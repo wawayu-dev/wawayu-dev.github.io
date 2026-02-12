@@ -1,0 +1,65 @@
+baseURL = 'https://example.org/'
+languageCode = 'en-us'
+title = 'My New Hugo Site'
+theme = "PaperMod"
+
+# 开启代码高亮
+pygmentsCodeFences = true
+pygmentsUseClasses = false
+pygmentsStyle = "monokai" # 技术人最爱的暗黑高亮
+
+[params]
+    env = "production"
+    title = "某某的技术随笔"
+    description = "专注于技术输出与价值展示"
+    author = "你的名字"
+    
+    # 允许切换深色/浅色模式
+    defaultTheme = "auto"
+    disableThemeToggle = false
+    
+    # 显示目录 (TOC)
+    ShowToc = true
+    TocOpen = true # 默认打开目录
+    
+    # 文章列表显示缩略图
+    ShowReadingTime = true
+    ShowShareButtons = true
+    ShowPostNavLinks = true
+    
+    # 主页正中间的欢迎词 (Profile Mode)
+    [params.profileMode]
+        enabled = true
+        title = "你好，我是某某 👋"
+        subtitle = "后端开发者 / 终身学习者 / 正在分享我的技术价值"
+        imageUrl = "https://github.com/你的用户名.png" # 自动调用你的GitHub头像
+        imageTitle = "My Avatar"
+        
+        [[params.profileMode.buttons]]
+            name = "阅读博客"
+            url = "posts"
+        [[params.profileMode.buttons]]
+            name = "关于我"
+            url = "about"
+
+    # 社交链接（会显示图标）
+    [[params.socialIcons]]
+        name = "github"
+        url = "https://github.com/你的用户名"
+    [[params.socialIcons]]
+        name = "email"
+        url = "mailto:你的邮箱"
+
+# 导航栏菜单
+[[menu.main]]
+    name = "文章"
+    url = "posts"
+    weight = 10
+[[menu.main]]
+    name = "搜索"
+    url = "search"
+    weight = 20
+[[menu.main]]
+    name = "关于"
+    url = "about"
+    weight = 30
