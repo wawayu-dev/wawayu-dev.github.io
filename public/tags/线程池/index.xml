@@ -1,0 +1,26 @@
+<?xml version="1.0" encoding="utf-8" standalone="yes"?>
+<rss version="2.0" xmlns:atom="http://www.w3.org/2005/Atom" xmlns:content="http://purl.org/rss/1.0/modules/content/">
+  <channel>
+    <title>线程池 on 博客喵</title>
+    <link>http://localhost:1313/tags/%E7%BA%BF%E7%A8%8B%E6%B1%A0/</link>
+    <description>Recent content in 线程池 on 博客喵</description>
+    <generator>Hugo -- 0.155.3</generator>
+    <language>zh-cn</language>
+    <lastBuildDate>Wed, 08 Jan 2025 00:00:00 +0000</lastBuildDate>
+    <atom:link href="http://localhost:1313/tags/%E7%BA%BF%E7%A8%8B%E6%B1%A0/index.xml" rel="self" type="application/rss+xml" />
+    <item>
+      <title>线程池参数动态配置：Admin 管理后台设计</title>
+      <link>http://localhost:1313/posts/2025/01/%E7%BA%BF%E7%A8%8B%E6%B1%A0%E5%8F%82%E6%95%B0%E5%8A%A8%E6%80%81%E9%85%8D%E7%BD%AEadmin-%E7%AE%A1%E7%90%86%E5%90%8E%E5%8F%B0%E8%AE%BE%E8%AE%A1/</link>
+      <pubDate>Wed, 08 Jan 2025 00:00:00 +0000</pubDate>
+      <guid>http://localhost:1313/posts/2025/01/%E7%BA%BF%E7%A8%8B%E6%B1%A0%E5%8F%82%E6%95%B0%E5%8A%A8%E6%80%81%E9%85%8D%E7%BD%AEadmin-%E7%AE%A1%E7%90%86%E5%90%8E%E5%8F%B0%E8%AE%BE%E8%AE%A1/</guid>
+      <description>从线程池监控到参数动态调整，打造生产级线程池管理平台</description>
+    </item>
+    <item>
+      <title>动态线程池 SDK：从零实现 Spring Boot Starter</title>
+      <link>http://localhost:1313/projects/thread-pool-sdk/</link>
+      <pubDate>Fri, 10 May 2024 00:00:00 +0000</pubDate>
+      <guid>http://localhost:1313/projects/thread-pool-sdk/</guid>
+      <description>深入 Spring Boot 自动装配原理，实现零侵入式线程池参数动态调整与监控</description>
+    </item>
+  </channel>
+</rss>

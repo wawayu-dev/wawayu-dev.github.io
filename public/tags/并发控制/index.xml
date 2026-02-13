@@ -1,0 +1,19 @@
+<?xml version="1.0" encoding="utf-8" standalone="yes"?>
+<rss version="2.0" xmlns:atom="http://www.w3.org/2005/Atom" xmlns:content="http://purl.org/rss/1.0/modules/content/">
+  <channel>
+    <title>并发控制 on 博客喵</title>
+    <link>http://localhost:1313/tags/%E5%B9%B6%E5%8F%91%E6%8E%A7%E5%88%B6/</link>
+    <description>Recent content in 并发控制 on 博客喵</description>
+    <generator>Hugo -- 0.155.3</generator>
+    <language>zh-cn</language>
+    <lastBuildDate>Thu, 05 Sep 2024 00:00:00 +0000</lastBuildDate>
+    <atom:link href="http://localhost:1313/tags/%E5%B9%B6%E5%8F%91%E6%8E%A7%E5%88%B6/index.xml" rel="self" type="application/rss+xml" />
+    <item>
+      <title>MySQL 事务隔离级别与 MVCC 机制深度解析</title>
+      <link>http://localhost:1313/posts/2024/09/mysql-%E4%BA%8B%E5%8A%A1%E9%9A%94%E7%A6%BB%E7%BA%A7%E5%88%AB%E4%B8%8E-mvcc-%E6%9C%BA%E5%88%B6%E6%B7%B1%E5%BA%A6%E8%A7%A3%E6%9E%90/</link>
+      <pubDate>Thu, 05 Sep 2024 00:00:00 +0000</pubDate>
+      <guid>http://localhost:1313/posts/2024/09/mysql-%E4%BA%8B%E5%8A%A1%E9%9A%94%E7%A6%BB%E7%BA%A7%E5%88%AB%E4%B8%8E-mvcc-%E6%9C%BA%E5%88%B6%E6%B7%B1%E5%BA%A6%E8%A7%A3%E6%9E%90/</guid>
+      <description>从脏读、不可重复读、幻读到 MVCC 的 ReadView 机制，彻底理解 MySQL 的并发控制</description>
+    </item>
+  </channel>
+</rss>

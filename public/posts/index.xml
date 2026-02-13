@@ -1,19 +1,257 @@
 <?xml version="1.0" encoding="utf-8" standalone="yes"?>
 <rss version="2.0" xmlns:atom="http://www.w3.org/2005/Atom" xmlns:content="http://purl.org/rss/1.0/modules/content/">
   <channel>
-    <title>Posts on My New Hugo Site</title>
-    <link>http://localhost:50726/posts/</link>
-    <description>Recent content in Posts on My New Hugo Site</description>
+    <title>Posts on 博客喵</title>
+    <link>http://localhost:1313/posts/</link>
+    <description>Recent content in Posts on 博客喵</description>
     <generator>Hugo -- 0.155.3</generator>
-    <language>en-us</language>
-    <lastBuildDate>Wed, 11 Feb 2026 21:03:25 +0800</lastBuildDate>
-    <atom:link href="http://localhost:50726/posts/index.xml" rel="self" type="application/rss+xml" />
+    <language>zh-cn</language>
+    <lastBuildDate>Thu, 12 Feb 2026 13:50:11 +0800</lastBuildDate>
+    <atom:link href="http://localhost:1313/posts/index.xml" rel="self" type="application/rss+xml" />
     <item>
-      <title>My First Post</title>
-      <link>http://localhost:50726/posts/my-first-post/</link>
-      <pubDate>Wed, 11 Feb 2026 21:03:25 +0800</pubDate>
-      <guid>http://localhost:50726/posts/my-first-post/</guid>
-      <description>&lt;p&gt;那是一条神奇的天路啊&lt;/p&gt;</description>
+      <title>从零到一：构建 Hugo &#43; PaperMod 自动化博客系统</title>
+      <link>http://localhost:1313/posts/2026/02/%E4%BB%8E%E9%9B%B6%E5%88%B0%E4%B8%80%E6%9E%84%E5%BB%BA-hugo--papermod-%E8%87%AA%E5%8A%A8%E5%8C%96%E5%8D%9A%E5%AE%A2%E7%B3%BB%E7%BB%9F/</link>
+      <pubDate>Thu, 12 Feb 2026 00:00:00 +0000</pubDate>
+      <guid>http://localhost:1313/posts/2026/02/%E4%BB%8E%E9%9B%B6%E5%88%B0%E4%B8%80%E6%9E%84%E5%BB%BA-hugo--papermod-%E8%87%AA%E5%8A%A8%E5%8C%96%E5%8D%9A%E5%AE%A2%E7%B3%BB%E7%BB%9F/</guid>
+      <description>跳出文档式教程，从架构视角理解 Hugo 静态博客的工程化实践</description>
+    </item>
+    <item>
+      <title>分布式事务解决方案：从 2PC 到 Seata 的演进与实战</title>
+      <link>http://localhost:1313/posts/2025/12/%E5%88%86%E5%B8%83%E5%BC%8F%E4%BA%8B%E5%8A%A1%E8%A7%A3%E5%86%B3%E6%96%B9%E6%A1%88%E4%BB%8E-2pc-%E5%88%B0-seata-%E7%9A%84%E6%BC%94%E8%BF%9B%E4%B8%8E%E5%AE%9E%E6%88%98/</link>
+      <pubDate>Sat, 20 Dec 2025 00:00:00 +0000</pubDate>
+      <guid>http://localhost:1313/posts/2025/12/%E5%88%86%E5%B8%83%E5%BC%8F%E4%BA%8B%E5%8A%A1%E8%A7%A3%E5%86%B3%E6%96%B9%E6%A1%88%E4%BB%8E-2pc-%E5%88%B0-seata-%E7%9A%84%E6%BC%94%E8%BF%9B%E4%B8%8E%E5%AE%9E%E6%88%98/</guid>
+      <description>深入讲解分布式事务的各种解决方案，从传统的2PC、3PC到现代的Seata框架，涵盖原理分析和生产实战</description>
+    </item>
+    <item>
+      <title>如何阅读开源项目源码：以 Spring Boot 为例</title>
+      <link>http://localhost:1313/posts/2025/11/%E5%A6%82%E4%BD%95%E9%98%85%E8%AF%BB%E5%BC%80%E6%BA%90%E9%A1%B9%E7%9B%AE%E6%BA%90%E7%A0%81%E4%BB%A5-spring-boot-%E4%B8%BA%E4%BE%8B/</link>
+      <pubDate>Tue, 18 Nov 2025 00:00:00 +0000</pubDate>
+      <guid>http://localhost:1313/posts/2025/11/%E5%A6%82%E4%BD%95%E9%98%85%E8%AF%BB%E5%BC%80%E6%BA%90%E9%A1%B9%E7%9B%AE%E6%BA%90%E7%A0%81%E4%BB%A5-spring-boot-%E4%B8%BA%E4%BE%8B/</guid>
+      <description>系统讲解如何高效阅读开源项目源码，以Spring Boot为例，从入门到精通的完整学习路径</description>
+    </item>
+    <item>
+      <title>接口响应慢？一次完整的性能优化之旅</title>
+      <link>http://localhost:1313/posts/2025/10/%E6%8E%A5%E5%8F%A3%E5%93%8D%E5%BA%94%E6%85%A2%E4%B8%80%E6%AC%A1%E5%AE%8C%E6%95%B4%E7%9A%84%E6%80%A7%E8%83%BD%E4%BC%98%E5%8C%96%E4%B9%8B%E6%97%85/</link>
+      <pubDate>Sun, 12 Oct 2025 00:00:00 +0000</pubDate>
+      <guid>http://localhost:1313/posts/2025/10/%E6%8E%A5%E5%8F%A3%E5%93%8D%E5%BA%94%E6%85%A2%E4%B8%80%E6%AC%A1%E5%AE%8C%E6%95%B4%E7%9A%84%E6%80%A7%E8%83%BD%E4%BC%98%E5%8C%96%E4%B9%8B%E6%97%85/</guid>
+      <description>从一个真实的接口性能问题出发，深入讲解如何系统性地进行性能优化，从3秒优化到300ms的完整实战</description>
+    </item>
+    <item>
+      <title>全链路压测：如何验证系统的真实承载能力</title>
+      <link>http://localhost:1313/posts/2025/09/%E5%85%A8%E9%93%BE%E8%B7%AF%E5%8E%8B%E6%B5%8B%E5%A6%82%E4%BD%95%E9%AA%8C%E8%AF%81%E7%B3%BB%E7%BB%9F%E7%9A%84%E7%9C%9F%E5%AE%9E%E6%89%BF%E8%BD%BD%E8%83%BD%E5%8A%9B/</link>
+      <pubDate>Fri, 05 Sep 2025 00:00:00 +0000</pubDate>
+      <guid>http://localhost:1313/posts/2025/09/%E5%85%A8%E9%93%BE%E8%B7%AF%E5%8E%8B%E6%B5%8B%E5%A6%82%E4%BD%95%E9%AA%8C%E8%AF%81%E7%B3%BB%E7%BB%9F%E7%9A%84%E7%9C%9F%E5%AE%9E%E6%89%BF%E8%BD%BD%E8%83%BD%E5%8A%9B/</guid>
+      <description>深入讲解全链路压测的方案设计与实施，从压测环境搭建到数据隔离，帮助你验证系统的真实承载能力</description>
+    </item>
+    <item>
+      <title>Git 工作流：从分支管理到代码审查的最佳实践</title>
+      <link>http://localhost:1313/posts/2025/07/git-%E5%B7%A5%E4%BD%9C%E6%B5%81%E4%BB%8E%E5%88%86%E6%94%AF%E7%AE%A1%E7%90%86%E5%88%B0%E4%BB%A3%E7%A0%81%E5%AE%A1%E6%9F%A5%E7%9A%84%E6%9C%80%E4%BD%B3%E5%AE%9E%E8%B7%B5/</link>
+      <pubDate>Wed, 30 Jul 2025 00:00:00 +0000</pubDate>
+      <guid>http://localhost:1313/posts/2025/07/git-%E5%B7%A5%E4%BD%9C%E6%B5%81%E4%BB%8E%E5%88%86%E6%94%AF%E7%AE%A1%E7%90%86%E5%88%B0%E4%BB%A3%E7%A0%81%E5%AE%A1%E6%9F%A5%E7%9A%84%E6%9C%80%E4%BD%B3%E5%AE%9E%E8%B7%B5/</guid>
+      <description>深入讲解 Git 工作流的最佳实践，涵盖分支策略、提交规范、代码审查、冲突解决等团队协作必备技能</description>
+    </item>
+    <item>
+      <title>Nginx 反向代理与负载均衡实战：从入门到生产优化</title>
+      <link>http://localhost:1313/posts/2025/06/nginx-%E5%8F%8D%E5%90%91%E4%BB%A3%E7%90%86%E4%B8%8E%E8%B4%9F%E8%BD%BD%E5%9D%87%E8%A1%A1%E5%AE%9E%E6%88%98%E4%BB%8E%E5%85%A5%E9%97%A8%E5%88%B0%E7%94%9F%E4%BA%A7%E4%BC%98%E5%8C%96/</link>
+      <pubDate>Wed, 25 Jun 2025 00:00:00 +0000</pubDate>
+      <guid>http://localhost:1313/posts/2025/06/nginx-%E5%8F%8D%E5%90%91%E4%BB%A3%E7%90%86%E4%B8%8E%E8%B4%9F%E8%BD%BD%E5%9D%87%E8%A1%A1%E5%AE%9E%E6%88%98%E4%BB%8E%E5%85%A5%E9%97%A8%E5%88%B0%E7%94%9F%E4%BA%A7%E4%BC%98%E5%8C%96/</guid>
+      <description>深入讲解 Nginx 反向代理和负载均衡的原理与实践，涵盖配置优化、健康检查、会话保持等生产级方案</description>
+    </item>
+    <item>
+      <title>EasyExcel 百万级数据导出的内存优化实战</title>
+      <link>http://localhost:1313/posts/2025/05/easyexcel-%E7%99%BE%E4%B8%87%E7%BA%A7%E6%95%B0%E6%8D%AE%E5%AF%BC%E5%87%BA%E7%9A%84%E5%86%85%E5%AD%98%E4%BC%98%E5%8C%96%E5%AE%9E%E6%88%98/</link>
+      <pubDate>Thu, 22 May 2025 00:00:00 +0000</pubDate>
+      <guid>http://localhost:1313/posts/2025/05/easyexcel-%E7%99%BE%E4%B8%87%E7%BA%A7%E6%95%B0%E6%8D%AE%E5%AF%BC%E5%87%BA%E7%9A%84%E5%86%85%E5%AD%98%E4%BC%98%E5%8C%96%E5%AE%9E%E6%88%98/</guid>
+      <description>深入讲解如何使用 EasyExcel 实现百万级数据导出，从内存溢出到性能优化，提供完整的生产级解决方案</description>
+    </item>
+    <item>
+      <title>Netty &#43; WebSocket 实现实时消息推送：从原理到生产实战</title>
+      <link>http://localhost:1313/posts/2025/04/netty--websocket-%E5%AE%9E%E7%8E%B0%E5%AE%9E%E6%97%B6%E6%B6%88%E6%81%AF%E6%8E%A8%E9%80%81%E4%BB%8E%E5%8E%9F%E7%90%86%E5%88%B0%E7%94%9F%E4%BA%A7%E5%AE%9E%E6%88%98/</link>
+      <pubDate>Fri, 18 Apr 2025 00:00:00 +0000</pubDate>
+      <guid>http://localhost:1313/posts/2025/04/netty--websocket-%E5%AE%9E%E7%8E%B0%E5%AE%9E%E6%97%B6%E6%B6%88%E6%81%AF%E6%8E%A8%E9%80%81%E4%BB%8E%E5%8E%9F%E7%90%86%E5%88%B0%E7%94%9F%E4%BA%A7%E5%AE%9E%E6%88%98/</guid>
+      <description>深入讲解如何使用 Netty 和 WebSocket 构建高性能实时消息推送系统，涵盖协议升级、心跳机制、集群部署等生产级实践</description>
+    </item>
+    <item>
+      <title>Redis 缓存架构：从穿透到雪崩的全链路防护</title>
+      <link>http://localhost:1313/posts/2025/03/redis-%E7%BC%93%E5%AD%98%E6%9E%B6%E6%9E%84%E4%BB%8E%E7%A9%BF%E9%80%8F%E5%88%B0%E9%9B%AA%E5%B4%A9%E7%9A%84%E5%85%A8%E9%93%BE%E8%B7%AF%E9%98%B2%E6%8A%A4/</link>
+      <pubDate>Thu, 20 Mar 2025 00:00:00 +0000</pubDate>
+      <guid>http://localhost:1313/posts/2025/03/redis-%E7%BC%93%E5%AD%98%E6%9E%B6%E6%9E%84%E4%BB%8E%E7%A9%BF%E9%80%8F%E5%88%B0%E9%9B%AA%E5%B4%A9%E7%9A%84%E5%85%A8%E9%93%BE%E8%B7%AF%E9%98%B2%E6%8A%A4/</guid>
+      <description>深入理解缓存穿透、击穿、雪崩问题，构建高可用的Redis缓存架构</description>
+    </item>
+    <item>
+      <title>ShardingSphere 分库分表的生产实战</title>
+      <link>http://localhost:1313/posts/2025/02/shardingsphere-%E5%88%86%E5%BA%93%E5%88%86%E8%A1%A8%E7%9A%84%E7%94%9F%E4%BA%A7%E5%AE%9E%E6%88%98/</link>
+      <pubDate>Sat, 15 Feb 2025 00:00:00 +0000</pubDate>
+      <guid>http://localhost:1313/posts/2025/02/shardingsphere-%E5%88%86%E5%BA%93%E5%88%86%E8%A1%A8%E7%9A%84%E7%94%9F%E4%BA%A7%E5%AE%9E%E6%88%98/</guid>
+      <description>从单表千万级数据到分库分表，掌握ShardingSphere的生产级应用</description>
+    </item>
+    <item>
+      <title>线程池参数动态配置：Admin 管理后台设计</title>
+      <link>http://localhost:1313/posts/2025/01/%E7%BA%BF%E7%A8%8B%E6%B1%A0%E5%8F%82%E6%95%B0%E5%8A%A8%E6%80%81%E9%85%8D%E7%BD%AEadmin-%E7%AE%A1%E7%90%86%E5%90%8E%E5%8F%B0%E8%AE%BE%E8%AE%A1/</link>
+      <pubDate>Wed, 08 Jan 2025 00:00:00 +0000</pubDate>
+      <guid>http://localhost:1313/posts/2025/01/%E7%BA%BF%E7%A8%8B%E6%B1%A0%E5%8F%82%E6%95%B0%E5%8A%A8%E6%80%81%E9%85%8D%E7%BD%AEadmin-%E7%AE%A1%E7%90%86%E5%90%8E%E5%8F%B0%E8%AE%BE%E8%AE%A1/</guid>
+      <description>从线程池监控到参数动态调整，打造生产级线程池管理平台</description>
+    </item>
+    <item>
+      <title>MySQL 慢查询优化实战案例</title>
+      <link>http://localhost:1313/posts/2024/12/mysql-%E6%85%A2%E6%9F%A5%E8%AF%A2%E4%BC%98%E5%8C%96%E5%AE%9E%E6%88%98%E6%A1%88%E4%BE%8B/</link>
+      <pubDate>Tue, 10 Dec 2024 00:00:00 +0000</pubDate>
+      <guid>http://localhost:1313/posts/2024/12/mysql-%E6%85%A2%E6%9F%A5%E8%AF%A2%E4%BC%98%E5%8C%96%E5%AE%9E%E6%88%98%E6%A1%88%E4%BE%8B/</guid>
+      <description>从 5 秒到 50ms 的优化之路，真实案例讲解 SQL 性能调优方法</description>
+    </item>
+    <item>
+      <title>MySQL 事务隔离级别与 MVCC 机制深度解析</title>
+      <link>http://localhost:1313/posts/2024/11/mysql-%E4%BA%8B%E5%8A%A1%E9%9A%94%E7%A6%BB%E7%BA%A7%E5%88%AB%E4%B8%8E-mvcc-%E6%9C%BA%E5%88%B6%E6%B7%B1%E5%BA%A6%E8%A7%A3%E6%9E%90/</link>
+      <pubDate>Thu, 28 Nov 2024 00:00:00 +0000</pubDate>
+      <guid>http://localhost:1313/posts/2024/11/mysql-%E4%BA%8B%E5%8A%A1%E9%9A%94%E7%A6%BB%E7%BA%A7%E5%88%AB%E4%B8%8E-mvcc-%E6%9C%BA%E5%88%B6%E6%B7%B1%E5%BA%A6%E8%A7%A3%E6%9E%90/</guid>
+      <description>深入理解 MySQL 的并发控制机制，掌握 MVCC 的 ReadView 原理</description>
+    </item>
+    <item>
+      <title>MySQL 索引优化：从 Explain 到执行计划</title>
+      <link>http://localhost:1313/posts/2024/11/mysql-%E7%B4%A2%E5%BC%95%E4%BC%98%E5%8C%96%E4%BB%8E-explain-%E5%88%B0%E6%89%A7%E8%A1%8C%E8%AE%A1%E5%88%92/</link>
+      <pubDate>Fri, 15 Nov 2024 00:00:00 +0000</pubDate>
+      <guid>http://localhost:1313/posts/2024/11/mysql-%E7%B4%A2%E5%BC%95%E4%BC%98%E5%8C%96%E4%BB%8E-explain-%E5%88%B0%E6%89%A7%E8%A1%8C%E8%AE%A1%E5%88%92/</guid>
+      <description>系统掌握 MySQL 索引优化方法，从 B&#43; 树原理到执行计划分析</description>
+    </item>
+    <item>
+      <title>JVM OOM 问题排查实战：从 Heap Dump 到根因分析</title>
+      <link>http://localhost:1313/posts/2024/10/jvm-oom-%E9%97%AE%E9%A2%98%E6%8E%92%E6%9F%A5%E5%AE%9E%E6%88%98%E4%BB%8E-heap-dump-%E5%88%B0%E6%A0%B9%E5%9B%A0%E5%88%86%E6%9E%90/</link>
+      <pubDate>Fri, 25 Oct 2024 00:00:00 +0000</pubDate>
+      <guid>http://localhost:1313/posts/2024/10/jvm-oom-%E9%97%AE%E9%A2%98%E6%8E%92%E6%9F%A5%E5%AE%9E%E6%88%98%E4%BB%8E-heap-dump-%E5%88%B0%E6%A0%B9%E5%9B%A0%E5%88%86%E6%9E%90/</guid>
+      <description>掌握 JVM 内存模型与 GC 机制，学会使用 MAT 工具分析 Heap Dump</description>
+    </item>
+    <item>
+      <title>RabbitMQ 在交易系统中的异步解耦实践</title>
+      <link>http://localhost:1313/posts/2024/10/rabbitmq-%E5%9C%A8%E4%BA%A4%E6%98%93%E7%B3%BB%E7%BB%9F%E4%B8%AD%E7%9A%84%E5%BC%82%E6%AD%A5%E8%A7%A3%E8%80%A6%E5%AE%9E%E8%B7%B5/</link>
+      <pubDate>Sun, 20 Oct 2024 00:00:00 +0000</pubDate>
+      <guid>http://localhost:1313/posts/2024/10/rabbitmq-%E5%9C%A8%E4%BA%A4%E6%98%93%E7%B3%BB%E7%BB%9F%E4%B8%AD%E7%9A%84%E5%BC%82%E6%AD%A5%E8%A7%A3%E8%80%A6%E5%AE%9E%E8%B7%B5/</guid>
+      <description>深入理解消息队列的选型与设计，掌握 RabbitMQ 的可靠性保障机制</description>
+    </item>
+    <item>
+      <title>领域驱动设计（DDD）落地实践：从理论到代码</title>
+      <link>http://localhost:1313/posts/2024/09/%E9%A2%86%E5%9F%9F%E9%A9%B1%E5%8A%A8%E8%AE%BE%E8%AE%A1ddd%E8%90%BD%E5%9C%B0%E5%AE%9E%E8%B7%B5%E4%BB%8E%E7%90%86%E8%AE%BA%E5%88%B0%E4%BB%A3%E7%A0%81/</link>
+      <pubDate>Wed, 25 Sep 2024 00:00:00 +0000</pubDate>
+      <guid>http://localhost:1313/posts/2024/09/%E9%A2%86%E5%9F%9F%E9%A9%B1%E5%8A%A8%E8%AE%BE%E8%AE%A1ddd%E8%90%BD%E5%9C%B0%E5%AE%9E%E8%B7%B5%E4%BB%8E%E7%90%86%E8%AE%BA%E5%88%B0%E4%BB%A3%E7%A0%81/</guid>
+      <description>深入理解 DDD 的核心概念，掌握聚合根、领域事件、限界上下文的设计方法</description>
+    </item>
+    <item>
+      <title>Docker 容器化部署最佳实践：从 Dockerfile 到生产环境</title>
+      <link>http://localhost:1313/posts/2024/09/docker-%E5%AE%B9%E5%99%A8%E5%8C%96%E9%83%A8%E7%BD%B2%E6%9C%80%E4%BD%B3%E5%AE%9E%E8%B7%B5%E4%BB%8E-dockerfile-%E5%88%B0%E7%94%9F%E4%BA%A7%E7%8E%AF%E5%A2%83/</link>
+      <pubDate>Tue, 10 Sep 2024 00:00:00 +0000</pubDate>
+      <guid>http://localhost:1313/posts/2024/09/docker-%E5%AE%B9%E5%99%A8%E5%8C%96%E9%83%A8%E7%BD%B2%E6%9C%80%E4%BD%B3%E5%AE%9E%E8%B7%B5%E4%BB%8E-dockerfile-%E5%88%B0%E7%94%9F%E4%BA%A7%E7%8E%AF%E5%A2%83/</guid>
+      <description>掌握 Docker 容器化的核心技术，从镜像构建到生产部署的完整实践</description>
+    </item>
+    <item>
+      <title>Redis 分布式锁的生产级实践：从原理到 Redisson</title>
+      <link>http://localhost:1313/posts/2024/08/redis-%E5%88%86%E5%B8%83%E5%BC%8F%E9%94%81%E7%9A%84%E7%94%9F%E4%BA%A7%E7%BA%A7%E5%AE%9E%E8%B7%B5%E4%BB%8E%E5%8E%9F%E7%90%86%E5%88%B0-redisson/</link>
+      <pubDate>Thu, 15 Aug 2024 00:00:00 +0000</pubDate>
+      <guid>http://localhost:1313/posts/2024/08/redis-%E5%88%86%E5%B8%83%E5%BC%8F%E9%94%81%E7%9A%84%E7%94%9F%E4%BA%A7%E7%BA%A7%E5%AE%9E%E8%B7%B5%E4%BB%8E%E5%8E%9F%E7%90%86%E5%88%B0-redisson/</guid>
+      <description>深入理解 Redis 分布式锁的实现原理，掌握 Redisson 看门狗机制与锁优化方案</description>
+    </item>
+    <item>
+      <title>Spring Boot Starter 自定义开发：从原理到实战</title>
+      <link>http://localhost:1313/posts/2024/08/spring-boot-starter-%E8%87%AA%E5%AE%9A%E4%B9%89%E5%BC%80%E5%8F%91%E4%BB%8E%E5%8E%9F%E7%90%86%E5%88%B0%E5%AE%9E%E6%88%98/</link>
+      <pubDate>Mon, 05 Aug 2024 00:00:00 +0000</pubDate>
+      <guid>http://localhost:1313/posts/2024/08/spring-boot-starter-%E8%87%AA%E5%AE%9A%E4%B9%89%E5%BC%80%E5%8F%91%E4%BB%8E%E5%8E%9F%E7%90%86%E5%88%B0%E5%AE%9E%E6%88%98/</guid>
+      <description>深入 BeanPostProcessor 和自动装配原理，实现零侵入式 SDK</description>
+    </item>
+    <item>
+      <title>分布式 ID 生成方案对比与选型指南</title>
+      <link>http://localhost:1313/posts/2024/07/%E5%88%86%E5%B8%83%E5%BC%8F-id-%E7%94%9F%E6%88%90%E6%96%B9%E6%A1%88%E5%AF%B9%E6%AF%94%E4%B8%8E%E9%80%89%E5%9E%8B%E6%8C%87%E5%8D%97/</link>
+      <pubDate>Fri, 05 Jul 2024 00:00:00 +0000</pubDate>
+      <guid>http://localhost:1313/posts/2024/07/%E5%88%86%E5%B8%83%E5%BC%8F-id-%E7%94%9F%E6%88%90%E6%96%B9%E6%A1%88%E5%AF%B9%E6%AF%94%E4%B8%8E%E9%80%89%E5%9E%8B%E6%8C%87%E5%8D%97/</guid>
+      <description>从雪花算法到美团 Leaf，深入理解分布式 ID 的设计思想与实现方案</description>
+    </item>
+    <item>
+      <title>Spring Bean 生命周期完全解析</title>
+      <link>http://localhost:1313/posts/2024/06/spring-bean-%E7%94%9F%E5%91%BD%E5%91%A8%E6%9C%9F%E5%AE%8C%E5%85%A8%E8%A7%A3%E6%9E%90/</link>
+      <pubDate>Thu, 20 Jun 2024 00:00:00 +0000</pubDate>
+      <guid>http://localhost:1313/posts/2024/06/spring-bean-%E7%94%9F%E5%91%BD%E5%91%A8%E6%9C%9F%E5%AE%8C%E5%85%A8%E8%A7%A3%E6%9E%90/</guid>
+      <description>从实例化到销毁的完整流程，深入理解 BeanPostProcessor 与循环依赖</description>
+    </item>
+    <item>
+      <title>Spring 事务传播机制与失效场景完全解析</title>
+      <link>http://localhost:1313/posts/2024/05/spring-%E4%BA%8B%E5%8A%A1%E4%BC%A0%E6%92%AD%E6%9C%BA%E5%88%B6%E4%B8%8E%E5%A4%B1%E6%95%88%E5%9C%BA%E6%99%AF%E5%AE%8C%E5%85%A8%E8%A7%A3%E6%9E%90/</link>
+      <pubDate>Wed, 15 May 2024 00:00:00 +0000</pubDate>
+      <guid>http://localhost:1313/posts/2024/05/spring-%E4%BA%8B%E5%8A%A1%E4%BC%A0%E6%92%AD%E6%9C%BA%E5%88%B6%E4%B8%8E%E5%A4%B1%E6%95%88%E5%9C%BA%E6%99%AF%E5%AE%8C%E5%85%A8%E8%A7%A3%E6%9E%90/</guid>
+      <description>深入理解 @Transactional 的 7 种传播行为，掌握事务失效的常见场景与解决方案</description>
+    </item>
+    <item>
+      <title>Spring AOP 原理与动态代理实现深度解析</title>
+      <link>http://localhost:1313/posts/2024/04/spring-aop-%E5%8E%9F%E7%90%86%E4%B8%8E%E5%8A%A8%E6%80%81%E4%BB%A3%E7%90%86%E5%AE%9E%E7%8E%B0%E6%B7%B1%E5%BA%A6%E8%A7%A3%E6%9E%90/</link>
+      <pubDate>Wed, 10 Apr 2024 00:00:00 +0000</pubDate>
+      <guid>http://localhost:1313/posts/2024/04/spring-aop-%E5%8E%9F%E7%90%86%E4%B8%8E%E5%8A%A8%E6%80%81%E4%BB%A3%E7%90%86%E5%AE%9E%E7%8E%B0%E6%B7%B1%E5%BA%A6%E8%A7%A3%E6%9E%90/</guid>
+      <description>深入理解 AOP 的底层实现机制，掌握 JDK 动态代理与 CGLIB 代理的区别</description>
+    </item>
+    <item>
+      <title>CompletableFuture 异步编程实战指南</title>
+      <link>http://localhost:1313/posts/2024/03/completablefuture-%E5%BC%82%E6%AD%A5%E7%BC%96%E7%A8%8B%E5%AE%9E%E6%88%98%E6%8C%87%E5%8D%97/</link>
+      <pubDate>Mon, 25 Mar 2024 00:00:00 +0000</pubDate>
+      <guid>http://localhost:1313/posts/2024/03/completablefuture-%E5%BC%82%E6%AD%A5%E7%BC%96%E7%A8%8B%E5%AE%9E%E6%88%98%E6%8C%87%E5%8D%97/</guid>
+      <description>掌握 Java 8 异步编程的核心工具，从链式调用到异常处理的完整实践</description>
+    </item>
+    <item>
+      <title>ThreadLocal 原理与内存泄漏排查实战</title>
+      <link>http://localhost:1313/posts/2024/02/threadlocal-%E5%8E%9F%E7%90%86%E4%B8%8E%E5%86%85%E5%AD%98%E6%B3%84%E6%BC%8F%E6%8E%92%E6%9F%A5%E5%AE%9E%E6%88%98/</link>
+      <pubDate>Tue, 20 Feb 2024 00:00:00 +0000</pubDate>
+      <guid>http://localhost:1313/posts/2024/02/threadlocal-%E5%8E%9F%E7%90%86%E4%B8%8E%E5%86%85%E5%AD%98%E6%B3%84%E6%BC%8F%E6%8E%92%E6%9F%A5%E5%AE%9E%E6%88%98/</guid>
+      <description>深入 ThreadLocal 的实现机制，理解弱引用设计，掌握线程池环境下的内存泄漏排查</description>
+    </item>
+    <item>
+      <title>我的第一篇博客文章</title>
+      <link>http://localhost:1313/posts/2024/02/%E6%88%91%E7%9A%84%E7%AC%AC%E4%B8%80%E7%AF%87%E5%8D%9A%E5%AE%A2%E6%96%87%E7%AB%A0/</link>
+      <pubDate>Sun, 11 Feb 2024 21:03:25 +0800</pubDate>
+      <guid>http://localhost:1313/posts/2024/02/%E6%88%91%E7%9A%84%E7%AC%AC%E4%B8%80%E7%AF%87%E5%8D%9A%E5%AE%A2%E6%96%87%E7%AB%A0/</guid>
+      <description>这是我博客的第一篇文章，记录开始的时刻</description>
+    </item>
+    <item>
+      <title>Java 并发编程：从 synchronized 到 AQS 的演进</title>
+      <link>http://localhost:1313/posts/2024/01/java-%E5%B9%B6%E5%8F%91%E7%BC%96%E7%A8%8B%E4%BB%8E-synchronized-%E5%88%B0-aqs-%E7%9A%84%E6%BC%94%E8%BF%9B/</link>
+      <pubDate>Mon, 15 Jan 2024 00:00:00 +0000</pubDate>
+      <guid>http://localhost:1313/posts/2024/01/java-%E5%B9%B6%E5%8F%91%E7%BC%96%E7%A8%8B%E4%BB%8E-synchronized-%E5%88%B0-aqs-%E7%9A%84%E6%BC%94%E8%BF%9B/</guid>
+      <description>深入理解 Java 锁机制的底层实现，从 synchronized 的锁升级到 AQS 的核心原理</description>
+    </item>
+    <item>
+      <title></title>
+      <link>http://localhost:1313/posts/1/01/</link>
+      <pubDate>Mon, 01 Jan 0001 00:00:00 +0000</pubDate>
+      <guid>http://localhost:1313/posts/1/01/</guid>
+      <description></description>
+    </item>
+    <item>
+      <title></title>
+      <link>http://localhost:1313/posts/1/01/</link>
+      <pubDate>Mon, 01 Jan 0001 00:00:00 +0000</pubDate>
+      <guid>http://localhost:1313/posts/1/01/</guid>
+      <description></description>
+    </item>
+    <item>
+      <title></title>
+      <link>http://localhost:1313/posts/1/01/</link>
+      <pubDate>Mon, 01 Jan 0001 00:00:00 +0000</pubDate>
+      <guid>http://localhost:1313/posts/1/01/</guid>
+      <description></description>
+    </item>
+    <item>
+      <title></title>
+      <link>http://localhost:1313/posts/1/01/</link>
+      <pubDate>Mon, 01 Jan 0001 00:00:00 +0000</pubDate>
+      <guid>http://localhost:1313/posts/1/01/</guid>
+      <description></description>
+    </item>
+    <item>
+      <title></title>
+      <link>http://localhost:1313/posts/1/01/</link>
+      <pubDate>Mon, 01 Jan 0001 00:00:00 +0000</pubDate>
+      <guid>http://localhost:1313/posts/1/01/</guid>
+      <description></description>
+    </item>
+    <item>
+      <title></title>
+      <link>http://localhost:1313/posts/1/01/</link>
+      <pubDate>Mon, 01 Jan 0001 00:00:00 +0000</pubDate>
+      <guid>http://localhost:1313/posts/1/01/</guid>
+      <description></description>
     </item>
   </channel>
 </rss>

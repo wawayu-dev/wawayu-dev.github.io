@@ -1,0 +1,26 @@
+<?xml version="1.0" encoding="utf-8" standalone="yes"?>
+<rss version="2.0" xmlns:atom="http://www.w3.org/2005/Atom" xmlns:content="http://purl.org/rss/1.0/modules/content/">
+  <channel>
+    <title>微服务 on 博客喵</title>
+    <link>http://localhost:1313/tags/%E5%BE%AE%E6%9C%8D%E5%8A%A1/</link>
+    <description>Recent content in 微服务 on 博客喵</description>
+    <generator>Hugo -- 0.155.3</generator>
+    <language>zh-cn</language>
+    <lastBuildDate>Sat, 20 Dec 2025 00:00:00 +0000</lastBuildDate>
+    <atom:link href="http://localhost:1313/tags/%E5%BE%AE%E6%9C%8D%E5%8A%A1/index.xml" rel="self" type="application/rss+xml" />
+    <item>
+      <title>分布式事务解决方案：从 2PC 到 Seata 的演进与实战</title>
+      <link>http://localhost:1313/posts/2025/12/%E5%88%86%E5%B8%83%E5%BC%8F%E4%BA%8B%E5%8A%A1%E8%A7%A3%E5%86%B3%E6%96%B9%E6%A1%88%E4%BB%8E-2pc-%E5%88%B0-seata-%E7%9A%84%E6%BC%94%E8%BF%9B%E4%B8%8E%E5%AE%9E%E6%88%98/</link>
+      <pubDate>Sat, 20 Dec 2025 00:00:00 +0000</pubDate>
+      <guid>http://localhost:1313/posts/2025/12/%E5%88%86%E5%B8%83%E5%BC%8F%E4%BA%8B%E5%8A%A1%E8%A7%A3%E5%86%B3%E6%96%B9%E6%A1%88%E4%BB%8E-2pc-%E5%88%B0-seata-%E7%9A%84%E6%BC%94%E8%BF%9B%E4%B8%8E%E5%AE%9E%E6%88%98/</guid>
+      <description>深入讲解分布式事务的各种解决方案，从传统的2PC、3PC到现代的Seata框架，涵盖原理分析和生产实战</description>
+    </item>
+    <item>
+      <title>领域驱动设计（DDD）落地实践：从理论到代码</title>
+      <link>http://localhost:1313/posts/2024/09/%E9%A2%86%E5%9F%9F%E9%A9%B1%E5%8A%A8%E8%AE%BE%E8%AE%A1ddd%E8%90%BD%E5%9C%B0%E5%AE%9E%E8%B7%B5%E4%BB%8E%E7%90%86%E8%AE%BA%E5%88%B0%E4%BB%A3%E7%A0%81/</link>
+      <pubDate>Wed, 25 Sep 2024 00:00:00 +0000</pubDate>
+      <guid>http://localhost:1313/posts/2024/09/%E9%A2%86%E5%9F%9F%E9%A9%B1%E5%8A%A8%E8%AE%BE%E8%AE%A1ddd%E8%90%BD%E5%9C%B0%E5%AE%9E%E8%B7%B5%E4%BB%8E%E7%90%86%E8%AE%BA%E5%88%B0%E4%BB%A3%E7%A0%81/</guid>
+      <description>深入理解 DDD 的核心概念，掌握聚合根、领域事件、限界上下文的设计方法</description>
+    </item>
+  </channel>
+</rss>

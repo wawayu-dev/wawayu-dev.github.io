@@ -1,0 +1,441 @@
+<!DOCTYPE html>
+<html lang="en" dir="auto" data-theme="auto">
+
+<head>
+	<meta name="generator" content="Hugo 0.155.3"><script src="/livereload.js?mindelay=10&amp;v=2&amp;port=1313&amp;path=livereload" data-no-instant defer></script><meta charset="utf-8">
+<meta http-equiv="X-UA-Compatible" content="IE=edge">
+<meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
+<meta name="robots" content="index, follow">
+<title>博客喵</title>
+<meta name="keywords" content="Java, Spring Boot, 分布式系统, 后端开发, 技术博客">
+<meta name="description" content="记录技术成长，分享开发经验，专注 Java 后端与分布式系统">
+<meta name="author" content="wawayu">
+<link rel="canonical" href="http://localhost:1313/">
+<link crossorigin="anonymous" href="/assets/css/stylesheet.a29c24210eb31d9ce56f669c66a35c9c51b17376b7764e336a49af7dec914cf0.css" integrity="sha256-opwkIQ6zHZzlb2acZqNcnFGxc3a3dk4zakmvfeyRTPA=" rel="preload stylesheet" as="style">
+<link rel="icon" href="http://localhost:1313/favicon.ico">
+<link rel="icon" type="image/png" sizes="16x16" href="http://localhost:1313/favicon-16x16.png">
+<link rel="icon" type="image/png" sizes="32x32" href="http://localhost:1313/favicon-32x32.png">
+<link rel="apple-touch-icon" href="http://localhost:1313/apple-touch-icon.png">
+<link rel="mask-icon" href="http://localhost:1313/safari-pinned-tab.svg">
+<meta name="theme-color" content="#2e2e33">
+<meta name="msapplication-TileColor" content="#2e2e33">
+<link rel="alternate" type="application/rss+xml" href="http://localhost:1313/index.xml" title="rss">
+<link rel="alternate" type="application/json" href="http://localhost:1313/index.json" title="json">
+<link rel="alternate" hreflang="en" href="http://localhost:1313/">
+<noscript>
+    <style>
+        #theme-toggle,
+        .top-link {
+            display: none;
+        }
+
+    </style>
+    <style>
+        @media (prefers-color-scheme: dark) {
+            :root {
+                --theme: rgb(29, 30, 32);
+                --entry: rgb(46, 46, 51);
+                --primary: rgb(218, 218, 219);
+                --secondary: rgb(155, 156, 157);
+                --tertiary: rgb(65, 66, 68);
+                --content: rgb(196, 196, 197);
+                --code-block-bg: rgb(46, 46, 51);
+                --code-bg: rgb(55, 56, 62);
+                --border: rgb(51, 51, 51);
+                color-scheme: dark;
+            }
+
+            .list {
+                background: var(--theme);
+            }
+
+            .toc {
+                background: var(--entry);
+            }
+        }
+
+        @media (prefers-color-scheme: light) {
+            .list::-webkit-scrollbar-thumb {
+                border-color: var(--code-bg);
+            }
+        }
+
+    </style>
+</noscript>
+<script>
+    if (localStorage.getItem("pref-theme") === "dark") {
+        document.querySelector("html").dataset.theme = 'dark';
+    } else if (localStorage.getItem("pref-theme") === "light") {
+       document.querySelector("html").dataset.theme = 'light';
+    } else if (window.matchMedia('(prefers-color-scheme: dark)').matches) {
+        document.querySelector("html").dataset.theme = 'dark';
+    } else {
+        document.querySelector("html").dataset.theme = 'light';
+    }
+
+</script><meta property="og:url" content="http://localhost:1313/">
+  <meta property="og:site_name" content="博客喵">
+  <meta property="og:title" content="博客喵">
+  <meta property="og:description" content="记录技术成长，分享开发经验，专注 Java 后端与分布式系统">
+  <meta property="og:locale" content="zh-cn">
+  <meta property="og:type" content="website">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:title" content="博客喵">
+<meta name="twitter:description" content="记录技术成长，分享开发经验，专注 Java 后端与分布式系统">
+
+<script type="application/ld+json">
+{
+  "@context": "https://schema.org",
+  "@type": "Organization",
+  "name": "博客喵",
+  "url": "http://localhost:1313/",
+  "description": "记录技术成长，分享开发经验，专注 Java 后端与分布式系统",
+  "logo": "http://localhost:1313/favicon.ico",
+  "sameAs": [
+      "https://github.com/wawayu-dev", "mailto:your-email@example.com", "/index.xml"
+  ]
+}
+</script>
+</head>
+<body class="list" id="top">
+    <header class="header">
+    <nav class="nav">
+        <div class="logo">
+            <a href="http://localhost:1313/" accesskey="h" title="博客喵 (Alt + H)">博客喵</a>
+            <div class="logo-switches">
+                <button id="theme-toggle" accesskey="t" title="(Alt + T)" aria-label="Toggle theme">
+                    <svg id="moon" xmlns="http://www.w3.org/2000/svg" width="24" height="18" viewBox="0 0 24 24"
+                        fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"
+                        stroke-linejoin="round">
+                        <path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"></path>
+                    </svg>
+                    <svg id="sun" xmlns="http://www.w3.org/2000/svg" width="24" height="18" viewBox="0 0 24 24"
+                        fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"
+                        stroke-linejoin="round">
+                        <circle cx="12" cy="12" r="5"></circle>
+                        <line x1="12" y1="1" x2="12" y2="3"></line>
+                        <line x1="12" y1="21" x2="12" y2="23"></line>
+                        <line x1="4.22" y1="4.22" x2="5.64" y2="5.64"></line>
+                        <line x1="18.36" y1="18.36" x2="19.78" y2="19.78"></line>
+                        <line x1="1" y1="12" x2="3" y2="12"></line>
+                        <line x1="21" y1="12" x2="23" y2="12"></line>
+                        <line x1="4.22" y1="19.78" x2="5.64" y2="18.36"></line>
+                        <line x1="18.36" y1="5.64" x2="19.78" y2="4.22"></line>
+                    </svg>
+                </button>
+            </div>
+        </div>
+        <ul id="menu">
+            <li>
+                <a href="http://localhost:1313/posts/" title="📝 文章">
+                    <span>📝 文章</span>
+                </a>
+            </li>
+            <li>
+                <a href="http://localhost:1313/tags/" title="🏷️ 标签">
+                    <span>🏷️ 标签</span>
+                </a>
+            </li>
+            <li>
+                <a href="http://localhost:1313/categories/" title="📂 分类">
+                    <span>📂 分类</span>
+                </a>
+            </li>
+            <li>
+                <a href="http://localhost:1313/skills/" title="💻 技能">
+                    <span>💻 技能</span>
+                </a>
+            </li>
+            <li>
+                <a href="http://localhost:1313/about/" title="👤 关于">
+                    <span>👤 关于</span>
+                </a>
+            </li>
+            <li>
+                <a href="http://localhost:1313/search/" title="🔍 搜索 (Alt &#43; /)" accesskey=/>
+                    <span>🔍 搜索</span>
+                </a>
+            </li>
+        </ul>
+    </nav>
+</header>
+<main class="main"> 
+
+<article class="post-entry"> 
+  <header class="entry-header">
+    <h2 class="entry-hint-parent">ShardingSphere 分库分表的生产实战
+    </h2>
+  </header>
+  <div class="entry-content">
+    <p>当单表数据量达到千万级别时，查询性能会急剧下降。分库分表是解决大数据量问题的有效方案。本文将深入讲解如何使用 ShardingSphere 实现分库分表，并分享生产环境的实战经验。
+本文亮点 理解分库分表的核心概念和应用场景 掌握 ShardingSphere 的配置和使用方法 学会选择合适的分片策略 了解分库分表的最佳实践和常见问题 为什么需要分库分表？ 场景：订单表数据爆炸
+电商系统的订单表，每天新增10万条数据，一年就是3600万条。随着数据量增长：
+查询变慢：单表查询从毫秒级变成秒级 索引失效：B&#43;树层级增加，索引效率下降 锁竞争：大表的锁粒度大，并发性能差 备份困难：单表备份时间过长 传统优化方案的局限
+1-- 优化索引 2CREATE INDEX idx_user_id_create_time ON orders(user_id, create_time); 3 4-- 分区表 5ALTER TABLE orders PARTITION BY RANGE (YEAR(create_time)) ( 6 PARTITION p2023 VALUES LESS THAN (2024), 7 PARTITION p2024 VALUES LESS THAN (2025) 8); 这些方案只能缓解问题，无法根本解决。当数据量达到亿级时，分库分表是必然选择。
+分库分表核心概念 垂直拆分 vs 水平拆分 垂直拆分：按业务模块拆分
+1原始数据库 2├── 用户表 3├── 订单表 4├── 商品表 5└── 支付表 6 7拆分后 8├── 用户库 9│ └── 用户表 10├── 订单库 11│ └── 订单表 12├── 商品库 13│ └── 商品表 14└── 支付库 15 └── 支付表 水平拆分：按数据行拆分
+...</p>
+  </div>
+  <footer class="entry-footer"><span title='2025-02-15 00:00:00 +0000 UTC'>February 15, 2025</span>&nbsp;·&nbsp;<span>6 min</span>&nbsp;·&nbsp;<span>1274 words</span>&nbsp;·&nbsp;<span>wawayu</span></footer>
+  <a class="entry-link" aria-label="post link to ShardingSphere 分库分表的生产实战" href="http://localhost:1313/posts/2025/02/shardingsphere-%E5%88%86%E5%BA%93%E5%88%86%E8%A1%A8%E7%9A%84%E7%94%9F%E4%BA%A7%E5%AE%9E%E6%88%98/"></a>
+</article>
+
+<article class="post-entry"> 
+  <header class="entry-header">
+    <h2 class="entry-hint-parent">线程池参数动态配置：Admin 管理后台设计
+    </h2>
+  </header>
+  <div class="entry-content">
+    <p>在生产环境中，线程池参数的配置往往需要根据实际负载动态调整。硬编码的参数配置缺乏灵活性，重启服务又会影响业务。本文将介绍如何设计一个线程池管理后台，实现参数的动态配置和实时监控。
+本文亮点 理解线程池参数动态调整的原理与实现 掌握线程池监控指标的采集与展示 学会设计生产级的线程池管理平台 了解线程池参数调优的最佳实践 为什么需要动态配置？ 场景一：流量突增
+双十一期间，订单处理线程池的核心线程数设置为 10，最大线程数 20。突然流量暴增，队列堆积严重，导致订单处理延迟。
+如果能动态调整线程池参数，将核心线程数调整为 50，最大线程数调整为 100，就能快速应对流量高峰。
+场景二：资源浪费
+凌晨时段流量很低，但线程池仍然保持高峰期的配置，浪费了大量系统资源。
+传统做法的问题
+1@Configuration 2public class ThreadPoolConfig { 3 @Bean(&#34;orderThreadPool&#34;) 4 public ThreadPoolExecutor orderThreadPool() { 5 return new ThreadPoolExecutor( 6 10, // 核心线程数：硬编码 7 20, // 最大线程数：硬编码 8 60, TimeUnit.SECONDS, 9 new LinkedBlockingQueue&lt;&gt;(100), 10 new ThreadFactoryBuilder().setNameFormat(&#34;order-pool-%d&#34;).build(), 11 new ThreadPoolExecutor.CallerRunsPolicy() 12 ); 13 } 14} 问题：
+...</p>
+  </div>
+  <footer class="entry-footer"><span title='2025-01-08 00:00:00 +0000 UTC'>January 8, 2025</span>&nbsp;·&nbsp;<span>9 min</span>&nbsp;·&nbsp;<span>1834 words</span>&nbsp;·&nbsp;<span>wawayu</span></footer>
+  <a class="entry-link" aria-label="post link to 线程池参数动态配置：Admin 管理后台设计" href="http://localhost:1313/posts/2025/01/%E7%BA%BF%E7%A8%8B%E6%B1%A0%E5%8F%82%E6%95%B0%E5%8A%A8%E6%80%81%E9%85%8D%E7%BD%AEadmin-%E7%AE%A1%E7%90%86%E5%90%8E%E5%8F%B0%E8%AE%BE%E8%AE%A1/"></a>
+</article>
+
+<article class="post-entry"> 
+  <header class="entry-header">
+    <h2 class="entry-hint-parent">MySQL 慢查询优化实战案例
+    </h2>
+  </header>
+  <div class="entry-content">
+    <p>一条慢查询可能拖垮整个系统。本文通过真实的生产案例，讲解如何定位和优化慢查询，让你掌握 SQL 性能调优的完整方法论。
+本文亮点 掌握慢查询日志的分析方法 学会使用 Explain 定位性能瓶颈 了解常见的 SQL 优化技巧 理解数据库层面的性能优化 案例背景 某电商系统的订单列表查询接口响应时间达到 5 秒，用户体验极差。
+原始 SQL
+1SELECT o.*, u.username, u.phone 2FROM `order` o 3LEFT JOIN user u ON o.user_id = u.id 4WHERE o.status IN (1, 2, 3) 5 AND o.create_time &gt;= &#39;2024-01-01&#39; 6 AND u.city = &#39;Beijing&#39; 7ORDER BY o.create_time DESC 8LIMIT 20; 数据量：
+order 表：100 万条 user 表：50 万条 第一步：开启慢查询日志 配置 MySQL
+1[mysqld] 2slow_query_log = 1 3slow_query_log_file = /var/log/mysql/slow.log 4long_query_time = 1 5log_queries_not_using_indexes = 1 分析慢查询日志
+...</p>
+  </div>
+  <footer class="entry-footer"><span title='2024-12-10 00:00:00 +0000 UTC'>December 10, 2024</span>&nbsp;·&nbsp;<span>4 min</span>&nbsp;·&nbsp;<span>761 words</span>&nbsp;·&nbsp;<span>wawayu</span></footer>
+  <a class="entry-link" aria-label="post link to MySQL 慢查询优化实战案例" href="http://localhost:1313/posts/2024/12/mysql-%E6%85%A2%E6%9F%A5%E8%AF%A2%E4%BC%98%E5%8C%96%E5%AE%9E%E6%88%98%E6%A1%88%E4%BE%8B/"></a>
+</article>
+
+<article class="post-entry"> 
+  <header class="entry-header">
+    <h2 class="entry-hint-parent">MySQL 事务隔离级别与 MVCC 机制深度解析
+    </h2>
+  </header>
+  <div class="entry-content">
+    <p>在高并发场景下，多个事务同时访问数据库，如何保证数据的一致性？MySQL 通过事务隔离级别和 MVCC 机制解决了这个问题。本文深入剖析 MySQL 的并发控制原理。
+本文亮点 理解四种事务隔离级别的区别与适用场景 掌握 MVCC 的 ReadView 机制 学会解决幻读问题的方法 了解锁机制与 MVCC 的配合 事务的并发问题 脏读（Dirty Read）
+事务 A 读取了事务 B 未提交的数据，事务 B 回滚后，事务 A 读到的数据是无效的。
+1时间线： 2T1: 事务 A 开始 3T2: 事务 B 开始，将 balance 从 100 改为 200 4T3: 事务 A 读取 balance = 200（脏读） 5T4: 事务 B 回滚，balance 恢复为 100 6T5: 事务 A 提交 不可重复读（Non-Repeatable Read）
+事务 A 两次读取同一数据，结果不一致（因为事务 B 修改并提交了数据）。
+...</p>
+  </div>
+  <footer class="entry-footer"><span title='2024-11-28 00:00:00 +0000 UTC'>November 28, 2024</span>&nbsp;·&nbsp;<span>6 min</span>&nbsp;·&nbsp;<span>1093 words</span>&nbsp;·&nbsp;<span>wawayu</span></footer>
+  <a class="entry-link" aria-label="post link to MySQL 事务隔离级别与 MVCC 机制深度解析" href="http://localhost:1313/posts/2024/11/mysql-%E4%BA%8B%E5%8A%A1%E9%9A%94%E7%A6%BB%E7%BA%A7%E5%88%AB%E4%B8%8E-mvcc-%E6%9C%BA%E5%88%B6%E6%B7%B1%E5%BA%A6%E8%A7%A3%E6%9E%90/"></a>
+</article>
+
+<article class="post-entry"> 
+  <header class="entry-header">
+    <h2 class="entry-hint-parent">MySQL 索引优化：从 Explain 到执行计划
+    </h2>
+  </header>
+  <div class="entry-content">
+    <p>SQL 性能优化是后端开发的必备技能。一条慢查询可能拖垮整个系统，而合理的索引设计能让查询速度提升百倍。本文系统讲解 MySQL 索引优化的方法论。
+本文亮点 理解 B&#43; 树索引的底层原理 掌握 Explain 执行计划的分析方法 学会联合索引的最左前缀匹配规则 了解覆盖索引与索引下推优化 B&#43; 树索引原理 为什么选择 B&#43; 树？
+常见的数据结构对比：
+数据结构 查询时间复杂度 问题 数组 O(n) 查询慢 二叉搜索树 O(log n) 可能退化为链表 平衡二叉树 O(log n) 树高太高，IO 次数多 B 树 O(log n) 非叶子节点存储数据，浪费空间 B&#43; 树 O(log n) 叶子节点存储数据，非叶子节点只存索引 B&#43; 树的特点
+所有数据存储在叶子节点 叶子节点通过指针连接，支持范围查询 非叶子节点只存储索引，可以存储更多的键值 树的高度低，IO 次数少 InnoDB 的聚簇索引
+InnoDB 的主键索引是聚簇索引，叶子节点存储完整的行数据。
+1主键索引（聚簇索引） 2 10 3 / \ 4 5 15 5 / \ / \ 6 1 7 12 18 7 | | | | 8 [完整行数据] 二级索引（非主键索引）的叶子节点存储主键值，需要回表查询。
+...</p>
+  </div>
+  <footer class="entry-footer"><span title='2024-11-15 00:00:00 +0000 UTC'>November 15, 2024</span>&nbsp;·&nbsp;<span>5 min</span>&nbsp;·&nbsp;<span>1007 words</span>&nbsp;·&nbsp;<span>wawayu</span></footer>
+  <a class="entry-link" aria-label="post link to MySQL 索引优化：从 Explain 到执行计划" href="http://localhost:1313/posts/2024/11/mysql-%E7%B4%A2%E5%BC%95%E4%BC%98%E5%8C%96%E4%BB%8E-explain-%E5%88%B0%E6%89%A7%E8%A1%8C%E8%AE%A1%E5%88%92/"></a>
+</article>
+
+<article class="post-entry"> 
+  <header class="entry-header">
+    <h2 class="entry-hint-parent">JVM OOM 问题排查实战：从 Heap Dump 到根因分析
+    </h2>
+  </header>
+  <div class="entry-content">
+    <p>生产环境的 OOM（Out Of Memory）是后端开发最头疼的问题之一。本文通过真实案例，讲解如何定位和解决 JVM 内存问题。
+本文亮点 理解 JVM 内存模型与 GC 机制 掌握 Heap Dump 的生成与分析方法 学会使用 MAT 工具定位内存泄漏 了解常见的内存泄漏场景与解决方案 JVM 内存模型 堆内存（Heap）
+年轻代（Young Generation） Eden 区：新对象分配的区域 Survivor 区：S0 和 S1，存放经过一次 GC 后存活的对象 老年代（Old Generation）：存放长期存活的对象 非堆内存
+方法区（Metaspace）：存放类信息、常量、静态变量 栈（Stack）：存放局部变量、方法调用 直接内存（Direct Memory）：NIO 使用的堆外内存 GC 机制
+Minor GC：清理年轻代 Major GC：清理老年代 Full GC：清理整个堆内存 对象晋升
+新对象在 Eden 区分配 Eden 区满了，触发 Minor GC 存活的对象移动到 Survivor 区 经过多次 GC 后，对象晋升到老年代 架构思考： JVM 的分代收集体现了&#34;大部分对象朝生夕死&#34;的特点。年轻代使用复制算法，快速回收短命对象；老年代使用标记-清除或标记-整理算法，处理长期存活的对象。这种设计在性能和内存利用率之间找到了平衡。
+...</p>
+  </div>
+  <footer class="entry-footer"><span title='2024-10-25 00:00:00 +0000 UTC'>October 25, 2024</span>&nbsp;·&nbsp;<span>4 min</span>&nbsp;·&nbsp;<span>758 words</span>&nbsp;·&nbsp;<span>wawayu</span></footer>
+  <a class="entry-link" aria-label="post link to JVM OOM 问题排查实战：从 Heap Dump 到根因分析" href="http://localhost:1313/posts/2024/10/jvm-oom-%E9%97%AE%E9%A2%98%E6%8E%92%E6%9F%A5%E5%AE%9E%E6%88%98%E4%BB%8E-heap-dump-%E5%88%B0%E6%A0%B9%E5%9B%A0%E5%88%86%E6%9E%90/"></a>
+</article>
+
+<article class="post-entry"> 
+  <header class="entry-header">
+    <h2 class="entry-hint-parent">RabbitMQ 在交易系统中的异步解耦实践
+    </h2>
+  </header>
+  <div class="entry-content">
+    <p>在微服务架构中，服务之间的同步调用会导致强耦合和性能瓶颈。消息队列通过异步解耦，提升了系统的可扩展性和容错能力。本文讲解 RabbitMQ 在交易系统中的实战应用。
+本文亮点 理解消息队列的核心价值与选型标准 掌握 RabbitMQ 的核心概念与工作模式 学会保障消息可靠性的完整方案 了解消息幂等性与顺序性的处理 为什么需要消息队列？ 场景：订单创建流程
+同步调用的问题：
+1@Service 2public class OrderService { 3 4 @Autowired 5 private InventoryService inventoryService; 6 7 @Autowired 8 private PaymentService paymentService; 9 10 @Autowired 11 private NotificationService notificationService; 12 13 public void createOrder(Order order) { 14 // 1. 保存订单 15 orderMapper.insert(order); 16 17 // 2. 扣减库存（同步调用） 18 inventoryService.deduct(order.getProductId(), order.getQuantity()); 19 20 // 3. 创建支付单（同步调用） 21 paymentService.createPayment(order.getId()); 22 23 // 4. 发送通知（同步调用） 24 notificationService.sendOrderCreatedNotification(order.getUserId()); 25 } 26} 问题：
+...</p>
+  </div>
+  <footer class="entry-footer"><span title='2024-10-20 00:00:00 +0000 UTC'>October 20, 2024</span>&nbsp;·&nbsp;<span>5 min</span>&nbsp;·&nbsp;<span>1007 words</span>&nbsp;·&nbsp;<span>wawayu</span></footer>
+  <a class="entry-link" aria-label="post link to RabbitMQ 在交易系统中的异步解耦实践" href="http://localhost:1313/posts/2024/10/rabbitmq-%E5%9C%A8%E4%BA%A4%E6%98%93%E7%B3%BB%E7%BB%9F%E4%B8%AD%E7%9A%84%E5%BC%82%E6%AD%A5%E8%A7%A3%E8%80%A6%E5%AE%9E%E8%B7%B5/"></a>
+</article>
+
+<article class="post-entry"> 
+  <header class="entry-header">
+    <h2 class="entry-hint-parent">领域驱动设计（DDD）落地实践：从理论到代码
+    </h2>
+  </header>
+  <div class="entry-content">
+    <p>DDD（Domain-Driven Design）是一套复杂业务系统的设计方法论。但很多人学了 DDD 的概念，却不知道如何落地。本文通过一个电商订单系统的案例，讲解 DDD 的实战应用。
+本文亮点 理解 DDD 的核心概念：实体、值对象、聚合根、领域服务 掌握限界上下文的划分方法 学会用领域事件实现服务解耦 了解 DDD 分层架构的代码组织 为什么需要 DDD？ 传统的三层架构（Controller-Service-DAO）在简单业务场景下够用，但当业务复杂度增加时，会出现几个问题：
+Service 层逻辑臃肿
+所有业务逻辑都堆在 Service 层，一个 OrderService 可能有几千行代码。
+业务规则散落各处
+订单的状态流转规则可能分散在多个 Service 方法中，难以维护。
+领域知识流失
+代码中充斥着 updateStatus(orderId, 3)，没人知道 3 代表什么状态。
+DDD 通过领域建模，让代码更贴近业务，提升可维护性。
+DDD 核心概念 实体（Entity）
+有唯一标识的对象，生命周期内标识不变。比如订单、用户。
+1public class Order { 2 private OrderId id; // 唯一标识 3 private UserId userId; 4 private OrderStatus status; 5 private List&lt;OrderItem&gt; items; 6 7 // 业务方法 8 public void pay() { 9 if (this.status != OrderStatus.PENDING_PAYMENT) { 10 throw new IllegalStateException(&#34;订单状态不允许支付&#34;); 11 } 12 this.status = OrderStatus.PAID; 13 } 14} 值对象（Value Object）
+...</p>
+  </div>
+  <footer class="entry-footer"><span title='2024-09-25 00:00:00 +0000 UTC'>September 25, 2024</span>&nbsp;·&nbsp;<span>4 min</span>&nbsp;·&nbsp;<span>703 words</span>&nbsp;·&nbsp;<span>wawayu</span></footer>
+  <a class="entry-link" aria-label="post link to 领域驱动设计（DDD）落地实践：从理论到代码" href="http://localhost:1313/posts/2024/09/%E9%A2%86%E5%9F%9F%E9%A9%B1%E5%8A%A8%E8%AE%BE%E8%AE%A1ddd%E8%90%BD%E5%9C%B0%E5%AE%9E%E8%B7%B5%E4%BB%8E%E7%90%86%E8%AE%BA%E5%88%B0%E4%BB%A3%E7%A0%81/"></a>
+</article>
+
+<article class="post-entry"> 
+  <header class="entry-header">
+    <h2 class="entry-hint-parent">Docker 容器化部署最佳实践：从 Dockerfile 到生产环境
+    </h2>
+  </header>
+  <div class="entry-content">
+    <p>容器化已经成为现代应用部署的标准方式。Docker 让应用部署变得简单、可靠、可移植。本文讲解 Docker 在生产环境中的最佳实践。
+本文亮点 掌握 Dockerfile 的编写技巧与优化方法 理解 Docker 镜像的分层构建原理 学会使用多阶段构建减少镜像体积 了解 Docker Compose 编排多服务环境 为什么需要容器化？ 传统部署的痛点
+环境不一致：“在我机器上能跑” 依赖管理复杂：JDK、Tomcat、MySQL 版本不一致 部署流程繁琐：手动上传、解压、配置、启动 资源利用率低：一台服务器只跑一个应用 容器化的优势
+环境一致性：开发、测试、生产环境完全一致 快速部署：秒级启动，一键部署 资源隔离：每个容器独立运行，互不影响 易于扩展：水平扩展只需启动更多容器 Dockerfile 基础 最简单的 Dockerfile
+1FROM openjdk:11-jre-slim 2COPY app.jar /app.jar 3ENTRYPOINT [&#34;java&#34;, &#34;-jar&#34;, &#34;/app.jar&#34;] 构建镜像
+1docker build -t myapp:1.0 . 运行容器
+1docker run -d -p 8080:8080 myapp:1.0 Dockerfile 最佳实践 1. 选择合适的基础镜像 不好的做法
+1FROM ubuntu:20.04 2RUN apt-get update &amp;&amp; apt-get install -y openjdk-11-jdk 镜像大小：600MB&#43;
+...</p>
+  </div>
+  <footer class="entry-footer"><span title='2024-09-10 00:00:00 +0000 UTC'>September 10, 2024</span>&nbsp;·&nbsp;<span>5 min</span>&nbsp;·&nbsp;<span>911 words</span>&nbsp;·&nbsp;<span>wawayu</span></footer>
+  <a class="entry-link" aria-label="post link to Docker 容器化部署最佳实践：从 Dockerfile 到生产环境" href="http://localhost:1313/posts/2024/09/docker-%E5%AE%B9%E5%99%A8%E5%8C%96%E9%83%A8%E7%BD%B2%E6%9C%80%E4%BD%B3%E5%AE%9E%E8%B7%B5%E4%BB%8E-dockerfile-%E5%88%B0%E7%94%9F%E4%BA%A7%E7%8E%AF%E5%A2%83/"></a>
+</article>
+
+<article class="post-entry"> 
+  <header class="entry-header">
+    <h2 class="entry-hint-parent">Redis 分布式锁的生产级实践：从原理到 Redisson
+    </h2>
+  </header>
+  <div class="entry-content">
+    <p>在分布式系统中，多个服务实例可能同时访问共享资源，需要分布式锁来保证数据一致性。Redis 是实现分布式锁的常用方案，但很多人只会用 SETNX，不知道其中的坑。本文深入剖析 Redis 分布式锁的实现。
+本文亮点 理解 Redis 分布式锁的实现原理与常见问题 掌握 Redisson 看门狗机制的设计思想 学会高并发场景下的锁优化方案 了解分布式锁的最佳实践 为什么需要分布式锁？ 场景一：库存扣减
+1// 错误示例：没有加锁 2public void deductStock(Long productId, int quantity) { 3 Stock stock = stockMapper.selectById(productId); 4 if (stock.getQuantity() &gt;= quantity) { 5 stock.setQuantity(stock.getQuantity() - quantity); 6 stockMapper.updateById(stock); 7 } 8} 在高并发场景下，多个线程同时读取库存，可能导致超卖。
+场景二：定时任务去重
+多个服务实例部署时，定时任务会重复执行，需要分布式锁保证只有一个实例执行。
+基础实现：SETNX &#43; EXPIRE 版本一：最简单的实现
+1public boolean tryLock(String key) { 2 return redisTemplate.opsForValue().setIfAbsent(key, &#34;1&#34;); 3} 4 5public void unlock(String key) { 6 redisTemplate.delete(key); 7} 问题：如果获取锁后，服务宕机，锁永远不会释放，导致死锁。
+...</p>
+  </div>
+  <footer class="entry-footer"><span title='2024-08-15 00:00:00 +0000 UTC'>August 15, 2024</span>&nbsp;·&nbsp;<span>5 min</span>&nbsp;·&nbsp;<span>883 words</span>&nbsp;·&nbsp;<span>wawayu</span></footer>
+  <a class="entry-link" aria-label="post link to Redis 分布式锁的生产级实践：从原理到 Redisson" href="http://localhost:1313/posts/2024/08/redis-%E5%88%86%E5%B8%83%E5%BC%8F%E9%94%81%E7%9A%84%E7%94%9F%E4%BA%A7%E7%BA%A7%E5%AE%9E%E8%B7%B5%E4%BB%8E%E5%8E%9F%E7%90%86%E5%88%B0-redisson/"></a>
+</article>
+<footer class="page-footer">
+  <nav class="pagination">
+    <a class="prev" href="http://localhost:1313/">
+      «&nbsp;Prev&nbsp;
+    </a>
+    <a class="next" href="http://localhost:1313/page/3/">Next&nbsp;&nbsp;»
+    </a>
+  </nav>
+</footer>
+    </main>
+    
+<footer class="footer">
+        <span>&copy; 2026 <a href="http://localhost:1313/">博客喵</a></span> · 
+
+    <span>
+        Powered by
+        <a href="https://gohugo.io/" rel="noopener noreferrer" target="_blank">Hugo</a> &
+        <a href="https://github.com/adityatelange/hugo-PaperMod/" rel="noopener" target="_blank">PaperMod</a>
+    </span>
+</footer>
+<a href="#top" aria-label="go to top" title="Go to Top (Alt + G)" class="top-link" id="top-link" accesskey="g">
+    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 12 6" fill="currentColor">
+        <path d="M12 6H0l6-6z" />
+    </svg>
+</a>
+
+<script>
+    let menu = document.getElementById('menu');
+    if (menu) {
+        
+        const scrollPosition = localStorage.getItem("menu-scroll-position");
+        if (scrollPosition) {
+            menu.scrollLeft = parseInt(scrollPosition, 10);
+        }
+        
+        menu.onscroll = function () {
+            localStorage.setItem("menu-scroll-position", menu.scrollLeft);
+        }
+    }
+
+    document.querySelectorAll('a[href^="#"]').forEach(anchor => {
+        anchor.addEventListener("click", function (e) {
+            e.preventDefault();
+            var id = this.getAttribute("href").substr(1);
+            if (!window.matchMedia('(prefers-reduced-motion: reduce)').matches) {
+                document.querySelector(`[id='${decodeURIComponent(id)}']`).scrollIntoView({
+                    behavior: "smooth"
+                });
+            } else {
+                document.querySelector(`[id='${decodeURIComponent(id)}']`).scrollIntoView();
+            }
+            if (id === "top") {
+                history.replaceState(null, null, " ");
+            } else {
+                history.pushState(null, null, `#${id}`);
+            }
+        });
+    });
+
+</script>
+<script>
+    var mybutton = document.getElementById("top-link");
+    window.onscroll = function () {
+        if (document.body.scrollTop > 800 || document.documentElement.scrollTop > 800) {
+            mybutton.style.visibility = "visible";
+            mybutton.style.opacity = "1";
+        } else {
+            mybutton.style.visibility = "hidden";
+            mybutton.style.opacity = "0";
+        }
+    };
+
+</script>
+<script>
+    document.getElementById("theme-toggle").addEventListener("click", () => {
+        const html = document.querySelector("html");
+        if (html.dataset.theme === "dark") {
+            html.dataset.theme = 'light';
+            localStorage.setItem("pref-theme", 'light');
+        } else {
+            html.dataset.theme = 'dark';
+            localStorage.setItem("pref-theme", 'dark');
+        }
+    })
+
+</script>
+</body>
+
+</html>

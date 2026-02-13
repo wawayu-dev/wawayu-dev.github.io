@@ -1,0 +1,309 @@
+<!DOCTYPE html>
+<html lang="en" dir="auto" data-theme="auto">
+
+<head><script src="/livereload.js?mindelay=10&amp;v=2&amp;port=1313&amp;path=livereload" data-no-instant defer></script><meta charset="utf-8">
+<meta http-equiv="X-UA-Compatible" content="IE=edge">
+<meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
+<meta name="robots" content="index, follow">
+<title>高并发 | 博客喵</title>
+<meta name="keywords" content="">
+<meta name="description" content="记录技术成长，分享开发经验，专注 Java 后端与分布式系统">
+<meta name="author" content="wawayu">
+<link rel="canonical" href="http://localhost:1313/tags/%E9%AB%98%E5%B9%B6%E5%8F%91/">
+<link crossorigin="anonymous" href="/assets/css/stylesheet.a29c24210eb31d9ce56f669c66a35c9c51b17376b7764e336a49af7dec914cf0.css" integrity="sha256-opwkIQ6zHZzlb2acZqNcnFGxc3a3dk4zakmvfeyRTPA=" rel="preload stylesheet" as="style">
+<link rel="icon" href="http://localhost:1313/favicon.ico">
+<link rel="icon" type="image/png" sizes="16x16" href="http://localhost:1313/favicon-16x16.png">
+<link rel="icon" type="image/png" sizes="32x32" href="http://localhost:1313/favicon-32x32.png">
+<link rel="apple-touch-icon" href="http://localhost:1313/apple-touch-icon.png">
+<link rel="mask-icon" href="http://localhost:1313/safari-pinned-tab.svg">
+<meta name="theme-color" content="#2e2e33">
+<meta name="msapplication-TileColor" content="#2e2e33">
+<link rel="alternate" type="application/rss+xml" href="http://localhost:1313/tags/%E9%AB%98%E5%B9%B6%E5%8F%91/index.xml" title="rss">
+<link rel="alternate" hreflang="en" href="http://localhost:1313/tags/%E9%AB%98%E5%B9%B6%E5%8F%91/">
+<noscript>
+    <style>
+        #theme-toggle,
+        .top-link {
+            display: none;
+        }
+
+    </style>
+    <style>
+        @media (prefers-color-scheme: dark) {
+            :root {
+                --theme: rgb(29, 30, 32);
+                --entry: rgb(46, 46, 51);
+                --primary: rgb(218, 218, 219);
+                --secondary: rgb(155, 156, 157);
+                --tertiary: rgb(65, 66, 68);
+                --content: rgb(196, 196, 197);
+                --code-block-bg: rgb(46, 46, 51);
+                --code-bg: rgb(55, 56, 62);
+                --border: rgb(51, 51, 51);
+                color-scheme: dark;
+            }
+
+            .list {
+                background: var(--theme);
+            }
+
+            .toc {
+                background: var(--entry);
+            }
+        }
+
+        @media (prefers-color-scheme: light) {
+            .list::-webkit-scrollbar-thumb {
+                border-color: var(--code-bg);
+            }
+        }
+
+    </style>
+</noscript>
+<script>
+    if (localStorage.getItem("pref-theme") === "dark") {
+        document.querySelector("html").dataset.theme = 'dark';
+    } else if (localStorage.getItem("pref-theme") === "light") {
+       document.querySelector("html").dataset.theme = 'light';
+    } else if (window.matchMedia('(prefers-color-scheme: dark)').matches) {
+        document.querySelector("html").dataset.theme = 'dark';
+    } else {
+        document.querySelector("html").dataset.theme = 'light';
+    }
+
+</script><meta property="og:url" content="http://localhost:1313/tags/%E9%AB%98%E5%B9%B6%E5%8F%91/">
+  <meta property="og:site_name" content="博客喵">
+  <meta property="og:title" content="高并发">
+  <meta property="og:description" content="记录技术成长，分享开发经验，专注 Java 后端与分布式系统">
+  <meta property="og:locale" content="zh-cn">
+  <meta property="og:type" content="website">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:title" content="高并发">
+<meta name="twitter:description" content="记录技术成长，分享开发经验，专注 Java 后端与分布式系统">
+
+</head>
+<body class="list" id="top">
+    <header class="header">
+    <nav class="nav">
+        <div class="logo">
+            <a href="http://localhost:1313/" accesskey="h" title="博客喵 (Alt + H)">博客喵</a>
+            <div class="logo-switches">
+                <button id="theme-toggle" accesskey="t" title="(Alt + T)" aria-label="Toggle theme">
+                    <svg id="moon" xmlns="http://www.w3.org/2000/svg" width="24" height="18" viewBox="0 0 24 24"
+                        fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"
+                        stroke-linejoin="round">
+                        <path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"></path>
+                    </svg>
+                    <svg id="sun" xmlns="http://www.w3.org/2000/svg" width="24" height="18" viewBox="0 0 24 24"
+                        fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"
+                        stroke-linejoin="round">
+                        <circle cx="12" cy="12" r="5"></circle>
+                        <line x1="12" y1="1" x2="12" y2="3"></line>
+                        <line x1="12" y1="21" x2="12" y2="23"></line>
+                        <line x1="4.22" y1="4.22" x2="5.64" y2="5.64"></line>
+                        <line x1="18.36" y1="18.36" x2="19.78" y2="19.78"></line>
+                        <line x1="1" y1="12" x2="3" y2="12"></line>
+                        <line x1="21" y1="12" x2="23" y2="12"></line>
+                        <line x1="4.22" y1="19.78" x2="5.64" y2="18.36"></line>
+                        <line x1="18.36" y1="5.64" x2="19.78" y2="4.22"></line>
+                    </svg>
+                </button>
+            </div>
+        </div>
+        <ul id="menu">
+            <li>
+                <a href="http://localhost:1313/posts/" title="📝 文章">
+                    <span>📝 文章</span>
+                </a>
+            </li>
+            <li>
+                <a href="http://localhost:1313/tags/" title="🏷️ 标签">
+                    <span>🏷️ 标签</span>
+                </a>
+            </li>
+            <li>
+                <a href="http://localhost:1313/categories/" title="📂 分类">
+                    <span>📂 分类</span>
+                </a>
+            </li>
+            <li>
+                <a href="http://localhost:1313/skills/" title="💻 技能">
+                    <span>💻 技能</span>
+                </a>
+            </li>
+            <li>
+                <a href="http://localhost:1313/about/" title="👤 关于">
+                    <span>👤 关于</span>
+                </a>
+            </li>
+            <li>
+                <a href="http://localhost:1313/search/" title="🔍 搜索 (Alt &#43; /)" accesskey=/>
+                    <span>🔍 搜索</span>
+                </a>
+            </li>
+        </ul>
+    </nav>
+</header>
+<main class="main"> 
+<header class="page-header"><div class="breadcrumbs"><a href="http://localhost:1313/">Home</a>&nbsp;»&nbsp;<a href="http://localhost:1313/tags/">Tags</a></div>
+  <h1>
+    高并发
+    <a href="/tags/%E9%AB%98%E5%B9%B6%E5%8F%91/index.xml" title="RSS" aria-label="RSS">
+      <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"
+        stroke-linecap="round" stroke-linejoin="round" height="23">
+        <path d="M4 11a9 9 0 0 1 9 9" />
+        <path d="M4 4a16 16 0 0 1 16 16" />
+        <circle cx="5" cy="19" r="1" />
+      </svg>
+    </a>
+  </h1>
+</header>
+
+<article class="post-entry tag-entry"> 
+  <header class="entry-header">
+    <h2 class="entry-hint-parent">Netty &#43; WebSocket 实现实时消息推送：从原理到生产实战
+    </h2>
+  </header>
+  <div class="entry-content">
+    <p>在现代互联网应用中，实时消息推送已成为标配功能。从即时通讯、在线客服到实时监控大屏，都离不开高性能的消息推送能力。传统的 HTTP 轮询方式存在延迟高、资源浪费等问题，而 WebSocket 协议的出现完美解决了这些痛点。
+本文将深入讲解如何使用 Netty 框架实现基于 WebSocket 的实时消息推送系统，从协议原理到生产实战，帮助你构建一个高性能、高可用的推送服务。
+本文亮点 掌握 WebSocket 协议原理与握手流程 学会使用 Netty 构建 WebSocket 服务器 理解心跳机制与连接管理策略 掌握集群部署与消息路由方案 了解生产环境的性能优化技巧 为什么选择 Netty &#43; WebSocket WebSocket 协议优势 相比传统的 HTTP 轮询，WebSocket 具有以下优势：
+特性 HTTP 轮询 WebSocket 通信方式 半双工 全双工 连接开销 每次请求都需要建立连接 一次握手，持久连接 实时性 取决于轮询间隔（秒级） 毫秒级 服务器压力 高（频繁的 HTTP 请求） 低（长连接） 带宽消耗 高（每次都有 HTTP 头） 低（只传输数据帧） Netty 框架优势 Netty 是一个高性能的异步事件驱动网络框架，具有以下特点：
+高性能：基于 NIO，支持百万级并发连接 易用性：提供了丰富的编解码器和处理器 稳定性：经过大量生产环境验证 扩展性：灵活的 Pipeline 机制 架构思考： 选择技术方案时，不仅要看技术本身的优势，更要考虑团队的技术栈、运维成本和社区生态。Netty 在 Java 生态中已经成为事实标准，Dubbo、RocketMQ、Elasticsearch 等知名项目都在使用。
+...</p>
+  </div>
+  <footer class="entry-footer"><span title='2025-04-18 00:00:00 +0000 UTC'>April 18, 2025</span>&nbsp;·&nbsp;<span>11 min</span>&nbsp;·&nbsp;<span>2175 words</span>&nbsp;·&nbsp;<span>wawayu</span></footer>
+  <a class="entry-link" aria-label="post link to Netty &#43; WebSocket 实现实时消息推送：从原理到生产实战" href="http://localhost:1313/posts/2025/04/netty--websocket-%E5%AE%9E%E7%8E%B0%E5%AE%9E%E6%97%B6%E6%B6%88%E6%81%AF%E6%8E%A8%E9%80%81%E4%BB%8E%E5%8E%9F%E7%90%86%E5%88%B0%E7%94%9F%E4%BA%A7%E5%AE%9E%E6%88%98/"></a>
+</article>
+
+<article class="post-entry tag-entry"> 
+  <header class="entry-header">
+    <h2 class="entry-hint-parent">Redis 缓存架构：从穿透到雪崩的全链路防护
+    </h2>
+  </header>
+  <div class="entry-content">
+    <p>在高并发系统中，缓存是提升性能的关键。但缓存使用不当会引发穿透、击穿、雪崩等问题，导致数据库崩溃。本文将深入分析这些问题的原理，并提供完整的解决方案。
+本文亮点 理解缓存穿透、击穿、雪崩的本质区别 掌握布隆过滤器、互斥锁等防护手段 学会设计高可用的缓存架构 了解缓存预热、降级等最佳实践 缓存的三大问题 问题对比 问题 原因 影响 解决方案 缓存穿透 查询不存在的数据 大量请求打到DB 布隆过滤器、空值缓存 缓存击穿 热点key过期 瞬间大量请求打到DB 互斥锁、永不过期 缓存雪崩 大量key同时过期 DB压力骤增 过期时间随机化、多级缓存 缓存穿透：查询不存在的数据 问题场景 1// 恶意攻击：查询不存在的用户ID 2for (int i = -1000000; i &lt; 0; i--) { 3 User user = getUser(i); // 缓存和DB都没有，每次都查DB 4} 流程：
+1请求 → 查缓存（未命中）→ 查数据库（未命中）→ 返回null 每次请求都会穿透缓存，直接打到数据库。
+解决方案1：布隆过滤器 原理： 用位数组判断元素是否存在，存在一定的误判率。
+1@Configuration 2public class BloomFilterConfig { 3 4 @Bean 5 public BloomFilter&lt;Long&gt; userBloomFilter() { 6 // 预期元素数量：1000万，误判率：0.01% 7 BloomFilter&lt;Long&gt; bloomFilter = BloomFilter.create( 8 Funnels.longFunnel(), 9 10000000, 10 0.0001 11 ); 12 13 // 初始化：将所有用户ID加入布隆过滤器 14 List&lt;Long&gt; userIds = userMapper.selectAllIds(); 15 userIds.forEach(bloomFilter::put); 16 17 return bloomFilter; 18 } 19} 1@Service 2public class UserService { 3 4 @Autowired 5 private BloomFilter&lt;Long&gt; userBloomFilter; 6 7 @Autowired 8 private RedisTemplate&lt;String, User&gt; redisTemplate; 9 10 @Autowired 11 private UserMapper userMapper; 12 13 public User getUser(Long userId) { 14 // 1. 布隆过滤器判断 15 if (!userBloomFilter.mightContain(userId)) { 16 return null; // 一定不存在，直接返回 17 } 18 19 // 2. 查缓存 20 String key = &#34;user:&#34; &#43; userId; 21 User user = redisTemplate.opsForValue().get(key); 22 if (user != null) { 23 return user; 24 } 25 26 // 3. 查数据库 27 user = userMapper.selectById(userId); 28 if (user != null) { 29 redisTemplate.opsForValue().set(key, user, 1, TimeUnit.HOURS); 30 } 31 32 return user; 33 } 34} 优点：
+...</p>
+  </div>
+  <footer class="entry-footer"><span title='2025-03-20 00:00:00 +0000 UTC'>March 20, 2025</span>&nbsp;·&nbsp;<span>8 min</span>&nbsp;·&nbsp;<span>1679 words</span>&nbsp;·&nbsp;<span>wawayu</span></footer>
+  <a class="entry-link" aria-label="post link to Redis 缓存架构：从穿透到雪崩的全链路防护" href="http://localhost:1313/posts/2025/03/redis-%E7%BC%93%E5%AD%98%E6%9E%B6%E6%9E%84%E4%BB%8E%E7%A9%BF%E9%80%8F%E5%88%B0%E9%9B%AA%E5%B4%A9%E7%9A%84%E5%85%A8%E9%93%BE%E8%B7%AF%E9%98%B2%E6%8A%A4/"></a>
+</article>
+
+<article class="post-entry tag-entry"> 
+  <header class="entry-header">
+    <h2 class="entry-hint-parent">Redis 分布式锁的生产级实践：从原理到 Redisson
+    </h2>
+  </header>
+  <div class="entry-content">
+    <p>在分布式系统中，多个服务实例可能同时访问共享资源，需要分布式锁来保证数据一致性。Redis 是实现分布式锁的常用方案，但很多人只会用 SETNX，不知道其中的坑。本文深入剖析 Redis 分布式锁的实现。
+本文亮点 理解 Redis 分布式锁的实现原理与常见问题 掌握 Redisson 看门狗机制的设计思想 学会高并发场景下的锁优化方案 了解分布式锁的最佳实践 为什么需要分布式锁？ 场景一：库存扣减
+1// 错误示例：没有加锁 2public void deductStock(Long productId, int quantity) { 3 Stock stock = stockMapper.selectById(productId); 4 if (stock.getQuantity() &gt;= quantity) { 5 stock.setQuantity(stock.getQuantity() - quantity); 6 stockMapper.updateById(stock); 7 } 8} 在高并发场景下，多个线程同时读取库存，可能导致超卖。
+场景二：定时任务去重
+多个服务实例部署时，定时任务会重复执行，需要分布式锁保证只有一个实例执行。
+基础实现：SETNX &#43; EXPIRE 版本一：最简单的实现
+1public boolean tryLock(String key) { 2 return redisTemplate.opsForValue().setIfAbsent(key, &#34;1&#34;); 3} 4 5public void unlock(String key) { 6 redisTemplate.delete(key); 7} 问题：如果获取锁后，服务宕机，锁永远不会释放，导致死锁。
+...</p>
+  </div>
+  <footer class="entry-footer"><span title='2024-08-15 00:00:00 +0000 UTC'>August 15, 2024</span>&nbsp;·&nbsp;<span>5 min</span>&nbsp;·&nbsp;<span>883 words</span>&nbsp;·&nbsp;<span>wawayu</span></footer>
+  <a class="entry-link" aria-label="post link to Redis 分布式锁的生产级实践：从原理到 Redisson" href="http://localhost:1313/posts/2024/08/redis-%E5%88%86%E5%B8%83%E5%BC%8F%E9%94%81%E7%9A%84%E7%94%9F%E4%BA%A7%E7%BA%A7%E5%AE%9E%E8%B7%B5%E4%BB%8E%E5%8E%9F%E7%90%86%E5%88%B0-redisson/"></a>
+</article>
+
+<article class="post-entry tag-entry"> 
+  <header class="entry-header">
+    <h2 class="entry-hint-parent">分布式 ID 生成方案对比与选型指南
+    </h2>
+  </header>
+  <div class="entry-content">
+    <p>在分布式系统中，生成全局唯一 ID 是一个基础需求。数据库自增 ID 在分库分表后无法使用，UUID 虽然简单但不适合作为主键。本文对比主流的分布式 ID 生成方案。
+本文亮点 理解分布式 ID 的核心要求 掌握雪花算法的实现与时钟回拨问题 了解美团 Leaf 方案的设计思想 学会根据业务场景选择合适方案 分布式 ID 的核心要求 全局唯一性：不能重复 趋势递增：方便排序和索引 高性能：生成速度快 高可用：服务不能挂 信息安全：不能泄露业务信息 方案一：数据库自增 ID 1CREATE TABLE id_generator ( 2 id BIGINT NOT NULL AUTO_INCREMENT PRIMARY KEY, 3 stub CHAR(1) NOT NULL DEFAULT &#39;&#39;, 4 UNIQUE KEY stub (stub) 5); 6 7INSERT INTO id_generator (stub) VALUES (&#39;a&#39;); 8SELECT LAST_INSERT_ID(); 优点：简单，趋势递增
+缺点：
+性能瓶颈：数据库压力大 单点故障：数据库挂了就无法生成 ID 扩展性差：分库分表后需要设置不同的步长 方案二：UUID 1String id = UUID.randomUUID().toString(); 优点：简单，本地生成，性能高
+...</p>
+  </div>
+  <footer class="entry-footer"><span title='2024-07-05 00:00:00 +0000 UTC'>July 5, 2024</span>&nbsp;·&nbsp;<span>3 min</span>&nbsp;·&nbsp;<span>459 words</span>&nbsp;·&nbsp;<span>wawayu</span></footer>
+  <a class="entry-link" aria-label="post link to 分布式 ID 生成方案对比与选型指南" href="http://localhost:1313/posts/2024/07/%E5%88%86%E5%B8%83%E5%BC%8F-id-%E7%94%9F%E6%88%90%E6%96%B9%E6%A1%88%E5%AF%B9%E6%AF%94%E4%B8%8E%E9%80%89%E5%9E%8B%E6%8C%87%E5%8D%97/"></a>
+</article>
+    </main>
+    
+<footer class="footer">
+        <span>&copy; 2026 <a href="http://localhost:1313/">博客喵</a></span> · 
+
+    <span>
+        Powered by
+        <a href="https://gohugo.io/" rel="noopener noreferrer" target="_blank">Hugo</a> &
+        <a href="https://github.com/adityatelange/hugo-PaperMod/" rel="noopener" target="_blank">PaperMod</a>
+    </span>
+</footer>
+<a href="#top" aria-label="go to top" title="Go to Top (Alt + G)" class="top-link" id="top-link" accesskey="g">
+    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 12 6" fill="currentColor">
+        <path d="M12 6H0l6-6z" />
+    </svg>
+</a>
+
+<script>
+    let menu = document.getElementById('menu');
+    if (menu) {
+        
+        const scrollPosition = localStorage.getItem("menu-scroll-position");
+        if (scrollPosition) {
+            menu.scrollLeft = parseInt(scrollPosition, 10);
+        }
+        
+        menu.onscroll = function () {
+            localStorage.setItem("menu-scroll-position", menu.scrollLeft);
+        }
+    }
+
+    document.querySelectorAll('a[href^="#"]').forEach(anchor => {
+        anchor.addEventListener("click", function (e) {
+            e.preventDefault();
+            var id = this.getAttribute("href").substr(1);
+            if (!window.matchMedia('(prefers-reduced-motion: reduce)').matches) {
+                document.querySelector(`[id='${decodeURIComponent(id)}']`).scrollIntoView({
+                    behavior: "smooth"
+                });
+            } else {
+                document.querySelector(`[id='${decodeURIComponent(id)}']`).scrollIntoView();
+            }
+            if (id === "top") {
+                history.replaceState(null, null, " ");
+            } else {
+                history.pushState(null, null, `#${id}`);
+            }
+        });
+    });
+
+</script>
+<script>
+    var mybutton = document.getElementById("top-link");
+    window.onscroll = function () {
+        if (document.body.scrollTop > 800 || document.documentElement.scrollTop > 800) {
+            mybutton.style.visibility = "visible";
+            mybutton.style.opacity = "1";
+        } else {
+            mybutton.style.visibility = "hidden";
+            mybutton.style.opacity = "0";
+        }
+    };
+
+</script>
+<script>
+    document.getElementById("theme-toggle").addEventListener("click", () => {
+        const html = document.querySelector("html");
+        if (html.dataset.theme === "dark") {
+            html.dataset.theme = 'light';
+            localStorage.setItem("pref-theme", 'light');
+        } else {
+            html.dataset.theme = 'dark';
+            localStorage.setItem("pref-theme", 'dark');
+        }
+    })
+
+</script>
+</body>
+
+</html>

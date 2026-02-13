@@ -1,0 +1,780 @@
+<!DOCTYPE html>
+<html lang="en" dir="auto" data-theme="auto">
+
+<head><script src="/livereload.js?mindelay=10&amp;v=2&amp;port=1313&amp;path=livereload" data-no-instant defer></script><meta charset="utf-8">
+<meta http-equiv="X-UA-Compatible" content="IE=edge">
+<meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
+<meta name="robots" content="index, follow">
+<title>RabbitMQ 异步解耦实战：从消息丢失到最终一致性 | 博客喵</title>
+<meta name="keywords" content="RabbitMQ, 消息队列, 异步, 分布式">
+<meta name="description" content="深入 RabbitMQ 的消息可靠性保障机制，解决消息丢失、重复消费、顺序性问题">
+<meta name="author" content="wawayu">
+<link rel="canonical" href="http://localhost:1313/posts/2024/11/rabbitmq-%E5%BC%82%E6%AD%A5%E8%A7%A3%E8%80%A6%E5%AE%9E%E6%88%98%E4%BB%8E%E6%B6%88%E6%81%AF%E4%B8%A2%E5%A4%B1%E5%88%B0%E6%9C%80%E7%BB%88%E4%B8%80%E8%87%B4%E6%80%A7/">
+<link crossorigin="anonymous" href="/assets/css/stylesheet.a29c24210eb31d9ce56f669c66a35c9c51b17376b7764e336a49af7dec914cf0.css" integrity="sha256-opwkIQ6zHZzlb2acZqNcnFGxc3a3dk4zakmvfeyRTPA=" rel="preload stylesheet" as="style">
+<link rel="icon" href="http://localhost:1313/favicon.ico">
+<link rel="icon" type="image/png" sizes="16x16" href="http://localhost:1313/favicon-16x16.png">
+<link rel="icon" type="image/png" sizes="32x32" href="http://localhost:1313/favicon-32x32.png">
+<link rel="apple-touch-icon" href="http://localhost:1313/apple-touch-icon.png">
+<link rel="mask-icon" href="http://localhost:1313/safari-pinned-tab.svg">
+<meta name="theme-color" content="#2e2e33">
+<meta name="msapplication-TileColor" content="#2e2e33">
+<link rel="alternate" hreflang="en" href="http://localhost:1313/posts/2024/11/rabbitmq-%E5%BC%82%E6%AD%A5%E8%A7%A3%E8%80%A6%E5%AE%9E%E6%88%98%E4%BB%8E%E6%B6%88%E6%81%AF%E4%B8%A2%E5%A4%B1%E5%88%B0%E6%9C%80%E7%BB%88%E4%B8%80%E8%87%B4%E6%80%A7/">
+<noscript>
+    <style>
+        #theme-toggle,
+        .top-link {
+            display: none;
+        }
+
+    </style>
+    <style>
+        @media (prefers-color-scheme: dark) {
+            :root {
+                --theme: rgb(29, 30, 32);
+                --entry: rgb(46, 46, 51);
+                --primary: rgb(218, 218, 219);
+                --secondary: rgb(155, 156, 157);
+                --tertiary: rgb(65, 66, 68);
+                --content: rgb(196, 196, 197);
+                --code-block-bg: rgb(46, 46, 51);
+                --code-bg: rgb(55, 56, 62);
+                --border: rgb(51, 51, 51);
+                color-scheme: dark;
+            }
+
+            .list {
+                background: var(--theme);
+            }
+
+            .toc {
+                background: var(--entry);
+            }
+        }
+
+        @media (prefers-color-scheme: light) {
+            .list::-webkit-scrollbar-thumb {
+                border-color: var(--code-bg);
+            }
+        }
+
+    </style>
+</noscript>
+<script>
+    if (localStorage.getItem("pref-theme") === "dark") {
+        document.querySelector("html").dataset.theme = 'dark';
+    } else if (localStorage.getItem("pref-theme") === "light") {
+       document.querySelector("html").dataset.theme = 'light';
+    } else if (window.matchMedia('(prefers-color-scheme: dark)').matches) {
+        document.querySelector("html").dataset.theme = 'dark';
+    } else {
+        document.querySelector("html").dataset.theme = 'light';
+    }
+
+</script><meta property="og:url" content="http://localhost:1313/posts/2024/11/rabbitmq-%E5%BC%82%E6%AD%A5%E8%A7%A3%E8%80%A6%E5%AE%9E%E6%88%98%E4%BB%8E%E6%B6%88%E6%81%AF%E4%B8%A2%E5%A4%B1%E5%88%B0%E6%9C%80%E7%BB%88%E4%B8%80%E8%87%B4%E6%80%A7/">
+  <meta property="og:site_name" content="博客喵">
+  <meta property="og:title" content="RabbitMQ 异步解耦实战：从消息丢失到最终一致性">
+  <meta property="og:description" content="深入 RabbitMQ 的消息可靠性保障机制，解决消息丢失、重复消费、顺序性问题">
+  <meta property="og:locale" content="zh-cn">
+  <meta property="og:type" content="article">
+    <meta property="article:section" content="posts">
+    <meta property="article:published_time" content="2024-11-20T00:00:00+00:00">
+    <meta property="article:modified_time" content="2024-11-20T00:00:00+00:00">
+    <meta property="article:tag" content="RabbitMQ">
+    <meta property="article:tag" content="消息队列">
+    <meta property="article:tag" content="异步">
+    <meta property="article:tag" content="分布式">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:title" content="RabbitMQ 异步解耦实战：从消息丢失到最终一致性">
+<meta name="twitter:description" content="深入 RabbitMQ 的消息可靠性保障机制，解决消息丢失、重复消费、顺序性问题">
+
+
+<script type="application/ld+json">
+{
+  "@context": "https://schema.org",
+  "@type": "BreadcrumbList",
+  "itemListElement": [
+    {
+      "@type": "ListItem",
+      "position":  1 ,
+      "name": "Posts",
+      "item": "http://localhost:1313/posts/"
+    }, 
+    {
+      "@type": "ListItem",
+      "position":  2 ,
+      "name": "RabbitMQ 异步解耦实战：从消息丢失到最终一致性",
+      "item": "http://localhost:1313/posts/2024/11/rabbitmq-%E5%BC%82%E6%AD%A5%E8%A7%A3%E8%80%A6%E5%AE%9E%E6%88%98%E4%BB%8E%E6%B6%88%E6%81%AF%E4%B8%A2%E5%A4%B1%E5%88%B0%E6%9C%80%E7%BB%88%E4%B8%80%E8%87%B4%E6%80%A7/"
+    }
+  ]
+}
+</script>
+<script type="application/ld+json">
+{
+  "@context": "https://schema.org",
+  "@type": "BlogPosting",
+  "headline": "RabbitMQ 异步解耦实战：从消息丢失到最终一致性",
+  "name": "RabbitMQ 异步解耦实战：从消息丢失到最终一致性",
+  "description": "深入 RabbitMQ 的消息可靠性保障机制，解决消息丢失、重复消费、顺序性问题",
+  "keywords": [
+    "RabbitMQ", "消息队列", "异步", "分布式"
+  ],
+  "articleBody": "在微服务架构中，服务之间的同步调用会导致强耦合和性能瓶颈。消息队列通过异步解耦，让系统更加灵活和高效。但消息队列不是银弹，消息丢失、重复消费、顺序性问题都需要仔细处理。\n本文亮点 理解 RabbitMQ 的核心概念：Exchange、Queue、Binding 掌握消息可靠性的三重保障：持久化、确认机制、死信队列 学会设计幂等消费者，解决重复消费问题 了解消息顺序性的保障方案 为什么选择 RabbitMQ？ 常见的消息队列有 RabbitMQ、Kafka、RocketMQ，它们的定位不同：\nRabbitMQ： 轻量级，支持多种消息模式，适合业务解耦和异步处理 Kafka： 高吞吐量，适合日志收集和流式计算 RocketMQ： 阿里开源，支持事务消息，适合电商场景 我们选择 RabbitMQ 的原因：\n部署简单，社区活跃 支持灵活的路由规则（Topic、Fanout、Direct） 提供完善的管理界面 RabbitMQ 核心概念 Producer → Exchange → Queue → Consumer\nProducer： 生产者，发送消息 Exchange： 交换机，根据路由规则分发消息 Queue： 队列，存储消息 Consumer： 消费者，接收消息 Exchange 的四种类型\nDirect： 精确匹配路由键 Topic： 模糊匹配路由键（支持通配符 * 和 #） Fanout： 广播模式，发送到所有绑定的队列 Headers： 根据消息头匹配（很少用） 实战案例：订单系统的消息路由\n订单创建后，需要通知多个下游服务：\n库存服务：扣减库存 支付服务：发起支付 通知服务：发送短信 使用 Topic Exchange 实现：\n1@Configuration 2public class RabbitMQConfig { 3 4 @Bean 5 public TopicExchange orderExchange() { 6 return new TopicExchange(\"order.exchange\"); 7 } 8 9 @Bean 10 public Queue inventoryQueue() { 11 return new Queue(\"order.inventory.queue\"); 12 } 13 14 @Bean 15 public Queue paymentQueue() { 16 return new Queue(\"order.payment.queue\"); 17 } 18 19 @Bean 20 public Queue notificationQueue() { 21 return new Queue(\"order.notification.queue\"); 22 } 23 24 @Bean 25 public Binding inventoryBinding() { 26 return BindingBuilder.bind(inventoryQueue()) 27 .to(orderExchange()) 28 .with(\"order.created\"); 29 } 30 31 @Bean 32 public Binding paymentBinding() { 33 return BindingBuilder.bind(paymentQueue()) 34 .to(orderExchange()) 35 .with(\"order.created\"); 36 } 37 38 @Bean 39 public Binding notificationBinding() { 40 return BindingBuilder.bind(notificationQueue()) 41 .to(orderExchange()) 42 .with(\"order.*\"); // 监听所有订单事件 43 } 44} 发送消息：\n1@Service 2public class OrderService { 3 4 @Autowired 5 private RabbitTemplate rabbitTemplate; 6 7 public void createOrder(Order order) { 8 // 保存订单到数据库 9 orderMapper.insert(order); 10 11 // 发送消息 12 rabbitTemplate.convertAndSend( 13 \"order.exchange\", 14 \"order.created\", 15 order 16 ); 17 } 18} 架构思考： Topic Exchange 的路由规则类似于日志系统的 Logger 层级。order.* 可以匹配 order.created、order.paid，order.# 可以匹配 order.created.success。这种灵活的路由机制，让消息分发变得非常优雅。\n消息可靠性：三重保障机制 问题一：消息丢失\n消息可能在三个环节丢失：\n生产者发送消息时，网络故障导致消息未到达 RabbitMQ RabbitMQ 宕机，内存中的消息丢失 消费者处理消息时崩溃，消息未被正确消费 解决方案一：生产者确认机制\n开启 Publisher Confirm 模式：\n1spring: 2 rabbitmq: 3 publisher-confirm-type: correlated 4 publisher-returns: true 配置回调：\n1@Configuration 2public class RabbitMQConfig { 3 4 @Bean 5 public RabbitTemplate rabbitTemplate(ConnectionFactory connectionFactory) { 6 RabbitTemplate template = new RabbitTemplate(connectionFactory); 7 8 // 消息发送到 Exchange 的确认回调 9 template.setConfirmCallback((correlationData, ack, cause) -\u003e { 10 if (ack) { 11 log.info(\"消息发送成功\"); 12 } else { 13 log.error(\"消息发送失败: {}\", cause); 14 // 重试或记录到数据库 15 } 16 }); 17 18 // 消息从 Exchange 路由到 Queue 失败的回调 19 template.setReturnsCallback(returned -\u003e { 20 log.error(\"消息路由失败: {}\", returned.getMessage()); 21 }); 22 23 return template; 24 } 25} 解决方案二：消息持久化\n确保消息不会因为 RabbitMQ 重启而丢失：\n1@Bean 2public Queue orderQueue() { 3 return QueueBuilder.durable(\"order.queue\") // 队列持久化 4 .build(); 5} 6 7@Bean 8public TopicExchange orderExchange() { 9 return new TopicExchange(\"order.exchange\", true, false); // Exchange 持久化 10} 发送消息时，设置消息持久化：\n1rabbitTemplate.convertAndSend( 2 \"order.exchange\", 3 \"order.created\", 4 order, 5 message -\u003e { 6 message.getMessageProperties().setDeliveryMode(MessageDeliveryMode.PERSISTENT); 7 return message; 8 } 9); 解决方案三：消费者手动确认\n默认情况下，消息一旦被消费者接收，就会从队列中删除。如果消费者处理失败，消息就丢失了。\n改为手动确认模式：\n1spring: 2 rabbitmq: 3 listener: 4 simple: 5 acknowledge-mode: manual 消费者代码：\n1@RabbitListener(queues = \"order.inventory.queue\") 2public void handleInventoryDeduct(Message message, Channel channel) throws IOException { 3 try { 4 Order order = JSON.parseObject(message.getBody(), Order.class); 5 6 // 处理业务逻辑 7 inventoryService.deduct(order.getProductId(), order.getQuantity()); 8 9 // 手动确认 10 channel.basicAck(message.getMessageProperties().getDeliveryTag(), false); 11 } catch (Exception e) { 12 log.error(\"消息处理失败\", e); 13 14 // 拒绝消息，重新入队 15 channel.basicNack(message.getMessageProperties().getDeliveryTag(), false, true); 16 } 17} 避坑提示： 手动确认模式下，如果忘记调用 basicAck 或 basicNack，消息会一直处于 Unacked 状态，导致内存泄漏。建议在 finally 块中确保消息被确认。\n重复消费：幂等性设计 即使有消息确认机制，网络抖动也可能导致消息重复投递。消费者必须设计成幂等的。\n方案一：唯一键去重\n在数据库中为消息 ID 创建唯一索引：\n1CREATE TABLE message_log ( 2 message_id VARCHAR(64) PRIMARY KEY, 3 status TINYINT, 4 create_time DATETIME 5); 消费者先检查消息是否已处理：\n1@RabbitListener(queues = \"order.inventory.queue\") 2public void handleInventoryDeduct(Order order, Channel channel, Message message) throws IOException { 3 String messageId = message.getMessageProperties().getMessageId(); 4 5 // 检查消息是否已处理 6 if (messageLogMapper.exists(messageId)) { 7 log.info(\"消息已处理，跳过: {}\", messageId); 8 channel.basicAck(message.getMessageProperties().getDeliveryTag(), false); 9 return; 10 } 11 12 try { 13 // 处理业务逻辑 14 inventoryService.deduct(order.getProductId(), order.getQuantity()); 15 16 // 记录消息已处理 17 messageLogMapper.insert(messageId, MessageStatus.SUCCESS); 18 19 channel.basicAck(message.getMessageProperties().getDeliveryTag(), false); 20 } catch (Exception e) { 21 messageLogMapper.insert(messageId, MessageStatus.FAILED); 22 channel.basicNack(message.getMessageProperties().getDeliveryTag(), false, false); 23 } 24} 方案二：业务幂等性\n有些业务天然具有幂等性：\n查询操作：多次查询结果一致 删除操作：删除不存在的记录不会报错 更新操作：UPDATE SET status = 1 WHERE id = ?（结果幂等） 对于非幂等操作（如扣减库存），可以改造为幂等：\n1-- 非幂等 2UPDATE inventory SET stock = stock - 1 WHERE product_id = ? 3 4-- 幂等（加上订单 ID 条件） 5UPDATE inventory SET stock = stock - 1 6WHERE product_id = ? AND NOT EXISTS ( 7 SELECT 1 FROM inventory_log WHERE order_id = ? 8) 死信队列：消息兜底方案 当消息处理失败且不应该重试时（如参数错误），应该将消息发送到死信队列，避免阻塞正常消息。\n配置死信队列\n1@Bean 2public Queue orderQueue() { 3 return QueueBuilder.durable(\"order.queue\") 4 .deadLetterExchange(\"order.dlx.exchange\") // 死信交换机 5 .deadLetterRoutingKey(\"order.dlx\") 6 .build(); 7} 8 9@Bean 10public Queue orderDlxQueue() { 11 return new Queue(\"order.dlx.queue\"); 12} 13 14@Bean 15public DirectExchange orderDlxExchange() { 16 return new DirectExchange(\"order.dlx.exchange\"); 17} 18 19@Bean 20public Binding orderDlxBinding() { 21 return BindingBuilder.bind(orderDlxQueue()) 22 .to(orderDlxExchange()) 23 .with(\"order.dlx\"); 24} 消费者拒绝消息时，不重新入队：\n1channel.basicNack(message.getMessageProperties().getDeliveryTag(), false, false); 消息会自动进入死信队列，可以人工介入处理。\n消息顺序性：单队列 + 单消费者 RabbitMQ 不保证全局顺序，只保证单队列单消费者的顺序。\n场景：订单状态流转\n订单状态必须按顺序流转：创建 → 支付 → 发货 → 完成\n解决方案：按订单 ID 路由到固定队列\n1// 根据订单 ID 计算队列编号 2int queueIndex = Math.abs(order.getId().hashCode()) % 4; 3String queueName = \"order.queue.\" + queueIndex; 4 5rabbitTemplate.convertAndSend(\"order.exchange\", queueName, order); 这样，同一个订单的所有消息都会路由到同一个队列，保证顺序性。\n架构思考： 消息顺序性和并发性能是矛盾的。如果要求全局顺序，就只能用单队列单消费者，性能很差。实际业务中，大部分场景只需要局部顺序（如同一个订单的消息有序），可以通过分区路由实现。\n总结与思考 RabbitMQ 的核心价值是异步解耦，但要用好它，必须解决三个问题：\n消息可靠性：通过持久化、确认机制、死信队列保障 重复消费：通过唯一键去重或业务幂等性解决 消息顺序：通过分区路由实现局部顺序 消息队列不是万能的，它引入了异步复杂度。在设计系统时，要权衡同步调用和异步消息的优缺点。\n下次当你的系统因为同步调用导致性能瓶颈时，不妨考虑引入消息队列。\n",
+  "wordCount" : "727",
+  "inLanguage": "en",
+  "datePublished": "2024-11-20T00:00:00Z",
+  "dateModified": "2024-11-20T00:00:00Z",
+  "author":{
+    "@type": "Person",
+    "name": "wawayu"
+  },
+  "mainEntityOfPage": {
+    "@type": "WebPage",
+    "@id": "http://localhost:1313/posts/2024/11/rabbitmq-%E5%BC%82%E6%AD%A5%E8%A7%A3%E8%80%A6%E5%AE%9E%E6%88%98%E4%BB%8E%E6%B6%88%E6%81%AF%E4%B8%A2%E5%A4%B1%E5%88%B0%E6%9C%80%E7%BB%88%E4%B8%80%E8%87%B4%E6%80%A7/"
+  },
+  "publisher": {
+    "@type": "Organization",
+    "name": "博客喵",
+    "logo": {
+      "@type": "ImageObject",
+      "url": "http://localhost:1313/favicon.ico"
+    }
+  }
+}
+</script>
+</head>
+<body id="top">
+    <header class="header">
+    <nav class="nav">
+        <div class="logo">
+            <a href="http://localhost:1313/" accesskey="h" title="博客喵 (Alt + H)">博客喵</a>
+            <div class="logo-switches">
+                <button id="theme-toggle" accesskey="t" title="(Alt + T)" aria-label="Toggle theme">
+                    <svg id="moon" xmlns="http://www.w3.org/2000/svg" width="24" height="18" viewBox="0 0 24 24"
+                        fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"
+                        stroke-linejoin="round">
+                        <path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"></path>
+                    </svg>
+                    <svg id="sun" xmlns="http://www.w3.org/2000/svg" width="24" height="18" viewBox="0 0 24 24"
+                        fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"
+                        stroke-linejoin="round">
+                        <circle cx="12" cy="12" r="5"></circle>
+                        <line x1="12" y1="1" x2="12" y2="3"></line>
+                        <line x1="12" y1="21" x2="12" y2="23"></line>
+                        <line x1="4.22" y1="4.22" x2="5.64" y2="5.64"></line>
+                        <line x1="18.36" y1="18.36" x2="19.78" y2="19.78"></line>
+                        <line x1="1" y1="12" x2="3" y2="12"></line>
+                        <line x1="21" y1="12" x2="23" y2="12"></line>
+                        <line x1="4.22" y1="19.78" x2="5.64" y2="18.36"></line>
+                        <line x1="18.36" y1="5.64" x2="19.78" y2="4.22"></line>
+                    </svg>
+                </button>
+            </div>
+        </div>
+        <ul id="menu">
+            <li>
+                <a href="http://localhost:1313/posts/" title="📝 文章">
+                    <span>📝 文章</span>
+                </a>
+            </li>
+            <li>
+                <a href="http://localhost:1313/tags/" title="🏷️ 标签">
+                    <span>🏷️ 标签</span>
+                </a>
+            </li>
+            <li>
+                <a href="http://localhost:1313/categories/" title="📂 分类">
+                    <span>📂 分类</span>
+                </a>
+            </li>
+            <li>
+                <a href="http://localhost:1313/skills/" title="💻 技能">
+                    <span>💻 技能</span>
+                </a>
+            </li>
+            <li>
+                <a href="http://localhost:1313/about/" title="👤 关于">
+                    <span>👤 关于</span>
+                </a>
+            </li>
+            <li>
+                <a href="http://localhost:1313/search/" title="🔍 搜索">
+                    <span>🔍 搜索</span>
+                </a>
+            </li>
+        </ul>
+    </nav>
+</header>
+<main class="main">
+
+<article class="post-single">
+  <header class="post-header">
+    <div class="breadcrumbs"><a href="http://localhost:1313/">Home</a>&nbsp;»&nbsp;<a href="http://localhost:1313/posts/">Posts</a></div>
+    <h1 class="post-title entry-hint-parent">
+      RabbitMQ 异步解耦实战：从消息丢失到最终一致性
+    </h1>
+    <div class="post-description">
+      深入 RabbitMQ 的消息可靠性保障机制，解决消息丢失、重复消费、顺序性问题
+    </div>
+    <div class="post-meta"><span title='2024-11-20 00:00:00 +0000 UTC'>November 20, 2024</span>&nbsp;·&nbsp;<span>4 min</span>&nbsp;·&nbsp;<span>727 words</span>&nbsp;·&nbsp;<span>wawayu</span>&nbsp;|&nbsp;<span>
+    <a href="https://github.com/wawayu-dev/wawayu-dev.github.io/tree/main/content/posts/rabbitmq-async-decoupling.md" rel="noopener noreferrer edit" target="_blank">建议修改</a>
+</span>
+
+</div>
+  </header> <div class="toc">
+    <details  open>
+        <summary accesskey="c" title="(Alt + C)">
+            <span class="details">Table of Contents</span>
+        </summary>
+
+        <div class="inner"><nav id="TableOfContents">
+  <ul>
+    <li>
+      <ul>
+        <li><a href="#本文亮点">本文亮点</a></li>
+      </ul>
+    </li>
+    <li><a href="#为什么选择-rabbitmq">为什么选择 RabbitMQ？</a></li>
+    <li><a href="#rabbitmq-核心概念">RabbitMQ 核心概念</a></li>
+    <li><a href="#消息可靠性三重保障机制">消息可靠性：三重保障机制</a></li>
+    <li><a href="#重复消费幂等性设计">重复消费：幂等性设计</a></li>
+    <li><a href="#死信队列消息兜底方案">死信队列：消息兜底方案</a></li>
+    <li><a href="#消息顺序性单队列--单消费者">消息顺序性：单队列 + 单消费者</a></li>
+    <li><a href="#总结与思考">总结与思考</a></li>
+  </ul>
+</nav>
+        </div>
+    </details>
+</div>
+
+  <div class="post-content"><p>在微服务架构中，服务之间的同步调用会导致强耦合和性能瓶颈。消息队列通过异步解耦，让系统更加灵活和高效。但消息队列不是银弹，消息丢失、重复消费、顺序性问题都需要仔细处理。</p>
+<h3 id="本文亮点">本文亮点<a hidden class="anchor" aria-hidden="true" href="#本文亮点">#</a></h3>
+<ul>
+<li><input checked="" disabled="" type="checkbox"> 理解 RabbitMQ 的核心概念：Exchange、Queue、Binding</li>
+<li><input checked="" disabled="" type="checkbox"> 掌握消息可靠性的三重保障：持久化、确认机制、死信队列</li>
+<li><input checked="" disabled="" type="checkbox"> 学会设计幂等消费者，解决重复消费问题</li>
+<li><input checked="" disabled="" type="checkbox"> 了解消息顺序性的保障方案</li>
+</ul>
+<hr>
+<h2 id="为什么选择-rabbitmq">为什么选择 RabbitMQ？<a hidden class="anchor" aria-hidden="true" href="#为什么选择-rabbitmq">#</a></h2>
+<p>常见的消息队列有 RabbitMQ、Kafka、RocketMQ，它们的定位不同：</p>
+<ul>
+<li><strong>RabbitMQ：</strong> 轻量级，支持多种消息模式，适合业务解耦和异步处理</li>
+<li><strong>Kafka：</strong> 高吞吐量，适合日志收集和流式计算</li>
+<li><strong>RocketMQ：</strong> 阿里开源，支持事务消息，适合电商场景</li>
+</ul>
+<p>我们选择 RabbitMQ 的原因：</p>
+<ol>
+<li>部署简单，社区活跃</li>
+<li>支持灵活的路由规则（Topic、Fanout、Direct）</li>
+<li>提供完善的管理界面</li>
+</ol>
+<hr>
+<h2 id="rabbitmq-核心概念">RabbitMQ 核心概念<a hidden class="anchor" aria-hidden="true" href="#rabbitmq-核心概念">#</a></h2>
+<p><strong>Producer → Exchange → Queue → Consumer</strong></p>
+<ul>
+<li><strong>Producer：</strong> 生产者，发送消息</li>
+<li><strong>Exchange：</strong> 交换机，根据路由规则分发消息</li>
+<li><strong>Queue：</strong> 队列，存储消息</li>
+<li><strong>Consumer：</strong> 消费者，接收消息</li>
+</ul>
+<p><strong>Exchange 的四种类型</strong></p>
+<ol>
+<li><strong>Direct：</strong> 精确匹配路由键</li>
+<li><strong>Topic：</strong> 模糊匹配路由键（支持通配符 * 和 #）</li>
+<li><strong>Fanout：</strong> 广播模式，发送到所有绑定的队列</li>
+<li><strong>Headers：</strong> 根据消息头匹配（很少用）</li>
+</ol>
+<p><strong>实战案例：订单系统的消息路由</strong></p>
+<p>订单创建后，需要通知多个下游服务：</p>
+<ul>
+<li>库存服务：扣减库存</li>
+<li>支付服务：发起支付</li>
+<li>通知服务：发送短信</li>
+</ul>
+<p>使用 Topic Exchange 实现：</p>
+<div class="highlight"><pre tabindex="0" class="chroma"><code class="language-java" data-lang="java"><span class="line"><span class="ln"> 1</span><span class="cl"><span class="nd">@Configuration</span><span class="w">
+</span></span></span><span class="line"><span class="ln"> 2</span><span class="cl"><span class="kd">public</span><span class="w"> </span><span class="kd">class</span> <span class="nc">RabbitMQConfig</span><span class="w"> </span><span class="p">{</span><span class="w">
+</span></span></span><span class="line"><span class="ln"> 3</span><span class="cl"><span class="w">    
+</span></span></span><span class="line"><span class="ln"> 4</span><span class="cl"><span class="w">    </span><span class="nd">@Bean</span><span class="w">
+</span></span></span><span class="line"><span class="ln"> 5</span><span class="cl"><span class="w">    </span><span class="kd">public</span><span class="w"> </span><span class="n">TopicExchange</span><span class="w"> </span><span class="nf">orderExchange</span><span class="p">()</span><span class="w"> </span><span class="p">{</span><span class="w">
+</span></span></span><span class="line"><span class="ln"> 6</span><span class="cl"><span class="w">        </span><span class="k">return</span><span class="w"> </span><span class="k">new</span><span class="w"> </span><span class="n">TopicExchange</span><span class="p">(</span><span class="s">&#34;order.exchange&#34;</span><span class="p">);</span><span class="w">
+</span></span></span><span class="line"><span class="ln"> 7</span><span class="cl"><span class="w">    </span><span class="p">}</span><span class="w">
+</span></span></span><span class="line"><span class="ln"> 8</span><span class="cl"><span class="w">    
+</span></span></span><span class="line"><span class="ln"> 9</span><span class="cl"><span class="w">    </span><span class="nd">@Bean</span><span class="w">
+</span></span></span><span class="line"><span class="ln">10</span><span class="cl"><span class="w">    </span><span class="kd">public</span><span class="w"> </span><span class="n">Queue</span><span class="w"> </span><span class="nf">inventoryQueue</span><span class="p">()</span><span class="w"> </span><span class="p">{</span><span class="w">
+</span></span></span><span class="line"><span class="ln">11</span><span class="cl"><span class="w">        </span><span class="k">return</span><span class="w"> </span><span class="k">new</span><span class="w"> </span><span class="n">Queue</span><span class="p">(</span><span class="s">&#34;order.inventory.queue&#34;</span><span class="p">);</span><span class="w">
+</span></span></span><span class="line"><span class="ln">12</span><span class="cl"><span class="w">    </span><span class="p">}</span><span class="w">
+</span></span></span><span class="line"><span class="ln">13</span><span class="cl"><span class="w">    
+</span></span></span><span class="line"><span class="ln">14</span><span class="cl"><span class="w">    </span><span class="nd">@Bean</span><span class="w">
+</span></span></span><span class="line"><span class="ln">15</span><span class="cl"><span class="w">    </span><span class="kd">public</span><span class="w"> </span><span class="n">Queue</span><span class="w"> </span><span class="nf">paymentQueue</span><span class="p">()</span><span class="w"> </span><span class="p">{</span><span class="w">
+</span></span></span><span class="line"><span class="ln">16</span><span class="cl"><span class="w">        </span><span class="k">return</span><span class="w"> </span><span class="k">new</span><span class="w"> </span><span class="n">Queue</span><span class="p">(</span><span class="s">&#34;order.payment.queue&#34;</span><span class="p">);</span><span class="w">
+</span></span></span><span class="line"><span class="ln">17</span><span class="cl"><span class="w">    </span><span class="p">}</span><span class="w">
+</span></span></span><span class="line"><span class="ln">18</span><span class="cl"><span class="w">    
+</span></span></span><span class="line"><span class="ln">19</span><span class="cl"><span class="w">    </span><span class="nd">@Bean</span><span class="w">
+</span></span></span><span class="line"><span class="ln">20</span><span class="cl"><span class="w">    </span><span class="kd">public</span><span class="w"> </span><span class="n">Queue</span><span class="w"> </span><span class="nf">notificationQueue</span><span class="p">()</span><span class="w"> </span><span class="p">{</span><span class="w">
+</span></span></span><span class="line"><span class="ln">21</span><span class="cl"><span class="w">        </span><span class="k">return</span><span class="w"> </span><span class="k">new</span><span class="w"> </span><span class="n">Queue</span><span class="p">(</span><span class="s">&#34;order.notification.queue&#34;</span><span class="p">);</span><span class="w">
+</span></span></span><span class="line"><span class="ln">22</span><span class="cl"><span class="w">    </span><span class="p">}</span><span class="w">
+</span></span></span><span class="line"><span class="ln">23</span><span class="cl"><span class="w">    
+</span></span></span><span class="line"><span class="ln">24</span><span class="cl"><span class="w">    </span><span class="nd">@Bean</span><span class="w">
+</span></span></span><span class="line"><span class="ln">25</span><span class="cl"><span class="w">    </span><span class="kd">public</span><span class="w"> </span><span class="n">Binding</span><span class="w"> </span><span class="nf">inventoryBinding</span><span class="p">()</span><span class="w"> </span><span class="p">{</span><span class="w">
+</span></span></span><span class="line"><span class="ln">26</span><span class="cl"><span class="w">        </span><span class="k">return</span><span class="w"> </span><span class="n">BindingBuilder</span><span class="p">.</span><span class="na">bind</span><span class="p">(</span><span class="n">inventoryQueue</span><span class="p">())</span><span class="w">
+</span></span></span><span class="line"><span class="ln">27</span><span class="cl"><span class="w">            </span><span class="p">.</span><span class="na">to</span><span class="p">(</span><span class="n">orderExchange</span><span class="p">())</span><span class="w">
+</span></span></span><span class="line"><span class="ln">28</span><span class="cl"><span class="w">            </span><span class="p">.</span><span class="na">with</span><span class="p">(</span><span class="s">&#34;order.created&#34;</span><span class="p">);</span><span class="w">
+</span></span></span><span class="line"><span class="ln">29</span><span class="cl"><span class="w">    </span><span class="p">}</span><span class="w">
+</span></span></span><span class="line"><span class="ln">30</span><span class="cl"><span class="w">    
+</span></span></span><span class="line"><span class="ln">31</span><span class="cl"><span class="w">    </span><span class="nd">@Bean</span><span class="w">
+</span></span></span><span class="line"><span class="ln">32</span><span class="cl"><span class="w">    </span><span class="kd">public</span><span class="w"> </span><span class="n">Binding</span><span class="w"> </span><span class="nf">paymentBinding</span><span class="p">()</span><span class="w"> </span><span class="p">{</span><span class="w">
+</span></span></span><span class="line"><span class="ln">33</span><span class="cl"><span class="w">        </span><span class="k">return</span><span class="w"> </span><span class="n">BindingBuilder</span><span class="p">.</span><span class="na">bind</span><span class="p">(</span><span class="n">paymentQueue</span><span class="p">())</span><span class="w">
+</span></span></span><span class="line"><span class="ln">34</span><span class="cl"><span class="w">            </span><span class="p">.</span><span class="na">to</span><span class="p">(</span><span class="n">orderExchange</span><span class="p">())</span><span class="w">
+</span></span></span><span class="line"><span class="ln">35</span><span class="cl"><span class="w">            </span><span class="p">.</span><span class="na">with</span><span class="p">(</span><span class="s">&#34;order.created&#34;</span><span class="p">);</span><span class="w">
+</span></span></span><span class="line"><span class="ln">36</span><span class="cl"><span class="w">    </span><span class="p">}</span><span class="w">
+</span></span></span><span class="line"><span class="ln">37</span><span class="cl"><span class="w">    
+</span></span></span><span class="line"><span class="ln">38</span><span class="cl"><span class="w">    </span><span class="nd">@Bean</span><span class="w">
+</span></span></span><span class="line"><span class="ln">39</span><span class="cl"><span class="w">    </span><span class="kd">public</span><span class="w"> </span><span class="n">Binding</span><span class="w"> </span><span class="nf">notificationBinding</span><span class="p">()</span><span class="w"> </span><span class="p">{</span><span class="w">
+</span></span></span><span class="line"><span class="ln">40</span><span class="cl"><span class="w">        </span><span class="k">return</span><span class="w"> </span><span class="n">BindingBuilder</span><span class="p">.</span><span class="na">bind</span><span class="p">(</span><span class="n">notificationQueue</span><span class="p">())</span><span class="w">
+</span></span></span><span class="line"><span class="ln">41</span><span class="cl"><span class="w">            </span><span class="p">.</span><span class="na">to</span><span class="p">(</span><span class="n">orderExchange</span><span class="p">())</span><span class="w">
+</span></span></span><span class="line"><span class="ln">42</span><span class="cl"><span class="w">            </span><span class="p">.</span><span class="na">with</span><span class="p">(</span><span class="s">&#34;order.*&#34;</span><span class="p">);</span><span class="w">  </span><span class="c1">// 监听所有订单事件</span><span class="w">
+</span></span></span><span class="line"><span class="ln">43</span><span class="cl"><span class="w">    </span><span class="p">}</span><span class="w">
+</span></span></span><span class="line"><span class="ln">44</span><span class="cl"><span class="p">}</span><span class="w">
+</span></span></span></code></pre></div><p>发送消息：</p>
+<div class="highlight"><pre tabindex="0" class="chroma"><code class="language-java" data-lang="java"><span class="line"><span class="ln"> 1</span><span class="cl"><span class="nd">@Service</span><span class="w">
+</span></span></span><span class="line"><span class="ln"> 2</span><span class="cl"><span class="kd">public</span><span class="w"> </span><span class="kd">class</span> <span class="nc">OrderService</span><span class="w"> </span><span class="p">{</span><span class="w">
+</span></span></span><span class="line"><span class="ln"> 3</span><span class="cl"><span class="w">    
+</span></span></span><span class="line"><span class="ln"> 4</span><span class="cl"><span class="w">    </span><span class="nd">@Autowired</span><span class="w">
+</span></span></span><span class="line"><span class="ln"> 5</span><span class="cl"><span class="w">    </span><span class="kd">private</span><span class="w"> </span><span class="n">RabbitTemplate</span><span class="w"> </span><span class="n">rabbitTemplate</span><span class="p">;</span><span class="w">
+</span></span></span><span class="line"><span class="ln"> 6</span><span class="cl"><span class="w">    
+</span></span></span><span class="line"><span class="ln"> 7</span><span class="cl"><span class="w">    </span><span class="kd">public</span><span class="w"> </span><span class="kt">void</span><span class="w"> </span><span class="nf">createOrder</span><span class="p">(</span><span class="n">Order</span><span class="w"> </span><span class="n">order</span><span class="p">)</span><span class="w"> </span><span class="p">{</span><span class="w">
+</span></span></span><span class="line"><span class="ln"> 8</span><span class="cl"><span class="w">        </span><span class="c1">// 保存订单到数据库</span><span class="w">
+</span></span></span><span class="line"><span class="ln"> 9</span><span class="cl"><span class="w">        </span><span class="n">orderMapper</span><span class="p">.</span><span class="na">insert</span><span class="p">(</span><span class="n">order</span><span class="p">);</span><span class="w">
+</span></span></span><span class="line"><span class="ln">10</span><span class="cl"><span class="w">        
+</span></span></span><span class="line"><span class="ln">11</span><span class="cl"><span class="w">        </span><span class="c1">// 发送消息</span><span class="w">
+</span></span></span><span class="line"><span class="ln">12</span><span class="cl"><span class="w">        </span><span class="n">rabbitTemplate</span><span class="p">.</span><span class="na">convertAndSend</span><span class="p">(</span><span class="w">
+</span></span></span><span class="line"><span class="ln">13</span><span class="cl"><span class="w">            </span><span class="s">&#34;order.exchange&#34;</span><span class="p">,</span><span class="w">
+</span></span></span><span class="line"><span class="ln">14</span><span class="cl"><span class="w">            </span><span class="s">&#34;order.created&#34;</span><span class="p">,</span><span class="w">
+</span></span></span><span class="line"><span class="ln">15</span><span class="cl"><span class="w">            </span><span class="n">order</span><span class="w">
+</span></span></span><span class="line"><span class="ln">16</span><span class="cl"><span class="w">        </span><span class="p">);</span><span class="w">
+</span></span></span><span class="line"><span class="ln">17</span><span class="cl"><span class="w">    </span><span class="p">}</span><span class="w">
+</span></span></span><span class="line"><span class="ln">18</span><span class="cl"><span class="p">}</span><span class="w">
+</span></span></span></code></pre></div><blockquote>
+<p><strong>架构思考：</strong> Topic Exchange 的路由规则类似于日志系统的 Logger 层级。<code>order.*</code> 可以匹配 <code>order.created</code>、<code>order.paid</code>，<code>order.#</code> 可以匹配 <code>order.created.success</code>。这种灵活的路由机制，让消息分发变得非常优雅。</p>
+</blockquote>
+<hr>
+<h2 id="消息可靠性三重保障机制">消息可靠性：三重保障机制<a hidden class="anchor" aria-hidden="true" href="#消息可靠性三重保障机制">#</a></h2>
+<p><strong>问题一：消息丢失</strong></p>
+<p>消息可能在三个环节丢失：</p>
+<ol>
+<li>生产者发送消息时，网络故障导致消息未到达 RabbitMQ</li>
+<li>RabbitMQ 宕机，内存中的消息丢失</li>
+<li>消费者处理消息时崩溃，消息未被正确消费</li>
+</ol>
+<p><strong>解决方案一：生产者确认机制</strong></p>
+<p>开启 Publisher Confirm 模式：</p>
+<div class="highlight"><pre tabindex="0" class="chroma"><code class="language-yaml" data-lang="yaml"><span class="line"><span class="ln">1</span><span class="cl"><span class="nt">spring</span><span class="p">:</span><span class="w">
+</span></span></span><span class="line"><span class="ln">2</span><span class="cl"><span class="w">  </span><span class="nt">rabbitmq</span><span class="p">:</span><span class="w">
+</span></span></span><span class="line"><span class="ln">3</span><span class="cl"><span class="w">    </span><span class="nt">publisher-confirm-type</span><span class="p">:</span><span class="w"> </span><span class="l">correlated</span><span class="w">
+</span></span></span><span class="line"><span class="ln">4</span><span class="cl"><span class="w">    </span><span class="nt">publisher-returns</span><span class="p">:</span><span class="w"> </span><span class="kc">true</span><span class="w">
+</span></span></span></code></pre></div><p>配置回调：</p>
+<div class="highlight"><pre tabindex="0" class="chroma"><code class="language-java" data-lang="java"><span class="line"><span class="ln"> 1</span><span class="cl"><span class="nd">@Configuration</span><span class="w">
+</span></span></span><span class="line"><span class="ln"> 2</span><span class="cl"><span class="kd">public</span><span class="w"> </span><span class="kd">class</span> <span class="nc">RabbitMQConfig</span><span class="w"> </span><span class="p">{</span><span class="w">
+</span></span></span><span class="line"><span class="ln"> 3</span><span class="cl"><span class="w">    
+</span></span></span><span class="line"><span class="ln"> 4</span><span class="cl"><span class="w">    </span><span class="nd">@Bean</span><span class="w">
+</span></span></span><span class="line"><span class="ln"> 5</span><span class="cl"><span class="w">    </span><span class="kd">public</span><span class="w"> </span><span class="n">RabbitTemplate</span><span class="w"> </span><span class="nf">rabbitTemplate</span><span class="p">(</span><span class="n">ConnectionFactory</span><span class="w"> </span><span class="n">connectionFactory</span><span class="p">)</span><span class="w"> </span><span class="p">{</span><span class="w">
+</span></span></span><span class="line"><span class="ln"> 6</span><span class="cl"><span class="w">        </span><span class="n">RabbitTemplate</span><span class="w"> </span><span class="n">template</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="k">new</span><span class="w"> </span><span class="n">RabbitTemplate</span><span class="p">(</span><span class="n">connectionFactory</span><span class="p">);</span><span class="w">
+</span></span></span><span class="line"><span class="ln"> 7</span><span class="cl"><span class="w">        
+</span></span></span><span class="line"><span class="ln"> 8</span><span class="cl"><span class="w">        </span><span class="c1">// 消息发送到 Exchange 的确认回调</span><span class="w">
+</span></span></span><span class="line"><span class="ln"> 9</span><span class="cl"><span class="w">        </span><span class="n">template</span><span class="p">.</span><span class="na">setConfirmCallback</span><span class="p">((</span><span class="n">correlationData</span><span class="p">,</span><span class="w"> </span><span class="n">ack</span><span class="p">,</span><span class="w"> </span><span class="n">cause</span><span class="p">)</span><span class="w"> </span><span class="o">-&gt;</span><span class="w"> </span><span class="p">{</span><span class="w">
+</span></span></span><span class="line"><span class="ln">10</span><span class="cl"><span class="w">            </span><span class="k">if</span><span class="w"> </span><span class="p">(</span><span class="n">ack</span><span class="p">)</span><span class="w"> </span><span class="p">{</span><span class="w">
+</span></span></span><span class="line"><span class="ln">11</span><span class="cl"><span class="w">                </span><span class="n">log</span><span class="p">.</span><span class="na">info</span><span class="p">(</span><span class="s">&#34;消息发送成功&#34;</span><span class="p">);</span><span class="w">
+</span></span></span><span class="line"><span class="ln">12</span><span class="cl"><span class="w">            </span><span class="p">}</span><span class="w"> </span><span class="k">else</span><span class="w"> </span><span class="p">{</span><span class="w">
+</span></span></span><span class="line"><span class="ln">13</span><span class="cl"><span class="w">                </span><span class="n">log</span><span class="p">.</span><span class="na">error</span><span class="p">(</span><span class="s">&#34;消息发送失败: {}&#34;</span><span class="p">,</span><span class="w"> </span><span class="n">cause</span><span class="p">);</span><span class="w">
+</span></span></span><span class="line"><span class="ln">14</span><span class="cl"><span class="w">                </span><span class="c1">// 重试或记录到数据库</span><span class="w">
+</span></span></span><span class="line"><span class="ln">15</span><span class="cl"><span class="w">            </span><span class="p">}</span><span class="w">
+</span></span></span><span class="line"><span class="ln">16</span><span class="cl"><span class="w">        </span><span class="p">});</span><span class="w">
+</span></span></span><span class="line"><span class="ln">17</span><span class="cl"><span class="w">        
+</span></span></span><span class="line"><span class="ln">18</span><span class="cl"><span class="w">        </span><span class="c1">// 消息从 Exchange 路由到 Queue 失败的回调</span><span class="w">
+</span></span></span><span class="line"><span class="ln">19</span><span class="cl"><span class="w">        </span><span class="n">template</span><span class="p">.</span><span class="na">setReturnsCallback</span><span class="p">(</span><span class="n">returned</span><span class="w"> </span><span class="o">-&gt;</span><span class="w"> </span><span class="p">{</span><span class="w">
+</span></span></span><span class="line"><span class="ln">20</span><span class="cl"><span class="w">            </span><span class="n">log</span><span class="p">.</span><span class="na">error</span><span class="p">(</span><span class="s">&#34;消息路由失败: {}&#34;</span><span class="p">,</span><span class="w"> </span><span class="n">returned</span><span class="p">.</span><span class="na">getMessage</span><span class="p">());</span><span class="w">
+</span></span></span><span class="line"><span class="ln">21</span><span class="cl"><span class="w">        </span><span class="p">});</span><span class="w">
+</span></span></span><span class="line"><span class="ln">22</span><span class="cl"><span class="w">        
+</span></span></span><span class="line"><span class="ln">23</span><span class="cl"><span class="w">        </span><span class="k">return</span><span class="w"> </span><span class="n">template</span><span class="p">;</span><span class="w">
+</span></span></span><span class="line"><span class="ln">24</span><span class="cl"><span class="w">    </span><span class="p">}</span><span class="w">
+</span></span></span><span class="line"><span class="ln">25</span><span class="cl"><span class="p">}</span><span class="w">
+</span></span></span></code></pre></div><p><strong>解决方案二：消息持久化</strong></p>
+<p>确保消息不会因为 RabbitMQ 重启而丢失：</p>
+<div class="highlight"><pre tabindex="0" class="chroma"><code class="language-java" data-lang="java"><span class="line"><span class="ln"> 1</span><span class="cl"><span class="nd">@Bean</span><span class="w">
+</span></span></span><span class="line"><span class="ln"> 2</span><span class="cl"><span class="kd">public</span><span class="w"> </span><span class="n">Queue</span><span class="w"> </span><span class="nf">orderQueue</span><span class="p">()</span><span class="w"> </span><span class="p">{</span><span class="w">
+</span></span></span><span class="line"><span class="ln"> 3</span><span class="cl"><span class="w">    </span><span class="k">return</span><span class="w"> </span><span class="n">QueueBuilder</span><span class="p">.</span><span class="na">durable</span><span class="p">(</span><span class="s">&#34;order.queue&#34;</span><span class="p">)</span><span class="w">  </span><span class="c1">// 队列持久化</span><span class="w">
+</span></span></span><span class="line"><span class="ln"> 4</span><span class="cl"><span class="w">        </span><span class="p">.</span><span class="na">build</span><span class="p">();</span><span class="w">
+</span></span></span><span class="line"><span class="ln"> 5</span><span class="cl"><span class="p">}</span><span class="w">
+</span></span></span><span class="line"><span class="ln"> 6</span><span class="cl"><span class="w">
+</span></span></span><span class="line"><span class="ln"> 7</span><span class="cl"><span class="nd">@Bean</span><span class="w">
+</span></span></span><span class="line"><span class="ln"> 8</span><span class="cl"><span class="kd">public</span><span class="w"> </span><span class="n">TopicExchange</span><span class="w"> </span><span class="nf">orderExchange</span><span class="p">()</span><span class="w"> </span><span class="p">{</span><span class="w">
+</span></span></span><span class="line"><span class="ln"> 9</span><span class="cl"><span class="w">    </span><span class="k">return</span><span class="w"> </span><span class="k">new</span><span class="w"> </span><span class="n">TopicExchange</span><span class="p">(</span><span class="s">&#34;order.exchange&#34;</span><span class="p">,</span><span class="w"> </span><span class="kc">true</span><span class="p">,</span><span class="w"> </span><span class="kc">false</span><span class="p">);</span><span class="w">  </span><span class="c1">// Exchange 持久化</span><span class="w">
+</span></span></span><span class="line"><span class="ln">10</span><span class="cl"><span class="p">}</span><span class="w">
+</span></span></span></code></pre></div><p>发送消息时，设置消息持久化：</p>
+<div class="highlight"><pre tabindex="0" class="chroma"><code class="language-java" data-lang="java"><span class="line"><span class="ln">1</span><span class="cl"><span class="n">rabbitTemplate</span><span class="p">.</span><span class="na">convertAndSend</span><span class="p">(</span><span class="w">
+</span></span></span><span class="line"><span class="ln">2</span><span class="cl"><span class="w">    </span><span class="s">&#34;order.exchange&#34;</span><span class="p">,</span><span class="w">
+</span></span></span><span class="line"><span class="ln">3</span><span class="cl"><span class="w">    </span><span class="s">&#34;order.created&#34;</span><span class="p">,</span><span class="w">
+</span></span></span><span class="line"><span class="ln">4</span><span class="cl"><span class="w">    </span><span class="n">order</span><span class="p">,</span><span class="w">
+</span></span></span><span class="line"><span class="ln">5</span><span class="cl"><span class="w">    </span><span class="n">message</span><span class="w"> </span><span class="o">-&gt;</span><span class="w"> </span><span class="p">{</span><span class="w">
+</span></span></span><span class="line"><span class="ln">6</span><span class="cl"><span class="w">        </span><span class="n">message</span><span class="p">.</span><span class="na">getMessageProperties</span><span class="p">().</span><span class="na">setDeliveryMode</span><span class="p">(</span><span class="n">MessageDeliveryMode</span><span class="p">.</span><span class="na">PERSISTENT</span><span class="p">);</span><span class="w">
+</span></span></span><span class="line"><span class="ln">7</span><span class="cl"><span class="w">        </span><span class="k">return</span><span class="w"> </span><span class="n">message</span><span class="p">;</span><span class="w">
+</span></span></span><span class="line"><span class="ln">8</span><span class="cl"><span class="w">    </span><span class="p">}</span><span class="w">
+</span></span></span><span class="line"><span class="ln">9</span><span class="cl"><span class="p">);</span><span class="w">
+</span></span></span></code></pre></div><p><strong>解决方案三：消费者手动确认</strong></p>
+<p>默认情况下，消息一旦被消费者接收，就会从队列中删除。如果消费者处理失败，消息就丢失了。</p>
+<p>改为手动确认模式：</p>
+<div class="highlight"><pre tabindex="0" class="chroma"><code class="language-yaml" data-lang="yaml"><span class="line"><span class="ln">1</span><span class="cl"><span class="nt">spring</span><span class="p">:</span><span class="w">
+</span></span></span><span class="line"><span class="ln">2</span><span class="cl"><span class="w">  </span><span class="nt">rabbitmq</span><span class="p">:</span><span class="w">
+</span></span></span><span class="line"><span class="ln">3</span><span class="cl"><span class="w">    </span><span class="nt">listener</span><span class="p">:</span><span class="w">
+</span></span></span><span class="line"><span class="ln">4</span><span class="cl"><span class="w">      </span><span class="nt">simple</span><span class="p">:</span><span class="w">
+</span></span></span><span class="line"><span class="ln">5</span><span class="cl"><span class="w">        </span><span class="nt">acknowledge-mode</span><span class="p">:</span><span class="w"> </span><span class="l">manual</span><span class="w">
+</span></span></span></code></pre></div><p>消费者代码：</p>
+<div class="highlight"><pre tabindex="0" class="chroma"><code class="language-java" data-lang="java"><span class="line"><span class="ln"> 1</span><span class="cl"><span class="nd">@RabbitListener</span><span class="p">(</span><span class="n">queues</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="s">&#34;order.inventory.queue&#34;</span><span class="p">)</span><span class="w">
+</span></span></span><span class="line"><span class="ln"> 2</span><span class="cl"><span class="kd">public</span><span class="w"> </span><span class="kt">void</span><span class="w"> </span><span class="nf">handleInventoryDeduct</span><span class="p">(</span><span class="n">Message</span><span class="w"> </span><span class="n">message</span><span class="p">,</span><span class="w"> </span><span class="n">Channel</span><span class="w"> </span><span class="n">channel</span><span class="p">)</span><span class="w"> </span><span class="kd">throws</span><span class="w"> </span><span class="n">IOException</span><span class="w"> </span><span class="p">{</span><span class="w">
+</span></span></span><span class="line"><span class="ln"> 3</span><span class="cl"><span class="w">    </span><span class="k">try</span><span class="w"> </span><span class="p">{</span><span class="w">
+</span></span></span><span class="line"><span class="ln"> 4</span><span class="cl"><span class="w">        </span><span class="n">Order</span><span class="w"> </span><span class="n">order</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">JSON</span><span class="p">.</span><span class="na">parseObject</span><span class="p">(</span><span class="n">message</span><span class="p">.</span><span class="na">getBody</span><span class="p">(),</span><span class="w"> </span><span class="n">Order</span><span class="p">.</span><span class="na">class</span><span class="p">);</span><span class="w">
+</span></span></span><span class="line"><span class="ln"> 5</span><span class="cl"><span class="w">        
+</span></span></span><span class="line"><span class="ln"> 6</span><span class="cl"><span class="w">        </span><span class="c1">// 处理业务逻辑</span><span class="w">
+</span></span></span><span class="line"><span class="ln"> 7</span><span class="cl"><span class="w">        </span><span class="n">inventoryService</span><span class="p">.</span><span class="na">deduct</span><span class="p">(</span><span class="n">order</span><span class="p">.</span><span class="na">getProductId</span><span class="p">(),</span><span class="w"> </span><span class="n">order</span><span class="p">.</span><span class="na">getQuantity</span><span class="p">());</span><span class="w">
+</span></span></span><span class="line"><span class="ln"> 8</span><span class="cl"><span class="w">        
+</span></span></span><span class="line"><span class="ln"> 9</span><span class="cl"><span class="w">        </span><span class="c1">// 手动确认</span><span class="w">
+</span></span></span><span class="line"><span class="ln">10</span><span class="cl"><span class="w">        </span><span class="n">channel</span><span class="p">.</span><span class="na">basicAck</span><span class="p">(</span><span class="n">message</span><span class="p">.</span><span class="na">getMessageProperties</span><span class="p">().</span><span class="na">getDeliveryTag</span><span class="p">(),</span><span class="w"> </span><span class="kc">false</span><span class="p">);</span><span class="w">
+</span></span></span><span class="line"><span class="ln">11</span><span class="cl"><span class="w">    </span><span class="p">}</span><span class="w"> </span><span class="k">catch</span><span class="w"> </span><span class="p">(</span><span class="n">Exception</span><span class="w"> </span><span class="n">e</span><span class="p">)</span><span class="w"> </span><span class="p">{</span><span class="w">
+</span></span></span><span class="line"><span class="ln">12</span><span class="cl"><span class="w">        </span><span class="n">log</span><span class="p">.</span><span class="na">error</span><span class="p">(</span><span class="s">&#34;消息处理失败&#34;</span><span class="p">,</span><span class="w"> </span><span class="n">e</span><span class="p">);</span><span class="w">
+</span></span></span><span class="line"><span class="ln">13</span><span class="cl"><span class="w">        
+</span></span></span><span class="line"><span class="ln">14</span><span class="cl"><span class="w">        </span><span class="c1">// 拒绝消息，重新入队</span><span class="w">
+</span></span></span><span class="line"><span class="ln">15</span><span class="cl"><span class="w">        </span><span class="n">channel</span><span class="p">.</span><span class="na">basicNack</span><span class="p">(</span><span class="n">message</span><span class="p">.</span><span class="na">getMessageProperties</span><span class="p">().</span><span class="na">getDeliveryTag</span><span class="p">(),</span><span class="w"> </span><span class="kc">false</span><span class="p">,</span><span class="w"> </span><span class="kc">true</span><span class="p">);</span><span class="w">
+</span></span></span><span class="line"><span class="ln">16</span><span class="cl"><span class="w">    </span><span class="p">}</span><span class="w">
+</span></span></span><span class="line"><span class="ln">17</span><span class="cl"><span class="p">}</span><span class="w">
+</span></span></span></code></pre></div><blockquote>
+<p><strong>避坑提示：</strong> 手动确认模式下，如果忘记调用 <code>basicAck</code> 或 <code>basicNack</code>，消息会一直处于 Unacked 状态，导致内存泄漏。建议在 finally 块中确保消息被确认。</p>
+</blockquote>
+<hr>
+<h2 id="重复消费幂等性设计">重复消费：幂等性设计<a hidden class="anchor" aria-hidden="true" href="#重复消费幂等性设计">#</a></h2>
+<p>即使有消息确认机制，网络抖动也可能导致消息重复投递。消费者必须设计成幂等的。</p>
+<p><strong>方案一：唯一键去重</strong></p>
+<p>在数据库中为消息 ID 创建唯一索引：</p>
+<div class="highlight"><pre tabindex="0" class="chroma"><code class="language-sql" data-lang="sql"><span class="line"><span class="ln">1</span><span class="cl"><span class="k">CREATE</span><span class="w"> </span><span class="k">TABLE</span><span class="w"> </span><span class="n">message_log</span><span class="w"> </span><span class="p">(</span><span class="w">
+</span></span></span><span class="line"><span class="ln">2</span><span class="cl"><span class="w">    </span><span class="n">message_id</span><span class="w"> </span><span class="nb">VARCHAR</span><span class="p">(</span><span class="mi">64</span><span class="p">)</span><span class="w"> </span><span class="k">PRIMARY</span><span class="w"> </span><span class="k">KEY</span><span class="p">,</span><span class="w">
+</span></span></span><span class="line"><span class="ln">3</span><span class="cl"><span class="w">    </span><span class="n">status</span><span class="w"> </span><span class="n">TINYINT</span><span class="p">,</span><span class="w">
+</span></span></span><span class="line"><span class="ln">4</span><span class="cl"><span class="w">    </span><span class="n">create_time</span><span class="w"> </span><span class="n">DATETIME</span><span class="w">
+</span></span></span><span class="line"><span class="ln">5</span><span class="cl"><span class="p">);</span><span class="w">
+</span></span></span></code></pre></div><p>消费者先检查消息是否已处理：</p>
+<div class="highlight"><pre tabindex="0" class="chroma"><code class="language-java" data-lang="java"><span class="line"><span class="ln"> 1</span><span class="cl"><span class="nd">@RabbitListener</span><span class="p">(</span><span class="n">queues</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="s">&#34;order.inventory.queue&#34;</span><span class="p">)</span><span class="w">
+</span></span></span><span class="line"><span class="ln"> 2</span><span class="cl"><span class="kd">public</span><span class="w"> </span><span class="kt">void</span><span class="w"> </span><span class="nf">handleInventoryDeduct</span><span class="p">(</span><span class="n">Order</span><span class="w"> </span><span class="n">order</span><span class="p">,</span><span class="w"> </span><span class="n">Channel</span><span class="w"> </span><span class="n">channel</span><span class="p">,</span><span class="w"> </span><span class="n">Message</span><span class="w"> </span><span class="n">message</span><span class="p">)</span><span class="w"> </span><span class="kd">throws</span><span class="w"> </span><span class="n">IOException</span><span class="w"> </span><span class="p">{</span><span class="w">
+</span></span></span><span class="line"><span class="ln"> 3</span><span class="cl"><span class="w">    </span><span class="n">String</span><span class="w"> </span><span class="n">messageId</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">message</span><span class="p">.</span><span class="na">getMessageProperties</span><span class="p">().</span><span class="na">getMessageId</span><span class="p">();</span><span class="w">
+</span></span></span><span class="line"><span class="ln"> 4</span><span class="cl"><span class="w">    
+</span></span></span><span class="line"><span class="ln"> 5</span><span class="cl"><span class="w">    </span><span class="c1">// 检查消息是否已处理</span><span class="w">
+</span></span></span><span class="line"><span class="ln"> 6</span><span class="cl"><span class="w">    </span><span class="k">if</span><span class="w"> </span><span class="p">(</span><span class="n">messageLogMapper</span><span class="p">.</span><span class="na">exists</span><span class="p">(</span><span class="n">messageId</span><span class="p">))</span><span class="w"> </span><span class="p">{</span><span class="w">
+</span></span></span><span class="line"><span class="ln"> 7</span><span class="cl"><span class="w">        </span><span class="n">log</span><span class="p">.</span><span class="na">info</span><span class="p">(</span><span class="s">&#34;消息已处理，跳过: {}&#34;</span><span class="p">,</span><span class="w"> </span><span class="n">messageId</span><span class="p">);</span><span class="w">
+</span></span></span><span class="line"><span class="ln"> 8</span><span class="cl"><span class="w">        </span><span class="n">channel</span><span class="p">.</span><span class="na">basicAck</span><span class="p">(</span><span class="n">message</span><span class="p">.</span><span class="na">getMessageProperties</span><span class="p">().</span><span class="na">getDeliveryTag</span><span class="p">(),</span><span class="w"> </span><span class="kc">false</span><span class="p">);</span><span class="w">
+</span></span></span><span class="line"><span class="ln"> 9</span><span class="cl"><span class="w">        </span><span class="k">return</span><span class="p">;</span><span class="w">
+</span></span></span><span class="line"><span class="ln">10</span><span class="cl"><span class="w">    </span><span class="p">}</span><span class="w">
+</span></span></span><span class="line"><span class="ln">11</span><span class="cl"><span class="w">    
+</span></span></span><span class="line"><span class="ln">12</span><span class="cl"><span class="w">    </span><span class="k">try</span><span class="w"> </span><span class="p">{</span><span class="w">
+</span></span></span><span class="line"><span class="ln">13</span><span class="cl"><span class="w">        </span><span class="c1">// 处理业务逻辑</span><span class="w">
+</span></span></span><span class="line"><span class="ln">14</span><span class="cl"><span class="w">        </span><span class="n">inventoryService</span><span class="p">.</span><span class="na">deduct</span><span class="p">(</span><span class="n">order</span><span class="p">.</span><span class="na">getProductId</span><span class="p">(),</span><span class="w"> </span><span class="n">order</span><span class="p">.</span><span class="na">getQuantity</span><span class="p">());</span><span class="w">
+</span></span></span><span class="line"><span class="ln">15</span><span class="cl"><span class="w">        
+</span></span></span><span class="line"><span class="ln">16</span><span class="cl"><span class="w">        </span><span class="c1">// 记录消息已处理</span><span class="w">
+</span></span></span><span class="line"><span class="ln">17</span><span class="cl"><span class="w">        </span><span class="n">messageLogMapper</span><span class="p">.</span><span class="na">insert</span><span class="p">(</span><span class="n">messageId</span><span class="p">,</span><span class="w"> </span><span class="n">MessageStatus</span><span class="p">.</span><span class="na">SUCCESS</span><span class="p">);</span><span class="w">
+</span></span></span><span class="line"><span class="ln">18</span><span class="cl"><span class="w">        
+</span></span></span><span class="line"><span class="ln">19</span><span class="cl"><span class="w">        </span><span class="n">channel</span><span class="p">.</span><span class="na">basicAck</span><span class="p">(</span><span class="n">message</span><span class="p">.</span><span class="na">getMessageProperties</span><span class="p">().</span><span class="na">getDeliveryTag</span><span class="p">(),</span><span class="w"> </span><span class="kc">false</span><span class="p">);</span><span class="w">
+</span></span></span><span class="line"><span class="ln">20</span><span class="cl"><span class="w">    </span><span class="p">}</span><span class="w"> </span><span class="k">catch</span><span class="w"> </span><span class="p">(</span><span class="n">Exception</span><span class="w"> </span><span class="n">e</span><span class="p">)</span><span class="w"> </span><span class="p">{</span><span class="w">
+</span></span></span><span class="line"><span class="ln">21</span><span class="cl"><span class="w">        </span><span class="n">messageLogMapper</span><span class="p">.</span><span class="na">insert</span><span class="p">(</span><span class="n">messageId</span><span class="p">,</span><span class="w"> </span><span class="n">MessageStatus</span><span class="p">.</span><span class="na">FAILED</span><span class="p">);</span><span class="w">
+</span></span></span><span class="line"><span class="ln">22</span><span class="cl"><span class="w">        </span><span class="n">channel</span><span class="p">.</span><span class="na">basicNack</span><span class="p">(</span><span class="n">message</span><span class="p">.</span><span class="na">getMessageProperties</span><span class="p">().</span><span class="na">getDeliveryTag</span><span class="p">(),</span><span class="w"> </span><span class="kc">false</span><span class="p">,</span><span class="w"> </span><span class="kc">false</span><span class="p">);</span><span class="w">
+</span></span></span><span class="line"><span class="ln">23</span><span class="cl"><span class="w">    </span><span class="p">}</span><span class="w">
+</span></span></span><span class="line"><span class="ln">24</span><span class="cl"><span class="p">}</span><span class="w">
+</span></span></span></code></pre></div><p><strong>方案二：业务幂等性</strong></p>
+<p>有些业务天然具有幂等性：</p>
+<ul>
+<li>查询操作：多次查询结果一致</li>
+<li>删除操作：删除不存在的记录不会报错</li>
+<li>更新操作：<code>UPDATE SET status = 1 WHERE id = ?</code>（结果幂等）</li>
+</ul>
+<p>对于非幂等操作（如扣减库存），可以改造为幂等：</p>
+<div class="highlight"><pre tabindex="0" class="chroma"><code class="language-sql" data-lang="sql"><span class="line"><span class="ln">1</span><span class="cl"><span class="c1">-- 非幂等
+</span></span></span><span class="line"><span class="ln">2</span><span class="cl"><span class="k">UPDATE</span><span class="w"> </span><span class="n">inventory</span><span class="w"> </span><span class="k">SET</span><span class="w"> </span><span class="n">stock</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">stock</span><span class="w"> </span><span class="o">-</span><span class="w"> </span><span class="mi">1</span><span class="w"> </span><span class="k">WHERE</span><span class="w"> </span><span class="n">product_id</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="o">?</span><span class="w">
+</span></span></span><span class="line"><span class="ln">3</span><span class="cl"><span class="w">
+</span></span></span><span class="line"><span class="ln">4</span><span class="cl"><span class="c1">-- 幂等（加上订单 ID 条件）
+</span></span></span><span class="line"><span class="ln">5</span><span class="cl"><span class="k">UPDATE</span><span class="w"> </span><span class="n">inventory</span><span class="w"> </span><span class="k">SET</span><span class="w"> </span><span class="n">stock</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">stock</span><span class="w"> </span><span class="o">-</span><span class="w"> </span><span class="mi">1</span><span class="w"> 
+</span></span></span><span class="line"><span class="ln">6</span><span class="cl"><span class="k">WHERE</span><span class="w"> </span><span class="n">product_id</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="o">?</span><span class="w"> </span><span class="k">AND</span><span class="w"> </span><span class="k">NOT</span><span class="w"> </span><span class="k">EXISTS</span><span class="w"> </span><span class="p">(</span><span class="w">
+</span></span></span><span class="line"><span class="ln">7</span><span class="cl"><span class="w">    </span><span class="k">SELECT</span><span class="w"> </span><span class="mi">1</span><span class="w"> </span><span class="k">FROM</span><span class="w"> </span><span class="n">inventory_log</span><span class="w"> </span><span class="k">WHERE</span><span class="w"> </span><span class="n">order_id</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="o">?</span><span class="w">
+</span></span></span><span class="line"><span class="ln">8</span><span class="cl"><span class="p">)</span><span class="w">
+</span></span></span></code></pre></div><hr>
+<h2 id="死信队列消息兜底方案">死信队列：消息兜底方案<a hidden class="anchor" aria-hidden="true" href="#死信队列消息兜底方案">#</a></h2>
+<p>当消息处理失败且不应该重试时（如参数错误），应该将消息发送到死信队列，避免阻塞正常消息。</p>
+<p><strong>配置死信队列</strong></p>
+<div class="highlight"><pre tabindex="0" class="chroma"><code class="language-java" data-lang="java"><span class="line"><span class="ln"> 1</span><span class="cl"><span class="nd">@Bean</span><span class="w">
+</span></span></span><span class="line"><span class="ln"> 2</span><span class="cl"><span class="kd">public</span><span class="w"> </span><span class="n">Queue</span><span class="w"> </span><span class="nf">orderQueue</span><span class="p">()</span><span class="w"> </span><span class="p">{</span><span class="w">
+</span></span></span><span class="line"><span class="ln"> 3</span><span class="cl"><span class="w">    </span><span class="k">return</span><span class="w"> </span><span class="n">QueueBuilder</span><span class="p">.</span><span class="na">durable</span><span class="p">(</span><span class="s">&#34;order.queue&#34;</span><span class="p">)</span><span class="w">
+</span></span></span><span class="line"><span class="ln"> 4</span><span class="cl"><span class="w">        </span><span class="p">.</span><span class="na">deadLetterExchange</span><span class="p">(</span><span class="s">&#34;order.dlx.exchange&#34;</span><span class="p">)</span><span class="w">  </span><span class="c1">// 死信交换机</span><span class="w">
+</span></span></span><span class="line"><span class="ln"> 5</span><span class="cl"><span class="w">        </span><span class="p">.</span><span class="na">deadLetterRoutingKey</span><span class="p">(</span><span class="s">&#34;order.dlx&#34;</span><span class="p">)</span><span class="w">
+</span></span></span><span class="line"><span class="ln"> 6</span><span class="cl"><span class="w">        </span><span class="p">.</span><span class="na">build</span><span class="p">();</span><span class="w">
+</span></span></span><span class="line"><span class="ln"> 7</span><span class="cl"><span class="p">}</span><span class="w">
+</span></span></span><span class="line"><span class="ln"> 8</span><span class="cl"><span class="w">
+</span></span></span><span class="line"><span class="ln"> 9</span><span class="cl"><span class="nd">@Bean</span><span class="w">
+</span></span></span><span class="line"><span class="ln">10</span><span class="cl"><span class="kd">public</span><span class="w"> </span><span class="n">Queue</span><span class="w"> </span><span class="nf">orderDlxQueue</span><span class="p">()</span><span class="w"> </span><span class="p">{</span><span class="w">
+</span></span></span><span class="line"><span class="ln">11</span><span class="cl"><span class="w">    </span><span class="k">return</span><span class="w"> </span><span class="k">new</span><span class="w"> </span><span class="n">Queue</span><span class="p">(</span><span class="s">&#34;order.dlx.queue&#34;</span><span class="p">);</span><span class="w">
+</span></span></span><span class="line"><span class="ln">12</span><span class="cl"><span class="p">}</span><span class="w">
+</span></span></span><span class="line"><span class="ln">13</span><span class="cl"><span class="w">
+</span></span></span><span class="line"><span class="ln">14</span><span class="cl"><span class="nd">@Bean</span><span class="w">
+</span></span></span><span class="line"><span class="ln">15</span><span class="cl"><span class="kd">public</span><span class="w"> </span><span class="n">DirectExchange</span><span class="w"> </span><span class="nf">orderDlxExchange</span><span class="p">()</span><span class="w"> </span><span class="p">{</span><span class="w">
+</span></span></span><span class="line"><span class="ln">16</span><span class="cl"><span class="w">    </span><span class="k">return</span><span class="w"> </span><span class="k">new</span><span class="w"> </span><span class="n">DirectExchange</span><span class="p">(</span><span class="s">&#34;order.dlx.exchange&#34;</span><span class="p">);</span><span class="w">
+</span></span></span><span class="line"><span class="ln">17</span><span class="cl"><span class="p">}</span><span class="w">
+</span></span></span><span class="line"><span class="ln">18</span><span class="cl"><span class="w">
+</span></span></span><span class="line"><span class="ln">19</span><span class="cl"><span class="nd">@Bean</span><span class="w">
+</span></span></span><span class="line"><span class="ln">20</span><span class="cl"><span class="kd">public</span><span class="w"> </span><span class="n">Binding</span><span class="w"> </span><span class="nf">orderDlxBinding</span><span class="p">()</span><span class="w"> </span><span class="p">{</span><span class="w">
+</span></span></span><span class="line"><span class="ln">21</span><span class="cl"><span class="w">    </span><span class="k">return</span><span class="w"> </span><span class="n">BindingBuilder</span><span class="p">.</span><span class="na">bind</span><span class="p">(</span><span class="n">orderDlxQueue</span><span class="p">())</span><span class="w">
+</span></span></span><span class="line"><span class="ln">22</span><span class="cl"><span class="w">        </span><span class="p">.</span><span class="na">to</span><span class="p">(</span><span class="n">orderDlxExchange</span><span class="p">())</span><span class="w">
+</span></span></span><span class="line"><span class="ln">23</span><span class="cl"><span class="w">        </span><span class="p">.</span><span class="na">with</span><span class="p">(</span><span class="s">&#34;order.dlx&#34;</span><span class="p">);</span><span class="w">
+</span></span></span><span class="line"><span class="ln">24</span><span class="cl"><span class="p">}</span><span class="w">
+</span></span></span></code></pre></div><p>消费者拒绝消息时，不重新入队：</p>
+<div class="highlight"><pre tabindex="0" class="chroma"><code class="language-java" data-lang="java"><span class="line"><span class="ln">1</span><span class="cl"><span class="n">channel</span><span class="p">.</span><span class="na">basicNack</span><span class="p">(</span><span class="n">message</span><span class="p">.</span><span class="na">getMessageProperties</span><span class="p">().</span><span class="na">getDeliveryTag</span><span class="p">(),</span><span class="w"> </span><span class="kc">false</span><span class="p">,</span><span class="w"> </span><span class="kc">false</span><span class="p">);</span><span class="w">
+</span></span></span></code></pre></div><p>消息会自动进入死信队列，可以人工介入处理。</p>
+<hr>
+<h2 id="消息顺序性单队列--单消费者">消息顺序性：单队列 + 单消费者<a hidden class="anchor" aria-hidden="true" href="#消息顺序性单队列--单消费者">#</a></h2>
+<p>RabbitMQ 不保证全局顺序，只保证单队列单消费者的顺序。</p>
+<p><strong>场景：订单状态流转</strong></p>
+<p>订单状态必须按顺序流转：创建 → 支付 → 发货 → 完成</p>
+<p><strong>解决方案：按订单 ID 路由到固定队列</strong></p>
+<div class="highlight"><pre tabindex="0" class="chroma"><code class="language-java" data-lang="java"><span class="line"><span class="ln">1</span><span class="cl"><span class="c1">// 根据订单 ID 计算队列编号</span><span class="w">
+</span></span></span><span class="line"><span class="ln">2</span><span class="cl"><span class="kt">int</span><span class="w"> </span><span class="n">queueIndex</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">Math</span><span class="p">.</span><span class="na">abs</span><span class="p">(</span><span class="n">order</span><span class="p">.</span><span class="na">getId</span><span class="p">().</span><span class="na">hashCode</span><span class="p">())</span><span class="w"> </span><span class="o">%</span><span class="w"> </span><span class="n">4</span><span class="p">;</span><span class="w">
+</span></span></span><span class="line"><span class="ln">3</span><span class="cl"><span class="n">String</span><span class="w"> </span><span class="n">queueName</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="s">&#34;order.queue.&#34;</span><span class="w"> </span><span class="o">+</span><span class="w"> </span><span class="n">queueIndex</span><span class="p">;</span><span class="w">
+</span></span></span><span class="line"><span class="ln">4</span><span class="cl"><span class="w">
+</span></span></span><span class="line"><span class="ln">5</span><span class="cl"><span class="n">rabbitTemplate</span><span class="p">.</span><span class="na">convertAndSend</span><span class="p">(</span><span class="s">&#34;order.exchange&#34;</span><span class="p">,</span><span class="w"> </span><span class="n">queueName</span><span class="p">,</span><span class="w"> </span><span class="n">order</span><span class="p">);</span><span class="w">
+</span></span></span></code></pre></div><p>这样，同一个订单的所有消息都会路由到同一个队列，保证顺序性。</p>
+<blockquote>
+<p><strong>架构思考：</strong> 消息顺序性和并发性能是矛盾的。如果要求全局顺序，就只能用单队列单消费者，性能很差。实际业务中，大部分场景只需要局部顺序（如同一个订单的消息有序），可以通过分区路由实现。</p>
+</blockquote>
+<hr>
+<h2 id="总结与思考">总结与思考<a hidden class="anchor" aria-hidden="true" href="#总结与思考">#</a></h2>
+<p>RabbitMQ 的核心价值是异步解耦，但要用好它，必须解决三个问题：</p>
+<ul>
+<li>消息可靠性：通过持久化、确认机制、死信队列保障</li>
+<li>重复消费：通过唯一键去重或业务幂等性解决</li>
+<li>消息顺序：通过分区路由实现局部顺序</li>
+</ul>
+<p>消息队列不是万能的，它引入了异步复杂度。在设计系统时，要权衡同步调用和异步消息的优缺点。</p>
+<p>下次当你的系统因为同步调用导致性能瓶颈时，不妨考虑引入消息队列。</p>
+
+
+  </div>
+
+  <footer class="post-footer">
+    <ul class="post-tags">
+      <li><a href="http://localhost:1313/tags/rabbitmq/">RabbitMQ</a></li>
+      <li><a href="http://localhost:1313/tags/%E6%B6%88%E6%81%AF%E9%98%9F%E5%88%97/">消息队列</a></li>
+      <li><a href="http://localhost:1313/tags/%E5%BC%82%E6%AD%A5/">异步</a></li>
+      <li><a href="http://localhost:1313/tags/%E5%88%86%E5%B8%83%E5%BC%8F/">分布式</a></li>
+    </ul>
+<nav class="paginav">
+  <a class="prev" href="http://localhost:1313/posts/2024/12/%E7%BA%BF%E4%B8%8A-oom-%E9%97%AE%E9%A2%98%E6%8E%92%E6%9F%A5%E5%AE%9E%E6%88%98%E4%BB%8E-heap-dump-%E5%88%B0%E6%A0%B9%E5%9B%A0%E5%AE%9A%E4%BD%8D/">
+    <span class="title">« Prev</span>
+    <br>
+    <span>线上 OOM 问题排查实战：从 Heap Dump 到根因定位</span>
+  </a>
+  <a class="next" href="http://localhost:1313/posts/2024/10/docker-%E5%AE%B9%E5%99%A8%E5%8C%96%E9%83%A8%E7%BD%B2%E6%9C%80%E4%BD%B3%E5%AE%9E%E8%B7%B5%E4%BB%8E-dockerfile-%E5%88%B0%E7%94%9F%E4%BA%A7%E7%8E%AF%E5%A2%83/">
+    <span class="title">Next »</span>
+    <br>
+    <span>Docker 容器化部署最佳实践：从 Dockerfile 到生产环境</span>
+  </a>
+</nav>
+
+
+<ul class="share-buttons">
+    <li>
+        <a target="_blank" rel="noopener noreferrer" aria-label="share RabbitMQ 异步解耦实战：从消息丢失到最终一致性 on x"
+            href="https://x.com/intent/tweet/?text=RabbitMQ%20%e5%bc%82%e6%ad%a5%e8%a7%a3%e8%80%a6%e5%ae%9e%e6%88%98%ef%bc%9a%e4%bb%8e%e6%b6%88%e6%81%af%e4%b8%a2%e5%a4%b1%e5%88%b0%e6%9c%80%e7%bb%88%e4%b8%80%e8%87%b4%e6%80%a7&amp;url=http%3a%2f%2flocalhost%3a1313%2fposts%2f2024%2f11%2frabbitmq-%25E5%25BC%2582%25E6%25AD%25A5%25E8%25A7%25A3%25E8%2580%25A6%25E5%25AE%259E%25E6%2588%2598%25E4%25BB%258E%25E6%25B6%2588%25E6%2581%25AF%25E4%25B8%25A2%25E5%25A4%25B1%25E5%2588%25B0%25E6%259C%2580%25E7%25BB%2588%25E4%25B8%2580%25E8%2587%25B4%25E6%2580%25A7%2f&amp;hashtags=RabbitMQ%2c%e6%b6%88%e6%81%af%e9%98%9f%e5%88%97%2c%e5%bc%82%e6%ad%a5%2c%e5%88%86%e5%b8%83%e5%bc%8f">
+            <svg version="1.1" viewBox="0 0 512 512" xml:space="preserve" height="30px" width="30px" fill="currentColor">
+                <path
+                    d="M512 62.554 L 512 449.446 C 512 483.97 483.97 512 449.446 512 L 62.554 512 C 28.03 512 0 483.97 0 449.446 L 0 62.554 C 0 28.03 28.029 0 62.554 0 L 449.446 0 C 483.971 0 512 28.03 512 62.554 Z M 269.951 190.75 L 182.567 75.216 L 56 75.216 L 207.216 272.95 L 63.9 436.783 L 125.266 436.783 L 235.9 310.383 L 332.567 436.783 L 456 436.783 L 298.367 228.367 L 432.367 75.216 L 371.033 75.216 Z M 127.633 110 L 164.101 110 L 383.481 400.065 L 349.5 400.065 Z" />
+            </svg>
+        </a>
+    </li>
+    <li>
+        <a target="_blank" rel="noopener noreferrer" aria-label="share RabbitMQ 异步解耦实战：从消息丢失到最终一致性 on linkedin"
+            href="https://www.linkedin.com/shareArticle?mini=true&amp;url=http%3a%2f%2flocalhost%3a1313%2fposts%2f2024%2f11%2frabbitmq-%25E5%25BC%2582%25E6%25AD%25A5%25E8%25A7%25A3%25E8%2580%25A6%25E5%25AE%259E%25E6%2588%2598%25E4%25BB%258E%25E6%25B6%2588%25E6%2581%25AF%25E4%25B8%25A2%25E5%25A4%25B1%25E5%2588%25B0%25E6%259C%2580%25E7%25BB%2588%25E4%25B8%2580%25E8%2587%25B4%25E6%2580%25A7%2f&amp;title=RabbitMQ%20%e5%bc%82%e6%ad%a5%e8%a7%a3%e8%80%a6%e5%ae%9e%e6%88%98%ef%bc%9a%e4%bb%8e%e6%b6%88%e6%81%af%e4%b8%a2%e5%a4%b1%e5%88%b0%e6%9c%80%e7%bb%88%e4%b8%80%e8%87%b4%e6%80%a7&amp;summary=RabbitMQ%20%e5%bc%82%e6%ad%a5%e8%a7%a3%e8%80%a6%e5%ae%9e%e6%88%98%ef%bc%9a%e4%bb%8e%e6%b6%88%e6%81%af%e4%b8%a2%e5%a4%b1%e5%88%b0%e6%9c%80%e7%bb%88%e4%b8%80%e8%87%b4%e6%80%a7&amp;source=http%3a%2f%2flocalhost%3a1313%2fposts%2f2024%2f11%2frabbitmq-%25E5%25BC%2582%25E6%25AD%25A5%25E8%25A7%25A3%25E8%2580%25A6%25E5%25AE%259E%25E6%2588%2598%25E4%25BB%258E%25E6%25B6%2588%25E6%2581%25AF%25E4%25B8%25A2%25E5%25A4%25B1%25E5%2588%25B0%25E6%259C%2580%25E7%25BB%2588%25E4%25B8%2580%25E8%2587%25B4%25E6%2580%25A7%2f">
+            <svg version="1.1" viewBox="0 0 512 512" xml:space="preserve" height="30px" width="30px" fill="currentColor">
+                <path
+                    d="M449.446,0c34.525,0 62.554,28.03 62.554,62.554l0,386.892c0,34.524 -28.03,62.554 -62.554,62.554l-386.892,0c-34.524,0 -62.554,-28.03 -62.554,-62.554l0,-386.892c0,-34.524 28.029,-62.554 62.554,-62.554l386.892,0Zm-288.985,423.278l0,-225.717l-75.04,0l0,225.717l75.04,0Zm270.539,0l0,-129.439c0,-69.333 -37.018,-101.586 -86.381,-101.586c-39.804,0 -57.634,21.891 -67.617,37.266l0,-31.958l-75.021,0c0.995,21.181 0,225.717 0,225.717l75.02,0l0,-126.056c0,-6.748 0.486,-13.492 2.474,-18.315c5.414,-13.475 17.767,-27.434 38.494,-27.434c27.135,0 38.007,20.707 38.007,51.037l0,120.768l75.024,0Zm-307.552,-334.556c-25.674,0 -42.448,16.879 -42.448,39.002c0,21.658 16.264,39.002 41.455,39.002l0.484,0c26.165,0 42.452,-17.344 42.452,-39.002c-0.485,-22.092 -16.241,-38.954 -41.943,-39.002Z" />
+            </svg>
+        </a>
+    </li>
+    <li>
+        <a target="_blank" rel="noopener noreferrer" aria-label="share RabbitMQ 异步解耦实战：从消息丢失到最终一致性 on reddit"
+            href="https://reddit.com/submit?url=http%3a%2f%2flocalhost%3a1313%2fposts%2f2024%2f11%2frabbitmq-%25E5%25BC%2582%25E6%25AD%25A5%25E8%25A7%25A3%25E8%2580%25A6%25E5%25AE%259E%25E6%2588%2598%25E4%25BB%258E%25E6%25B6%2588%25E6%2581%25AF%25E4%25B8%25A2%25E5%25A4%25B1%25E5%2588%25B0%25E6%259C%2580%25E7%25BB%2588%25E4%25B8%2580%25E8%2587%25B4%25E6%2580%25A7%2f&title=RabbitMQ%20%e5%bc%82%e6%ad%a5%e8%a7%a3%e8%80%a6%e5%ae%9e%e6%88%98%ef%bc%9a%e4%bb%8e%e6%b6%88%e6%81%af%e4%b8%a2%e5%a4%b1%e5%88%b0%e6%9c%80%e7%bb%88%e4%b8%80%e8%87%b4%e6%80%a7">
+            <svg version="1.1" viewBox="0 0 512 512" xml:space="preserve" height="30px" width="30px" fill="currentColor">
+                <path
+                    d="M449.446,0c34.525,0 62.554,28.03 62.554,62.554l0,386.892c0,34.524 -28.03,62.554 -62.554,62.554l-386.892,0c-34.524,0 -62.554,-28.03 -62.554,-62.554l0,-386.892c0,-34.524 28.029,-62.554 62.554,-62.554l386.892,0Zm-3.446,265.638c0,-22.964 -18.616,-41.58 -41.58,-41.58c-11.211,0 -21.361,4.457 -28.841,11.666c-28.424,-20.508 -67.586,-33.757 -111.204,-35.278l18.941,-89.121l61.884,13.157c0.756,15.734 13.642,28.29 29.56,28.29c16.407,0 29.706,-13.299 29.706,-29.701c0,-16.403 -13.299,-29.702 -29.706,-29.702c-11.666,0 -21.657,6.792 -26.515,16.578l-69.105,-14.69c-1.922,-0.418 -3.939,-0.042 -5.585,1.036c-1.658,1.073 -2.811,2.761 -3.224,4.686l-21.152,99.438c-44.258,1.228 -84.046,14.494 -112.837,35.232c-7.468,-7.164 -17.589,-11.591 -28.757,-11.591c-22.965,0 -41.585,18.616 -41.585,41.58c0,16.896 10.095,31.41 24.568,37.918c-0.639,4.135 -0.99,8.328 -0.99,12.576c0,63.977 74.469,115.836 166.33,115.836c91.861,0 166.334,-51.859 166.334,-115.836c0,-4.218 -0.347,-8.387 -0.977,-12.493c14.564,-6.47 24.735,-21.034 24.735,-38.001Zm-119.474,108.193c-20.27,20.241 -59.115,21.816 -70.534,21.816c-11.428,0 -50.277,-1.575 -70.522,-21.82c-3.007,-3.008 -3.007,-7.882 0,-10.889c3.003,-2.999 7.882,-3.003 10.885,0c12.777,12.781 40.11,17.317 59.637,17.317c19.522,0 46.86,-4.536 59.657,-17.321c3.016,-2.999 7.886,-2.995 10.885,0.008c3.008,3.011 3.003,7.882 -0.008,10.889Zm-5.23,-48.781c-16.373,0 -29.701,-13.324 -29.701,-29.698c0,-16.381 13.328,-29.714 29.701,-29.714c16.378,0 29.706,13.333 29.706,29.714c0,16.374 -13.328,29.698 -29.706,29.698Zm-160.386,-29.702c0,-16.381 13.328,-29.71 29.714,-29.71c16.369,0 29.689,13.329 29.689,29.71c0,16.373 -13.32,29.693 -29.689,29.693c-16.386,0 -29.714,-13.32 -29.714,-29.693Z" />
+            </svg>
+        </a>
+    </li>
+    <li>
+        <a target="_blank" rel="noopener noreferrer" aria-label="share RabbitMQ 异步解耦实战：从消息丢失到最终一致性 on facebook"
+            href="https://facebook.com/sharer/sharer.php?u=http%3a%2f%2flocalhost%3a1313%2fposts%2f2024%2f11%2frabbitmq-%25E5%25BC%2582%25E6%25AD%25A5%25E8%25A7%25A3%25E8%2580%25A6%25E5%25AE%259E%25E6%2588%2598%25E4%25BB%258E%25E6%25B6%2588%25E6%2581%25AF%25E4%25B8%25A2%25E5%25A4%25B1%25E5%2588%25B0%25E6%259C%2580%25E7%25BB%2588%25E4%25B8%2580%25E8%2587%25B4%25E6%2580%25A7%2f">
+            <svg version="1.1" viewBox="0 0 512 512" xml:space="preserve" height="30px" width="30px" fill="currentColor">
+                <path
+                    d="M449.446,0c34.525,0 62.554,28.03 62.554,62.554l0,386.892c0,34.524 -28.03,62.554 -62.554,62.554l-106.468,0l0,-192.915l66.6,0l12.672,-82.621l-79.272,0l0,-53.617c0,-22.603 11.073,-44.636 46.58,-44.636l36.042,0l0,-70.34c0,0 -32.71,-5.582 -63.982,-5.582c-65.288,0 -107.96,39.569 -107.96,111.204l0,62.971l-72.573,0l0,82.621l72.573,0l0,192.915l-191.104,0c-34.524,0 -62.554,-28.03 -62.554,-62.554l0,-386.892c0,-34.524 28.029,-62.554 62.554,-62.554l386.892,0Z" />
+            </svg>
+        </a>
+    </li>
+    <li>
+        <a target="_blank" rel="noopener noreferrer" aria-label="share RabbitMQ 异步解耦实战：从消息丢失到最终一致性 on whatsapp"
+            href="https://api.whatsapp.com/send?text=RabbitMQ%20%e5%bc%82%e6%ad%a5%e8%a7%a3%e8%80%a6%e5%ae%9e%e6%88%98%ef%bc%9a%e4%bb%8e%e6%b6%88%e6%81%af%e4%b8%a2%e5%a4%b1%e5%88%b0%e6%9c%80%e7%bb%88%e4%b8%80%e8%87%b4%e6%80%a7%20-%20http%3a%2f%2flocalhost%3a1313%2fposts%2f2024%2f11%2frabbitmq-%25E5%25BC%2582%25E6%25AD%25A5%25E8%25A7%25A3%25E8%2580%25A6%25E5%25AE%259E%25E6%2588%2598%25E4%25BB%258E%25E6%25B6%2588%25E6%2581%25AF%25E4%25B8%25A2%25E5%25A4%25B1%25E5%2588%25B0%25E6%259C%2580%25E7%25BB%2588%25E4%25B8%2580%25E8%2587%25B4%25E6%2580%25A7%2f">
+            <svg version="1.1" viewBox="0 0 512 512" xml:space="preserve" height="30px" width="30px" fill="currentColor">
+                <path
+                    d="M449.446,0c34.525,0 62.554,28.03 62.554,62.554l0,386.892c0,34.524 -28.03,62.554 -62.554,62.554l-386.892,0c-34.524,0 -62.554,-28.03 -62.554,-62.554l0,-386.892c0,-34.524 28.029,-62.554 62.554,-62.554l386.892,0Zm-58.673,127.703c-33.842,-33.881 -78.847,-52.548 -126.798,-52.568c-98.799,0 -179.21,80.405 -179.249,179.234c-0.013,31.593 8.241,62.428 23.927,89.612l-25.429,92.884l95.021,-24.925c26.181,14.28 55.659,21.807 85.658,21.816l0.074,0c98.789,0 179.206,-80.413 179.247,-179.243c0.018,-47.895 -18.61,-92.93 -52.451,-126.81Zm-126.797,275.782l-0.06,0c-26.734,-0.01 -52.954,-7.193 -75.828,-20.767l-5.441,-3.229l-56.386,14.792l15.05,-54.977l-3.542,-5.637c-14.913,-23.72 -22.791,-51.136 -22.779,-79.287c0.033,-82.142 66.867,-148.971 149.046,-148.971c39.793,0.014 77.199,15.531 105.329,43.692c28.128,28.16 43.609,65.592 43.594,105.4c-0.034,82.149 -66.866,148.983 -148.983,148.984Zm81.721,-111.581c-4.479,-2.242 -26.499,-13.075 -30.604,-14.571c-4.105,-1.495 -7.091,-2.241 -10.077,2.241c-2.986,4.483 -11.569,14.572 -14.182,17.562c-2.612,2.988 -5.225,3.364 -9.703,1.12c-4.479,-2.241 -18.91,-6.97 -36.017,-22.23c-13.314,-11.876 -22.304,-26.542 -24.916,-31.026c-2.612,-4.484 -0.279,-6.908 1.963,-9.14c2.016,-2.007 4.48,-5.232 6.719,-7.847c2.24,-2.615 2.986,-4.484 4.479,-7.472c1.493,-2.99 0.747,-5.604 -0.374,-7.846c-1.119,-2.241 -10.077,-24.288 -13.809,-33.256c-3.635,-8.733 -7.327,-7.55 -10.077,-7.688c-2.609,-0.13 -5.598,-0.158 -8.583,-0.158c-2.986,0 -7.839,1.121 -11.944,5.604c-4.105,4.484 -15.675,15.32 -15.675,37.364c0,22.046 16.048,43.342 18.287,46.332c2.24,2.99 31.582,48.227 76.511,67.627c10.685,4.615 19.028,7.371 25.533,9.434c10.728,3.41 20.492,2.929 28.209,1.775c8.605,-1.285 26.499,-10.833 30.231,-21.295c3.732,-10.464 3.732,-19.431 2.612,-21.298c-1.119,-1.869 -4.105,-2.99 -8.583,-5.232Z" />
+            </svg>
+        </a>
+    </li>
+    <li>
+        <a target="_blank" rel="noopener noreferrer" aria-label="share RabbitMQ 异步解耦实战：从消息丢失到最终一致性 on telegram"
+            href="https://telegram.me/share/url?text=RabbitMQ%20%e5%bc%82%e6%ad%a5%e8%a7%a3%e8%80%a6%e5%ae%9e%e6%88%98%ef%bc%9a%e4%bb%8e%e6%b6%88%e6%81%af%e4%b8%a2%e5%a4%b1%e5%88%b0%e6%9c%80%e7%bb%88%e4%b8%80%e8%87%b4%e6%80%a7&amp;url=http%3a%2f%2flocalhost%3a1313%2fposts%2f2024%2f11%2frabbitmq-%25E5%25BC%2582%25E6%25AD%25A5%25E8%25A7%25A3%25E8%2580%25A6%25E5%25AE%259E%25E6%2588%2598%25E4%25BB%258E%25E6%25B6%2588%25E6%2581%25AF%25E4%25B8%25A2%25E5%25A4%25B1%25E5%2588%25B0%25E6%259C%2580%25E7%25BB%2588%25E4%25B8%2580%25E8%2587%25B4%25E6%2580%25A7%2f">
+            <svg version="1.1" xml:space="preserve" viewBox="2 2 28 28" height="30px" width="30px" fill="currentColor">
+                <path
+                    d="M26.49,29.86H5.5a3.37,3.37,0,0,1-2.47-1,3.35,3.35,0,0,1-1-2.47V5.48A3.36,3.36,0,0,1,3,3,3.37,3.37,0,0,1,5.5,2h21A3.38,3.38,0,0,1,29,3a3.36,3.36,0,0,1,1,2.46V26.37a3.35,3.35,0,0,1-1,2.47A3.38,3.38,0,0,1,26.49,29.86Zm-5.38-6.71a.79.79,0,0,0,.85-.66L24.73,9.24a.55.55,0,0,0-.18-.46.62.62,0,0,0-.41-.17q-.08,0-16.53,6.11a.59.59,0,0,0-.41.59.57.57,0,0,0,.43.52l4,1.24,1.61,4.83a.62.62,0,0,0,.63.43.56.56,0,0,0,.4-.17L16.54,20l4.09,3A.9.9,0,0,0,21.11,23.15ZM13.8,20.71l-1.21-4q8.72-5.55,8.78-5.55c.15,0,.23,0,.23.16a.18.18,0,0,1,0,.06s-2.51,2.3-7.52,6.8Z" />
+            </svg>
+        </a>
+    </li>
+    <li>
+        <a target="_blank" rel="noopener noreferrer" aria-label="share RabbitMQ 异步解耦实战：从消息丢失到最终一致性 on ycombinator"
+            href="https://news.ycombinator.com/submitlink?t=RabbitMQ%20%e5%bc%82%e6%ad%a5%e8%a7%a3%e8%80%a6%e5%ae%9e%e6%88%98%ef%bc%9a%e4%bb%8e%e6%b6%88%e6%81%af%e4%b8%a2%e5%a4%b1%e5%88%b0%e6%9c%80%e7%bb%88%e4%b8%80%e8%87%b4%e6%80%a7&u=http%3a%2f%2flocalhost%3a1313%2fposts%2f2024%2f11%2frabbitmq-%25E5%25BC%2582%25E6%25AD%25A5%25E8%25A7%25A3%25E8%2580%25A6%25E5%25AE%259E%25E6%2588%2598%25E4%25BB%258E%25E6%25B6%2588%25E6%2581%25AF%25E4%25B8%25A2%25E5%25A4%25B1%25E5%2588%25B0%25E6%259C%2580%25E7%25BB%2588%25E4%25B8%2580%25E8%2587%25B4%25E6%2580%25A7%2f">
+            <svg version="1.1" xml:space="preserve" width="30px" height="30px" viewBox="0 0 512 512" fill="currentColor"
+                xmlns:inkscape="http://www.inkscape.org/namespaces/inkscape">
+                <path
+                    d="M449.446 0C483.971 0 512 28.03 512 62.554L512 449.446C512 483.97 483.97 512 449.446 512L62.554 512C28.03 512 0 483.97 0 449.446L0 62.554C0 28.03 28.029 0 62.554 0L449.446 0ZM183.8767 87.9921H121.8427L230.6673 292.4508V424.0079H281.3328V292.4508L390.1575 87.9921H328.1233L256 238.2489z" />
+            </svg>
+        </a>
+    </li>
+</ul>
+
+  </footer>
+</article>
+    </main>
+    
+<footer class="footer">
+        <span>&copy; 2026 <a href="http://localhost:1313/">博客喵</a></span> · 
+
+    <span>
+        Powered by
+        <a href="https://gohugo.io/" rel="noopener noreferrer" target="_blank">Hugo</a> &
+        <a href="https://github.com/adityatelange/hugo-PaperMod/" rel="noopener" target="_blank">PaperMod</a>
+    </span>
+</footer>
+<a href="#top" aria-label="go to top" title="Go to Top (Alt + G)" class="top-link" id="top-link" accesskey="g">
+    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 12 6" fill="currentColor">
+        <path d="M12 6H0l6-6z" />
+    </svg>
+</a>
+
+<script>
+    let menu = document.getElementById('menu');
+    if (menu) {
+        
+        const scrollPosition = localStorage.getItem("menu-scroll-position");
+        if (scrollPosition) {
+            menu.scrollLeft = parseInt(scrollPosition, 10);
+        }
+        
+        menu.onscroll = function () {
+            localStorage.setItem("menu-scroll-position", menu.scrollLeft);
+        }
+    }
+
+    document.querySelectorAll('a[href^="#"]').forEach(anchor => {
+        anchor.addEventListener("click", function (e) {
+            e.preventDefault();
+            var id = this.getAttribute("href").substr(1);
+            if (!window.matchMedia('(prefers-reduced-motion: reduce)').matches) {
+                document.querySelector(`[id='${decodeURIComponent(id)}']`).scrollIntoView({
+                    behavior: "smooth"
+                });
+            } else {
+                document.querySelector(`[id='${decodeURIComponent(id)}']`).scrollIntoView();
+            }
+            if (id === "top") {
+                history.replaceState(null, null, " ");
+            } else {
+                history.pushState(null, null, `#${id}`);
+            }
+        });
+    });
+
+</script>
+<script>
+    var mybutton = document.getElementById("top-link");
+    window.onscroll = function () {
+        if (document.body.scrollTop > 800 || document.documentElement.scrollTop > 800) {
+            mybutton.style.visibility = "visible";
+            mybutton.style.opacity = "1";
+        } else {
+            mybutton.style.visibility = "hidden";
+            mybutton.style.opacity = "0";
+        }
+    };
+
+</script>
+<script>
+    document.getElementById("theme-toggle").addEventListener("click", () => {
+        const html = document.querySelector("html");
+        if (html.dataset.theme === "dark") {
+            html.dataset.theme = 'light';
+            localStorage.setItem("pref-theme", 'light');
+        } else {
+            html.dataset.theme = 'dark';
+            localStorage.setItem("pref-theme", 'dark');
+        }
+    })
+
+</script>
+<script>
+    document.querySelectorAll('pre > code').forEach((codeblock) => {
+        const container = codeblock.parentNode.parentNode;
+
+        const copybutton = document.createElement('button');
+        copybutton.classList.add('copy-code');
+        copybutton.innerHTML = 'copy';
+
+        function copyingDone() {
+            copybutton.innerHTML = 'copied!';
+            setTimeout(() => {
+                copybutton.innerHTML = 'copy';
+            }, 2000);
+        }
+
+        copybutton.addEventListener('click', (cb) => {
+            if ('clipboard' in navigator) {
+                navigator.clipboard.writeText(codeblock.textContent);
+                copyingDone();
+                return;
+            }
+
+            const range = document.createRange();
+            range.selectNodeContents(codeblock);
+            const selection = window.getSelection();
+            selection.removeAllRanges();
+            selection.addRange(range);
+            try {
+                document.execCommand('copy');
+                copyingDone();
+            } catch (e) { };
+            selection.removeRange(range);
+        });
+
+        if (container.classList.contains("highlight")) {
+            container.appendChild(copybutton);
+        } else if (container.parentNode.firstChild == container) {
+            
+        } else if (codeblock.parentNode.parentNode.parentNode.parentNode.parentNode.nodeName == "TABLE") {
+            
+            codeblock.parentNode.parentNode.parentNode.parentNode.parentNode.appendChild(copybutton);
+        } else {
+            
+            codeblock.parentNode.appendChild(copybutton);
+        }
+    });
+</script>
+</body>
+
+</html>

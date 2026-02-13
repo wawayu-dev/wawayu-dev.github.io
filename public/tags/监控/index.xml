@@ -1,0 +1,19 @@
+<?xml version="1.0" encoding="utf-8" standalone="yes"?>
+<rss version="2.0" xmlns:atom="http://www.w3.org/2005/Atom" xmlns:content="http://purl.org/rss/1.0/modules/content/">
+  <channel>
+    <title>监控 on 博客喵</title>
+    <link>http://localhost:1313/tags/%E7%9B%91%E6%8E%A7/</link>
+    <description>Recent content in 监控 on 博客喵</description>
+    <generator>Hugo -- 0.155.3</generator>
+    <language>zh-cn</language>
+    <lastBuildDate>Fri, 10 May 2024 00:00:00 +0000</lastBuildDate>
+    <atom:link href="http://localhost:1313/tags/%E7%9B%91%E6%8E%A7/index.xml" rel="self" type="application/rss+xml" />
+    <item>
+      <title>动态线程池 SDK：从零实现 Spring Boot Starter</title>
+      <link>http://localhost:1313/projects/thread-pool-sdk/</link>
+      <pubDate>Fri, 10 May 2024 00:00:00 +0000</pubDate>
+      <guid>http://localhost:1313/projects/thread-pool-sdk/</guid>
+      <description>深入 Spring Boot 自动装配原理，实现零侵入式线程池参数动态调整与监控</description>
+    </item>
+  </channel>
+</rss>

@@ -1,0 +1,698 @@
+<!DOCTYPE html>
+<html lang="en" dir="auto" data-theme="auto">
+
+<head><script src="/livereload.js?mindelay=10&amp;v=2&amp;port=1313&amp;path=livereload" data-no-instant defer></script><meta charset="utf-8">
+<meta http-equiv="X-UA-Compatible" content="IE=edge">
+<meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
+<meta name="robots" content="index, follow">
+<title>MySQL 索引优化：从 EXPLAIN 到执行计划的完整实战 | 博客喵</title>
+<meta name="keywords" content="MySQL, 索引优化, 性能调优, EXPLAIN">
+<meta name="description" content="深入 B&#43; 树原理，掌握联合索引、覆盖索引、索引下推等优化技巧">
+<meta name="author" content="wawayu">
+<link rel="canonical" href="http://localhost:1313/posts/2024/08/mysql-%E7%B4%A2%E5%BC%95%E4%BC%98%E5%8C%96%E4%BB%8E-explain-%E5%88%B0%E6%89%A7%E8%A1%8C%E8%AE%A1%E5%88%92%E7%9A%84%E5%AE%8C%E6%95%B4%E5%AE%9E%E6%88%98/">
+<link crossorigin="anonymous" href="/assets/css/stylesheet.a29c24210eb31d9ce56f669c66a35c9c51b17376b7764e336a49af7dec914cf0.css" integrity="sha256-opwkIQ6zHZzlb2acZqNcnFGxc3a3dk4zakmvfeyRTPA=" rel="preload stylesheet" as="style">
+<link rel="icon" href="http://localhost:1313/favicon.ico">
+<link rel="icon" type="image/png" sizes="16x16" href="http://localhost:1313/favicon-16x16.png">
+<link rel="icon" type="image/png" sizes="32x32" href="http://localhost:1313/favicon-32x32.png">
+<link rel="apple-touch-icon" href="http://localhost:1313/apple-touch-icon.png">
+<link rel="mask-icon" href="http://localhost:1313/safari-pinned-tab.svg">
+<meta name="theme-color" content="#2e2e33">
+<meta name="msapplication-TileColor" content="#2e2e33">
+<link rel="alternate" hreflang="en" href="http://localhost:1313/posts/2024/08/mysql-%E7%B4%A2%E5%BC%95%E4%BC%98%E5%8C%96%E4%BB%8E-explain-%E5%88%B0%E6%89%A7%E8%A1%8C%E8%AE%A1%E5%88%92%E7%9A%84%E5%AE%8C%E6%95%B4%E5%AE%9E%E6%88%98/">
+<noscript>
+    <style>
+        #theme-toggle,
+        .top-link {
+            display: none;
+        }
+
+    </style>
+    <style>
+        @media (prefers-color-scheme: dark) {
+            :root {
+                --theme: rgb(29, 30, 32);
+                --entry: rgb(46, 46, 51);
+                --primary: rgb(218, 218, 219);
+                --secondary: rgb(155, 156, 157);
+                --tertiary: rgb(65, 66, 68);
+                --content: rgb(196, 196, 197);
+                --code-block-bg: rgb(46, 46, 51);
+                --code-bg: rgb(55, 56, 62);
+                --border: rgb(51, 51, 51);
+                color-scheme: dark;
+            }
+
+            .list {
+                background: var(--theme);
+            }
+
+            .toc {
+                background: var(--entry);
+            }
+        }
+
+        @media (prefers-color-scheme: light) {
+            .list::-webkit-scrollbar-thumb {
+                border-color: var(--code-bg);
+            }
+        }
+
+    </style>
+</noscript>
+<script>
+    if (localStorage.getItem("pref-theme") === "dark") {
+        document.querySelector("html").dataset.theme = 'dark';
+    } else if (localStorage.getItem("pref-theme") === "light") {
+       document.querySelector("html").dataset.theme = 'light';
+    } else if (window.matchMedia('(prefers-color-scheme: dark)').matches) {
+        document.querySelector("html").dataset.theme = 'dark';
+    } else {
+        document.querySelector("html").dataset.theme = 'light';
+    }
+
+</script><meta property="og:url" content="http://localhost:1313/posts/2024/08/mysql-%E7%B4%A2%E5%BC%95%E4%BC%98%E5%8C%96%E4%BB%8E-explain-%E5%88%B0%E6%89%A7%E8%A1%8C%E8%AE%A1%E5%88%92%E7%9A%84%E5%AE%8C%E6%95%B4%E5%AE%9E%E6%88%98/">
+  <meta property="og:site_name" content="博客喵">
+  <meta property="og:title" content="MySQL 索引优化：从 EXPLAIN 到执行计划的完整实战">
+  <meta property="og:description" content="深入 B&#43; 树原理，掌握联合索引、覆盖索引、索引下推等优化技巧">
+  <meta property="og:locale" content="zh-cn">
+  <meta property="og:type" content="article">
+    <meta property="article:section" content="posts">
+    <meta property="article:published_time" content="2024-08-10T00:00:00+00:00">
+    <meta property="article:modified_time" content="2024-08-10T00:00:00+00:00">
+    <meta property="article:tag" content="MySQL">
+    <meta property="article:tag" content="索引优化">
+    <meta property="article:tag" content="性能调优">
+    <meta property="article:tag" content="EXPLAIN">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:title" content="MySQL 索引优化：从 EXPLAIN 到执行计划的完整实战">
+<meta name="twitter:description" content="深入 B&#43; 树原理，掌握联合索引、覆盖索引、索引下推等优化技巧">
+
+
+<script type="application/ld+json">
+{
+  "@context": "https://schema.org",
+  "@type": "BreadcrumbList",
+  "itemListElement": [
+    {
+      "@type": "ListItem",
+      "position":  1 ,
+      "name": "Posts",
+      "item": "http://localhost:1313/posts/"
+    }, 
+    {
+      "@type": "ListItem",
+      "position":  2 ,
+      "name": "MySQL 索引优化：从 EXPLAIN 到执行计划的完整实战",
+      "item": "http://localhost:1313/posts/2024/08/mysql-%E7%B4%A2%E5%BC%95%E4%BC%98%E5%8C%96%E4%BB%8E-explain-%E5%88%B0%E6%89%A7%E8%A1%8C%E8%AE%A1%E5%88%92%E7%9A%84%E5%AE%8C%E6%95%B4%E5%AE%9E%E6%88%98/"
+    }
+  ]
+}
+</script>
+<script type="application/ld+json">
+{
+  "@context": "https://schema.org",
+  "@type": "BlogPosting",
+  "headline": "MySQL 索引优化：从 EXPLAIN 到执行计划的完整实战",
+  "name": "MySQL 索引优化：从 EXPLAIN 到执行计划的完整实战",
+  "description": "深入 B+ 树原理，掌握联合索引、覆盖索引、索引下推等优化技巧",
+  "keywords": [
+    "MySQL", "索引优化", "性能调优", "EXPLAIN"
+  ],
+  "articleBody": "一条 SQL 查询从 3 秒优化到 30ms，背后往往只是加了一个索引。但索引不是银弹，用错了反而会拖慢查询速度。本文从 B+ 树原理出发，系统讲解 MySQL 索引优化的方法论。\n本文亮点 理解 B+ 树索引的底层存储结构 掌握 EXPLAIN 执行计划的关键字段含义 学会设计高效的联合索引 深入覆盖索引与索引下推优化 B+ 树：MySQL 索引的底层实现 MySQL 的 InnoDB 引擎使用 B+ 树作为索引结构。理解 B+ 树的特性，是优化索引的基础。\nB+ 树 vs 二叉搜索树\n为什么不用二叉搜索树？因为树的高度会影响查询性能。假设有 100 万条数据：\n二叉搜索树：高度约为 20（log₂ 1000000），需要 20 次磁盘 IO B+ 树（每个节点 1000 个键）：高度约为 3（log₁₀₀₀ 1000000），只需 3 次磁盘 IO B+ 树通过增加节点的扇出度（每个节点存储更多键），大幅降低了树的高度。\nB+ 树的关键特性\n所有数据都存储在叶子节点，非叶子节点只存储键值 叶子节点之间通过指针连接，形成有序链表 每个节点的大小等于一个磁盘页（InnoDB 默认 16KB） 这些特性带来三个优势：\n范围查询高效：通过叶子节点的链表，可以快速扫描连续数据 磁盘 IO 少：树的高度低，查询时访问的磁盘页少 缓存友好：非叶子节点只存储键值，可以在内存中缓存更多节点 架构思考： B+ 树的设计充分考虑了磁盘 IO 的特性。磁盘的随机读写速度远低于顺序读写，B+ 树通过降低树高减少随机 IO，通过叶子节点链表实现顺序扫描。这是\"软件设计要适配硬件特性\"的经典案例。\nEXPLAIN：SQL 性能分析的第一步 优化 SQL 的第一步是用 EXPLAIN 查看执行计划：\n1EXPLAIN SELECT * FROM orders WHERE user_id = 123 AND status = 1; 输出结果包含多个字段，我们重点关注以下几个：\ntype：访问类型\n从好到坏依次是：\nsystem：表只有一行数据（系统表） const：通过主键或唯一索引查询，最多返回一行 eq_ref：连接查询中，被驱动表通过主键或唯一索引关联 ref：通过非唯一索引查询 range：索引范围扫描（BETWEEN、\u003e、\u003c 等） index：全索引扫描（扫描整个索引树） ALL：全表扫描（最差） key：实际使用的索引\n如果是 NULL，说明没有使用索引，需要优化。\nrows：扫描的行数\n这是 MySQL 估算的值，不是精确值。rows 越小，查询越快。\nExtra：额外信息\nUsing index：覆盖索引，不需要回表查询 Using where：在存储引擎层过滤后，还需要在 Server 层再次过滤 Using filesort：需要额外排序，性能较差 Using temporary：需要创建临时表，性能很差 实战案例：慢查询优化\n假设有一张订单表：\n1CREATE TABLE orders ( 2 id BIGINT PRIMARY KEY, 3 user_id BIGINT, 4 status TINYINT, 5 create_time DATETIME, 6 INDEX idx_user_id (user_id) 7); 执行查询：\n1SELECT * FROM orders WHERE user_id = 123 AND status = 1 ORDER BY create_time DESC LIMIT 10; EXPLAIN 结果：\n1type: ref 2key: idx_user_id 3rows: 5000 4Extra: Using where; Using filesort 问题分析：\n使用了 idx_user_id 索引，type 是 ref，还不错 但 Extra 显示 Using filesort，说明需要额外排序，性能较差 rows 是 5000，说明扫描了 5000 行数据 优化方案：创建联合索引 (user_id, status, create_time)\n1ALTER TABLE orders ADD INDEX idx_user_status_time (user_id, status, create_time); 再次 EXPLAIN：\n1type: ref 2key: idx_user_status_time 3rows: 10 4Extra: Using index condition 优化效果：\nrows 从 5000 降低到 10 去掉了 Using filesort，不需要额外排序 联合索引：最左前缀匹配原则 联合索引的顺序很重要，必须遵循最左前缀匹配原则。\n原理解析\n假设有联合索引 (a, b, c)，索引的排序规则是：\n先按 a 排序 a 相同时，按 b 排序 a 和 b 都相同时，按 c 排序 这意味着：\nWHERE a = 1：可以使用索引 WHERE a = 1 AND b = 2：可以使用索引 WHERE a = 1 AND b = 2 AND c = 3：可以使用索引 WHERE b = 2：不能使用索引（缺少 a） WHERE a = 1 AND c = 3：只能使用 a 部分的索引（缺少 b） 索引顺序的选择策略\n区分度高的字段放在前面 经常用于查询条件的字段放在前面 经常用于排序的字段放在后面 实战案例：订单查询优化\n业务场景：\n查询某个用户的订单：WHERE user_id = ? 查询某个用户的待支付订单：WHERE user_id = ? AND status = 1 查询某个用户的订单，按时间倒序：WHERE user_id = ? ORDER BY create_time DESC 索引设计：(user_id, status, create_time)\n为什么不是 (user_id, create_time, status)？\n因为第二个查询需要同时过滤 user_id 和 status，如果 status 在最后，就无法利用索引的有序性。\n避坑提示： 联合索引不是越多越好。每增加一个索引，都会增加写入时的维护成本（插入、更新、删除都需要更新索引）。建议一张表的索引数量控制在 5 个以内。\n覆盖索引：避免回表查询 什么是回表？\nInnoDB 的索引分为两种：\n聚簇索引（主键索引）：叶子节点存储完整的行数据 二级索引（普通索引）：叶子节点只存储索引列和主键值 当通过二级索引查询时，如果需要的列不在索引中，就需要回表：\n先通过二级索引找到主键值 再通过主键值到聚簇索引中查找完整行数据 回表需要额外的磁盘 IO，影响性能。\n覆盖索引优化\n如果查询的列都在索引中，就不需要回表，这叫覆盖索引。\n案例：\n1-- 需要回表 2SELECT * FROM orders WHERE user_id = 123; 3 4-- 不需要回表（覆盖索引） 5SELECT id, user_id, status FROM orders WHERE user_id = 123; 如果有索引 (user_id, status)，第二个查询就是覆盖索引（查询列 id、user_id、status 都在索引中）。\nEXPLAIN 结果会显示 Extra: Using index。\n实战技巧：索引列冗余\n有时候为了实现覆盖索引，可以在索引中冗余一些常用列：\n1-- 原索引 2ALTER TABLE orders ADD INDEX idx_user_id (user_id); 3 4-- 优化后：冗余 status 和 create_time 5ALTER TABLE orders ADD INDEX idx_user_id_status_time (user_id, status, create_time); 这样，大部分查询都能命中覆盖索引，避免回表。\n索引下推：减少回表次数 MySQL 5.6 引入了索引下推（Index Condition Pushdown，ICP）优化。\n没有索引下推的情况\n假设有索引 (user_id, status)，执行查询：\n1SELECT * FROM orders WHERE user_id = 123 AND status \u003e 0; 传统流程：\n通过索引找到所有 user_id = 123 的记录 回表获取完整行数据 在 Server 层过滤 status \u003e 0 问题：即使 status 不满足条件，也会回表，浪费 IO。\n有索引下推的情况\n优化后的流程：\n通过索引找到所有 user_id = 123 的记录 在索引层就过滤 status \u003e 0（不需要回表） 只对满足条件的记录回表 EXPLAIN 结果会显示 Extra: Using index condition。\n索引下推的好处：减少回表次数，降低磁盘 IO。\n架构思考： 索引下推体现了\"计算下推\"的思想：把过滤逻辑尽可能下推到存储引擎层，减少数据传输量。类似的思想还有：数据库的谓词下推、大数据的算子下推。\n索引失效的常见场景 即使创建了索引,某些情况下也会失效：\n1. 在索引列上使用函数\n1-- 索引失效 2SELECT * FROM orders WHERE DATE(create_time) = '2024-08-10'; 3 4-- 优化：改写为范围查询 5SELECT * FROM orders WHERE create_time \u003e= '2024-08-10 00:00:00' 6 AND create_time \u003c '2024-08-11 00:00:00'; 2. 隐式类型转换\n1-- user_id 是 BIGINT 类型，传入字符串会导致索引失效 2SELECT * FROM orders WHERE user_id = '123'; 3 4-- 优化：传入正确类型 5SELECT * FROM orders WHERE user_id = 123; 3. 使用 OR 连接不同索引列\n1-- 索引失效（user_id 和 status 在不同索引中） 2SELECT * FROM orders WHERE user_id = 123 OR status = 1; 3 4-- 优化：改写为 UNION 5SELECT * FROM orders WHERE user_id = 123 6UNION 7SELECT * FROM orders WHERE status = 1; 4. 模糊查询以 % 开头\n1-- 索引失效 2SELECT * FROM users WHERE name LIKE '%张三%'; 3 4-- 部分优化：如果只是后缀模糊，可以使用索引 5SELECT * FROM users WHERE name LIKE '张三%'; 总结与思考 MySQL 索引优化的核心是：理解 B+ 树的存储结构，利用索引的有序性，减少磁盘 IO。\n通过 EXPLAIN 分析执行计划，找到性能瓶颈 设计合理的联合索引，遵循最左前缀匹配原则 利用覆盖索引避免回表，利用索引下推减少回表次数 避免索引失效的常见陷阱 索引不是越多越好，每个索引都有维护成本。在设计索引时，要结合业务场景，权衡查询性能和写入性能。\n下次当你的 SQL 查询很慢时，不妨先 EXPLAIN 一下，看看是不是索引的问题。\n",
+  "wordCount" : "613",
+  "inLanguage": "en",
+  "datePublished": "2024-08-10T00:00:00Z",
+  "dateModified": "2024-08-10T00:00:00Z",
+  "author":{
+    "@type": "Person",
+    "name": "wawayu"
+  },
+  "mainEntityOfPage": {
+    "@type": "WebPage",
+    "@id": "http://localhost:1313/posts/2024/08/mysql-%E7%B4%A2%E5%BC%95%E4%BC%98%E5%8C%96%E4%BB%8E-explain-%E5%88%B0%E6%89%A7%E8%A1%8C%E8%AE%A1%E5%88%92%E7%9A%84%E5%AE%8C%E6%95%B4%E5%AE%9E%E6%88%98/"
+  },
+  "publisher": {
+    "@type": "Organization",
+    "name": "博客喵",
+    "logo": {
+      "@type": "ImageObject",
+      "url": "http://localhost:1313/favicon.ico"
+    }
+  }
+}
+</script>
+</head>
+<body id="top">
+    <header class="header">
+    <nav class="nav">
+        <div class="logo">
+            <a href="http://localhost:1313/" accesskey="h" title="博客喵 (Alt + H)">博客喵</a>
+            <div class="logo-switches">
+                <button id="theme-toggle" accesskey="t" title="(Alt + T)" aria-label="Toggle theme">
+                    <svg id="moon" xmlns="http://www.w3.org/2000/svg" width="24" height="18" viewBox="0 0 24 24"
+                        fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"
+                        stroke-linejoin="round">
+                        <path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"></path>
+                    </svg>
+                    <svg id="sun" xmlns="http://www.w3.org/2000/svg" width="24" height="18" viewBox="0 0 24 24"
+                        fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"
+                        stroke-linejoin="round">
+                        <circle cx="12" cy="12" r="5"></circle>
+                        <line x1="12" y1="1" x2="12" y2="3"></line>
+                        <line x1="12" y1="21" x2="12" y2="23"></line>
+                        <line x1="4.22" y1="4.22" x2="5.64" y2="5.64"></line>
+                        <line x1="18.36" y1="18.36" x2="19.78" y2="19.78"></line>
+                        <line x1="1" y1="12" x2="3" y2="12"></line>
+                        <line x1="21" y1="12" x2="23" y2="12"></line>
+                        <line x1="4.22" y1="19.78" x2="5.64" y2="18.36"></line>
+                        <line x1="18.36" y1="5.64" x2="19.78" y2="4.22"></line>
+                    </svg>
+                </button>
+            </div>
+        </div>
+        <ul id="menu">
+            <li>
+                <a href="http://localhost:1313/posts/" title="📝 文章">
+                    <span>📝 文章</span>
+                </a>
+            </li>
+            <li>
+                <a href="http://localhost:1313/tags/" title="🏷️ 标签">
+                    <span>🏷️ 标签</span>
+                </a>
+            </li>
+            <li>
+                <a href="http://localhost:1313/categories/" title="📂 分类">
+                    <span>📂 分类</span>
+                </a>
+            </li>
+            <li>
+                <a href="http://localhost:1313/skills/" title="💻 技能">
+                    <span>💻 技能</span>
+                </a>
+            </li>
+            <li>
+                <a href="http://localhost:1313/about/" title="👤 关于">
+                    <span>👤 关于</span>
+                </a>
+            </li>
+            <li>
+                <a href="http://localhost:1313/search/" title="🔍 搜索">
+                    <span>🔍 搜索</span>
+                </a>
+            </li>
+        </ul>
+    </nav>
+</header>
+<main class="main">
+
+<article class="post-single">
+  <header class="post-header">
+    <div class="breadcrumbs"><a href="http://localhost:1313/">Home</a>&nbsp;»&nbsp;<a href="http://localhost:1313/posts/">Posts</a></div>
+    <h1 class="post-title entry-hint-parent">
+      MySQL 索引优化：从 EXPLAIN 到执行计划的完整实战
+    </h1>
+    <div class="post-description">
+      深入 B&#43; 树原理，掌握联合索引、覆盖索引、索引下推等优化技巧
+    </div>
+    <div class="post-meta"><span title='2024-08-10 00:00:00 +0000 UTC'>August 10, 2024</span>&nbsp;·&nbsp;<span>3 min</span>&nbsp;·&nbsp;<span>613 words</span>&nbsp;·&nbsp;<span>wawayu</span>&nbsp;|&nbsp;<span>
+    <a href="https://github.com/wawayu-dev/wawayu-dev.github.io/tree/main/content/posts/mysql-index-optimization.md" rel="noopener noreferrer edit" target="_blank">建议修改</a>
+</span>
+
+</div>
+  </header> <div class="toc">
+    <details  open>
+        <summary accesskey="c" title="(Alt + C)">
+            <span class="details">Table of Contents</span>
+        </summary>
+
+        <div class="inner"><nav id="TableOfContents">
+  <ul>
+    <li>
+      <ul>
+        <li><a href="#本文亮点">本文亮点</a></li>
+      </ul>
+    </li>
+    <li><a href="#b-树mysql-索引的底层实现">B+ 树：MySQL 索引的底层实现</a></li>
+    <li><a href="#explainsql-性能分析的第一步">EXPLAIN：SQL 性能分析的第一步</a></li>
+    <li><a href="#联合索引最左前缀匹配原则">联合索引：最左前缀匹配原则</a></li>
+    <li><a href="#覆盖索引避免回表查询">覆盖索引：避免回表查询</a></li>
+    <li><a href="#索引下推减少回表次数">索引下推：减少回表次数</a></li>
+    <li><a href="#索引失效的常见场景">索引失效的常见场景</a></li>
+    <li><a href="#总结与思考">总结与思考</a></li>
+  </ul>
+</nav>
+        </div>
+    </details>
+</div>
+
+  <div class="post-content"><p>一条 SQL 查询从 3 秒优化到 30ms，背后往往只是加了一个索引。但索引不是银弹，用错了反而会拖慢查询速度。本文从 B+ 树原理出发，系统讲解 MySQL 索引优化的方法论。</p>
+<h3 id="本文亮点">本文亮点<a hidden class="anchor" aria-hidden="true" href="#本文亮点">#</a></h3>
+<ul>
+<li><input checked="" disabled="" type="checkbox"> 理解 B+ 树索引的底层存储结构</li>
+<li><input checked="" disabled="" type="checkbox"> 掌握 EXPLAIN 执行计划的关键字段含义</li>
+<li><input checked="" disabled="" type="checkbox"> 学会设计高效的联合索引</li>
+<li><input checked="" disabled="" type="checkbox"> 深入覆盖索引与索引下推优化</li>
+</ul>
+<hr>
+<h2 id="b-树mysql-索引的底层实现">B+ 树：MySQL 索引的底层实现<a hidden class="anchor" aria-hidden="true" href="#b-树mysql-索引的底层实现">#</a></h2>
+<p>MySQL 的 InnoDB 引擎使用 B+ 树作为索引结构。理解 B+ 树的特性，是优化索引的基础。</p>
+<p><strong>B+ 树 vs 二叉搜索树</strong></p>
+<p>为什么不用二叉搜索树？因为树的高度会影响查询性能。假设有 100 万条数据：</p>
+<ul>
+<li>二叉搜索树：高度约为 20（log₂ 1000000），需要 20 次磁盘 IO</li>
+<li>B+ 树（每个节点 1000 个键）：高度约为 3（log₁₀₀₀ 1000000），只需 3 次磁盘 IO</li>
+</ul>
+<p>B+ 树通过增加节点的扇出度（每个节点存储更多键），大幅降低了树的高度。</p>
+<p><strong>B+ 树的关键特性</strong></p>
+<ol>
+<li>所有数据都存储在叶子节点，非叶子节点只存储键值</li>
+<li>叶子节点之间通过指针连接，形成有序链表</li>
+<li>每个节点的大小等于一个磁盘页（InnoDB 默认 16KB）</li>
+</ol>
+<p>这些特性带来三个优势：</p>
+<ul>
+<li>范围查询高效：通过叶子节点的链表，可以快速扫描连续数据</li>
+<li>磁盘 IO 少：树的高度低，查询时访问的磁盘页少</li>
+<li>缓存友好：非叶子节点只存储键值，可以在内存中缓存更多节点</li>
+</ul>
+<blockquote>
+<p><strong>架构思考：</strong> B+ 树的设计充分考虑了磁盘 IO 的特性。磁盘的随机读写速度远低于顺序读写，B+ 树通过降低树高减少随机 IO，通过叶子节点链表实现顺序扫描。这是&quot;软件设计要适配硬件特性&quot;的经典案例。</p>
+</blockquote>
+<hr>
+<h2 id="explainsql-性能分析的第一步">EXPLAIN：SQL 性能分析的第一步<a hidden class="anchor" aria-hidden="true" href="#explainsql-性能分析的第一步">#</a></h2>
+<p>优化 SQL 的第一步是用 EXPLAIN 查看执行计划：</p>
+<div class="highlight"><pre tabindex="0" class="chroma"><code class="language-sql" data-lang="sql"><span class="line"><span class="ln">1</span><span class="cl"><span class="k">EXPLAIN</span><span class="w"> </span><span class="k">SELECT</span><span class="w"> </span><span class="o">*</span><span class="w"> </span><span class="k">FROM</span><span class="w"> </span><span class="n">orders</span><span class="w"> </span><span class="k">WHERE</span><span class="w"> </span><span class="n">user_id</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="mi">123</span><span class="w"> </span><span class="k">AND</span><span class="w"> </span><span class="n">status</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="mi">1</span><span class="p">;</span><span class="w">
+</span></span></span></code></pre></div><p>输出结果包含多个字段，我们重点关注以下几个：</p>
+<p><strong>type：访问类型</strong></p>
+<p>从好到坏依次是：</p>
+<ul>
+<li><code>system</code>：表只有一行数据（系统表）</li>
+<li><code>const</code>：通过主键或唯一索引查询，最多返回一行</li>
+<li><code>eq_ref</code>：连接查询中，被驱动表通过主键或唯一索引关联</li>
+<li><code>ref</code>：通过非唯一索引查询</li>
+<li><code>range</code>：索引范围扫描（BETWEEN、&gt;、&lt; 等）</li>
+<li><code>index</code>：全索引扫描（扫描整个索引树）</li>
+<li><code>ALL</code>：全表扫描（最差）</li>
+</ul>
+<p><strong>key：实际使用的索引</strong></p>
+<p>如果是 NULL，说明没有使用索引，需要优化。</p>
+<p><strong>rows：扫描的行数</strong></p>
+<p>这是 MySQL 估算的值，不是精确值。rows 越小，查询越快。</p>
+<p><strong>Extra：额外信息</strong></p>
+<ul>
+<li><code>Using index</code>：覆盖索引，不需要回表查询</li>
+<li><code>Using where</code>：在存储引擎层过滤后，还需要在 Server 层再次过滤</li>
+<li><code>Using filesort</code>：需要额外排序，性能较差</li>
+<li><code>Using temporary</code>：需要创建临时表，性能很差</li>
+</ul>
+<p><strong>实战案例：慢查询优化</strong></p>
+<p>假设有一张订单表：</p>
+<div class="highlight"><pre tabindex="0" class="chroma"><code class="language-sql" data-lang="sql"><span class="line"><span class="ln">1</span><span class="cl"><span class="k">CREATE</span><span class="w"> </span><span class="k">TABLE</span><span class="w"> </span><span class="n">orders</span><span class="w"> </span><span class="p">(</span><span class="w">
+</span></span></span><span class="line"><span class="ln">2</span><span class="cl"><span class="w">    </span><span class="n">id</span><span class="w"> </span><span class="nb">BIGINT</span><span class="w"> </span><span class="k">PRIMARY</span><span class="w"> </span><span class="k">KEY</span><span class="p">,</span><span class="w">
+</span></span></span><span class="line"><span class="ln">3</span><span class="cl"><span class="w">    </span><span class="n">user_id</span><span class="w"> </span><span class="nb">BIGINT</span><span class="p">,</span><span class="w">
+</span></span></span><span class="line"><span class="ln">4</span><span class="cl"><span class="w">    </span><span class="n">status</span><span class="w"> </span><span class="n">TINYINT</span><span class="p">,</span><span class="w">
+</span></span></span><span class="line"><span class="ln">5</span><span class="cl"><span class="w">    </span><span class="n">create_time</span><span class="w"> </span><span class="n">DATETIME</span><span class="p">,</span><span class="w">
+</span></span></span><span class="line"><span class="ln">6</span><span class="cl"><span class="w">    </span><span class="k">INDEX</span><span class="w"> </span><span class="n">idx_user_id</span><span class="w"> </span><span class="p">(</span><span class="n">user_id</span><span class="p">)</span><span class="w">
+</span></span></span><span class="line"><span class="ln">7</span><span class="cl"><span class="p">);</span><span class="w">
+</span></span></span></code></pre></div><p>执行查询：</p>
+<div class="highlight"><pre tabindex="0" class="chroma"><code class="language-sql" data-lang="sql"><span class="line"><span class="ln">1</span><span class="cl"><span class="k">SELECT</span><span class="w"> </span><span class="o">*</span><span class="w"> </span><span class="k">FROM</span><span class="w"> </span><span class="n">orders</span><span class="w"> </span><span class="k">WHERE</span><span class="w"> </span><span class="n">user_id</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="mi">123</span><span class="w"> </span><span class="k">AND</span><span class="w"> </span><span class="n">status</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="mi">1</span><span class="w"> </span><span class="k">ORDER</span><span class="w"> </span><span class="k">BY</span><span class="w"> </span><span class="n">create_time</span><span class="w"> </span><span class="k">DESC</span><span class="w"> </span><span class="k">LIMIT</span><span class="w"> </span><span class="mi">10</span><span class="p">;</span><span class="w">
+</span></span></span></code></pre></div><p>EXPLAIN 结果：</p>
+<div class="highlight"><pre tabindex="0" class="chroma"><code class="language-fallback" data-lang="fallback"><span class="line"><span class="ln">1</span><span class="cl">type: ref
+</span></span><span class="line"><span class="ln">2</span><span class="cl">key: idx_user_id
+</span></span><span class="line"><span class="ln">3</span><span class="cl">rows: 5000
+</span></span><span class="line"><span class="ln">4</span><span class="cl">Extra: Using where; Using filesort
+</span></span></code></pre></div><p>问题分析：</p>
+<ol>
+<li>使用了 <code>idx_user_id</code> 索引，type 是 ref，还不错</li>
+<li>但 Extra 显示 <code>Using filesort</code>，说明需要额外排序，性能较差</li>
+<li>rows 是 5000，说明扫描了 5000 行数据</li>
+</ol>
+<p>优化方案：创建联合索引 <code>(user_id, status, create_time)</code></p>
+<div class="highlight"><pre tabindex="0" class="chroma"><code class="language-sql" data-lang="sql"><span class="line"><span class="ln">1</span><span class="cl"><span class="k">ALTER</span><span class="w"> </span><span class="k">TABLE</span><span class="w"> </span><span class="n">orders</span><span class="w"> </span><span class="k">ADD</span><span class="w"> </span><span class="k">INDEX</span><span class="w"> </span><span class="n">idx_user_status_time</span><span class="w"> </span><span class="p">(</span><span class="n">user_id</span><span class="p">,</span><span class="w"> </span><span class="n">status</span><span class="p">,</span><span class="w"> </span><span class="n">create_time</span><span class="p">);</span><span class="w">
+</span></span></span></code></pre></div><p>再次 EXPLAIN：</p>
+<div class="highlight"><pre tabindex="0" class="chroma"><code class="language-fallback" data-lang="fallback"><span class="line"><span class="ln">1</span><span class="cl">type: ref
+</span></span><span class="line"><span class="ln">2</span><span class="cl">key: idx_user_status_time
+</span></span><span class="line"><span class="ln">3</span><span class="cl">rows: 10
+</span></span><span class="line"><span class="ln">4</span><span class="cl">Extra: Using index condition
+</span></span></code></pre></div><p>优化效果：</p>
+<ul>
+<li>rows 从 5000 降低到 10</li>
+<li>去掉了 Using filesort，不需要额外排序</li>
+</ul>
+<hr>
+<h2 id="联合索引最左前缀匹配原则">联合索引：最左前缀匹配原则<a hidden class="anchor" aria-hidden="true" href="#联合索引最左前缀匹配原则">#</a></h2>
+<p>联合索引的顺序很重要，必须遵循最左前缀匹配原则。</p>
+<p><strong>原理解析</strong></p>
+<p>假设有联合索引 <code>(a, b, c)</code>，索引的排序规则是：</p>
+<ol>
+<li>先按 a 排序</li>
+<li>a 相同时，按 b 排序</li>
+<li>a 和 b 都相同时，按 c 排序</li>
+</ol>
+<p>这意味着：</p>
+<ul>
+<li><code>WHERE a = 1</code>：可以使用索引</li>
+<li><code>WHERE a = 1 AND b = 2</code>：可以使用索引</li>
+<li><code>WHERE a = 1 AND b = 2 AND c = 3</code>：可以使用索引</li>
+<li><code>WHERE b = 2</code>：不能使用索引（缺少 a）</li>
+<li><code>WHERE a = 1 AND c = 3</code>：只能使用 a 部分的索引（缺少 b）</li>
+</ul>
+<p><strong>索引顺序的选择策略</strong></p>
+<ol>
+<li>区分度高的字段放在前面</li>
+<li>经常用于查询条件的字段放在前面</li>
+<li>经常用于排序的字段放在后面</li>
+</ol>
+<p><strong>实战案例：订单查询优化</strong></p>
+<p>业务场景：</p>
+<ul>
+<li>查询某个用户的订单：<code>WHERE user_id = ?</code></li>
+<li>查询某个用户的待支付订单：<code>WHERE user_id = ? AND status = 1</code></li>
+<li>查询某个用户的订单，按时间倒序：<code>WHERE user_id = ? ORDER BY create_time DESC</code></li>
+</ul>
+<p>索引设计：<code>(user_id, status, create_time)</code></p>
+<p>为什么不是 <code>(user_id, create_time, status)</code>？</p>
+<p>因为第二个查询需要同时过滤 user_id 和 status，如果 status 在最后，就无法利用索引的有序性。</p>
+<blockquote>
+<p><strong>避坑提示：</strong> 联合索引不是越多越好。每增加一个索引，都会增加写入时的维护成本（插入、更新、删除都需要更新索引）。建议一张表的索引数量控制在 5 个以内。</p>
+</blockquote>
+<hr>
+<h2 id="覆盖索引避免回表查询">覆盖索引：避免回表查询<a hidden class="anchor" aria-hidden="true" href="#覆盖索引避免回表查询">#</a></h2>
+<p><strong>什么是回表？</strong></p>
+<p>InnoDB 的索引分为两种：</p>
+<ul>
+<li>聚簇索引（主键索引）：叶子节点存储完整的行数据</li>
+<li>二级索引（普通索引）：叶子节点只存储索引列和主键值</li>
+</ul>
+<p>当通过二级索引查询时，如果需要的列不在索引中，就需要回表：</p>
+<ol>
+<li>先通过二级索引找到主键值</li>
+<li>再通过主键值到聚簇索引中查找完整行数据</li>
+</ol>
+<p>回表需要额外的磁盘 IO，影响性能。</p>
+<p><strong>覆盖索引优化</strong></p>
+<p>如果查询的列都在索引中，就不需要回表，这叫覆盖索引。</p>
+<p>案例：</p>
+<div class="highlight"><pre tabindex="0" class="chroma"><code class="language-sql" data-lang="sql"><span class="line"><span class="ln">1</span><span class="cl"><span class="c1">-- 需要回表
+</span></span></span><span class="line"><span class="ln">2</span><span class="cl"><span class="k">SELECT</span><span class="w"> </span><span class="o">*</span><span class="w"> </span><span class="k">FROM</span><span class="w"> </span><span class="n">orders</span><span class="w"> </span><span class="k">WHERE</span><span class="w"> </span><span class="n">user_id</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="mi">123</span><span class="p">;</span><span class="w">
+</span></span></span><span class="line"><span class="ln">3</span><span class="cl"><span class="w">
+</span></span></span><span class="line"><span class="ln">4</span><span class="cl"><span class="c1">-- 不需要回表（覆盖索引）
+</span></span></span><span class="line"><span class="ln">5</span><span class="cl"><span class="k">SELECT</span><span class="w"> </span><span class="n">id</span><span class="p">,</span><span class="w"> </span><span class="n">user_id</span><span class="p">,</span><span class="w"> </span><span class="n">status</span><span class="w"> </span><span class="k">FROM</span><span class="w"> </span><span class="n">orders</span><span class="w"> </span><span class="k">WHERE</span><span class="w"> </span><span class="n">user_id</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="mi">123</span><span class="p">;</span><span class="w">
+</span></span></span></code></pre></div><p>如果有索引 <code>(user_id, status)</code>，第二个查询就是覆盖索引（查询列 id、user_id、status 都在索引中）。</p>
+<p>EXPLAIN 结果会显示 <code>Extra: Using index</code>。</p>
+<p><strong>实战技巧：索引列冗余</strong></p>
+<p>有时候为了实现覆盖索引，可以在索引中冗余一些常用列：</p>
+<div class="highlight"><pre tabindex="0" class="chroma"><code class="language-sql" data-lang="sql"><span class="line"><span class="ln">1</span><span class="cl"><span class="c1">-- 原索引
+</span></span></span><span class="line"><span class="ln">2</span><span class="cl"><span class="k">ALTER</span><span class="w"> </span><span class="k">TABLE</span><span class="w"> </span><span class="n">orders</span><span class="w"> </span><span class="k">ADD</span><span class="w"> </span><span class="k">INDEX</span><span class="w"> </span><span class="n">idx_user_id</span><span class="w"> </span><span class="p">(</span><span class="n">user_id</span><span class="p">);</span><span class="w">
+</span></span></span><span class="line"><span class="ln">3</span><span class="cl"><span class="w">
+</span></span></span><span class="line"><span class="ln">4</span><span class="cl"><span class="c1">-- 优化后：冗余 status 和 create_time
+</span></span></span><span class="line"><span class="ln">5</span><span class="cl"><span class="k">ALTER</span><span class="w"> </span><span class="k">TABLE</span><span class="w"> </span><span class="n">orders</span><span class="w"> </span><span class="k">ADD</span><span class="w"> </span><span class="k">INDEX</span><span class="w"> </span><span class="n">idx_user_id_status_time</span><span class="w"> </span><span class="p">(</span><span class="n">user_id</span><span class="p">,</span><span class="w"> </span><span class="n">status</span><span class="p">,</span><span class="w"> </span><span class="n">create_time</span><span class="p">);</span><span class="w">
+</span></span></span></code></pre></div><p>这样，大部分查询都能命中覆盖索引，避免回表。</p>
+<hr>
+<h2 id="索引下推减少回表次数">索引下推：减少回表次数<a hidden class="anchor" aria-hidden="true" href="#索引下推减少回表次数">#</a></h2>
+<p>MySQL 5.6 引入了索引下推（Index Condition Pushdown，ICP）优化。</p>
+<p><strong>没有索引下推的情况</strong></p>
+<p>假设有索引 <code>(user_id, status)</code>，执行查询：</p>
+<div class="highlight"><pre tabindex="0" class="chroma"><code class="language-sql" data-lang="sql"><span class="line"><span class="ln">1</span><span class="cl"><span class="k">SELECT</span><span class="w"> </span><span class="o">*</span><span class="w"> </span><span class="k">FROM</span><span class="w"> </span><span class="n">orders</span><span class="w"> </span><span class="k">WHERE</span><span class="w"> </span><span class="n">user_id</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="mi">123</span><span class="w"> </span><span class="k">AND</span><span class="w"> </span><span class="n">status</span><span class="w"> </span><span class="o">&gt;</span><span class="w"> </span><span class="mi">0</span><span class="p">;</span><span class="w">
+</span></span></span></code></pre></div><p>传统流程：</p>
+<ol>
+<li>通过索引找到所有 user_id = 123 的记录</li>
+<li>回表获取完整行数据</li>
+<li>在 Server 层过滤 status &gt; 0</li>
+</ol>
+<p>问题：即使 status 不满足条件，也会回表，浪费 IO。</p>
+<p><strong>有索引下推的情况</strong></p>
+<p>优化后的流程：</p>
+<ol>
+<li>通过索引找到所有 user_id = 123 的记录</li>
+<li>在索引层就过滤 status &gt; 0（不需要回表）</li>
+<li>只对满足条件的记录回表</li>
+</ol>
+<p>EXPLAIN 结果会显示 <code>Extra: Using index condition</code>。</p>
+<p>索引下推的好处：减少回表次数，降低磁盘 IO。</p>
+<blockquote>
+<p><strong>架构思考：</strong> 索引下推体现了&quot;计算下推&quot;的思想：把过滤逻辑尽可能下推到存储引擎层，减少数据传输量。类似的思想还有：数据库的谓词下推、大数据的算子下推。</p>
+</blockquote>
+<hr>
+<h2 id="索引失效的常见场景">索引失效的常见场景<a hidden class="anchor" aria-hidden="true" href="#索引失效的常见场景">#</a></h2>
+<p>即使创建了索引,某些情况下也会失效：</p>
+<p><strong>1. 在索引列上使用函数</strong></p>
+<div class="highlight"><pre tabindex="0" class="chroma"><code class="language-sql" data-lang="sql"><span class="line"><span class="ln">1</span><span class="cl"><span class="c1">-- 索引失效
+</span></span></span><span class="line"><span class="ln">2</span><span class="cl"><span class="k">SELECT</span><span class="w"> </span><span class="o">*</span><span class="w"> </span><span class="k">FROM</span><span class="w"> </span><span class="n">orders</span><span class="w"> </span><span class="k">WHERE</span><span class="w"> </span><span class="nb">DATE</span><span class="p">(</span><span class="n">create_time</span><span class="p">)</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="s1">&#39;2024-08-10&#39;</span><span class="p">;</span><span class="w">
+</span></span></span><span class="line"><span class="ln">3</span><span class="cl"><span class="w">
+</span></span></span><span class="line"><span class="ln">4</span><span class="cl"><span class="c1">-- 优化：改写为范围查询
+</span></span></span><span class="line"><span class="ln">5</span><span class="cl"><span class="k">SELECT</span><span class="w"> </span><span class="o">*</span><span class="w"> </span><span class="k">FROM</span><span class="w"> </span><span class="n">orders</span><span class="w"> </span><span class="k">WHERE</span><span class="w"> </span><span class="n">create_time</span><span class="w"> </span><span class="o">&gt;=</span><span class="w"> </span><span class="s1">&#39;2024-08-10 00:00:00&#39;</span><span class="w"> 
+</span></span></span><span class="line"><span class="ln">6</span><span class="cl"><span class="w">  </span><span class="k">AND</span><span class="w"> </span><span class="n">create_time</span><span class="w"> </span><span class="o">&lt;</span><span class="w"> </span><span class="s1">&#39;2024-08-11 00:00:00&#39;</span><span class="p">;</span><span class="w">
+</span></span></span></code></pre></div><p><strong>2. 隐式类型转换</strong></p>
+<div class="highlight"><pre tabindex="0" class="chroma"><code class="language-sql" data-lang="sql"><span class="line"><span class="ln">1</span><span class="cl"><span class="c1">-- user_id 是 BIGINT 类型，传入字符串会导致索引失效
+</span></span></span><span class="line"><span class="ln">2</span><span class="cl"><span class="k">SELECT</span><span class="w"> </span><span class="o">*</span><span class="w"> </span><span class="k">FROM</span><span class="w"> </span><span class="n">orders</span><span class="w"> </span><span class="k">WHERE</span><span class="w"> </span><span class="n">user_id</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="s1">&#39;123&#39;</span><span class="p">;</span><span class="w">
+</span></span></span><span class="line"><span class="ln">3</span><span class="cl"><span class="w">
+</span></span></span><span class="line"><span class="ln">4</span><span class="cl"><span class="c1">-- 优化：传入正确类型
+</span></span></span><span class="line"><span class="ln">5</span><span class="cl"><span class="k">SELECT</span><span class="w"> </span><span class="o">*</span><span class="w"> </span><span class="k">FROM</span><span class="w"> </span><span class="n">orders</span><span class="w"> </span><span class="k">WHERE</span><span class="w"> </span><span class="n">user_id</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="mi">123</span><span class="p">;</span><span class="w">
+</span></span></span></code></pre></div><p><strong>3. 使用 OR 连接不同索引列</strong></p>
+<div class="highlight"><pre tabindex="0" class="chroma"><code class="language-sql" data-lang="sql"><span class="line"><span class="ln">1</span><span class="cl"><span class="c1">-- 索引失效（user_id 和 status 在不同索引中）
+</span></span></span><span class="line"><span class="ln">2</span><span class="cl"><span class="k">SELECT</span><span class="w"> </span><span class="o">*</span><span class="w"> </span><span class="k">FROM</span><span class="w"> </span><span class="n">orders</span><span class="w"> </span><span class="k">WHERE</span><span class="w"> </span><span class="n">user_id</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="mi">123</span><span class="w"> </span><span class="k">OR</span><span class="w"> </span><span class="n">status</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="mi">1</span><span class="p">;</span><span class="w">
+</span></span></span><span class="line"><span class="ln">3</span><span class="cl"><span class="w">
+</span></span></span><span class="line"><span class="ln">4</span><span class="cl"><span class="c1">-- 优化：改写为 UNION
+</span></span></span><span class="line"><span class="ln">5</span><span class="cl"><span class="k">SELECT</span><span class="w"> </span><span class="o">*</span><span class="w"> </span><span class="k">FROM</span><span class="w"> </span><span class="n">orders</span><span class="w"> </span><span class="k">WHERE</span><span class="w"> </span><span class="n">user_id</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="mi">123</span><span class="w">
+</span></span></span><span class="line"><span class="ln">6</span><span class="cl"><span class="k">UNION</span><span class="w">
+</span></span></span><span class="line"><span class="ln">7</span><span class="cl"><span class="k">SELECT</span><span class="w"> </span><span class="o">*</span><span class="w"> </span><span class="k">FROM</span><span class="w"> </span><span class="n">orders</span><span class="w"> </span><span class="k">WHERE</span><span class="w"> </span><span class="n">status</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="mi">1</span><span class="p">;</span><span class="w">
+</span></span></span></code></pre></div><p><strong>4. 模糊查询以 % 开头</strong></p>
+<div class="highlight"><pre tabindex="0" class="chroma"><code class="language-sql" data-lang="sql"><span class="line"><span class="ln">1</span><span class="cl"><span class="c1">-- 索引失效
+</span></span></span><span class="line"><span class="ln">2</span><span class="cl"><span class="k">SELECT</span><span class="w"> </span><span class="o">*</span><span class="w"> </span><span class="k">FROM</span><span class="w"> </span><span class="n">users</span><span class="w"> </span><span class="k">WHERE</span><span class="w"> </span><span class="n">name</span><span class="w"> </span><span class="k">LIKE</span><span class="w"> </span><span class="s1">&#39;%张三%&#39;</span><span class="p">;</span><span class="w">
+</span></span></span><span class="line"><span class="ln">3</span><span class="cl"><span class="w">
+</span></span></span><span class="line"><span class="ln">4</span><span class="cl"><span class="c1">-- 部分优化：如果只是后缀模糊，可以使用索引
+</span></span></span><span class="line"><span class="ln">5</span><span class="cl"><span class="k">SELECT</span><span class="w"> </span><span class="o">*</span><span class="w"> </span><span class="k">FROM</span><span class="w"> </span><span class="n">users</span><span class="w"> </span><span class="k">WHERE</span><span class="w"> </span><span class="n">name</span><span class="w"> </span><span class="k">LIKE</span><span class="w"> </span><span class="s1">&#39;张三%&#39;</span><span class="p">;</span><span class="w">
+</span></span></span></code></pre></div><hr>
+<h2 id="总结与思考">总结与思考<a hidden class="anchor" aria-hidden="true" href="#总结与思考">#</a></h2>
+<p>MySQL 索引优化的核心是：理解 B+ 树的存储结构，利用索引的有序性，减少磁盘 IO。</p>
+<ul>
+<li>通过 EXPLAIN 分析执行计划，找到性能瓶颈</li>
+<li>设计合理的联合索引，遵循最左前缀匹配原则</li>
+<li>利用覆盖索引避免回表，利用索引下推减少回表次数</li>
+<li>避免索引失效的常见陷阱</li>
+</ul>
+<p>索引不是越多越好，每个索引都有维护成本。在设计索引时，要结合业务场景，权衡查询性能和写入性能。</p>
+<p>下次当你的 SQL 查询很慢时，不妨先 EXPLAIN 一下，看看是不是索引的问题。</p>
+
+
+  </div>
+
+  <footer class="post-footer">
+    <ul class="post-tags">
+      <li><a href="http://localhost:1313/tags/mysql/">MySQL</a></li>
+      <li><a href="http://localhost:1313/tags/%E7%B4%A2%E5%BC%95%E4%BC%98%E5%8C%96/">索引优化</a></li>
+      <li><a href="http://localhost:1313/tags/%E6%80%A7%E8%83%BD%E8%B0%83%E4%BC%98/">性能调优</a></li>
+      <li><a href="http://localhost:1313/tags/explain/">EXPLAIN</a></li>
+    </ul>
+<nav class="paginav">
+  <a class="prev" href="http://localhost:1313/posts/2024/09/mysql-%E4%BA%8B%E5%8A%A1%E9%9A%94%E7%A6%BB%E7%BA%A7%E5%88%AB%E4%B8%8E-mvcc-%E6%9C%BA%E5%88%B6%E6%B7%B1%E5%BA%A6%E8%A7%A3%E6%9E%90/">
+    <span class="title">« Prev</span>
+    <br>
+    <span>MySQL 事务隔离级别与 MVCC 机制深度解析</span>
+  </a>
+  <a class="next" href="http://localhost:1313/posts/2024/07/redis-%E5%88%86%E5%B8%83%E5%BC%8F%E9%94%81%E7%9A%84%E7%94%9F%E4%BA%A7%E7%BA%A7%E5%AE%9E%E8%B7%B5%E4%B8%8E-redisson-%E6%BA%90%E7%A0%81%E5%88%86%E6%9E%90/">
+    <span class="title">Next »</span>
+    <br>
+    <span>Redis 分布式锁的生产级实践与 Redisson 源码分析</span>
+  </a>
+</nav>
+
+
+<ul class="share-buttons">
+    <li>
+        <a target="_blank" rel="noopener noreferrer" aria-label="share MySQL 索引优化：从 EXPLAIN 到执行计划的完整实战 on x"
+            href="https://x.com/intent/tweet/?text=MySQL%20%e7%b4%a2%e5%bc%95%e4%bc%98%e5%8c%96%ef%bc%9a%e4%bb%8e%20EXPLAIN%20%e5%88%b0%e6%89%a7%e8%a1%8c%e8%ae%a1%e5%88%92%e7%9a%84%e5%ae%8c%e6%95%b4%e5%ae%9e%e6%88%98&amp;url=http%3a%2f%2flocalhost%3a1313%2fposts%2f2024%2f08%2fmysql-%25E7%25B4%25A2%25E5%25BC%2595%25E4%25BC%2598%25E5%258C%2596%25E4%25BB%258E-explain-%25E5%2588%25B0%25E6%2589%25A7%25E8%25A1%258C%25E8%25AE%25A1%25E5%2588%2592%25E7%259A%2584%25E5%25AE%258C%25E6%2595%25B4%25E5%25AE%259E%25E6%2588%2598%2f&amp;hashtags=MySQL%2c%e7%b4%a2%e5%bc%95%e4%bc%98%e5%8c%96%2c%e6%80%a7%e8%83%bd%e8%b0%83%e4%bc%98%2cEXPLAIN">
+            <svg version="1.1" viewBox="0 0 512 512" xml:space="preserve" height="30px" width="30px" fill="currentColor">
+                <path
+                    d="M512 62.554 L 512 449.446 C 512 483.97 483.97 512 449.446 512 L 62.554 512 C 28.03 512 0 483.97 0 449.446 L 0 62.554 C 0 28.03 28.029 0 62.554 0 L 449.446 0 C 483.971 0 512 28.03 512 62.554 Z M 269.951 190.75 L 182.567 75.216 L 56 75.216 L 207.216 272.95 L 63.9 436.783 L 125.266 436.783 L 235.9 310.383 L 332.567 436.783 L 456 436.783 L 298.367 228.367 L 432.367 75.216 L 371.033 75.216 Z M 127.633 110 L 164.101 110 L 383.481 400.065 L 349.5 400.065 Z" />
+            </svg>
+        </a>
+    </li>
+    <li>
+        <a target="_blank" rel="noopener noreferrer" aria-label="share MySQL 索引优化：从 EXPLAIN 到执行计划的完整实战 on linkedin"
+            href="https://www.linkedin.com/shareArticle?mini=true&amp;url=http%3a%2f%2flocalhost%3a1313%2fposts%2f2024%2f08%2fmysql-%25E7%25B4%25A2%25E5%25BC%2595%25E4%25BC%2598%25E5%258C%2596%25E4%25BB%258E-explain-%25E5%2588%25B0%25E6%2589%25A7%25E8%25A1%258C%25E8%25AE%25A1%25E5%2588%2592%25E7%259A%2584%25E5%25AE%258C%25E6%2595%25B4%25E5%25AE%259E%25E6%2588%2598%2f&amp;title=MySQL%20%e7%b4%a2%e5%bc%95%e4%bc%98%e5%8c%96%ef%bc%9a%e4%bb%8e%20EXPLAIN%20%e5%88%b0%e6%89%a7%e8%a1%8c%e8%ae%a1%e5%88%92%e7%9a%84%e5%ae%8c%e6%95%b4%e5%ae%9e%e6%88%98&amp;summary=MySQL%20%e7%b4%a2%e5%bc%95%e4%bc%98%e5%8c%96%ef%bc%9a%e4%bb%8e%20EXPLAIN%20%e5%88%b0%e6%89%a7%e8%a1%8c%e8%ae%a1%e5%88%92%e7%9a%84%e5%ae%8c%e6%95%b4%e5%ae%9e%e6%88%98&amp;source=http%3a%2f%2flocalhost%3a1313%2fposts%2f2024%2f08%2fmysql-%25E7%25B4%25A2%25E5%25BC%2595%25E4%25BC%2598%25E5%258C%2596%25E4%25BB%258E-explain-%25E5%2588%25B0%25E6%2589%25A7%25E8%25A1%258C%25E8%25AE%25A1%25E5%2588%2592%25E7%259A%2584%25E5%25AE%258C%25E6%2595%25B4%25E5%25AE%259E%25E6%2588%2598%2f">
+            <svg version="1.1" viewBox="0 0 512 512" xml:space="preserve" height="30px" width="30px" fill="currentColor">
+                <path
+                    d="M449.446,0c34.525,0 62.554,28.03 62.554,62.554l0,386.892c0,34.524 -28.03,62.554 -62.554,62.554l-386.892,0c-34.524,0 -62.554,-28.03 -62.554,-62.554l0,-386.892c0,-34.524 28.029,-62.554 62.554,-62.554l386.892,0Zm-288.985,423.278l0,-225.717l-75.04,0l0,225.717l75.04,0Zm270.539,0l0,-129.439c0,-69.333 -37.018,-101.586 -86.381,-101.586c-39.804,0 -57.634,21.891 -67.617,37.266l0,-31.958l-75.021,0c0.995,21.181 0,225.717 0,225.717l75.02,0l0,-126.056c0,-6.748 0.486,-13.492 2.474,-18.315c5.414,-13.475 17.767,-27.434 38.494,-27.434c27.135,0 38.007,20.707 38.007,51.037l0,120.768l75.024,0Zm-307.552,-334.556c-25.674,0 -42.448,16.879 -42.448,39.002c0,21.658 16.264,39.002 41.455,39.002l0.484,0c26.165,0 42.452,-17.344 42.452,-39.002c-0.485,-22.092 -16.241,-38.954 -41.943,-39.002Z" />
+            </svg>
+        </a>
+    </li>
+    <li>
+        <a target="_blank" rel="noopener noreferrer" aria-label="share MySQL 索引优化：从 EXPLAIN 到执行计划的完整实战 on reddit"
+            href="https://reddit.com/submit?url=http%3a%2f%2flocalhost%3a1313%2fposts%2f2024%2f08%2fmysql-%25E7%25B4%25A2%25E5%25BC%2595%25E4%25BC%2598%25E5%258C%2596%25E4%25BB%258E-explain-%25E5%2588%25B0%25E6%2589%25A7%25E8%25A1%258C%25E8%25AE%25A1%25E5%2588%2592%25E7%259A%2584%25E5%25AE%258C%25E6%2595%25B4%25E5%25AE%259E%25E6%2588%2598%2f&title=MySQL%20%e7%b4%a2%e5%bc%95%e4%bc%98%e5%8c%96%ef%bc%9a%e4%bb%8e%20EXPLAIN%20%e5%88%b0%e6%89%a7%e8%a1%8c%e8%ae%a1%e5%88%92%e7%9a%84%e5%ae%8c%e6%95%b4%e5%ae%9e%e6%88%98">
+            <svg version="1.1" viewBox="0 0 512 512" xml:space="preserve" height="30px" width="30px" fill="currentColor">
+                <path
+                    d="M449.446,0c34.525,0 62.554,28.03 62.554,62.554l0,386.892c0,34.524 -28.03,62.554 -62.554,62.554l-386.892,0c-34.524,0 -62.554,-28.03 -62.554,-62.554l0,-386.892c0,-34.524 28.029,-62.554 62.554,-62.554l386.892,0Zm-3.446,265.638c0,-22.964 -18.616,-41.58 -41.58,-41.58c-11.211,0 -21.361,4.457 -28.841,11.666c-28.424,-20.508 -67.586,-33.757 -111.204,-35.278l18.941,-89.121l61.884,13.157c0.756,15.734 13.642,28.29 29.56,28.29c16.407,0 29.706,-13.299 29.706,-29.701c0,-16.403 -13.299,-29.702 -29.706,-29.702c-11.666,0 -21.657,6.792 -26.515,16.578l-69.105,-14.69c-1.922,-0.418 -3.939,-0.042 -5.585,1.036c-1.658,1.073 -2.811,2.761 -3.224,4.686l-21.152,99.438c-44.258,1.228 -84.046,14.494 -112.837,35.232c-7.468,-7.164 -17.589,-11.591 -28.757,-11.591c-22.965,0 -41.585,18.616 -41.585,41.58c0,16.896 10.095,31.41 24.568,37.918c-0.639,4.135 -0.99,8.328 -0.99,12.576c0,63.977 74.469,115.836 166.33,115.836c91.861,0 166.334,-51.859 166.334,-115.836c0,-4.218 -0.347,-8.387 -0.977,-12.493c14.564,-6.47 24.735,-21.034 24.735,-38.001Zm-119.474,108.193c-20.27,20.241 -59.115,21.816 -70.534,21.816c-11.428,0 -50.277,-1.575 -70.522,-21.82c-3.007,-3.008 -3.007,-7.882 0,-10.889c3.003,-2.999 7.882,-3.003 10.885,0c12.777,12.781 40.11,17.317 59.637,17.317c19.522,0 46.86,-4.536 59.657,-17.321c3.016,-2.999 7.886,-2.995 10.885,0.008c3.008,3.011 3.003,7.882 -0.008,10.889Zm-5.23,-48.781c-16.373,0 -29.701,-13.324 -29.701,-29.698c0,-16.381 13.328,-29.714 29.701,-29.714c16.378,0 29.706,13.333 29.706,29.714c0,16.374 -13.328,29.698 -29.706,29.698Zm-160.386,-29.702c0,-16.381 13.328,-29.71 29.714,-29.71c16.369,0 29.689,13.329 29.689,29.71c0,16.373 -13.32,29.693 -29.689,29.693c-16.386,0 -29.714,-13.32 -29.714,-29.693Z" />
+            </svg>
+        </a>
+    </li>
+    <li>
+        <a target="_blank" rel="noopener noreferrer" aria-label="share MySQL 索引优化：从 EXPLAIN 到执行计划的完整实战 on facebook"
+            href="https://facebook.com/sharer/sharer.php?u=http%3a%2f%2flocalhost%3a1313%2fposts%2f2024%2f08%2fmysql-%25E7%25B4%25A2%25E5%25BC%2595%25E4%25BC%2598%25E5%258C%2596%25E4%25BB%258E-explain-%25E5%2588%25B0%25E6%2589%25A7%25E8%25A1%258C%25E8%25AE%25A1%25E5%2588%2592%25E7%259A%2584%25E5%25AE%258C%25E6%2595%25B4%25E5%25AE%259E%25E6%2588%2598%2f">
+            <svg version="1.1" viewBox="0 0 512 512" xml:space="preserve" height="30px" width="30px" fill="currentColor">
+                <path
+                    d="M449.446,0c34.525,0 62.554,28.03 62.554,62.554l0,386.892c0,34.524 -28.03,62.554 -62.554,62.554l-106.468,0l0,-192.915l66.6,0l12.672,-82.621l-79.272,0l0,-53.617c0,-22.603 11.073,-44.636 46.58,-44.636l36.042,0l0,-70.34c0,0 -32.71,-5.582 -63.982,-5.582c-65.288,0 -107.96,39.569 -107.96,111.204l0,62.971l-72.573,0l0,82.621l72.573,0l0,192.915l-191.104,0c-34.524,0 -62.554,-28.03 -62.554,-62.554l0,-386.892c0,-34.524 28.029,-62.554 62.554,-62.554l386.892,0Z" />
+            </svg>
+        </a>
+    </li>
+    <li>
+        <a target="_blank" rel="noopener noreferrer" aria-label="share MySQL 索引优化：从 EXPLAIN 到执行计划的完整实战 on whatsapp"
+            href="https://api.whatsapp.com/send?text=MySQL%20%e7%b4%a2%e5%bc%95%e4%bc%98%e5%8c%96%ef%bc%9a%e4%bb%8e%20EXPLAIN%20%e5%88%b0%e6%89%a7%e8%a1%8c%e8%ae%a1%e5%88%92%e7%9a%84%e5%ae%8c%e6%95%b4%e5%ae%9e%e6%88%98%20-%20http%3a%2f%2flocalhost%3a1313%2fposts%2f2024%2f08%2fmysql-%25E7%25B4%25A2%25E5%25BC%2595%25E4%25BC%2598%25E5%258C%2596%25E4%25BB%258E-explain-%25E5%2588%25B0%25E6%2589%25A7%25E8%25A1%258C%25E8%25AE%25A1%25E5%2588%2592%25E7%259A%2584%25E5%25AE%258C%25E6%2595%25B4%25E5%25AE%259E%25E6%2588%2598%2f">
+            <svg version="1.1" viewBox="0 0 512 512" xml:space="preserve" height="30px" width="30px" fill="currentColor">
+                <path
+                    d="M449.446,0c34.525,0 62.554,28.03 62.554,62.554l0,386.892c0,34.524 -28.03,62.554 -62.554,62.554l-386.892,0c-34.524,0 -62.554,-28.03 -62.554,-62.554l0,-386.892c0,-34.524 28.029,-62.554 62.554,-62.554l386.892,0Zm-58.673,127.703c-33.842,-33.881 -78.847,-52.548 -126.798,-52.568c-98.799,0 -179.21,80.405 -179.249,179.234c-0.013,31.593 8.241,62.428 23.927,89.612l-25.429,92.884l95.021,-24.925c26.181,14.28 55.659,21.807 85.658,21.816l0.074,0c98.789,0 179.206,-80.413 179.247,-179.243c0.018,-47.895 -18.61,-92.93 -52.451,-126.81Zm-126.797,275.782l-0.06,0c-26.734,-0.01 -52.954,-7.193 -75.828,-20.767l-5.441,-3.229l-56.386,14.792l15.05,-54.977l-3.542,-5.637c-14.913,-23.72 -22.791,-51.136 -22.779,-79.287c0.033,-82.142 66.867,-148.971 149.046,-148.971c39.793,0.014 77.199,15.531 105.329,43.692c28.128,28.16 43.609,65.592 43.594,105.4c-0.034,82.149 -66.866,148.983 -148.983,148.984Zm81.721,-111.581c-4.479,-2.242 -26.499,-13.075 -30.604,-14.571c-4.105,-1.495 -7.091,-2.241 -10.077,2.241c-2.986,4.483 -11.569,14.572 -14.182,17.562c-2.612,2.988 -5.225,3.364 -9.703,1.12c-4.479,-2.241 -18.91,-6.97 -36.017,-22.23c-13.314,-11.876 -22.304,-26.542 -24.916,-31.026c-2.612,-4.484 -0.279,-6.908 1.963,-9.14c2.016,-2.007 4.48,-5.232 6.719,-7.847c2.24,-2.615 2.986,-4.484 4.479,-7.472c1.493,-2.99 0.747,-5.604 -0.374,-7.846c-1.119,-2.241 -10.077,-24.288 -13.809,-33.256c-3.635,-8.733 -7.327,-7.55 -10.077,-7.688c-2.609,-0.13 -5.598,-0.158 -8.583,-0.158c-2.986,0 -7.839,1.121 -11.944,5.604c-4.105,4.484 -15.675,15.32 -15.675,37.364c0,22.046 16.048,43.342 18.287,46.332c2.24,2.99 31.582,48.227 76.511,67.627c10.685,4.615 19.028,7.371 25.533,9.434c10.728,3.41 20.492,2.929 28.209,1.775c8.605,-1.285 26.499,-10.833 30.231,-21.295c3.732,-10.464 3.732,-19.431 2.612,-21.298c-1.119,-1.869 -4.105,-2.99 -8.583,-5.232Z" />
+            </svg>
+        </a>
+    </li>
+    <li>
+        <a target="_blank" rel="noopener noreferrer" aria-label="share MySQL 索引优化：从 EXPLAIN 到执行计划的完整实战 on telegram"
+            href="https://telegram.me/share/url?text=MySQL%20%e7%b4%a2%e5%bc%95%e4%bc%98%e5%8c%96%ef%bc%9a%e4%bb%8e%20EXPLAIN%20%e5%88%b0%e6%89%a7%e8%a1%8c%e8%ae%a1%e5%88%92%e7%9a%84%e5%ae%8c%e6%95%b4%e5%ae%9e%e6%88%98&amp;url=http%3a%2f%2flocalhost%3a1313%2fposts%2f2024%2f08%2fmysql-%25E7%25B4%25A2%25E5%25BC%2595%25E4%25BC%2598%25E5%258C%2596%25E4%25BB%258E-explain-%25E5%2588%25B0%25E6%2589%25A7%25E8%25A1%258C%25E8%25AE%25A1%25E5%2588%2592%25E7%259A%2584%25E5%25AE%258C%25E6%2595%25B4%25E5%25AE%259E%25E6%2588%2598%2f">
+            <svg version="1.1" xml:space="preserve" viewBox="2 2 28 28" height="30px" width="30px" fill="currentColor">
+                <path
+                    d="M26.49,29.86H5.5a3.37,3.37,0,0,1-2.47-1,3.35,3.35,0,0,1-1-2.47V5.48A3.36,3.36,0,0,1,3,3,3.37,3.37,0,0,1,5.5,2h21A3.38,3.38,0,0,1,29,3a3.36,3.36,0,0,1,1,2.46V26.37a3.35,3.35,0,0,1-1,2.47A3.38,3.38,0,0,1,26.49,29.86Zm-5.38-6.71a.79.79,0,0,0,.85-.66L24.73,9.24a.55.55,0,0,0-.18-.46.62.62,0,0,0-.41-.17q-.08,0-16.53,6.11a.59.59,0,0,0-.41.59.57.57,0,0,0,.43.52l4,1.24,1.61,4.83a.62.62,0,0,0,.63.43.56.56,0,0,0,.4-.17L16.54,20l4.09,3A.9.9,0,0,0,21.11,23.15ZM13.8,20.71l-1.21-4q8.72-5.55,8.78-5.55c.15,0,.23,0,.23.16a.18.18,0,0,1,0,.06s-2.51,2.3-7.52,6.8Z" />
+            </svg>
+        </a>
+    </li>
+    <li>
+        <a target="_blank" rel="noopener noreferrer" aria-label="share MySQL 索引优化：从 EXPLAIN 到执行计划的完整实战 on ycombinator"
+            href="https://news.ycombinator.com/submitlink?t=MySQL%20%e7%b4%a2%e5%bc%95%e4%bc%98%e5%8c%96%ef%bc%9a%e4%bb%8e%20EXPLAIN%20%e5%88%b0%e6%89%a7%e8%a1%8c%e8%ae%a1%e5%88%92%e7%9a%84%e5%ae%8c%e6%95%b4%e5%ae%9e%e6%88%98&u=http%3a%2f%2flocalhost%3a1313%2fposts%2f2024%2f08%2fmysql-%25E7%25B4%25A2%25E5%25BC%2595%25E4%25BC%2598%25E5%258C%2596%25E4%25BB%258E-explain-%25E5%2588%25B0%25E6%2589%25A7%25E8%25A1%258C%25E8%25AE%25A1%25E5%2588%2592%25E7%259A%2584%25E5%25AE%258C%25E6%2595%25B4%25E5%25AE%259E%25E6%2588%2598%2f">
+            <svg version="1.1" xml:space="preserve" width="30px" height="30px" viewBox="0 0 512 512" fill="currentColor"
+                xmlns:inkscape="http://www.inkscape.org/namespaces/inkscape">
+                <path
+                    d="M449.446 0C483.971 0 512 28.03 512 62.554L512 449.446C512 483.97 483.97 512 449.446 512L62.554 512C28.03 512 0 483.97 0 449.446L0 62.554C0 28.03 28.029 0 62.554 0L449.446 0ZM183.8767 87.9921H121.8427L230.6673 292.4508V424.0079H281.3328V292.4508L390.1575 87.9921H328.1233L256 238.2489z" />
+            </svg>
+        </a>
+    </li>
+</ul>
+
+  </footer>
+</article>
+    </main>
+    
+<footer class="footer">
+        <span>&copy; 2026 <a href="http://localhost:1313/">博客喵</a></span> · 
+
+    <span>
+        Powered by
+        <a href="https://gohugo.io/" rel="noopener noreferrer" target="_blank">Hugo</a> &
+        <a href="https://github.com/adityatelange/hugo-PaperMod/" rel="noopener" target="_blank">PaperMod</a>
+    </span>
+</footer>
+<a href="#top" aria-label="go to top" title="Go to Top (Alt + G)" class="top-link" id="top-link" accesskey="g">
+    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 12 6" fill="currentColor">
+        <path d="M12 6H0l6-6z" />
+    </svg>
+</a>
+
+<script>
+    let menu = document.getElementById('menu');
+    if (menu) {
+        
+        const scrollPosition = localStorage.getItem("menu-scroll-position");
+        if (scrollPosition) {
+            menu.scrollLeft = parseInt(scrollPosition, 10);
+        }
+        
+        menu.onscroll = function () {
+            localStorage.setItem("menu-scroll-position", menu.scrollLeft);
+        }
+    }
+
+    document.querySelectorAll('a[href^="#"]').forEach(anchor => {
+        anchor.addEventListener("click", function (e) {
+            e.preventDefault();
+            var id = this.getAttribute("href").substr(1);
+            if (!window.matchMedia('(prefers-reduced-motion: reduce)').matches) {
+                document.querySelector(`[id='${decodeURIComponent(id)}']`).scrollIntoView({
+                    behavior: "smooth"
+                });
+            } else {
+                document.querySelector(`[id='${decodeURIComponent(id)}']`).scrollIntoView();
+            }
+            if (id === "top") {
+                history.replaceState(null, null, " ");
+            } else {
+                history.pushState(null, null, `#${id}`);
+            }
+        });
+    });
+
+</script>
+<script>
+    var mybutton = document.getElementById("top-link");
+    window.onscroll = function () {
+        if (document.body.scrollTop > 800 || document.documentElement.scrollTop > 800) {
+            mybutton.style.visibility = "visible";
+            mybutton.style.opacity = "1";
+        } else {
+            mybutton.style.visibility = "hidden";
+            mybutton.style.opacity = "0";
+        }
+    };
+
+</script>
+<script>
+    document.getElementById("theme-toggle").addEventListener("click", () => {
+        const html = document.querySelector("html");
+        if (html.dataset.theme === "dark") {
+            html.dataset.theme = 'light';
+            localStorage.setItem("pref-theme", 'light');
+        } else {
+            html.dataset.theme = 'dark';
+            localStorage.setItem("pref-theme", 'dark');
+        }
+    })
+
+</script>
+<script>
+    document.querySelectorAll('pre > code').forEach((codeblock) => {
+        const container = codeblock.parentNode.parentNode;
+
+        const copybutton = document.createElement('button');
+        copybutton.classList.add('copy-code');
+        copybutton.innerHTML = 'copy';
+
+        function copyingDone() {
+            copybutton.innerHTML = 'copied!';
+            setTimeout(() => {
+                copybutton.innerHTML = 'copy';
+            }, 2000);
+        }
+
+        copybutton.addEventListener('click', (cb) => {
+            if ('clipboard' in navigator) {
+                navigator.clipboard.writeText(codeblock.textContent);
+                copyingDone();
+                return;
+            }
+
+            const range = document.createRange();
+            range.selectNodeContents(codeblock);
+            const selection = window.getSelection();
+            selection.removeAllRanges();
+            selection.addRange(range);
+            try {
+                document.execCommand('copy');
+                copyingDone();
+            } catch (e) { };
+            selection.removeRange(range);
+        });
+
+        if (container.classList.contains("highlight")) {
+            container.appendChild(copybutton);
+        } else if (container.parentNode.firstChild == container) {
+            
+        } else if (codeblock.parentNode.parentNode.parentNode.parentNode.parentNode.nodeName == "TABLE") {
+            
+            codeblock.parentNode.parentNode.parentNode.parentNode.parentNode.appendChild(copybutton);
+        } else {
+            
+            codeblock.parentNode.appendChild(copybutton);
+        }
+    });
+</script>
+</body>
+
+</html>

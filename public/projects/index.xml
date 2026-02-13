@@ -1,0 +1,33 @@
+<?xml version="1.0" encoding="utf-8" standalone="yes"?>
+<rss version="2.0" xmlns:atom="http://www.w3.org/2005/Atom" xmlns:content="http://purl.org/rss/1.0/modules/content/">
+  <channel>
+    <title>项目展示 on 博客喵</title>
+    <link>http://localhost:1313/projects/</link>
+    <description>Recent content in 项目展示 on 博客喵</description>
+    <generator>Hugo -- 0.155.3</generator>
+    <language>zh-cn</language>
+    <lastBuildDate>Thu, 15 Jan 2026 00:00:00 +0000</lastBuildDate>
+    <atom:link href="http://localhost:1313/projects/index.xml" rel="self" type="application/rss+xml" />
+    <item>
+      <title>[项目名称]</title>
+      <link>http://localhost:1313/projects/example-project/</link>
+      <pubDate>Thu, 15 Jan 2026 00:00:00 +0000</pubDate>
+      <guid>http://localhost:1313/projects/example-project/</guid>
+      <description>一句话描述这个项目</description>
+    </item>
+    <item>
+      <title>动态线程池 SDK：从零实现 Spring Boot Starter</title>
+      <link>http://localhost:1313/projects/thread-pool-sdk/</link>
+      <pubDate>Fri, 10 May 2024 00:00:00 +0000</pubDate>
+      <guid>http://localhost:1313/projects/thread-pool-sdk/</guid>
+      <description>深入 Spring Boot 自动装配原理，实现零侵入式线程池参数动态调整与监控</description>
+    </item>
+    <item>
+      <title>拼团交易平台系统：DDD 架构下的分布式实战</title>
+      <link>http://localhost:1313/projects/pindan-trading-platform/</link>
+      <pubDate>Fri, 15 Mar 2024 00:00:00 +0000</pubDate>
+      <guid>http://localhost:1313/projects/pindan-trading-platform/</guid>
+      <description>从零到一设计高并发拼团系统，解决库存超卖、分布式事务、海量订单存储等核心问题</description>
+    </item>
+  </channel>
+</rss>

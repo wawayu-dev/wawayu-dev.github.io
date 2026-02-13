@@ -1,0 +1,374 @@
+<!DOCTYPE html>
+<html lang="en" dir="auto" data-theme="auto">
+
+<head><script src="/livereload.js?mindelay=10&amp;v=2&amp;port=1313&amp;path=livereload" data-no-instant defer></script><meta charset="utf-8">
+<meta http-equiv="X-UA-Compatible" content="IE=edge">
+<meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
+<meta name="robots" content="index, follow">
+<title>性能优化 | 博客喵</title>
+<meta name="keywords" content="">
+<meta name="description" content="记录技术成长，分享开发经验，专注 Java 后端与分布式系统">
+<meta name="author" content="wawayu">
+<link rel="canonical" href="http://localhost:1313/tags/%E6%80%A7%E8%83%BD%E4%BC%98%E5%8C%96/">
+<link crossorigin="anonymous" href="/assets/css/stylesheet.a29c24210eb31d9ce56f669c66a35c9c51b17376b7764e336a49af7dec914cf0.css" integrity="sha256-opwkIQ6zHZzlb2acZqNcnFGxc3a3dk4zakmvfeyRTPA=" rel="preload stylesheet" as="style">
+<link rel="icon" href="http://localhost:1313/favicon.ico">
+<link rel="icon" type="image/png" sizes="16x16" href="http://localhost:1313/favicon-16x16.png">
+<link rel="icon" type="image/png" sizes="32x32" href="http://localhost:1313/favicon-32x32.png">
+<link rel="apple-touch-icon" href="http://localhost:1313/apple-touch-icon.png">
+<link rel="mask-icon" href="http://localhost:1313/safari-pinned-tab.svg">
+<meta name="theme-color" content="#2e2e33">
+<meta name="msapplication-TileColor" content="#2e2e33">
+<link rel="alternate" type="application/rss+xml" href="http://localhost:1313/tags/%E6%80%A7%E8%83%BD%E4%BC%98%E5%8C%96/index.xml" title="rss">
+<link rel="alternate" hreflang="en" href="http://localhost:1313/tags/%E6%80%A7%E8%83%BD%E4%BC%98%E5%8C%96/">
+<noscript>
+    <style>
+        #theme-toggle,
+        .top-link {
+            display: none;
+        }
+
+    </style>
+    <style>
+        @media (prefers-color-scheme: dark) {
+            :root {
+                --theme: rgb(29, 30, 32);
+                --entry: rgb(46, 46, 51);
+                --primary: rgb(218, 218, 219);
+                --secondary: rgb(155, 156, 157);
+                --tertiary: rgb(65, 66, 68);
+                --content: rgb(196, 196, 197);
+                --code-block-bg: rgb(46, 46, 51);
+                --code-bg: rgb(55, 56, 62);
+                --border: rgb(51, 51, 51);
+                color-scheme: dark;
+            }
+
+            .list {
+                background: var(--theme);
+            }
+
+            .toc {
+                background: var(--entry);
+            }
+        }
+
+        @media (prefers-color-scheme: light) {
+            .list::-webkit-scrollbar-thumb {
+                border-color: var(--code-bg);
+            }
+        }
+
+    </style>
+</noscript>
+<script>
+    if (localStorage.getItem("pref-theme") === "dark") {
+        document.querySelector("html").dataset.theme = 'dark';
+    } else if (localStorage.getItem("pref-theme") === "light") {
+       document.querySelector("html").dataset.theme = 'light';
+    } else if (window.matchMedia('(prefers-color-scheme: dark)').matches) {
+        document.querySelector("html").dataset.theme = 'dark';
+    } else {
+        document.querySelector("html").dataset.theme = 'light';
+    }
+
+</script><meta property="og:url" content="http://localhost:1313/tags/%E6%80%A7%E8%83%BD%E4%BC%98%E5%8C%96/">
+  <meta property="og:site_name" content="博客喵">
+  <meta property="og:title" content="性能优化">
+  <meta property="og:description" content="记录技术成长，分享开发经验，专注 Java 后端与分布式系统">
+  <meta property="og:locale" content="zh-cn">
+  <meta property="og:type" content="website">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:title" content="性能优化">
+<meta name="twitter:description" content="记录技术成长，分享开发经验，专注 Java 后端与分布式系统">
+
+</head>
+<body class="list" id="top">
+    <header class="header">
+    <nav class="nav">
+        <div class="logo">
+            <a href="http://localhost:1313/" accesskey="h" title="博客喵 (Alt + H)">博客喵</a>
+            <div class="logo-switches">
+                <button id="theme-toggle" accesskey="t" title="(Alt + T)" aria-label="Toggle theme">
+                    <svg id="moon" xmlns="http://www.w3.org/2000/svg" width="24" height="18" viewBox="0 0 24 24"
+                        fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"
+                        stroke-linejoin="round">
+                        <path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"></path>
+                    </svg>
+                    <svg id="sun" xmlns="http://www.w3.org/2000/svg" width="24" height="18" viewBox="0 0 24 24"
+                        fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"
+                        stroke-linejoin="round">
+                        <circle cx="12" cy="12" r="5"></circle>
+                        <line x1="12" y1="1" x2="12" y2="3"></line>
+                        <line x1="12" y1="21" x2="12" y2="23"></line>
+                        <line x1="4.22" y1="4.22" x2="5.64" y2="5.64"></line>
+                        <line x1="18.36" y1="18.36" x2="19.78" y2="19.78"></line>
+                        <line x1="1" y1="12" x2="3" y2="12"></line>
+                        <line x1="21" y1="12" x2="23" y2="12"></line>
+                        <line x1="4.22" y1="19.78" x2="5.64" y2="18.36"></line>
+                        <line x1="18.36" y1="5.64" x2="19.78" y2="4.22"></line>
+                    </svg>
+                </button>
+            </div>
+        </div>
+        <ul id="menu">
+            <li>
+                <a href="http://localhost:1313/posts/" title="📝 文章">
+                    <span>📝 文章</span>
+                </a>
+            </li>
+            <li>
+                <a href="http://localhost:1313/tags/" title="🏷️ 标签">
+                    <span>🏷️ 标签</span>
+                </a>
+            </li>
+            <li>
+                <a href="http://localhost:1313/categories/" title="📂 分类">
+                    <span>📂 分类</span>
+                </a>
+            </li>
+            <li>
+                <a href="http://localhost:1313/skills/" title="💻 技能">
+                    <span>💻 技能</span>
+                </a>
+            </li>
+            <li>
+                <a href="http://localhost:1313/about/" title="👤 关于">
+                    <span>👤 关于</span>
+                </a>
+            </li>
+            <li>
+                <a href="http://localhost:1313/search/" title="🔍 搜索 (Alt &#43; /)" accesskey=/>
+                    <span>🔍 搜索</span>
+                </a>
+            </li>
+        </ul>
+    </nav>
+</header>
+<main class="main"> 
+<header class="page-header"><div class="breadcrumbs"><a href="http://localhost:1313/">Home</a>&nbsp;»&nbsp;<a href="http://localhost:1313/tags/">Tags</a></div>
+  <h1>
+    性能优化
+    <a href="/tags/%E6%80%A7%E8%83%BD%E4%BC%98%E5%8C%96/index.xml" title="RSS" aria-label="RSS">
+      <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"
+        stroke-linecap="round" stroke-linejoin="round" height="23">
+        <path d="M4 11a9 9 0 0 1 9 9" />
+        <path d="M4 4a16 16 0 0 1 16 16" />
+        <circle cx="5" cy="19" r="1" />
+      </svg>
+    </a>
+  </h1>
+</header>
+
+<article class="post-entry tag-entry"> 
+  <header class="entry-header">
+    <h2 class="entry-hint-parent">接口响应慢？一次完整的性能优化之旅
+    </h2>
+  </header>
+  <div class="entry-content">
+    <p>“这个接口怎么这么慢？“这是每个后端开发都会遇到的问题。当用户抱怨系统卡顿，当监控告警频繁触发，我们该如何系统性地定位和解决性能问题？
+本文将通过一个真实的案例，带你经历一次完整的性能优化之旅，从问题发现到最终优化，将接口响应时间从3秒降低到300ms。
+本文亮点 掌握性能问题的系统性排查方法 学会使用各种性能分析工具 理解常见的性能瓶颈及解决方案 了解数据库、缓存、代码层面的优化技巧 建立完整的性能优化思维模型 问题背景 业务场景 某电商系统的订单详情接口，用户反馈页面加载缓慢，影响用户体验。
+接口定义：
+1@GetMapping(&#34;/api/orders/{orderId}&#34;) 2public Result&lt;OrderDetailVO&gt; getOrderDetail(@PathVariable Long orderId) { 3 return Result.success(orderService.getOrderDetail(orderId)); 4} 监控数据：
+平均响应时间：2.8秒 P95响应时间：3.5秒 P99响应时间：5秒 QPS：100 业务要求：
+响应时间 &lt; 500ms P99 &lt; 1秒 架构思考： 性能优化不是盲目地优化，而是要基于数据和目标。首先要明确性能指标和优化目标，然后系统性地分析和优化。
+第一步：问题定位 1. 添加监控埋点 首先，我们需要知道时间都花在哪里了：
+1@Service 2@Slf4j 3public class OrderService { 4 5 @Autowired 6 private OrderMapper orderMapper; 7 8 @Autowired 9 private UserService userService; 10 11 @Autowired 12 private ProductService productService; 13 14 @Autowired 15 private LogisticsService logisticsService; 16 17 public OrderDetailVO getOrderDetail(Long orderId) { 18 long startTime = System.currentTimeMillis(); 19 20 // 1. 查询订单基本信息 21 long step1Start = System.currentTimeMillis(); 22 Order order = orderMapper.selectById(orderId); 23 log.info(&#34;查询订单耗时：{}ms&#34;, System.currentTimeMillis() - step1Start); 24 25 // 2. 查询用户信息 26 long step2Start = System.currentTimeMillis(); 27 User user = userService.getUserById(order.getUserId()); 28 log.info(&#34;查询用户耗时：{}ms&#34;, System.currentTimeMillis() - step2Start); 29 30 // 3. 查询商品信息 31 long step3Start = System.currentTimeMillis(); 32 List&lt;OrderItem&gt; items = orderMapper.selectItemsByOrderId(orderId); 33 List&lt;Product&gt; products = new ArrayList&lt;&gt;(); 34 for (OrderItem item : items) { 35 Product product = productService.getProductById(item.getProductId()); 36 products.add(product); 37 } 38 log.info(&#34;查询商品耗时：{}ms&#34;, System.currentTimeMillis() - step3Start); 39 40 // 4. 查询物流信息 41 long step4Start = System.currentTimeMillis(); 42 Logistics logistics = logisticsService.getLogisticsByOrderId(orderId); 43 log.info(&#34;查询物流耗时：{}ms&#34;, System.currentTimeMillis() - step4Start); 44 45 // 5. 组装返回数据 46 OrderDetailVO vo = buildOrderDetailVO(order, user, products, logistics); 47 48 log.info(&#34;总耗时：{}ms&#34;, System.currentTimeMillis() - startTime); 49 return vo; 50 } 51} 日志输出：
+...</p>
+  </div>
+  <footer class="entry-footer"><span title='2025-10-12 00:00:00 +0000 UTC'>October 12, 2025</span>&nbsp;·&nbsp;<span>7 min</span>&nbsp;·&nbsp;<span>1312 words</span>&nbsp;·&nbsp;<span>wawayu</span></footer>
+  <a class="entry-link" aria-label="post link to 接口响应慢？一次完整的性能优化之旅" href="http://localhost:1313/posts/2025/10/%E6%8E%A5%E5%8F%A3%E5%93%8D%E5%BA%94%E6%85%A2%E4%B8%80%E6%AC%A1%E5%AE%8C%E6%95%B4%E7%9A%84%E6%80%A7%E8%83%BD%E4%BC%98%E5%8C%96%E4%B9%8B%E6%97%85/"></a>
+</article>
+
+<article class="post-entry tag-entry"> 
+  <header class="entry-header">
+    <h2 class="entry-hint-parent">全链路压测：如何验证系统的真实承载能力
+    </h2>
+  </header>
+  <div class="entry-content">
+    <p>在大促、秒杀等高并发场景下，系统能否扛住流量冲击是每个技术团队最关心的问题。传统的单接口压测无法真实反映系统的整体承载能力，而全链路压测通过模拟真实用户行为，可以全面验证系统的性能瓶颈。
+本文将深入讲解全链路压测的方案设计与实施，从理论到实践，帮助你构建完整的压测体系。
+本文亮点 理解全链路压测的核心价值 掌握压测环境的搭建方案 学会数据隔离与流量标记 了解压测工具的选型与使用 掌握性能瓶颈的分析与优化 什么是全链路压测 传统压测 vs 全链路压测 传统压测：
+针对单个接口或服务进行压测 使用测试环境或预发布环境 数据量小，无法反映真实情况 全链路压测：
+在生产环境进行压测 模拟真实用户的完整业务流程 使用真实的数据量和系统配置 全链路压测的价值 真实性：在生产环境验证，结果最可信 全面性：覆盖所有系统组件和依赖 及时性：提前发现性能瓶颈 指导性：为容量规划提供数据支持 压测场景 1用户访问 → 网关 → 应用服务 → 缓存 → 数据库 2 ↓ 3 消息队列 → 异步服务 4 ↓ 5 第三方服务 架构思考： 全链路压测不仅是技术问题，更是业务问题。需要产品、运营、技术团队共同参与，制定合理的压测目标和验收标准。
+压测方案设计 1. 压测目标设定 性能指标：
+TPS/QPS：每秒事务数/查询数 响应时间：P50、P95、P99 成功率：请求成功的比例 资源使用率：CPU、内存、磁盘、网络 业务指标：
+订单创建成功率 支付成功率 库存扣减准确性 示例目标：
+1大促场景： 2- 峰值 TPS：10000 3- P99 响应时间：&lt; 500ms 4- 成功率：&gt; 99.9% 5- CPU 使用率：&lt; 70% 2. 压测流量模型 流量特征：
+...</p>
+  </div>
+  <footer class="entry-footer"><span title='2025-09-05 00:00:00 +0000 UTC'>September 5, 2025</span>&nbsp;·&nbsp;<span>6 min</span>&nbsp;·&nbsp;<span>1174 words</span>&nbsp;·&nbsp;<span>wawayu</span></footer>
+  <a class="entry-link" aria-label="post link to 全链路压测：如何验证系统的真实承载能力" href="http://localhost:1313/posts/2025/09/%E5%85%A8%E9%93%BE%E8%B7%AF%E5%8E%8B%E6%B5%8B%E5%A6%82%E4%BD%95%E9%AA%8C%E8%AF%81%E7%B3%BB%E7%BB%9F%E7%9A%84%E7%9C%9F%E5%AE%9E%E6%89%BF%E8%BD%BD%E8%83%BD%E5%8A%9B/"></a>
+</article>
+
+<article class="post-entry tag-entry"> 
+  <header class="entry-header">
+    <h2 class="entry-hint-parent">EasyExcel 百万级数据导出的内存优化实战
+    </h2>
+  </header>
+  <div class="entry-content">
+    <p>在企业级应用中，大数据量导出是一个常见但棘手的问题。传统的 Apache POI 在处理大文件时容易出现内存溢出，而阿里开源的 EasyExcel 通过优化内存占用，可以轻松处理百万级数据导出。
+本文将从实际问题出发，深入讲解如何使用 EasyExcel 实现高性能的大数据量导出，并分享生产环境中的优化经验。
+本文亮点 理解传统 POI 的内存问题 掌握 EasyExcel 的核心原理 学会百万级数据导出的最佳实践 了解异步导出与进度反馈方案 掌握生产环境的性能调优技巧 传统 POI 的内存问题 问题场景 某电商系统需要导出订单数据，数据量达到 100 万条。使用传统的 Apache POI 实现：
+1// 传统 POI 实现（有问题的代码） 2public void exportOrders() { 3 Workbook workbook = new XSSFWorkbook(); 4 Sheet sheet = workbook.createSheet(&#34;订单数据&#34;); 5 6 // 查询 100 万条数据 7 List&lt;Order&gt; orders = orderMapper.selectAll(); 8 9 // 写入 Excel 10 for (int i = 0; i &lt; orders.size(); i&#43;&#43;) { 11 Row row = sheet.createRow(i); 12 Order order = orders.get(i); 13 row.createCell(0).setCellValue(order.getOrderNo()); 14 row.createCell(1).setCellValue(order.getUserName()); 15 // ... 更多字段 16 } 17 18 // 输出文件 19 FileOutputStream fos = new FileOutputStream(&#34;orders.xlsx&#34;); 20 workbook.write(fos); 21 fos.close(); 22} 内存分析 这段代码存在严重的内存问题：
+...</p>
+  </div>
+  <footer class="entry-footer"><span title='2025-05-22 00:00:00 +0000 UTC'>May 22, 2025</span>&nbsp;·&nbsp;<span>9 min</span>&nbsp;·&nbsp;<span>1819 words</span>&nbsp;·&nbsp;<span>wawayu</span></footer>
+  <a class="entry-link" aria-label="post link to EasyExcel 百万级数据导出的内存优化实战" href="http://localhost:1313/posts/2025/05/easyexcel-%E7%99%BE%E4%B8%87%E7%BA%A7%E6%95%B0%E6%8D%AE%E5%AF%BC%E5%87%BA%E7%9A%84%E5%86%85%E5%AD%98%E4%BC%98%E5%8C%96%E5%AE%9E%E6%88%98/"></a>
+</article>
+
+<article class="post-entry tag-entry"> 
+  <header class="entry-header">
+    <h2 class="entry-hint-parent">ShardingSphere 分库分表的生产实战
+    </h2>
+  </header>
+  <div class="entry-content">
+    <p>当单表数据量达到千万级别时，查询性能会急剧下降。分库分表是解决大数据量问题的有效方案。本文将深入讲解如何使用 ShardingSphere 实现分库分表，并分享生产环境的实战经验。
+本文亮点 理解分库分表的核心概念和应用场景 掌握 ShardingSphere 的配置和使用方法 学会选择合适的分片策略 了解分库分表的最佳实践和常见问题 为什么需要分库分表？ 场景：订单表数据爆炸
+电商系统的订单表，每天新增10万条数据，一年就是3600万条。随着数据量增长：
+查询变慢：单表查询从毫秒级变成秒级 索引失效：B&#43;树层级增加，索引效率下降 锁竞争：大表的锁粒度大，并发性能差 备份困难：单表备份时间过长 传统优化方案的局限
+1-- 优化索引 2CREATE INDEX idx_user_id_create_time ON orders(user_id, create_time); 3 4-- 分区表 5ALTER TABLE orders PARTITION BY RANGE (YEAR(create_time)) ( 6 PARTITION p2023 VALUES LESS THAN (2024), 7 PARTITION p2024 VALUES LESS THAN (2025) 8); 这些方案只能缓解问题，无法根本解决。当数据量达到亿级时，分库分表是必然选择。
+分库分表核心概念 垂直拆分 vs 水平拆分 垂直拆分：按业务模块拆分
+1原始数据库 2├── 用户表 3├── 订单表 4├── 商品表 5└── 支付表 6 7拆分后 8├── 用户库 9│ └── 用户表 10├── 订单库 11│ └── 订单表 12├── 商品库 13│ └── 商品表 14└── 支付库 15 └── 支付表 水平拆分：按数据行拆分
+...</p>
+  </div>
+  <footer class="entry-footer"><span title='2025-02-15 00:00:00 +0000 UTC'>February 15, 2025</span>&nbsp;·&nbsp;<span>6 min</span>&nbsp;·&nbsp;<span>1274 words</span>&nbsp;·&nbsp;<span>wawayu</span></footer>
+  <a class="entry-link" aria-label="post link to ShardingSphere 分库分表的生产实战" href="http://localhost:1313/posts/2025/02/shardingsphere-%E5%88%86%E5%BA%93%E5%88%86%E8%A1%A8%E7%9A%84%E7%94%9F%E4%BA%A7%E5%AE%9E%E6%88%98/"></a>
+</article>
+
+<article class="post-entry tag-entry"> 
+  <header class="entry-header">
+    <h2 class="entry-hint-parent">线程池参数动态配置：Admin 管理后台设计
+    </h2>
+  </header>
+  <div class="entry-content">
+    <p>在生产环境中，线程池参数的配置往往需要根据实际负载动态调整。硬编码的参数配置缺乏灵活性，重启服务又会影响业务。本文将介绍如何设计一个线程池管理后台，实现参数的动态配置和实时监控。
+本文亮点 理解线程池参数动态调整的原理与实现 掌握线程池监控指标的采集与展示 学会设计生产级的线程池管理平台 了解线程池参数调优的最佳实践 为什么需要动态配置？ 场景一：流量突增
+双十一期间，订单处理线程池的核心线程数设置为 10，最大线程数 20。突然流量暴增，队列堆积严重，导致订单处理延迟。
+如果能动态调整线程池参数，将核心线程数调整为 50，最大线程数调整为 100，就能快速应对流量高峰。
+场景二：资源浪费
+凌晨时段流量很低，但线程池仍然保持高峰期的配置，浪费了大量系统资源。
+传统做法的问题
+1@Configuration 2public class ThreadPoolConfig { 3 @Bean(&#34;orderThreadPool&#34;) 4 public ThreadPoolExecutor orderThreadPool() { 5 return new ThreadPoolExecutor( 6 10, // 核心线程数：硬编码 7 20, // 最大线程数：硬编码 8 60, TimeUnit.SECONDS, 9 new LinkedBlockingQueue&lt;&gt;(100), 10 new ThreadFactoryBuilder().setNameFormat(&#34;order-pool-%d&#34;).build(), 11 new ThreadPoolExecutor.CallerRunsPolicy() 12 ); 13 } 14} 问题：
+...</p>
+  </div>
+  <footer class="entry-footer"><span title='2025-01-08 00:00:00 +0000 UTC'>January 8, 2025</span>&nbsp;·&nbsp;<span>9 min</span>&nbsp;·&nbsp;<span>1834 words</span>&nbsp;·&nbsp;<span>wawayu</span></footer>
+  <a class="entry-link" aria-label="post link to 线程池参数动态配置：Admin 管理后台设计" href="http://localhost:1313/posts/2025/01/%E7%BA%BF%E7%A8%8B%E6%B1%A0%E5%8F%82%E6%95%B0%E5%8A%A8%E6%80%81%E9%85%8D%E7%BD%AEadmin-%E7%AE%A1%E7%90%86%E5%90%8E%E5%8F%B0%E8%AE%BE%E8%AE%A1/"></a>
+</article>
+
+<article class="post-entry tag-entry"> 
+  <header class="entry-header">
+    <h2 class="entry-hint-parent">MySQL 慢查询优化实战案例
+    </h2>
+  </header>
+  <div class="entry-content">
+    <p>一条慢查询可能拖垮整个系统。本文通过真实的生产案例，讲解如何定位和优化慢查询，让你掌握 SQL 性能调优的完整方法论。
+本文亮点 掌握慢查询日志的分析方法 学会使用 Explain 定位性能瓶颈 了解常见的 SQL 优化技巧 理解数据库层面的性能优化 案例背景 某电商系统的订单列表查询接口响应时间达到 5 秒，用户体验极差。
+原始 SQL
+1SELECT o.*, u.username, u.phone 2FROM `order` o 3LEFT JOIN user u ON o.user_id = u.id 4WHERE o.status IN (1, 2, 3) 5 AND o.create_time &gt;= &#39;2024-01-01&#39; 6 AND u.city = &#39;Beijing&#39; 7ORDER BY o.create_time DESC 8LIMIT 20; 数据量：
+order 表：100 万条 user 表：50 万条 第一步：开启慢查询日志 配置 MySQL
+1[mysqld] 2slow_query_log = 1 3slow_query_log_file = /var/log/mysql/slow.log 4long_query_time = 1 5log_queries_not_using_indexes = 1 分析慢查询日志
+...</p>
+  </div>
+  <footer class="entry-footer"><span title='2024-12-10 00:00:00 +0000 UTC'>December 10, 2024</span>&nbsp;·&nbsp;<span>4 min</span>&nbsp;·&nbsp;<span>761 words</span>&nbsp;·&nbsp;<span>wawayu</span></footer>
+  <a class="entry-link" aria-label="post link to MySQL 慢查询优化实战案例" href="http://localhost:1313/posts/2024/12/mysql-%E6%85%A2%E6%9F%A5%E8%AF%A2%E4%BC%98%E5%8C%96%E5%AE%9E%E6%88%98%E6%A1%88%E4%BE%8B/"></a>
+</article>
+
+<article class="post-entry tag-entry"> 
+  <header class="entry-header">
+    <h2 class="entry-hint-parent">MySQL 索引优化：从 Explain 到执行计划
+    </h2>
+  </header>
+  <div class="entry-content">
+    <p>SQL 性能优化是后端开发的必备技能。一条慢查询可能拖垮整个系统，而合理的索引设计能让查询速度提升百倍。本文系统讲解 MySQL 索引优化的方法论。
+本文亮点 理解 B&#43; 树索引的底层原理 掌握 Explain 执行计划的分析方法 学会联合索引的最左前缀匹配规则 了解覆盖索引与索引下推优化 B&#43; 树索引原理 为什么选择 B&#43; 树？
+常见的数据结构对比：
+数据结构 查询时间复杂度 问题 数组 O(n) 查询慢 二叉搜索树 O(log n) 可能退化为链表 平衡二叉树 O(log n) 树高太高，IO 次数多 B 树 O(log n) 非叶子节点存储数据，浪费空间 B&#43; 树 O(log n) 叶子节点存储数据，非叶子节点只存索引 B&#43; 树的特点
+所有数据存储在叶子节点 叶子节点通过指针连接，支持范围查询 非叶子节点只存储索引，可以存储更多的键值 树的高度低，IO 次数少 InnoDB 的聚簇索引
+InnoDB 的主键索引是聚簇索引，叶子节点存储完整的行数据。
+1主键索引（聚簇索引） 2 10 3 / \ 4 5 15 5 / \ / \ 6 1 7 12 18 7 | | | | 8 [完整行数据] 二级索引（非主键索引）的叶子节点存储主键值，需要回表查询。
+...</p>
+  </div>
+  <footer class="entry-footer"><span title='2024-11-15 00:00:00 +0000 UTC'>November 15, 2024</span>&nbsp;·&nbsp;<span>5 min</span>&nbsp;·&nbsp;<span>1007 words</span>&nbsp;·&nbsp;<span>wawayu</span></footer>
+  <a class="entry-link" aria-label="post link to MySQL 索引优化：从 Explain 到执行计划" href="http://localhost:1313/posts/2024/11/mysql-%E7%B4%A2%E5%BC%95%E4%BC%98%E5%8C%96%E4%BB%8E-explain-%E5%88%B0%E6%89%A7%E8%A1%8C%E8%AE%A1%E5%88%92/"></a>
+</article>
+    </main>
+    
+<footer class="footer">
+        <span>&copy; 2026 <a href="http://localhost:1313/">博客喵</a></span> · 
+
+    <span>
+        Powered by
+        <a href="https://gohugo.io/" rel="noopener noreferrer" target="_blank">Hugo</a> &
+        <a href="https://github.com/adityatelange/hugo-PaperMod/" rel="noopener" target="_blank">PaperMod</a>
+    </span>
+</footer>
+<a href="#top" aria-label="go to top" title="Go to Top (Alt + G)" class="top-link" id="top-link" accesskey="g">
+    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 12 6" fill="currentColor">
+        <path d="M12 6H0l6-6z" />
+    </svg>
+</a>
+
+<script>
+    let menu = document.getElementById('menu');
+    if (menu) {
+        
+        const scrollPosition = localStorage.getItem("menu-scroll-position");
+        if (scrollPosition) {
+            menu.scrollLeft = parseInt(scrollPosition, 10);
+        }
+        
+        menu.onscroll = function () {
+            localStorage.setItem("menu-scroll-position", menu.scrollLeft);
+        }
+    }
+
+    document.querySelectorAll('a[href^="#"]').forEach(anchor => {
+        anchor.addEventListener("click", function (e) {
+            e.preventDefault();
+            var id = this.getAttribute("href").substr(1);
+            if (!window.matchMedia('(prefers-reduced-motion: reduce)').matches) {
+                document.querySelector(`[id='${decodeURIComponent(id)}']`).scrollIntoView({
+                    behavior: "smooth"
+                });
+            } else {
+                document.querySelector(`[id='${decodeURIComponent(id)}']`).scrollIntoView();
+            }
+            if (id === "top") {
+                history.replaceState(null, null, " ");
+            } else {
+                history.pushState(null, null, `#${id}`);
+            }
+        });
+    });
+
+</script>
+<script>
+    var mybutton = document.getElementById("top-link");
+    window.onscroll = function () {
+        if (document.body.scrollTop > 800 || document.documentElement.scrollTop > 800) {
+            mybutton.style.visibility = "visible";
+            mybutton.style.opacity = "1";
+        } else {
+            mybutton.style.visibility = "hidden";
+            mybutton.style.opacity = "0";
+        }
+    };
+
+</script>
+<script>
+    document.getElementById("theme-toggle").addEventListener("click", () => {
+        const html = document.querySelector("html");
+        if (html.dataset.theme === "dark") {
+            html.dataset.theme = 'light';
+            localStorage.setItem("pref-theme", 'light');
+        } else {
+            html.dataset.theme = 'dark';
+            localStorage.setItem("pref-theme", 'dark');
+        }
+    })
+
+</script>
+</body>
+
+</html>

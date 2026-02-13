@@ -1,0 +1,882 @@
+<!DOCTYPE html>
+<html lang="en" dir="auto" data-theme="auto">
+
+<head><script src="/livereload.js?mindelay=10&amp;v=2&amp;port=1313&amp;path=livereload" data-no-instant defer></script><meta charset="utf-8">
+<meta http-equiv="X-UA-Compatible" content="IE=edge">
+<meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
+<meta name="robots" content="index, follow">
+<title>MySQL 事务隔离级别与 MVCC 机制深度解析 | 博客喵</title>
+<meta name="keywords" content="MySQL, 数据库, 并发编程, 源码分析">
+<meta name="description" content="深入理解 MySQL 的并发控制机制，掌握 MVCC 的 ReadView 原理">
+<meta name="author" content="wawayu">
+<link rel="canonical" href="http://localhost:1313/posts/2024/11/mysql-%E4%BA%8B%E5%8A%A1%E9%9A%94%E7%A6%BB%E7%BA%A7%E5%88%AB%E4%B8%8E-mvcc-%E6%9C%BA%E5%88%B6%E6%B7%B1%E5%BA%A6%E8%A7%A3%E6%9E%90/">
+<link crossorigin="anonymous" href="/assets/css/stylesheet.a29c24210eb31d9ce56f669c66a35c9c51b17376b7764e336a49af7dec914cf0.css" integrity="sha256-opwkIQ6zHZzlb2acZqNcnFGxc3a3dk4zakmvfeyRTPA=" rel="preload stylesheet" as="style">
+<link rel="icon" href="http://localhost:1313/favicon.ico">
+<link rel="icon" type="image/png" sizes="16x16" href="http://localhost:1313/favicon-16x16.png">
+<link rel="icon" type="image/png" sizes="32x32" href="http://localhost:1313/favicon-32x32.png">
+<link rel="apple-touch-icon" href="http://localhost:1313/apple-touch-icon.png">
+<link rel="mask-icon" href="http://localhost:1313/safari-pinned-tab.svg">
+<meta name="theme-color" content="#2e2e33">
+<meta name="msapplication-TileColor" content="#2e2e33">
+<link rel="alternate" hreflang="en" href="http://localhost:1313/posts/2024/11/mysql-%E4%BA%8B%E5%8A%A1%E9%9A%94%E7%A6%BB%E7%BA%A7%E5%88%AB%E4%B8%8E-mvcc-%E6%9C%BA%E5%88%B6%E6%B7%B1%E5%BA%A6%E8%A7%A3%E6%9E%90/">
+<noscript>
+    <style>
+        #theme-toggle,
+        .top-link {
+            display: none;
+        }
+
+    </style>
+    <style>
+        @media (prefers-color-scheme: dark) {
+            :root {
+                --theme: rgb(29, 30, 32);
+                --entry: rgb(46, 46, 51);
+                --primary: rgb(218, 218, 219);
+                --secondary: rgb(155, 156, 157);
+                --tertiary: rgb(65, 66, 68);
+                --content: rgb(196, 196, 197);
+                --code-block-bg: rgb(46, 46, 51);
+                --code-bg: rgb(55, 56, 62);
+                --border: rgb(51, 51, 51);
+                color-scheme: dark;
+            }
+
+            .list {
+                background: var(--theme);
+            }
+
+            .toc {
+                background: var(--entry);
+            }
+        }
+
+        @media (prefers-color-scheme: light) {
+            .list::-webkit-scrollbar-thumb {
+                border-color: var(--code-bg);
+            }
+        }
+
+    </style>
+</noscript>
+<script>
+    if (localStorage.getItem("pref-theme") === "dark") {
+        document.querySelector("html").dataset.theme = 'dark';
+    } else if (localStorage.getItem("pref-theme") === "light") {
+       document.querySelector("html").dataset.theme = 'light';
+    } else if (window.matchMedia('(prefers-color-scheme: dark)').matches) {
+        document.querySelector("html").dataset.theme = 'dark';
+    } else {
+        document.querySelector("html").dataset.theme = 'light';
+    }
+
+</script><meta property="og:url" content="http://localhost:1313/posts/2024/11/mysql-%E4%BA%8B%E5%8A%A1%E9%9A%94%E7%A6%BB%E7%BA%A7%E5%88%AB%E4%B8%8E-mvcc-%E6%9C%BA%E5%88%B6%E6%B7%B1%E5%BA%A6%E8%A7%A3%E6%9E%90/">
+  <meta property="og:site_name" content="博客喵">
+  <meta property="og:title" content="MySQL 事务隔离级别与 MVCC 机制深度解析">
+  <meta property="og:description" content="深入理解 MySQL 的并发控制机制，掌握 MVCC 的 ReadView 原理">
+  <meta property="og:locale" content="zh-cn">
+  <meta property="og:type" content="article">
+    <meta property="article:section" content="posts">
+    <meta property="article:published_time" content="2024-11-28T00:00:00+00:00">
+    <meta property="article:modified_time" content="2024-11-28T00:00:00+00:00">
+    <meta property="article:tag" content="MySQL">
+    <meta property="article:tag" content="数据库">
+    <meta property="article:tag" content="并发编程">
+    <meta property="article:tag" content="源码分析">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:title" content="MySQL 事务隔离级别与 MVCC 机制深度解析">
+<meta name="twitter:description" content="深入理解 MySQL 的并发控制机制，掌握 MVCC 的 ReadView 原理">
+
+
+<script type="application/ld+json">
+{
+  "@context": "https://schema.org",
+  "@type": "BreadcrumbList",
+  "itemListElement": [
+    {
+      "@type": "ListItem",
+      "position":  1 ,
+      "name": "Posts",
+      "item": "http://localhost:1313/posts/"
+    }, 
+    {
+      "@type": "ListItem",
+      "position":  2 ,
+      "name": "MySQL 事务隔离级别与 MVCC 机制深度解析",
+      "item": "http://localhost:1313/posts/2024/11/mysql-%E4%BA%8B%E5%8A%A1%E9%9A%94%E7%A6%BB%E7%BA%A7%E5%88%AB%E4%B8%8E-mvcc-%E6%9C%BA%E5%88%B6%E6%B7%B1%E5%BA%A6%E8%A7%A3%E6%9E%90/"
+    }
+  ]
+}
+</script>
+<script type="application/ld+json">
+{
+  "@context": "https://schema.org",
+  "@type": "BlogPosting",
+  "headline": "MySQL 事务隔离级别与 MVCC 机制深度解析",
+  "name": "MySQL 事务隔离级别与 MVCC 机制深度解析",
+  "description": "深入理解 MySQL 的并发控制机制，掌握 MVCC 的 ReadView 原理",
+  "keywords": [
+    "MySQL", "数据库", "并发编程", "源码分析"
+  ],
+  "articleBody": "在高并发场景下，多个事务同时访问数据库，如何保证数据的一致性？MySQL 通过事务隔离级别和 MVCC 机制解决了这个问题。本文深入剖析 MySQL 的并发控制原理。\n本文亮点 理解四种事务隔离级别的区别与适用场景 掌握 MVCC 的 ReadView 机制 学会解决幻读问题的方法 了解锁机制与 MVCC 的配合 事务的并发问题 脏读（Dirty Read）\n事务 A 读取了事务 B 未提交的数据，事务 B 回滚后，事务 A 读到的数据是无效的。\n1时间线： 2T1: 事务 A 开始 3T2: 事务 B 开始，将 balance 从 100 改为 200 4T3: 事务 A 读取 balance = 200（脏读） 5T4: 事务 B 回滚，balance 恢复为 100 6T5: 事务 A 提交 不可重复读（Non-Repeatable Read）\n事务 A 两次读取同一数据，结果不一致（因为事务 B 修改并提交了数据）。\n1时间线： 2T1: 事务 A 读取 balance = 100 3T2: 事务 B 将 balance 改为 200 并提交 4T3: 事务 A 再次读取 balance = 200（不可重复读） 幻读（Phantom Read）\n事务 A 两次查询，第二次查询多出了新的行（因为事务 B 插入了新数据）。\n1时间线： 2T1: 事务 A 查询 age \u003e 20 的用户，结果 2 条 3T2: 事务 B 插入一条 age = 25 的用户并提交 4T3: 事务 A 再次查询 age \u003e 20 的用户，结果 3 条（幻读） 四种事务隔离级别 隔离级别 脏读 不可重复读 幻读 READ UNCOMMITTED 可能 可能 可能 READ COMMITTED 不可能 可能 可能 REPEATABLE READ（默认） 不可能 不可能 可能 SERIALIZABLE 不可能 不可能 不可能 查看当前隔离级别\n1SELECT @@transaction_isolation; 设置隔离级别\n1-- 会话级别 2SET SESSION TRANSACTION ISOLATION LEVEL READ COMMITTED; 3 4-- 全局级别 5SET GLOBAL TRANSACTION ISOLATION LEVEL REPEATABLE READ; READ UNCOMMITTED：读未提交 特点： 事务可以读取其他事务未提交的数据。\n问题： 会出现脏读、不可重复读、幻读。\n适用场景： 几乎不使用，数据一致性无法保证。\n演示脏读\n1-- 事务 A 2SET SESSION TRANSACTION ISOLATION LEVEL READ UNCOMMITTED; 3START TRANSACTION; 4SELECT balance FROM account WHERE id = 1; -- 100 5 6-- 事务 B 7START TRANSACTION; 8UPDATE account SET balance = 200 WHERE id = 1; 9 10-- 事务 A 11SELECT balance FROM account WHERE id = 1; -- 200（脏读） 12 13-- 事务 B 14ROLLBACK; 15 16-- 事务 A 17SELECT balance FROM account WHERE id = 1; -- 100 18COMMIT; READ COMMITTED：读已提交 特点： 事务只能读取其他事务已提交的数据。\n问题： 会出现不可重复读、幻读。\n适用场景： Oracle、PostgreSQL 的默认隔离级别。\n演示不可重复读\n1-- 事务 A 2SET SESSION TRANSACTION ISOLATION LEVEL READ COMMITTED; 3START TRANSACTION; 4SELECT balance FROM account WHERE id = 1; -- 100 5 6-- 事务 B 7START TRANSACTION; 8UPDATE account SET balance = 200 WHERE id = 1; 9COMMIT; 10 11-- 事务 A 12SELECT balance FROM account WHERE id = 1; -- 200（不可重复读） 13COMMIT; REPEATABLE READ：可重复读 特点： 事务内多次读取同一数据，结果一致。\n问题： 理论上会出现幻读，但 MySQL 通过 MVCC + Next-Key Lock 解决了大部分幻读问题。\n适用场景： MySQL 的默认隔离级别，适合大多数场景。\n演示可重复读\n1-- 事务 A 2SET SESSION TRANSACTION ISOLATION LEVEL REPEATABLE READ; 3START TRANSACTION; 4SELECT balance FROM account WHERE id = 1; -- 100 5 6-- 事务 B 7START TRANSACTION; 8UPDATE account SET balance = 200 WHERE id = 1; 9COMMIT; 10 11-- 事务 A 12SELECT balance FROM account WHERE id = 1; -- 100（可重复读） 13COMMIT; SERIALIZABLE：串行化 特点： 事务串行执行，完全避免并发问题。\n问题： 性能最差，并发度最低。\n适用场景： 对数据一致性要求极高的场景（如金融系统）。\n实现方式： 对读取的每一行数据都加锁。\n1-- 事务 A 2SET SESSION TRANSACTION ISOLATION LEVEL SERIALIZABLE; 3START TRANSACTION; 4SELECT * FROM account WHERE id = 1; -- 加共享锁 5 6-- 事务 B 7START TRANSACTION; 8UPDATE account SET balance = 200 WHERE id = 1; -- 等待事务 A 释放锁 MVCC：多版本并发控制 核心思想： 为每个事务提供数据的快照，不同事务看到不同版本的数据。\n优势：\n读不加锁，写不阻塞读 提升并发性能 实现机制：\n隐藏字段：DB_TRX_ID、DB_ROLL_PTR、DB_ROW_ID Undo Log：记录数据的历史版本 ReadView：判断数据版本的可见性 隐藏字段 InnoDB 为每一行数据添加了三个隐藏字段：\n字段 说明 DB_TRX_ID 最后修改该行的事务 ID DB_ROLL_PTR 指向 Undo Log 的指针 DB_ROW_ID 行 ID（如果没有主键） 示例\n1原始数据： 2id | name | age | DB_TRX_ID | DB_ROLL_PTR 31 | Alice | 20 | 100 | NULL 4 5事务 101 修改： 6id | name | age | DB_TRX_ID | DB_ROLL_PTR 71 | Alice | 25 | 101 | → Undo Log (age=20, TRX_ID=100) 8 9事务 102 修改： 10id | name | age | DB_TRX_ID | DB_ROLL_PTR 111 | Alice | 30 | 102 | → Undo Log (age=25, TRX_ID=101) 通过 Undo Log，可以构建版本链，回溯到任意历史版本。\nReadView：可见性判断 ReadView 是事务开始时创建的快照，包含以下信息：\n字段 说明 m_ids 当前活跃的事务 ID 列表 min_trx_id 最小的活跃事务 ID max_trx_id 下一个要分配的事务 ID creator_trx_id 创建 ReadView 的事务 ID 可见性规则\n对于数据行的 DB_TRX_ID：\n如果 DB_TRX_ID \u003c min_trx_id，说明该版本在 ReadView 创建前已提交，可见 如果 DB_TRX_ID \u003e= max_trx_id，说明该版本在 ReadView 创建后才开始，不可见 如果 min_trx_id \u003c= DB_TRX_ID \u003c max_trx_id： 如果 DB_TRX_ID 在 m_ids 中，说明该事务还未提交，不可见 如果 DB_TRX_ID 不在 m_ids 中，说明该事务已提交，可见 如果 DB_TRX_ID == creator_trx_id，说明是当前事务自己修改的，可见 如果当前版本不可见，通过 DB_ROLL_PTR 找到 Undo Log 中的上一个版本，继续判断。\nREAD COMMITTED 与 REPEATABLE READ 的区别 READ COMMITTED\n每次 SELECT 都创建新的 ReadView。\n1时间线： 2T1: 事务 A 开始（TRX_ID=100） 3T2: 事务 A 第一次 SELECT，创建 ReadView1（m_ids=[100]） 4T3: 事务 B（TRX_ID=101）修改数据并提交 5T4: 事务 A 第二次 SELECT，创建 ReadView2（m_ids=[100]） 6 此时事务 101 已提交，不在 m_ids 中，可见 结果：两次 SELECT 结果不同（不可重复读）。\nREPEATABLE READ\n事务开始时创建 ReadView，整个事务期间复用。\n1时间线： 2T1: 事务 A 开始（TRX_ID=100），创建 ReadView（m_ids=[100]） 3T2: 事务 A 第一次 SELECT 4T3: 事务 B（TRX_ID=101）修改数据并提交 5T4: 事务 A 第二次 SELECT，复用 ReadView（m_ids=[100]） 6 事务 101 在 ReadView 创建后才提交，不可见 结果：两次 SELECT 结果相同（可重复读）。\n架构思考： MVCC 的设计体现了\"空间换时间\"的思想。通过 Undo Log 保存历史版本，牺牲了存储空间，换取了读写并发的性能提升。这种思想在很多系统中都有应用，比如 Git 的版本控制、Redis 的 RDB 快照。\n幻读问题 什么是幻读？\n事务 A 两次查询，第二次查询多出了新的行。\nMVCC 能解决幻读吗？\n部分解决。对于快照读（普通 SELECT），MVCC 可以解决幻读。但对于当前读（SELECT FOR UPDATE、UPDATE、DELETE），MVCC 无法解决幻读。\n演示幻读\n1-- 事务 A 2START TRANSACTION; 3SELECT * FROM user WHERE age \u003e 20; -- 2 条记录 4 5-- 事务 B 6START TRANSACTION; 7INSERT INTO user (name, age) VALUES ('Charlie', 25); 8COMMIT; 9 10-- 事务 A 11SELECT * FROM user WHERE age \u003e 20; -- 仍然 2 条（MVCC 解决了快照读的幻读） 12 13-- 但是 14SELECT * FROM user WHERE age \u003e 20 FOR UPDATE; -- 3 条（当前读出现幻读） 解决方案：Next-Key Lock\nNext-Key Lock = Record Lock（行锁） + Gap Lock（间隙锁）\n1-- 事务 A 2START TRANSACTION; 3SELECT * FROM user WHERE age \u003e 20 FOR UPDATE; -- 锁定 age \u003e 20 的所有行和间隙 4 5-- 事务 B 6INSERT INTO user (name, age) VALUES ('Charlie', 25); -- 等待（被间隙锁阻塞） 间隙锁锁定的是索引记录之间的间隙，防止其他事务插入数据。\n锁机制 共享锁（S Lock）\n读锁，多个事务可以同时持有。\n1SELECT * FROM user WHERE id = 1 LOCK IN SHARE MODE; 排他锁（X Lock）\n写锁，只有一个事务可以持有。\n1SELECT * FROM user WHERE id = 1 FOR UPDATE; 2UPDATE user SET age = 25 WHERE id = 1; 3DELETE FROM user WHERE id = 1; 行锁（Record Lock）\n锁定单个索引记录。\n间隙锁（Gap Lock）\n锁定索引记录之间的间隙，防止插入。\nNext-Key Lock\n行锁 + 间隙锁，锁定索引记录及其前面的间隙。\n锁的兼容性\nS Lock X Lock S Lock 兼容 冲突 X Lock 冲突 冲突 死锁 场景\n1-- 事务 A 2START TRANSACTION; 3UPDATE user SET age = 25 WHERE id = 1; -- 锁定 id=1 4 5-- 事务 B 6START TRANSACTION; 7UPDATE user SET age = 30 WHERE id = 2; -- 锁定 id=2 8 9-- 事务 A 10UPDATE user SET age = 26 WHERE id = 2; -- 等待事务 B 释放锁 11 12-- 事务 B 13UPDATE user SET age = 31 WHERE id = 1; -- 等待事务 A 释放锁（死锁） 检测与解决\nMySQL 会自动检测死锁，并回滚其中一个事务。\n避免死锁\n按相同顺序访问资源 缩短事务时间 降低隔离级别 使用乐观锁 实战案例：秒杀系统的库存扣减 方案一：悲观锁\n1START TRANSACTION; 2SELECT stock FROM product WHERE id = 1 FOR UPDATE; -- 加排他锁 3UPDATE product SET stock = stock - 1 WHERE id = 1; 4COMMIT; 优点：数据一致性强 缺点：并发性能差\n方案二：乐观锁\n1-- 查询库存和版本号 2SELECT stock, version FROM product WHERE id = 1; 3 4-- 更新时检查版本号 5UPDATE product SET stock = stock - 1, version = version + 1 6WHERE id = 1 AND version = #{oldVersion}; 优点：并发性能好 缺点：高并发下更新失败率高\n方案三：Redis + 数据库\n1// 1. Redis 预扣减 2Long stock = redisTemplate.opsForValue().decrement(\"stock:1\"); 3if (stock \u003c 0) { 4 redisTemplate.opsForValue().increment(\"stock:1\"); 5 return \"库存不足\"; 6} 7 8// 2. 异步更新数据库 9rabbitTemplate.convertAndSend(\"order.exchange\", \"order.created\", orderId); 优点：性能最好 缺点：实现复杂，需要保证最终一致性\n总结与思考 MySQL 事务隔离级别与 MVCC 的核心要点：\n四种隔离级别解决不同的并发问题 MVCC 通过 ReadView 和 Undo Log 实现多版本并发控制 READ COMMITTED 每次 SELECT 创建新 ReadView REPEATABLE READ 事务开始时创建 ReadView 并复用 Next-Key Lock 解决当前读的幻读问题 理解这些机制，才能在实际开发中选择合适的隔离级别和锁策略。\n下次当你遇到并发问题时，不妨想想：这是脏读、不可重复读还是幻读？应该用什么隔离级别和锁机制？\n",
+  "wordCount" : "1093",
+  "inLanguage": "en",
+  "datePublished": "2024-11-28T00:00:00Z",
+  "dateModified": "2024-11-28T00:00:00Z",
+  "author":{
+    "@type": "Person",
+    "name": "wawayu"
+  },
+  "mainEntityOfPage": {
+    "@type": "WebPage",
+    "@id": "http://localhost:1313/posts/2024/11/mysql-%E4%BA%8B%E5%8A%A1%E9%9A%94%E7%A6%BB%E7%BA%A7%E5%88%AB%E4%B8%8E-mvcc-%E6%9C%BA%E5%88%B6%E6%B7%B1%E5%BA%A6%E8%A7%A3%E6%9E%90/"
+  },
+  "publisher": {
+    "@type": "Organization",
+    "name": "博客喵",
+    "logo": {
+      "@type": "ImageObject",
+      "url": "http://localhost:1313/favicon.ico"
+    }
+  }
+}
+</script>
+</head>
+<body id="top">
+    <header class="header">
+    <nav class="nav">
+        <div class="logo">
+            <a href="http://localhost:1313/" accesskey="h" title="博客喵 (Alt + H)">博客喵</a>
+            <div class="logo-switches">
+                <button id="theme-toggle" accesskey="t" title="(Alt + T)" aria-label="Toggle theme">
+                    <svg id="moon" xmlns="http://www.w3.org/2000/svg" width="24" height="18" viewBox="0 0 24 24"
+                        fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"
+                        stroke-linejoin="round">
+                        <path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"></path>
+                    </svg>
+                    <svg id="sun" xmlns="http://www.w3.org/2000/svg" width="24" height="18" viewBox="0 0 24 24"
+                        fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"
+                        stroke-linejoin="round">
+                        <circle cx="12" cy="12" r="5"></circle>
+                        <line x1="12" y1="1" x2="12" y2="3"></line>
+                        <line x1="12" y1="21" x2="12" y2="23"></line>
+                        <line x1="4.22" y1="4.22" x2="5.64" y2="5.64"></line>
+                        <line x1="18.36" y1="18.36" x2="19.78" y2="19.78"></line>
+                        <line x1="1" y1="12" x2="3" y2="12"></line>
+                        <line x1="21" y1="12" x2="23" y2="12"></line>
+                        <line x1="4.22" y1="19.78" x2="5.64" y2="18.36"></line>
+                        <line x1="18.36" y1="5.64" x2="19.78" y2="4.22"></line>
+                    </svg>
+                </button>
+            </div>
+        </div>
+        <ul id="menu">
+            <li>
+                <a href="http://localhost:1313/posts/" title="📝 文章">
+                    <span>📝 文章</span>
+                </a>
+            </li>
+            <li>
+                <a href="http://localhost:1313/tags/" title="🏷️ 标签">
+                    <span>🏷️ 标签</span>
+                </a>
+            </li>
+            <li>
+                <a href="http://localhost:1313/categories/" title="📂 分类">
+                    <span>📂 分类</span>
+                </a>
+            </li>
+            <li>
+                <a href="http://localhost:1313/skills/" title="💻 技能">
+                    <span>💻 技能</span>
+                </a>
+            </li>
+            <li>
+                <a href="http://localhost:1313/about/" title="👤 关于">
+                    <span>👤 关于</span>
+                </a>
+            </li>
+            <li>
+                <a href="http://localhost:1313/search/" title="🔍 搜索 (Alt &#43; /)" accesskey=/>
+                    <span>🔍 搜索</span>
+                </a>
+            </li>
+        </ul>
+    </nav>
+</header>
+<main class="main">
+
+<article class="post-single">
+  <header class="post-header">
+    <div class="breadcrumbs"><a href="http://localhost:1313/">Home</a>&nbsp;»&nbsp;<a href="http://localhost:1313/posts/">Posts</a></div>
+    <h1 class="post-title entry-hint-parent">
+      MySQL 事务隔离级别与 MVCC 机制深度解析
+    </h1>
+    <div class="post-description">
+      深入理解 MySQL 的并发控制机制，掌握 MVCC 的 ReadView 原理
+    </div>
+    <div class="post-meta"><span title='2024-11-28 00:00:00 +0000 UTC'>November 28, 2024</span>&nbsp;·&nbsp;<span>6 min</span>&nbsp;·&nbsp;<span>1093 words</span>&nbsp;·&nbsp;<span>wawayu</span>&nbsp;|&nbsp;<span>
+    <a href="https://github.com/wawayu-dev/wawayu-dev.github.io/tree/main/content/posts/mysql-transaction-mvcc.md" rel="noopener noreferrer edit" target="_blank">建议修改</a>
+</span>
+
+</div>
+  </header> <div class="toc">
+    <details  open>
+        <summary accesskey="c" title="(Alt + C)">
+            <span class="details">Table of Contents</span>
+        </summary>
+
+        <div class="inner"><nav id="TableOfContents">
+  <ul>
+    <li>
+      <ul>
+        <li><a href="#本文亮点">本文亮点</a></li>
+      </ul>
+    </li>
+    <li><a href="#事务的并发问题">事务的并发问题</a></li>
+    <li><a href="#四种事务隔离级别">四种事务隔离级别</a></li>
+    <li><a href="#read-uncommitted读未提交">READ UNCOMMITTED：读未提交</a></li>
+    <li><a href="#read-committed读已提交">READ COMMITTED：读已提交</a></li>
+    <li><a href="#repeatable-read可重复读">REPEATABLE READ：可重复读</a></li>
+    <li><a href="#serializable串行化">SERIALIZABLE：串行化</a></li>
+    <li><a href="#mvcc多版本并发控制">MVCC：多版本并发控制</a></li>
+    <li><a href="#隐藏字段">隐藏字段</a></li>
+    <li><a href="#readview可见性判断">ReadView：可见性判断</a></li>
+    <li><a href="#read-committed-与-repeatable-read-的区别">READ COMMITTED 与 REPEATABLE READ 的区别</a></li>
+    <li><a href="#幻读问题">幻读问题</a></li>
+    <li><a href="#锁机制">锁机制</a></li>
+    <li><a href="#死锁">死锁</a></li>
+    <li><a href="#实战案例秒杀系统的库存扣减">实战案例：秒杀系统的库存扣减</a></li>
+    <li><a href="#总结与思考">总结与思考</a></li>
+  </ul>
+</nav>
+        </div>
+    </details>
+</div>
+
+  <div class="post-content"><p>在高并发场景下，多个事务同时访问数据库，如何保证数据的一致性？MySQL 通过事务隔离级别和 MVCC 机制解决了这个问题。本文深入剖析 MySQL 的并发控制原理。</p>
+<h3 id="本文亮点">本文亮点<a hidden class="anchor" aria-hidden="true" href="#本文亮点">#</a></h3>
+<ul>
+<li><input checked="" disabled="" type="checkbox"> 理解四种事务隔离级别的区别与适用场景</li>
+<li><input checked="" disabled="" type="checkbox"> 掌握 MVCC 的 ReadView 机制</li>
+<li><input checked="" disabled="" type="checkbox"> 学会解决幻读问题的方法</li>
+<li><input checked="" disabled="" type="checkbox"> 了解锁机制与 MVCC 的配合</li>
+</ul>
+<hr>
+<h2 id="事务的并发问题">事务的并发问题<a hidden class="anchor" aria-hidden="true" href="#事务的并发问题">#</a></h2>
+<p><strong>脏读（Dirty Read）</strong></p>
+<p>事务 A 读取了事务 B 未提交的数据，事务 B 回滚后，事务 A 读到的数据是无效的。</p>
+<div class="highlight"><pre tabindex="0" class="chroma"><code class="language-fallback" data-lang="fallback"><span class="line"><span class="ln">1</span><span class="cl">时间线：
+</span></span><span class="line"><span class="ln">2</span><span class="cl">T1: 事务 A 开始
+</span></span><span class="line"><span class="ln">3</span><span class="cl">T2: 事务 B 开始，将 balance 从 100 改为 200
+</span></span><span class="line"><span class="ln">4</span><span class="cl">T3: 事务 A 读取 balance = 200（脏读）
+</span></span><span class="line"><span class="ln">5</span><span class="cl">T4: 事务 B 回滚，balance 恢复为 100
+</span></span><span class="line"><span class="ln">6</span><span class="cl">T5: 事务 A 提交
+</span></span></code></pre></div><p><strong>不可重复读（Non-Repeatable Read）</strong></p>
+<p>事务 A 两次读取同一数据，结果不一致（因为事务 B 修改并提交了数据）。</p>
+<div class="highlight"><pre tabindex="0" class="chroma"><code class="language-fallback" data-lang="fallback"><span class="line"><span class="ln">1</span><span class="cl">时间线：
+</span></span><span class="line"><span class="ln">2</span><span class="cl">T1: 事务 A 读取 balance = 100
+</span></span><span class="line"><span class="ln">3</span><span class="cl">T2: 事务 B 将 balance 改为 200 并提交
+</span></span><span class="line"><span class="ln">4</span><span class="cl">T3: 事务 A 再次读取 balance = 200（不可重复读）
+</span></span></code></pre></div><p><strong>幻读（Phantom Read）</strong></p>
+<p>事务 A 两次查询，第二次查询多出了新的行（因为事务 B 插入了新数据）。</p>
+<div class="highlight"><pre tabindex="0" class="chroma"><code class="language-fallback" data-lang="fallback"><span class="line"><span class="ln">1</span><span class="cl">时间线：
+</span></span><span class="line"><span class="ln">2</span><span class="cl">T1: 事务 A 查询 age &gt; 20 的用户，结果 2 条
+</span></span><span class="line"><span class="ln">3</span><span class="cl">T2: 事务 B 插入一条 age = 25 的用户并提交
+</span></span><span class="line"><span class="ln">4</span><span class="cl">T3: 事务 A 再次查询 age &gt; 20 的用户，结果 3 条（幻读）
+</span></span></code></pre></div><hr>
+<h2 id="四种事务隔离级别">四种事务隔离级别<a hidden class="anchor" aria-hidden="true" href="#四种事务隔离级别">#</a></h2>
+<table>
+  <thead>
+      <tr>
+          <th>隔离级别</th>
+          <th>脏读</th>
+          <th>不可重复读</th>
+          <th>幻读</th>
+      </tr>
+  </thead>
+  <tbody>
+      <tr>
+          <td>READ UNCOMMITTED</td>
+          <td>可能</td>
+          <td>可能</td>
+          <td>可能</td>
+      </tr>
+      <tr>
+          <td>READ COMMITTED</td>
+          <td>不可能</td>
+          <td>可能</td>
+          <td>可能</td>
+      </tr>
+      <tr>
+          <td>REPEATABLE READ（默认）</td>
+          <td>不可能</td>
+          <td>不可能</td>
+          <td>可能</td>
+      </tr>
+      <tr>
+          <td>SERIALIZABLE</td>
+          <td>不可能</td>
+          <td>不可能</td>
+          <td>不可能</td>
+      </tr>
+  </tbody>
+</table>
+<p><strong>查看当前隔离级别</strong></p>
+<div class="highlight"><pre tabindex="0" class="chroma"><code class="language-sql" data-lang="sql"><span class="line"><span class="ln">1</span><span class="cl"><span class="k">SELECT</span><span class="w"> </span><span class="o">@@</span><span class="n">transaction_isolation</span><span class="p">;</span><span class="w">
+</span></span></span></code></pre></div><p><strong>设置隔离级别</strong></p>
+<div class="highlight"><pre tabindex="0" class="chroma"><code class="language-sql" data-lang="sql"><span class="line"><span class="ln">1</span><span class="cl"><span class="c1">-- 会话级别
+</span></span></span><span class="line"><span class="ln">2</span><span class="cl"><span class="k">SET</span><span class="w"> </span><span class="k">SESSION</span><span class="w"> </span><span class="k">TRANSACTION</span><span class="w"> </span><span class="k">ISOLATION</span><span class="w"> </span><span class="k">LEVEL</span><span class="w"> </span><span class="k">READ</span><span class="w"> </span><span class="k">COMMITTED</span><span class="p">;</span><span class="w">
+</span></span></span><span class="line"><span class="ln">3</span><span class="cl"><span class="w">
+</span></span></span><span class="line"><span class="ln">4</span><span class="cl"><span class="c1">-- 全局级别
+</span></span></span><span class="line"><span class="ln">5</span><span class="cl"><span class="k">SET</span><span class="w"> </span><span class="k">GLOBAL</span><span class="w"> </span><span class="k">TRANSACTION</span><span class="w"> </span><span class="k">ISOLATION</span><span class="w"> </span><span class="k">LEVEL</span><span class="w"> </span><span class="k">REPEATABLE</span><span class="w"> </span><span class="k">READ</span><span class="p">;</span><span class="w">
+</span></span></span></code></pre></div><hr>
+<h2 id="read-uncommitted读未提交">READ UNCOMMITTED：读未提交<a hidden class="anchor" aria-hidden="true" href="#read-uncommitted读未提交">#</a></h2>
+<p><strong>特点：</strong> 事务可以读取其他事务未提交的数据。</p>
+<p><strong>问题：</strong> 会出现脏读、不可重复读、幻读。</p>
+<p><strong>适用场景：</strong> 几乎不使用，数据一致性无法保证。</p>
+<p><strong>演示脏读</strong></p>
+<div class="highlight"><pre tabindex="0" class="chroma"><code class="language-sql" data-lang="sql"><span class="line"><span class="ln"> 1</span><span class="cl"><span class="c1">-- 事务 A
+</span></span></span><span class="line"><span class="ln"> 2</span><span class="cl"><span class="k">SET</span><span class="w"> </span><span class="k">SESSION</span><span class="w"> </span><span class="k">TRANSACTION</span><span class="w"> </span><span class="k">ISOLATION</span><span class="w"> </span><span class="k">LEVEL</span><span class="w"> </span><span class="k">READ</span><span class="w"> </span><span class="k">UNCOMMITTED</span><span class="p">;</span><span class="w">
+</span></span></span><span class="line"><span class="ln"> 3</span><span class="cl"><span class="k">START</span><span class="w"> </span><span class="k">TRANSACTION</span><span class="p">;</span><span class="w">
+</span></span></span><span class="line"><span class="ln"> 4</span><span class="cl"><span class="k">SELECT</span><span class="w"> </span><span class="n">balance</span><span class="w"> </span><span class="k">FROM</span><span class="w"> </span><span class="n">account</span><span class="w"> </span><span class="k">WHERE</span><span class="w"> </span><span class="n">id</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="mi">1</span><span class="p">;</span><span class="w">  </span><span class="c1">-- 100
+</span></span></span><span class="line"><span class="ln"> 5</span><span class="cl"><span class="w">
+</span></span></span><span class="line"><span class="ln"> 6</span><span class="cl"><span class="c1">-- 事务 B
+</span></span></span><span class="line"><span class="ln"> 7</span><span class="cl"><span class="k">START</span><span class="w"> </span><span class="k">TRANSACTION</span><span class="p">;</span><span class="w">
+</span></span></span><span class="line"><span class="ln"> 8</span><span class="cl"><span class="k">UPDATE</span><span class="w"> </span><span class="n">account</span><span class="w"> </span><span class="k">SET</span><span class="w"> </span><span class="n">balance</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="mi">200</span><span class="w"> </span><span class="k">WHERE</span><span class="w"> </span><span class="n">id</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="mi">1</span><span class="p">;</span><span class="w">
+</span></span></span><span class="line"><span class="ln"> 9</span><span class="cl"><span class="w">
+</span></span></span><span class="line"><span class="ln">10</span><span class="cl"><span class="c1">-- 事务 A
+</span></span></span><span class="line"><span class="ln">11</span><span class="cl"><span class="k">SELECT</span><span class="w"> </span><span class="n">balance</span><span class="w"> </span><span class="k">FROM</span><span class="w"> </span><span class="n">account</span><span class="w"> </span><span class="k">WHERE</span><span class="w"> </span><span class="n">id</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="mi">1</span><span class="p">;</span><span class="w">  </span><span class="c1">-- 200（脏读）
+</span></span></span><span class="line"><span class="ln">12</span><span class="cl"><span class="w">
+</span></span></span><span class="line"><span class="ln">13</span><span class="cl"><span class="c1">-- 事务 B
+</span></span></span><span class="line"><span class="ln">14</span><span class="cl"><span class="k">ROLLBACK</span><span class="p">;</span><span class="w">
+</span></span></span><span class="line"><span class="ln">15</span><span class="cl"><span class="w">
+</span></span></span><span class="line"><span class="ln">16</span><span class="cl"><span class="c1">-- 事务 A
+</span></span></span><span class="line"><span class="ln">17</span><span class="cl"><span class="k">SELECT</span><span class="w"> </span><span class="n">balance</span><span class="w"> </span><span class="k">FROM</span><span class="w"> </span><span class="n">account</span><span class="w"> </span><span class="k">WHERE</span><span class="w"> </span><span class="n">id</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="mi">1</span><span class="p">;</span><span class="w">  </span><span class="c1">-- 100
+</span></span></span><span class="line"><span class="ln">18</span><span class="cl"><span class="k">COMMIT</span><span class="p">;</span><span class="w">
+</span></span></span></code></pre></div><hr>
+<h2 id="read-committed读已提交">READ COMMITTED：读已提交<a hidden class="anchor" aria-hidden="true" href="#read-committed读已提交">#</a></h2>
+<p><strong>特点：</strong> 事务只能读取其他事务已提交的数据。</p>
+<p><strong>问题：</strong> 会出现不可重复读、幻读。</p>
+<p><strong>适用场景：</strong> Oracle、PostgreSQL 的默认隔离级别。</p>
+<p><strong>演示不可重复读</strong></p>
+<div class="highlight"><pre tabindex="0" class="chroma"><code class="language-sql" data-lang="sql"><span class="line"><span class="ln"> 1</span><span class="cl"><span class="c1">-- 事务 A
+</span></span></span><span class="line"><span class="ln"> 2</span><span class="cl"><span class="k">SET</span><span class="w"> </span><span class="k">SESSION</span><span class="w"> </span><span class="k">TRANSACTION</span><span class="w"> </span><span class="k">ISOLATION</span><span class="w"> </span><span class="k">LEVEL</span><span class="w"> </span><span class="k">READ</span><span class="w"> </span><span class="k">COMMITTED</span><span class="p">;</span><span class="w">
+</span></span></span><span class="line"><span class="ln"> 3</span><span class="cl"><span class="k">START</span><span class="w"> </span><span class="k">TRANSACTION</span><span class="p">;</span><span class="w">
+</span></span></span><span class="line"><span class="ln"> 4</span><span class="cl"><span class="k">SELECT</span><span class="w"> </span><span class="n">balance</span><span class="w"> </span><span class="k">FROM</span><span class="w"> </span><span class="n">account</span><span class="w"> </span><span class="k">WHERE</span><span class="w"> </span><span class="n">id</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="mi">1</span><span class="p">;</span><span class="w">  </span><span class="c1">-- 100
+</span></span></span><span class="line"><span class="ln"> 5</span><span class="cl"><span class="w">
+</span></span></span><span class="line"><span class="ln"> 6</span><span class="cl"><span class="c1">-- 事务 B
+</span></span></span><span class="line"><span class="ln"> 7</span><span class="cl"><span class="k">START</span><span class="w"> </span><span class="k">TRANSACTION</span><span class="p">;</span><span class="w">
+</span></span></span><span class="line"><span class="ln"> 8</span><span class="cl"><span class="k">UPDATE</span><span class="w"> </span><span class="n">account</span><span class="w"> </span><span class="k">SET</span><span class="w"> </span><span class="n">balance</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="mi">200</span><span class="w"> </span><span class="k">WHERE</span><span class="w"> </span><span class="n">id</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="mi">1</span><span class="p">;</span><span class="w">
+</span></span></span><span class="line"><span class="ln"> 9</span><span class="cl"><span class="k">COMMIT</span><span class="p">;</span><span class="w">
+</span></span></span><span class="line"><span class="ln">10</span><span class="cl"><span class="w">
+</span></span></span><span class="line"><span class="ln">11</span><span class="cl"><span class="c1">-- 事务 A
+</span></span></span><span class="line"><span class="ln">12</span><span class="cl"><span class="k">SELECT</span><span class="w"> </span><span class="n">balance</span><span class="w"> </span><span class="k">FROM</span><span class="w"> </span><span class="n">account</span><span class="w"> </span><span class="k">WHERE</span><span class="w"> </span><span class="n">id</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="mi">1</span><span class="p">;</span><span class="w">  </span><span class="c1">-- 200（不可重复读）
+</span></span></span><span class="line"><span class="ln">13</span><span class="cl"><span class="k">COMMIT</span><span class="p">;</span><span class="w">
+</span></span></span></code></pre></div><hr>
+<h2 id="repeatable-read可重复读">REPEATABLE READ：可重复读<a hidden class="anchor" aria-hidden="true" href="#repeatable-read可重复读">#</a></h2>
+<p><strong>特点：</strong> 事务内多次读取同一数据，结果一致。</p>
+<p><strong>问题：</strong> 理论上会出现幻读，但 MySQL 通过 MVCC + Next-Key Lock 解决了大部分幻读问题。</p>
+<p><strong>适用场景：</strong> MySQL 的默认隔离级别，适合大多数场景。</p>
+<p><strong>演示可重复读</strong></p>
+<div class="highlight"><pre tabindex="0" class="chroma"><code class="language-sql" data-lang="sql"><span class="line"><span class="ln"> 1</span><span class="cl"><span class="c1">-- 事务 A
+</span></span></span><span class="line"><span class="ln"> 2</span><span class="cl"><span class="k">SET</span><span class="w"> </span><span class="k">SESSION</span><span class="w"> </span><span class="k">TRANSACTION</span><span class="w"> </span><span class="k">ISOLATION</span><span class="w"> </span><span class="k">LEVEL</span><span class="w"> </span><span class="k">REPEATABLE</span><span class="w"> </span><span class="k">READ</span><span class="p">;</span><span class="w">
+</span></span></span><span class="line"><span class="ln"> 3</span><span class="cl"><span class="k">START</span><span class="w"> </span><span class="k">TRANSACTION</span><span class="p">;</span><span class="w">
+</span></span></span><span class="line"><span class="ln"> 4</span><span class="cl"><span class="k">SELECT</span><span class="w"> </span><span class="n">balance</span><span class="w"> </span><span class="k">FROM</span><span class="w"> </span><span class="n">account</span><span class="w"> </span><span class="k">WHERE</span><span class="w"> </span><span class="n">id</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="mi">1</span><span class="p">;</span><span class="w">  </span><span class="c1">-- 100
+</span></span></span><span class="line"><span class="ln"> 5</span><span class="cl"><span class="w">
+</span></span></span><span class="line"><span class="ln"> 6</span><span class="cl"><span class="c1">-- 事务 B
+</span></span></span><span class="line"><span class="ln"> 7</span><span class="cl"><span class="k">START</span><span class="w"> </span><span class="k">TRANSACTION</span><span class="p">;</span><span class="w">
+</span></span></span><span class="line"><span class="ln"> 8</span><span class="cl"><span class="k">UPDATE</span><span class="w"> </span><span class="n">account</span><span class="w"> </span><span class="k">SET</span><span class="w"> </span><span class="n">balance</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="mi">200</span><span class="w"> </span><span class="k">WHERE</span><span class="w"> </span><span class="n">id</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="mi">1</span><span class="p">;</span><span class="w">
+</span></span></span><span class="line"><span class="ln"> 9</span><span class="cl"><span class="k">COMMIT</span><span class="p">;</span><span class="w">
+</span></span></span><span class="line"><span class="ln">10</span><span class="cl"><span class="w">
+</span></span></span><span class="line"><span class="ln">11</span><span class="cl"><span class="c1">-- 事务 A
+</span></span></span><span class="line"><span class="ln">12</span><span class="cl"><span class="k">SELECT</span><span class="w"> </span><span class="n">balance</span><span class="w"> </span><span class="k">FROM</span><span class="w"> </span><span class="n">account</span><span class="w"> </span><span class="k">WHERE</span><span class="w"> </span><span class="n">id</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="mi">1</span><span class="p">;</span><span class="w">  </span><span class="c1">-- 100（可重复读）
+</span></span></span><span class="line"><span class="ln">13</span><span class="cl"><span class="k">COMMIT</span><span class="p">;</span><span class="w">
+</span></span></span></code></pre></div><hr>
+<h2 id="serializable串行化">SERIALIZABLE：串行化<a hidden class="anchor" aria-hidden="true" href="#serializable串行化">#</a></h2>
+<p><strong>特点：</strong> 事务串行执行，完全避免并发问题。</p>
+<p><strong>问题：</strong> 性能最差，并发度最低。</p>
+<p><strong>适用场景：</strong> 对数据一致性要求极高的场景（如金融系统）。</p>
+<p><strong>实现方式：</strong> 对读取的每一行数据都加锁。</p>
+<div class="highlight"><pre tabindex="0" class="chroma"><code class="language-sql" data-lang="sql"><span class="line"><span class="ln">1</span><span class="cl"><span class="c1">-- 事务 A
+</span></span></span><span class="line"><span class="ln">2</span><span class="cl"><span class="k">SET</span><span class="w"> </span><span class="k">SESSION</span><span class="w"> </span><span class="k">TRANSACTION</span><span class="w"> </span><span class="k">ISOLATION</span><span class="w"> </span><span class="k">LEVEL</span><span class="w"> </span><span class="k">SERIALIZABLE</span><span class="p">;</span><span class="w">
+</span></span></span><span class="line"><span class="ln">3</span><span class="cl"><span class="k">START</span><span class="w"> </span><span class="k">TRANSACTION</span><span class="p">;</span><span class="w">
+</span></span></span><span class="line"><span class="ln">4</span><span class="cl"><span class="k">SELECT</span><span class="w"> </span><span class="o">*</span><span class="w"> </span><span class="k">FROM</span><span class="w"> </span><span class="n">account</span><span class="w"> </span><span class="k">WHERE</span><span class="w"> </span><span class="n">id</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="mi">1</span><span class="p">;</span><span class="w">  </span><span class="c1">-- 加共享锁
+</span></span></span><span class="line"><span class="ln">5</span><span class="cl"><span class="w">
+</span></span></span><span class="line"><span class="ln">6</span><span class="cl"><span class="c1">-- 事务 B
+</span></span></span><span class="line"><span class="ln">7</span><span class="cl"><span class="k">START</span><span class="w"> </span><span class="k">TRANSACTION</span><span class="p">;</span><span class="w">
+</span></span></span><span class="line"><span class="ln">8</span><span class="cl"><span class="k">UPDATE</span><span class="w"> </span><span class="n">account</span><span class="w"> </span><span class="k">SET</span><span class="w"> </span><span class="n">balance</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="mi">200</span><span class="w"> </span><span class="k">WHERE</span><span class="w"> </span><span class="n">id</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="mi">1</span><span class="p">;</span><span class="w">  </span><span class="c1">-- 等待事务 A 释放锁
+</span></span></span></code></pre></div><hr>
+<h2 id="mvcc多版本并发控制">MVCC：多版本并发控制<a hidden class="anchor" aria-hidden="true" href="#mvcc多版本并发控制">#</a></h2>
+<p><strong>核心思想：</strong> 为每个事务提供数据的快照，不同事务看到不同版本的数据。</p>
+<p><strong>优势：</strong></p>
+<ul>
+<li>读不加锁，写不阻塞读</li>
+<li>提升并发性能</li>
+</ul>
+<p><strong>实现机制：</strong></p>
+<ol>
+<li>隐藏字段：DB_TRX_ID、DB_ROLL_PTR、DB_ROW_ID</li>
+<li>Undo Log：记录数据的历史版本</li>
+<li>ReadView：判断数据版本的可见性</li>
+</ol>
+<hr>
+<h2 id="隐藏字段">隐藏字段<a hidden class="anchor" aria-hidden="true" href="#隐藏字段">#</a></h2>
+<p>InnoDB 为每一行数据添加了三个隐藏字段：</p>
+<table>
+  <thead>
+      <tr>
+          <th>字段</th>
+          <th>说明</th>
+      </tr>
+  </thead>
+  <tbody>
+      <tr>
+          <td>DB_TRX_ID</td>
+          <td>最后修改该行的事务 ID</td>
+      </tr>
+      <tr>
+          <td>DB_ROLL_PTR</td>
+          <td>指向 Undo Log 的指针</td>
+      </tr>
+      <tr>
+          <td>DB_ROW_ID</td>
+          <td>行 ID（如果没有主键）</td>
+      </tr>
+  </tbody>
+</table>
+<p><strong>示例</strong></p>
+<div class="highlight"><pre tabindex="0" class="chroma"><code class="language-fallback" data-lang="fallback"><span class="line"><span class="ln"> 1</span><span class="cl">原始数据：
+</span></span><span class="line"><span class="ln"> 2</span><span class="cl">id | name  | age | DB_TRX_ID | DB_ROLL_PTR
+</span></span><span class="line"><span class="ln"> 3</span><span class="cl">1  | Alice | 20  | 100       | NULL
+</span></span><span class="line"><span class="ln"> 4</span><span class="cl">
+</span></span><span class="line"><span class="ln"> 5</span><span class="cl">事务 101 修改：
+</span></span><span class="line"><span class="ln"> 6</span><span class="cl">id | name  | age | DB_TRX_ID | DB_ROLL_PTR
+</span></span><span class="line"><span class="ln"> 7</span><span class="cl">1  | Alice | 25  | 101       | → Undo Log (age=20, TRX_ID=100)
+</span></span><span class="line"><span class="ln"> 8</span><span class="cl">
+</span></span><span class="line"><span class="ln"> 9</span><span class="cl">事务 102 修改：
+</span></span><span class="line"><span class="ln">10</span><span class="cl">id | name  | age | DB_TRX_ID | DB_ROLL_PTR
+</span></span><span class="line"><span class="ln">11</span><span class="cl">1  | Alice | 30  | 102       | → Undo Log (age=25, TRX_ID=101)
+</span></span></code></pre></div><p>通过 Undo Log，可以构建版本链，回溯到任意历史版本。</p>
+<hr>
+<h2 id="readview可见性判断">ReadView：可见性判断<a hidden class="anchor" aria-hidden="true" href="#readview可见性判断">#</a></h2>
+<p>ReadView 是事务开始时创建的快照，包含以下信息：</p>
+<table>
+  <thead>
+      <tr>
+          <th>字段</th>
+          <th>说明</th>
+      </tr>
+  </thead>
+  <tbody>
+      <tr>
+          <td>m_ids</td>
+          <td>当前活跃的事务 ID 列表</td>
+      </tr>
+      <tr>
+          <td>min_trx_id</td>
+          <td>最小的活跃事务 ID</td>
+      </tr>
+      <tr>
+          <td>max_trx_id</td>
+          <td>下一个要分配的事务 ID</td>
+      </tr>
+      <tr>
+          <td>creator_trx_id</td>
+          <td>创建 ReadView 的事务 ID</td>
+      </tr>
+  </tbody>
+</table>
+<p><strong>可见性规则</strong></p>
+<p>对于数据行的 DB_TRX_ID：</p>
+<ol>
+<li>如果 <code>DB_TRX_ID &lt; min_trx_id</code>，说明该版本在 ReadView 创建前已提交，可见</li>
+<li>如果 <code>DB_TRX_ID &gt;= max_trx_id</code>，说明该版本在 ReadView 创建后才开始，不可见</li>
+<li>如果 <code>min_trx_id &lt;= DB_TRX_ID &lt; max_trx_id</code>：
+<ul>
+<li>如果 <code>DB_TRX_ID</code> 在 <code>m_ids</code> 中，说明该事务还未提交，不可见</li>
+<li>如果 <code>DB_TRX_ID</code> 不在 <code>m_ids</code> 中，说明该事务已提交，可见</li>
+</ul>
+</li>
+<li>如果 <code>DB_TRX_ID == creator_trx_id</code>，说明是当前事务自己修改的，可见</li>
+</ol>
+<p>如果当前版本不可见，通过 DB_ROLL_PTR 找到 Undo Log 中的上一个版本，继续判断。</p>
+<hr>
+<h2 id="read-committed-与-repeatable-read-的区别">READ COMMITTED 与 REPEATABLE READ 的区别<a hidden class="anchor" aria-hidden="true" href="#read-committed-与-repeatable-read-的区别">#</a></h2>
+<p><strong>READ COMMITTED</strong></p>
+<p>每次 SELECT 都创建新的 ReadView。</p>
+<div class="highlight"><pre tabindex="0" class="chroma"><code class="language-fallback" data-lang="fallback"><span class="line"><span class="ln">1</span><span class="cl">时间线：
+</span></span><span class="line"><span class="ln">2</span><span class="cl">T1: 事务 A 开始（TRX_ID=100）
+</span></span><span class="line"><span class="ln">3</span><span class="cl">T2: 事务 A 第一次 SELECT，创建 ReadView1（m_ids=[100]）
+</span></span><span class="line"><span class="ln">4</span><span class="cl">T3: 事务 B（TRX_ID=101）修改数据并提交
+</span></span><span class="line"><span class="ln">5</span><span class="cl">T4: 事务 A 第二次 SELECT，创建 ReadView2（m_ids=[100]）
+</span></span><span class="line"><span class="ln">6</span><span class="cl">    此时事务 101 已提交，不在 m_ids 中，可见
+</span></span></code></pre></div><p>结果：两次 SELECT 结果不同（不可重复读）。</p>
+<p><strong>REPEATABLE READ</strong></p>
+<p>事务开始时创建 ReadView，整个事务期间复用。</p>
+<div class="highlight"><pre tabindex="0" class="chroma"><code class="language-fallback" data-lang="fallback"><span class="line"><span class="ln">1</span><span class="cl">时间线：
+</span></span><span class="line"><span class="ln">2</span><span class="cl">T1: 事务 A 开始（TRX_ID=100），创建 ReadView（m_ids=[100]）
+</span></span><span class="line"><span class="ln">3</span><span class="cl">T2: 事务 A 第一次 SELECT
+</span></span><span class="line"><span class="ln">4</span><span class="cl">T3: 事务 B（TRX_ID=101）修改数据并提交
+</span></span><span class="line"><span class="ln">5</span><span class="cl">T4: 事务 A 第二次 SELECT，复用 ReadView（m_ids=[100]）
+</span></span><span class="line"><span class="ln">6</span><span class="cl">    事务 101 在 ReadView 创建后才提交，不可见
+</span></span></code></pre></div><p>结果：两次 SELECT 结果相同（可重复读）。</p>
+<blockquote>
+<p><strong>架构思考：</strong> MVCC 的设计体现了&quot;空间换时间&quot;的思想。通过 Undo Log 保存历史版本，牺牲了存储空间，换取了读写并发的性能提升。这种思想在很多系统中都有应用，比如 Git 的版本控制、Redis 的 RDB 快照。</p>
+</blockquote>
+<hr>
+<h2 id="幻读问题">幻读问题<a hidden class="anchor" aria-hidden="true" href="#幻读问题">#</a></h2>
+<p><strong>什么是幻读？</strong></p>
+<p>事务 A 两次查询，第二次查询多出了新的行。</p>
+<p><strong>MVCC 能解决幻读吗？</strong></p>
+<p>部分解决。对于快照读（普通 SELECT），MVCC 可以解决幻读。但对于当前读（SELECT FOR UPDATE、UPDATE、DELETE），MVCC 无法解决幻读。</p>
+<p><strong>演示幻读</strong></p>
+<div class="highlight"><pre tabindex="0" class="chroma"><code class="language-sql" data-lang="sql"><span class="line"><span class="ln"> 1</span><span class="cl"><span class="c1">-- 事务 A
+</span></span></span><span class="line"><span class="ln"> 2</span><span class="cl"><span class="k">START</span><span class="w"> </span><span class="k">TRANSACTION</span><span class="p">;</span><span class="w">
+</span></span></span><span class="line"><span class="ln"> 3</span><span class="cl"><span class="k">SELECT</span><span class="w"> </span><span class="o">*</span><span class="w"> </span><span class="k">FROM</span><span class="w"> </span><span class="k">user</span><span class="w"> </span><span class="k">WHERE</span><span class="w"> </span><span class="n">age</span><span class="w"> </span><span class="o">&gt;</span><span class="w"> </span><span class="mi">20</span><span class="p">;</span><span class="w">  </span><span class="c1">-- 2 条记录
+</span></span></span><span class="line"><span class="ln"> 4</span><span class="cl"><span class="w">
+</span></span></span><span class="line"><span class="ln"> 5</span><span class="cl"><span class="c1">-- 事务 B
+</span></span></span><span class="line"><span class="ln"> 6</span><span class="cl"><span class="k">START</span><span class="w"> </span><span class="k">TRANSACTION</span><span class="p">;</span><span class="w">
+</span></span></span><span class="line"><span class="ln"> 7</span><span class="cl"><span class="k">INSERT</span><span class="w"> </span><span class="k">INTO</span><span class="w"> </span><span class="k">user</span><span class="w"> </span><span class="p">(</span><span class="n">name</span><span class="p">,</span><span class="w"> </span><span class="n">age</span><span class="p">)</span><span class="w"> </span><span class="k">VALUES</span><span class="w"> </span><span class="p">(</span><span class="s1">&#39;Charlie&#39;</span><span class="p">,</span><span class="w"> </span><span class="mi">25</span><span class="p">);</span><span class="w">
+</span></span></span><span class="line"><span class="ln"> 8</span><span class="cl"><span class="k">COMMIT</span><span class="p">;</span><span class="w">
+</span></span></span><span class="line"><span class="ln"> 9</span><span class="cl"><span class="w">
+</span></span></span><span class="line"><span class="ln">10</span><span class="cl"><span class="c1">-- 事务 A
+</span></span></span><span class="line"><span class="ln">11</span><span class="cl"><span class="k">SELECT</span><span class="w"> </span><span class="o">*</span><span class="w"> </span><span class="k">FROM</span><span class="w"> </span><span class="k">user</span><span class="w"> </span><span class="k">WHERE</span><span class="w"> </span><span class="n">age</span><span class="w"> </span><span class="o">&gt;</span><span class="w"> </span><span class="mi">20</span><span class="p">;</span><span class="w">  </span><span class="c1">-- 仍然 2 条（MVCC 解决了快照读的幻读）
+</span></span></span><span class="line"><span class="ln">12</span><span class="cl"><span class="w">
+</span></span></span><span class="line"><span class="ln">13</span><span class="cl"><span class="c1">-- 但是
+</span></span></span><span class="line"><span class="ln">14</span><span class="cl"><span class="k">SELECT</span><span class="w"> </span><span class="o">*</span><span class="w"> </span><span class="k">FROM</span><span class="w"> </span><span class="k">user</span><span class="w"> </span><span class="k">WHERE</span><span class="w"> </span><span class="n">age</span><span class="w"> </span><span class="o">&gt;</span><span class="w"> </span><span class="mi">20</span><span class="w"> </span><span class="k">FOR</span><span class="w"> </span><span class="k">UPDATE</span><span class="p">;</span><span class="w">  </span><span class="c1">-- 3 条（当前读出现幻读）
+</span></span></span></code></pre></div><p><strong>解决方案：Next-Key Lock</strong></p>
+<p>Next-Key Lock = Record Lock（行锁） + Gap Lock（间隙锁）</p>
+<div class="highlight"><pre tabindex="0" class="chroma"><code class="language-sql" data-lang="sql"><span class="line"><span class="ln">1</span><span class="cl"><span class="c1">-- 事务 A
+</span></span></span><span class="line"><span class="ln">2</span><span class="cl"><span class="k">START</span><span class="w"> </span><span class="k">TRANSACTION</span><span class="p">;</span><span class="w">
+</span></span></span><span class="line"><span class="ln">3</span><span class="cl"><span class="k">SELECT</span><span class="w"> </span><span class="o">*</span><span class="w"> </span><span class="k">FROM</span><span class="w"> </span><span class="k">user</span><span class="w"> </span><span class="k">WHERE</span><span class="w"> </span><span class="n">age</span><span class="w"> </span><span class="o">&gt;</span><span class="w"> </span><span class="mi">20</span><span class="w"> </span><span class="k">FOR</span><span class="w"> </span><span class="k">UPDATE</span><span class="p">;</span><span class="w">  </span><span class="c1">-- 锁定 age &gt; 20 的所有行和间隙
+</span></span></span><span class="line"><span class="ln">4</span><span class="cl"><span class="w">
+</span></span></span><span class="line"><span class="ln">5</span><span class="cl"><span class="c1">-- 事务 B
+</span></span></span><span class="line"><span class="ln">6</span><span class="cl"><span class="k">INSERT</span><span class="w"> </span><span class="k">INTO</span><span class="w"> </span><span class="k">user</span><span class="w"> </span><span class="p">(</span><span class="n">name</span><span class="p">,</span><span class="w"> </span><span class="n">age</span><span class="p">)</span><span class="w"> </span><span class="k">VALUES</span><span class="w"> </span><span class="p">(</span><span class="s1">&#39;Charlie&#39;</span><span class="p">,</span><span class="w"> </span><span class="mi">25</span><span class="p">);</span><span class="w">  </span><span class="c1">-- 等待（被间隙锁阻塞）
+</span></span></span></code></pre></div><p>间隙锁锁定的是索引记录之间的间隙，防止其他事务插入数据。</p>
+<hr>
+<h2 id="锁机制">锁机制<a hidden class="anchor" aria-hidden="true" href="#锁机制">#</a></h2>
+<p><strong>共享锁（S Lock）</strong></p>
+<p>读锁，多个事务可以同时持有。</p>
+<div class="highlight"><pre tabindex="0" class="chroma"><code class="language-sql" data-lang="sql"><span class="line"><span class="ln">1</span><span class="cl"><span class="k">SELECT</span><span class="w"> </span><span class="o">*</span><span class="w"> </span><span class="k">FROM</span><span class="w"> </span><span class="k">user</span><span class="w"> </span><span class="k">WHERE</span><span class="w"> </span><span class="n">id</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="mi">1</span><span class="w"> </span><span class="k">LOCK</span><span class="w"> </span><span class="k">IN</span><span class="w"> </span><span class="k">SHARE</span><span class="w"> </span><span class="k">MODE</span><span class="p">;</span><span class="w">
+</span></span></span></code></pre></div><p><strong>排他锁（X Lock）</strong></p>
+<p>写锁，只有一个事务可以持有。</p>
+<div class="highlight"><pre tabindex="0" class="chroma"><code class="language-sql" data-lang="sql"><span class="line"><span class="ln">1</span><span class="cl"><span class="k">SELECT</span><span class="w"> </span><span class="o">*</span><span class="w"> </span><span class="k">FROM</span><span class="w"> </span><span class="k">user</span><span class="w"> </span><span class="k">WHERE</span><span class="w"> </span><span class="n">id</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="mi">1</span><span class="w"> </span><span class="k">FOR</span><span class="w"> </span><span class="k">UPDATE</span><span class="p">;</span><span class="w">
+</span></span></span><span class="line"><span class="ln">2</span><span class="cl"><span class="k">UPDATE</span><span class="w"> </span><span class="k">user</span><span class="w"> </span><span class="k">SET</span><span class="w"> </span><span class="n">age</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="mi">25</span><span class="w"> </span><span class="k">WHERE</span><span class="w"> </span><span class="n">id</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="mi">1</span><span class="p">;</span><span class="w">
+</span></span></span><span class="line"><span class="ln">3</span><span class="cl"><span class="k">DELETE</span><span class="w"> </span><span class="k">FROM</span><span class="w"> </span><span class="k">user</span><span class="w"> </span><span class="k">WHERE</span><span class="w"> </span><span class="n">id</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="mi">1</span><span class="p">;</span><span class="w">
+</span></span></span></code></pre></div><p><strong>行锁（Record Lock）</strong></p>
+<p>锁定单个索引记录。</p>
+<p><strong>间隙锁（Gap Lock）</strong></p>
+<p>锁定索引记录之间的间隙，防止插入。</p>
+<p><strong>Next-Key Lock</strong></p>
+<p>行锁 + 间隙锁，锁定索引记录及其前面的间隙。</p>
+<p><strong>锁的兼容性</strong></p>
+<table>
+  <thead>
+      <tr>
+          <th></th>
+          <th>S Lock</th>
+          <th>X Lock</th>
+      </tr>
+  </thead>
+  <tbody>
+      <tr>
+          <td>S Lock</td>
+          <td>兼容</td>
+          <td>冲突</td>
+      </tr>
+      <tr>
+          <td>X Lock</td>
+          <td>冲突</td>
+          <td>冲突</td>
+      </tr>
+  </tbody>
+</table>
+<hr>
+<h2 id="死锁">死锁<a hidden class="anchor" aria-hidden="true" href="#死锁">#</a></h2>
+<p><strong>场景</strong></p>
+<div class="highlight"><pre tabindex="0" class="chroma"><code class="language-sql" data-lang="sql"><span class="line"><span class="ln"> 1</span><span class="cl"><span class="c1">-- 事务 A
+</span></span></span><span class="line"><span class="ln"> 2</span><span class="cl"><span class="k">START</span><span class="w"> </span><span class="k">TRANSACTION</span><span class="p">;</span><span class="w">
+</span></span></span><span class="line"><span class="ln"> 3</span><span class="cl"><span class="k">UPDATE</span><span class="w"> </span><span class="k">user</span><span class="w"> </span><span class="k">SET</span><span class="w"> </span><span class="n">age</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="mi">25</span><span class="w"> </span><span class="k">WHERE</span><span class="w"> </span><span class="n">id</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="mi">1</span><span class="p">;</span><span class="w">  </span><span class="c1">-- 锁定 id=1
+</span></span></span><span class="line"><span class="ln"> 4</span><span class="cl"><span class="w">
+</span></span></span><span class="line"><span class="ln"> 5</span><span class="cl"><span class="c1">-- 事务 B
+</span></span></span><span class="line"><span class="ln"> 6</span><span class="cl"><span class="k">START</span><span class="w"> </span><span class="k">TRANSACTION</span><span class="p">;</span><span class="w">
+</span></span></span><span class="line"><span class="ln"> 7</span><span class="cl"><span class="k">UPDATE</span><span class="w"> </span><span class="k">user</span><span class="w"> </span><span class="k">SET</span><span class="w"> </span><span class="n">age</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="mi">30</span><span class="w"> </span><span class="k">WHERE</span><span class="w"> </span><span class="n">id</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="mi">2</span><span class="p">;</span><span class="w">  </span><span class="c1">-- 锁定 id=2
+</span></span></span><span class="line"><span class="ln"> 8</span><span class="cl"><span class="w">
+</span></span></span><span class="line"><span class="ln"> 9</span><span class="cl"><span class="c1">-- 事务 A
+</span></span></span><span class="line"><span class="ln">10</span><span class="cl"><span class="k">UPDATE</span><span class="w"> </span><span class="k">user</span><span class="w"> </span><span class="k">SET</span><span class="w"> </span><span class="n">age</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="mi">26</span><span class="w"> </span><span class="k">WHERE</span><span class="w"> </span><span class="n">id</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="mi">2</span><span class="p">;</span><span class="w">  </span><span class="c1">-- 等待事务 B 释放锁
+</span></span></span><span class="line"><span class="ln">11</span><span class="cl"><span class="w">
+</span></span></span><span class="line"><span class="ln">12</span><span class="cl"><span class="c1">-- 事务 B
+</span></span></span><span class="line"><span class="ln">13</span><span class="cl"><span class="k">UPDATE</span><span class="w"> </span><span class="k">user</span><span class="w"> </span><span class="k">SET</span><span class="w"> </span><span class="n">age</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="mi">31</span><span class="w"> </span><span class="k">WHERE</span><span class="w"> </span><span class="n">id</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="mi">1</span><span class="p">;</span><span class="w">  </span><span class="c1">-- 等待事务 A 释放锁（死锁）
+</span></span></span></code></pre></div><p><strong>检测与解决</strong></p>
+<p>MySQL 会自动检测死锁，并回滚其中一个事务。</p>
+<p><strong>避免死锁</strong></p>
+<ol>
+<li>按相同顺序访问资源</li>
+<li>缩短事务时间</li>
+<li>降低隔离级别</li>
+<li>使用乐观锁</li>
+</ol>
+<hr>
+<h2 id="实战案例秒杀系统的库存扣减">实战案例：秒杀系统的库存扣减<a hidden class="anchor" aria-hidden="true" href="#实战案例秒杀系统的库存扣减">#</a></h2>
+<p><strong>方案一：悲观锁</strong></p>
+<div class="highlight"><pre tabindex="0" class="chroma"><code class="language-sql" data-lang="sql"><span class="line"><span class="ln">1</span><span class="cl"><span class="k">START</span><span class="w"> </span><span class="k">TRANSACTION</span><span class="p">;</span><span class="w">
+</span></span></span><span class="line"><span class="ln">2</span><span class="cl"><span class="k">SELECT</span><span class="w"> </span><span class="n">stock</span><span class="w"> </span><span class="k">FROM</span><span class="w"> </span><span class="n">product</span><span class="w"> </span><span class="k">WHERE</span><span class="w"> </span><span class="n">id</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="mi">1</span><span class="w"> </span><span class="k">FOR</span><span class="w"> </span><span class="k">UPDATE</span><span class="p">;</span><span class="w">  </span><span class="c1">-- 加排他锁
+</span></span></span><span class="line"><span class="ln">3</span><span class="cl"><span class="k">UPDATE</span><span class="w"> </span><span class="n">product</span><span class="w"> </span><span class="k">SET</span><span class="w"> </span><span class="n">stock</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">stock</span><span class="w"> </span><span class="o">-</span><span class="w"> </span><span class="mi">1</span><span class="w"> </span><span class="k">WHERE</span><span class="w"> </span><span class="n">id</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="mi">1</span><span class="p">;</span><span class="w">
+</span></span></span><span class="line"><span class="ln">4</span><span class="cl"><span class="k">COMMIT</span><span class="p">;</span><span class="w">
+</span></span></span></code></pre></div><p>优点：数据一致性强
+缺点：并发性能差</p>
+<p><strong>方案二：乐观锁</strong></p>
+<div class="highlight"><pre tabindex="0" class="chroma"><code class="language-sql" data-lang="sql"><span class="line"><span class="ln">1</span><span class="cl"><span class="c1">-- 查询库存和版本号
+</span></span></span><span class="line"><span class="ln">2</span><span class="cl"><span class="k">SELECT</span><span class="w"> </span><span class="n">stock</span><span class="p">,</span><span class="w"> </span><span class="k">version</span><span class="w"> </span><span class="k">FROM</span><span class="w"> </span><span class="n">product</span><span class="w"> </span><span class="k">WHERE</span><span class="w"> </span><span class="n">id</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="mi">1</span><span class="p">;</span><span class="w">
+</span></span></span><span class="line"><span class="ln">3</span><span class="cl"><span class="w">
+</span></span></span><span class="line"><span class="ln">4</span><span class="cl"><span class="c1">-- 更新时检查版本号
+</span></span></span><span class="line"><span class="ln">5</span><span class="cl"><span class="k">UPDATE</span><span class="w"> </span><span class="n">product</span><span class="w"> </span><span class="k">SET</span><span class="w"> </span><span class="n">stock</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">stock</span><span class="w"> </span><span class="o">-</span><span class="w"> </span><span class="mi">1</span><span class="p">,</span><span class="w"> </span><span class="k">version</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="k">version</span><span class="w"> </span><span class="o">+</span><span class="w"> </span><span class="mi">1</span><span class="w">
+</span></span></span><span class="line"><span class="ln">6</span><span class="cl"><span class="k">WHERE</span><span class="w"> </span><span class="n">id</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="mi">1</span><span class="w"> </span><span class="k">AND</span><span class="w"> </span><span class="k">version</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="o">#</span><span class="err">{</span><span class="n">oldVersion</span><span class="err">}</span><span class="p">;</span><span class="w">
+</span></span></span></code></pre></div><p>优点：并发性能好
+缺点：高并发下更新失败率高</p>
+<p><strong>方案三：Redis + 数据库</strong></p>
+<div class="highlight"><pre tabindex="0" class="chroma"><code class="language-java" data-lang="java"><span class="line"><span class="ln">1</span><span class="cl"><span class="c1">// 1. Redis 预扣减</span><span class="w">
+</span></span></span><span class="line"><span class="ln">2</span><span class="cl"><span class="n">Long</span><span class="w"> </span><span class="n">stock</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">redisTemplate</span><span class="p">.</span><span class="na">opsForValue</span><span class="p">().</span><span class="na">decrement</span><span class="p">(</span><span class="s">&#34;stock:1&#34;</span><span class="p">);</span><span class="w">
+</span></span></span><span class="line"><span class="ln">3</span><span class="cl"><span class="k">if</span><span class="w"> </span><span class="p">(</span><span class="n">stock</span><span class="w"> </span><span class="o">&lt;</span><span class="w"> </span><span class="n">0</span><span class="p">)</span><span class="w"> </span><span class="p">{</span><span class="w">
+</span></span></span><span class="line"><span class="ln">4</span><span class="cl"><span class="w">    </span><span class="n">redisTemplate</span><span class="p">.</span><span class="na">opsForValue</span><span class="p">().</span><span class="na">increment</span><span class="p">(</span><span class="s">&#34;stock:1&#34;</span><span class="p">);</span><span class="w">
+</span></span></span><span class="line"><span class="ln">5</span><span class="cl"><span class="w">    </span><span class="k">return</span><span class="w"> </span><span class="s">&#34;库存不足&#34;</span><span class="p">;</span><span class="w">
+</span></span></span><span class="line"><span class="ln">6</span><span class="cl"><span class="p">}</span><span class="w">
+</span></span></span><span class="line"><span class="ln">7</span><span class="cl"><span class="w">
+</span></span></span><span class="line"><span class="ln">8</span><span class="cl"><span class="c1">// 2. 异步更新数据库</span><span class="w">
+</span></span></span><span class="line"><span class="ln">9</span><span class="cl"><span class="n">rabbitTemplate</span><span class="p">.</span><span class="na">convertAndSend</span><span class="p">(</span><span class="s">&#34;order.exchange&#34;</span><span class="p">,</span><span class="w"> </span><span class="s">&#34;order.created&#34;</span><span class="p">,</span><span class="w"> </span><span class="n">orderId</span><span class="p">);</span><span class="w">
+</span></span></span></code></pre></div><p>优点：性能最好
+缺点：实现复杂，需要保证最终一致性</p>
+<hr>
+<h2 id="总结与思考">总结与思考<a hidden class="anchor" aria-hidden="true" href="#总结与思考">#</a></h2>
+<p>MySQL 事务隔离级别与 MVCC 的核心要点：</p>
+<ul>
+<li>四种隔离级别解决不同的并发问题</li>
+<li>MVCC 通过 ReadView 和 Undo Log 实现多版本并发控制</li>
+<li>READ COMMITTED 每次 SELECT 创建新 ReadView</li>
+<li>REPEATABLE READ 事务开始时创建 ReadView 并复用</li>
+<li>Next-Key Lock 解决当前读的幻读问题</li>
+</ul>
+<p>理解这些机制，才能在实际开发中选择合适的隔离级别和锁策略。</p>
+<p>下次当你遇到并发问题时，不妨想想：这是脏读、不可重复读还是幻读？应该用什么隔离级别和锁机制？</p>
+
+
+  </div>
+
+  <footer class="post-footer">
+    <ul class="post-tags">
+      <li><a href="http://localhost:1313/tags/mysql/">MySQL</a></li>
+      <li><a href="http://localhost:1313/tags/%E6%95%B0%E6%8D%AE%E5%BA%93/">数据库</a></li>
+      <li><a href="http://localhost:1313/tags/%E5%B9%B6%E5%8F%91%E7%BC%96%E7%A8%8B/">并发编程</a></li>
+      <li><a href="http://localhost:1313/tags/%E6%BA%90%E7%A0%81%E5%88%86%E6%9E%90/">源码分析</a></li>
+    </ul>
+<nav class="paginav">
+  <a class="prev" href="http://localhost:1313/posts/2024/12/mysql-%E6%85%A2%E6%9F%A5%E8%AF%A2%E4%BC%98%E5%8C%96%E5%AE%9E%E6%88%98%E6%A1%88%E4%BE%8B/">
+    <span class="title">« Prev</span>
+    <br>
+    <span>MySQL 慢查询优化实战案例</span>
+  </a>
+  <a class="next" href="http://localhost:1313/posts/2024/11/mysql-%E7%B4%A2%E5%BC%95%E4%BC%98%E5%8C%96%E4%BB%8E-explain-%E5%88%B0%E6%89%A7%E8%A1%8C%E8%AE%A1%E5%88%92/">
+    <span class="title">Next »</span>
+    <br>
+    <span>MySQL 索引优化：从 Explain 到执行计划</span>
+  </a>
+</nav>
+
+
+<ul class="share-buttons">
+    <li>
+        <a target="_blank" rel="noopener noreferrer" aria-label="share MySQL 事务隔离级别与 MVCC 机制深度解析 on x"
+            href="https://x.com/intent/tweet/?text=MySQL%20%e4%ba%8b%e5%8a%a1%e9%9a%94%e7%a6%bb%e7%ba%a7%e5%88%ab%e4%b8%8e%20MVCC%20%e6%9c%ba%e5%88%b6%e6%b7%b1%e5%ba%a6%e8%a7%a3%e6%9e%90&amp;url=http%3a%2f%2flocalhost%3a1313%2fposts%2f2024%2f11%2fmysql-%25E4%25BA%258B%25E5%258A%25A1%25E9%259A%2594%25E7%25A6%25BB%25E7%25BA%25A7%25E5%2588%25AB%25E4%25B8%258E-mvcc-%25E6%259C%25BA%25E5%2588%25B6%25E6%25B7%25B1%25E5%25BA%25A6%25E8%25A7%25A3%25E6%259E%2590%2f&amp;hashtags=MySQL%2c%e6%95%b0%e6%8d%ae%e5%ba%93%2c%e5%b9%b6%e5%8f%91%e7%bc%96%e7%a8%8b%2c%e6%ba%90%e7%a0%81%e5%88%86%e6%9e%90">
+            <svg version="1.1" viewBox="0 0 512 512" xml:space="preserve" height="30px" width="30px" fill="currentColor">
+                <path
+                    d="M512 62.554 L 512 449.446 C 512 483.97 483.97 512 449.446 512 L 62.554 512 C 28.03 512 0 483.97 0 449.446 L 0 62.554 C 0 28.03 28.029 0 62.554 0 L 449.446 0 C 483.971 0 512 28.03 512 62.554 Z M 269.951 190.75 L 182.567 75.216 L 56 75.216 L 207.216 272.95 L 63.9 436.783 L 125.266 436.783 L 235.9 310.383 L 332.567 436.783 L 456 436.783 L 298.367 228.367 L 432.367 75.216 L 371.033 75.216 Z M 127.633 110 L 164.101 110 L 383.481 400.065 L 349.5 400.065 Z" />
+            </svg>
+        </a>
+    </li>
+    <li>
+        <a target="_blank" rel="noopener noreferrer" aria-label="share MySQL 事务隔离级别与 MVCC 机制深度解析 on linkedin"
+            href="https://www.linkedin.com/shareArticle?mini=true&amp;url=http%3a%2f%2flocalhost%3a1313%2fposts%2f2024%2f11%2fmysql-%25E4%25BA%258B%25E5%258A%25A1%25E9%259A%2594%25E7%25A6%25BB%25E7%25BA%25A7%25E5%2588%25AB%25E4%25B8%258E-mvcc-%25E6%259C%25BA%25E5%2588%25B6%25E6%25B7%25B1%25E5%25BA%25A6%25E8%25A7%25A3%25E6%259E%2590%2f&amp;title=MySQL%20%e4%ba%8b%e5%8a%a1%e9%9a%94%e7%a6%bb%e7%ba%a7%e5%88%ab%e4%b8%8e%20MVCC%20%e6%9c%ba%e5%88%b6%e6%b7%b1%e5%ba%a6%e8%a7%a3%e6%9e%90&amp;summary=MySQL%20%e4%ba%8b%e5%8a%a1%e9%9a%94%e7%a6%bb%e7%ba%a7%e5%88%ab%e4%b8%8e%20MVCC%20%e6%9c%ba%e5%88%b6%e6%b7%b1%e5%ba%a6%e8%a7%a3%e6%9e%90&amp;source=http%3a%2f%2flocalhost%3a1313%2fposts%2f2024%2f11%2fmysql-%25E4%25BA%258B%25E5%258A%25A1%25E9%259A%2594%25E7%25A6%25BB%25E7%25BA%25A7%25E5%2588%25AB%25E4%25B8%258E-mvcc-%25E6%259C%25BA%25E5%2588%25B6%25E6%25B7%25B1%25E5%25BA%25A6%25E8%25A7%25A3%25E6%259E%2590%2f">
+            <svg version="1.1" viewBox="0 0 512 512" xml:space="preserve" height="30px" width="30px" fill="currentColor">
+                <path
+                    d="M449.446,0c34.525,0 62.554,28.03 62.554,62.554l0,386.892c0,34.524 -28.03,62.554 -62.554,62.554l-386.892,0c-34.524,0 -62.554,-28.03 -62.554,-62.554l0,-386.892c0,-34.524 28.029,-62.554 62.554,-62.554l386.892,0Zm-288.985,423.278l0,-225.717l-75.04,0l0,225.717l75.04,0Zm270.539,0l0,-129.439c0,-69.333 -37.018,-101.586 -86.381,-101.586c-39.804,0 -57.634,21.891 -67.617,37.266l0,-31.958l-75.021,0c0.995,21.181 0,225.717 0,225.717l75.02,0l0,-126.056c0,-6.748 0.486,-13.492 2.474,-18.315c5.414,-13.475 17.767,-27.434 38.494,-27.434c27.135,0 38.007,20.707 38.007,51.037l0,120.768l75.024,0Zm-307.552,-334.556c-25.674,0 -42.448,16.879 -42.448,39.002c0,21.658 16.264,39.002 41.455,39.002l0.484,0c26.165,0 42.452,-17.344 42.452,-39.002c-0.485,-22.092 -16.241,-38.954 -41.943,-39.002Z" />
+            </svg>
+        </a>
+    </li>
+    <li>
+        <a target="_blank" rel="noopener noreferrer" aria-label="share MySQL 事务隔离级别与 MVCC 机制深度解析 on reddit"
+            href="https://reddit.com/submit?url=http%3a%2f%2flocalhost%3a1313%2fposts%2f2024%2f11%2fmysql-%25E4%25BA%258B%25E5%258A%25A1%25E9%259A%2594%25E7%25A6%25BB%25E7%25BA%25A7%25E5%2588%25AB%25E4%25B8%258E-mvcc-%25E6%259C%25BA%25E5%2588%25B6%25E6%25B7%25B1%25E5%25BA%25A6%25E8%25A7%25A3%25E6%259E%2590%2f&title=MySQL%20%e4%ba%8b%e5%8a%a1%e9%9a%94%e7%a6%bb%e7%ba%a7%e5%88%ab%e4%b8%8e%20MVCC%20%e6%9c%ba%e5%88%b6%e6%b7%b1%e5%ba%a6%e8%a7%a3%e6%9e%90">
+            <svg version="1.1" viewBox="0 0 512 512" xml:space="preserve" height="30px" width="30px" fill="currentColor">
+                <path
+                    d="M449.446,0c34.525,0 62.554,28.03 62.554,62.554l0,386.892c0,34.524 -28.03,62.554 -62.554,62.554l-386.892,0c-34.524,0 -62.554,-28.03 -62.554,-62.554l0,-386.892c0,-34.524 28.029,-62.554 62.554,-62.554l386.892,0Zm-3.446,265.638c0,-22.964 -18.616,-41.58 -41.58,-41.58c-11.211,0 -21.361,4.457 -28.841,11.666c-28.424,-20.508 -67.586,-33.757 -111.204,-35.278l18.941,-89.121l61.884,13.157c0.756,15.734 13.642,28.29 29.56,28.29c16.407,0 29.706,-13.299 29.706,-29.701c0,-16.403 -13.299,-29.702 -29.706,-29.702c-11.666,0 -21.657,6.792 -26.515,16.578l-69.105,-14.69c-1.922,-0.418 -3.939,-0.042 -5.585,1.036c-1.658,1.073 -2.811,2.761 -3.224,4.686l-21.152,99.438c-44.258,1.228 -84.046,14.494 -112.837,35.232c-7.468,-7.164 -17.589,-11.591 -28.757,-11.591c-22.965,0 -41.585,18.616 -41.585,41.58c0,16.896 10.095,31.41 24.568,37.918c-0.639,4.135 -0.99,8.328 -0.99,12.576c0,63.977 74.469,115.836 166.33,115.836c91.861,0 166.334,-51.859 166.334,-115.836c0,-4.218 -0.347,-8.387 -0.977,-12.493c14.564,-6.47 24.735,-21.034 24.735,-38.001Zm-119.474,108.193c-20.27,20.241 -59.115,21.816 -70.534,21.816c-11.428,0 -50.277,-1.575 -70.522,-21.82c-3.007,-3.008 -3.007,-7.882 0,-10.889c3.003,-2.999 7.882,-3.003 10.885,0c12.777,12.781 40.11,17.317 59.637,17.317c19.522,0 46.86,-4.536 59.657,-17.321c3.016,-2.999 7.886,-2.995 10.885,0.008c3.008,3.011 3.003,7.882 -0.008,10.889Zm-5.23,-48.781c-16.373,0 -29.701,-13.324 -29.701,-29.698c0,-16.381 13.328,-29.714 29.701,-29.714c16.378,0 29.706,13.333 29.706,29.714c0,16.374 -13.328,29.698 -29.706,29.698Zm-160.386,-29.702c0,-16.381 13.328,-29.71 29.714,-29.71c16.369,0 29.689,13.329 29.689,29.71c0,16.373 -13.32,29.693 -29.689,29.693c-16.386,0 -29.714,-13.32 -29.714,-29.693Z" />
+            </svg>
+        </a>
+    </li>
+    <li>
+        <a target="_blank" rel="noopener noreferrer" aria-label="share MySQL 事务隔离级别与 MVCC 机制深度解析 on facebook"
+            href="https://facebook.com/sharer/sharer.php?u=http%3a%2f%2flocalhost%3a1313%2fposts%2f2024%2f11%2fmysql-%25E4%25BA%258B%25E5%258A%25A1%25E9%259A%2594%25E7%25A6%25BB%25E7%25BA%25A7%25E5%2588%25AB%25E4%25B8%258E-mvcc-%25E6%259C%25BA%25E5%2588%25B6%25E6%25B7%25B1%25E5%25BA%25A6%25E8%25A7%25A3%25E6%259E%2590%2f">
+            <svg version="1.1" viewBox="0 0 512 512" xml:space="preserve" height="30px" width="30px" fill="currentColor">
+                <path
+                    d="M449.446,0c34.525,0 62.554,28.03 62.554,62.554l0,386.892c0,34.524 -28.03,62.554 -62.554,62.554l-106.468,0l0,-192.915l66.6,0l12.672,-82.621l-79.272,0l0,-53.617c0,-22.603 11.073,-44.636 46.58,-44.636l36.042,0l0,-70.34c0,0 -32.71,-5.582 -63.982,-5.582c-65.288,0 -107.96,39.569 -107.96,111.204l0,62.971l-72.573,0l0,82.621l72.573,0l0,192.915l-191.104,0c-34.524,0 -62.554,-28.03 -62.554,-62.554l0,-386.892c0,-34.524 28.029,-62.554 62.554,-62.554l386.892,0Z" />
+            </svg>
+        </a>
+    </li>
+    <li>
+        <a target="_blank" rel="noopener noreferrer" aria-label="share MySQL 事务隔离级别与 MVCC 机制深度解析 on whatsapp"
+            href="https://api.whatsapp.com/send?text=MySQL%20%e4%ba%8b%e5%8a%a1%e9%9a%94%e7%a6%bb%e7%ba%a7%e5%88%ab%e4%b8%8e%20MVCC%20%e6%9c%ba%e5%88%b6%e6%b7%b1%e5%ba%a6%e8%a7%a3%e6%9e%90%20-%20http%3a%2f%2flocalhost%3a1313%2fposts%2f2024%2f11%2fmysql-%25E4%25BA%258B%25E5%258A%25A1%25E9%259A%2594%25E7%25A6%25BB%25E7%25BA%25A7%25E5%2588%25AB%25E4%25B8%258E-mvcc-%25E6%259C%25BA%25E5%2588%25B6%25E6%25B7%25B1%25E5%25BA%25A6%25E8%25A7%25A3%25E6%259E%2590%2f">
+            <svg version="1.1" viewBox="0 0 512 512" xml:space="preserve" height="30px" width="30px" fill="currentColor">
+                <path
+                    d="M449.446,0c34.525,0 62.554,28.03 62.554,62.554l0,386.892c0,34.524 -28.03,62.554 -62.554,62.554l-386.892,0c-34.524,0 -62.554,-28.03 -62.554,-62.554l0,-386.892c0,-34.524 28.029,-62.554 62.554,-62.554l386.892,0Zm-58.673,127.703c-33.842,-33.881 -78.847,-52.548 -126.798,-52.568c-98.799,0 -179.21,80.405 -179.249,179.234c-0.013,31.593 8.241,62.428 23.927,89.612l-25.429,92.884l95.021,-24.925c26.181,14.28 55.659,21.807 85.658,21.816l0.074,0c98.789,0 179.206,-80.413 179.247,-179.243c0.018,-47.895 -18.61,-92.93 -52.451,-126.81Zm-126.797,275.782l-0.06,0c-26.734,-0.01 -52.954,-7.193 -75.828,-20.767l-5.441,-3.229l-56.386,14.792l15.05,-54.977l-3.542,-5.637c-14.913,-23.72 -22.791,-51.136 -22.779,-79.287c0.033,-82.142 66.867,-148.971 149.046,-148.971c39.793,0.014 77.199,15.531 105.329,43.692c28.128,28.16 43.609,65.592 43.594,105.4c-0.034,82.149 -66.866,148.983 -148.983,148.984Zm81.721,-111.581c-4.479,-2.242 -26.499,-13.075 -30.604,-14.571c-4.105,-1.495 -7.091,-2.241 -10.077,2.241c-2.986,4.483 -11.569,14.572 -14.182,17.562c-2.612,2.988 -5.225,3.364 -9.703,1.12c-4.479,-2.241 -18.91,-6.97 -36.017,-22.23c-13.314,-11.876 -22.304,-26.542 -24.916,-31.026c-2.612,-4.484 -0.279,-6.908 1.963,-9.14c2.016,-2.007 4.48,-5.232 6.719,-7.847c2.24,-2.615 2.986,-4.484 4.479,-7.472c1.493,-2.99 0.747,-5.604 -0.374,-7.846c-1.119,-2.241 -10.077,-24.288 -13.809,-33.256c-3.635,-8.733 -7.327,-7.55 -10.077,-7.688c-2.609,-0.13 -5.598,-0.158 -8.583,-0.158c-2.986,0 -7.839,1.121 -11.944,5.604c-4.105,4.484 -15.675,15.32 -15.675,37.364c0,22.046 16.048,43.342 18.287,46.332c2.24,2.99 31.582,48.227 76.511,67.627c10.685,4.615 19.028,7.371 25.533,9.434c10.728,3.41 20.492,2.929 28.209,1.775c8.605,-1.285 26.499,-10.833 30.231,-21.295c3.732,-10.464 3.732,-19.431 2.612,-21.298c-1.119,-1.869 -4.105,-2.99 -8.583,-5.232Z" />
+            </svg>
+        </a>
+    </li>
+    <li>
+        <a target="_blank" rel="noopener noreferrer" aria-label="share MySQL 事务隔离级别与 MVCC 机制深度解析 on telegram"
+            href="https://telegram.me/share/url?text=MySQL%20%e4%ba%8b%e5%8a%a1%e9%9a%94%e7%a6%bb%e7%ba%a7%e5%88%ab%e4%b8%8e%20MVCC%20%e6%9c%ba%e5%88%b6%e6%b7%b1%e5%ba%a6%e8%a7%a3%e6%9e%90&amp;url=http%3a%2f%2flocalhost%3a1313%2fposts%2f2024%2f11%2fmysql-%25E4%25BA%258B%25E5%258A%25A1%25E9%259A%2594%25E7%25A6%25BB%25E7%25BA%25A7%25E5%2588%25AB%25E4%25B8%258E-mvcc-%25E6%259C%25BA%25E5%2588%25B6%25E6%25B7%25B1%25E5%25BA%25A6%25E8%25A7%25A3%25E6%259E%2590%2f">
+            <svg version="1.1" xml:space="preserve" viewBox="2 2 28 28" height="30px" width="30px" fill="currentColor">
+                <path
+                    d="M26.49,29.86H5.5a3.37,3.37,0,0,1-2.47-1,3.35,3.35,0,0,1-1-2.47V5.48A3.36,3.36,0,0,1,3,3,3.37,3.37,0,0,1,5.5,2h21A3.38,3.38,0,0,1,29,3a3.36,3.36,0,0,1,1,2.46V26.37a3.35,3.35,0,0,1-1,2.47A3.38,3.38,0,0,1,26.49,29.86Zm-5.38-6.71a.79.79,0,0,0,.85-.66L24.73,9.24a.55.55,0,0,0-.18-.46.62.62,0,0,0-.41-.17q-.08,0-16.53,6.11a.59.59,0,0,0-.41.59.57.57,0,0,0,.43.52l4,1.24,1.61,4.83a.62.62,0,0,0,.63.43.56.56,0,0,0,.4-.17L16.54,20l4.09,3A.9.9,0,0,0,21.11,23.15ZM13.8,20.71l-1.21-4q8.72-5.55,8.78-5.55c.15,0,.23,0,.23.16a.18.18,0,0,1,0,.06s-2.51,2.3-7.52,6.8Z" />
+            </svg>
+        </a>
+    </li>
+    <li>
+        <a target="_blank" rel="noopener noreferrer" aria-label="share MySQL 事务隔离级别与 MVCC 机制深度解析 on ycombinator"
+            href="https://news.ycombinator.com/submitlink?t=MySQL%20%e4%ba%8b%e5%8a%a1%e9%9a%94%e7%a6%bb%e7%ba%a7%e5%88%ab%e4%b8%8e%20MVCC%20%e6%9c%ba%e5%88%b6%e6%b7%b1%e5%ba%a6%e8%a7%a3%e6%9e%90&u=http%3a%2f%2flocalhost%3a1313%2fposts%2f2024%2f11%2fmysql-%25E4%25BA%258B%25E5%258A%25A1%25E9%259A%2594%25E7%25A6%25BB%25E7%25BA%25A7%25E5%2588%25AB%25E4%25B8%258E-mvcc-%25E6%259C%25BA%25E5%2588%25B6%25E6%25B7%25B1%25E5%25BA%25A6%25E8%25A7%25A3%25E6%259E%2590%2f">
+            <svg version="1.1" xml:space="preserve" width="30px" height="30px" viewBox="0 0 512 512" fill="currentColor"
+                xmlns:inkscape="http://www.inkscape.org/namespaces/inkscape">
+                <path
+                    d="M449.446 0C483.971 0 512 28.03 512 62.554L512 449.446C512 483.97 483.97 512 449.446 512L62.554 512C28.03 512 0 483.97 0 449.446L0 62.554C0 28.03 28.029 0 62.554 0L449.446 0ZM183.8767 87.9921H121.8427L230.6673 292.4508V424.0079H281.3328V292.4508L390.1575 87.9921H328.1233L256 238.2489z" />
+            </svg>
+        </a>
+    </li>
+</ul>
+
+  </footer>
+</article>
+    </main>
+    
+<footer class="footer">
+        <span>&copy; 2026 <a href="http://localhost:1313/">博客喵</a></span> · 
+
+    <span>
+        Powered by
+        <a href="https://gohugo.io/" rel="noopener noreferrer" target="_blank">Hugo</a> &
+        <a href="https://github.com/adityatelange/hugo-PaperMod/" rel="noopener" target="_blank">PaperMod</a>
+    </span>
+</footer>
+<a href="#top" aria-label="go to top" title="Go to Top (Alt + G)" class="top-link" id="top-link" accesskey="g">
+    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 12 6" fill="currentColor">
+        <path d="M12 6H0l6-6z" />
+    </svg>
+</a>
+
+<script>
+    let menu = document.getElementById('menu');
+    if (menu) {
+        
+        const scrollPosition = localStorage.getItem("menu-scroll-position");
+        if (scrollPosition) {
+            menu.scrollLeft = parseInt(scrollPosition, 10);
+        }
+        
+        menu.onscroll = function () {
+            localStorage.setItem("menu-scroll-position", menu.scrollLeft);
+        }
+    }
+
+    document.querySelectorAll('a[href^="#"]').forEach(anchor => {
+        anchor.addEventListener("click", function (e) {
+            e.preventDefault();
+            var id = this.getAttribute("href").substr(1);
+            if (!window.matchMedia('(prefers-reduced-motion: reduce)').matches) {
+                document.querySelector(`[id='${decodeURIComponent(id)}']`).scrollIntoView({
+                    behavior: "smooth"
+                });
+            } else {
+                document.querySelector(`[id='${decodeURIComponent(id)}']`).scrollIntoView();
+            }
+            if (id === "top") {
+                history.replaceState(null, null, " ");
+            } else {
+                history.pushState(null, null, `#${id}`);
+            }
+        });
+    });
+
+</script>
+<script>
+    var mybutton = document.getElementById("top-link");
+    window.onscroll = function () {
+        if (document.body.scrollTop > 800 || document.documentElement.scrollTop > 800) {
+            mybutton.style.visibility = "visible";
+            mybutton.style.opacity = "1";
+        } else {
+            mybutton.style.visibility = "hidden";
+            mybutton.style.opacity = "0";
+        }
+    };
+
+</script>
+<script>
+    document.getElementById("theme-toggle").addEventListener("click", () => {
+        const html = document.querySelector("html");
+        if (html.dataset.theme === "dark") {
+            html.dataset.theme = 'light';
+            localStorage.setItem("pref-theme", 'light');
+        } else {
+            html.dataset.theme = 'dark';
+            localStorage.setItem("pref-theme", 'dark');
+        }
+    })
+
+</script>
+<script>
+    document.querySelectorAll('pre > code').forEach((codeblock) => {
+        const container = codeblock.parentNode.parentNode;
+
+        const copybutton = document.createElement('button');
+        copybutton.classList.add('copy-code');
+        copybutton.innerHTML = 'copy';
+
+        function copyingDone() {
+            copybutton.innerHTML = 'copied!';
+            setTimeout(() => {
+                copybutton.innerHTML = 'copy';
+            }, 2000);
+        }
+
+        copybutton.addEventListener('click', (cb) => {
+            if ('clipboard' in navigator) {
+                navigator.clipboard.writeText(codeblock.textContent);
+                copyingDone();
+                return;
+            }
+
+            const range = document.createRange();
+            range.selectNodeContents(codeblock);
+            const selection = window.getSelection();
+            selection.removeAllRanges();
+            selection.addRange(range);
+            try {
+                document.execCommand('copy');
+                copyingDone();
+            } catch (e) { };
+            selection.removeRange(range);
+        });
+
+        if (container.classList.contains("highlight")) {
+            container.appendChild(copybutton);
+        } else if (container.parentNode.firstChild == container) {
+            
+        } else if (codeblock.parentNode.parentNode.parentNode.parentNode.parentNode.nodeName == "TABLE") {
+            
+            codeblock.parentNode.parentNode.parentNode.parentNode.parentNode.appendChild(copybutton);
+        } else {
+            
+            codeblock.parentNode.appendChild(copybutton);
+        }
+    });
+</script>
+</body>
+
+</html>

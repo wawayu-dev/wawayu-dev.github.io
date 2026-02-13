@@ -1,0 +1,329 @@
+<!DOCTYPE html>
+<html lang="en" dir="auto" data-theme="auto">
+
+<head><script src="/livereload.js?mindelay=10&amp;v=2&amp;port=1313&amp;path=livereload" data-no-instant defer></script><meta charset="utf-8">
+<meta http-equiv="X-UA-Compatible" content="IE=edge">
+<meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
+<meta name="robots" content="index, follow">
+<title>问题排查 | 博客喵</title>
+<meta name="keywords" content="">
+<meta name="description" content="记录技术成长，分享开发经验，专注 Java 后端与分布式系统">
+<meta name="author" content="wawayu">
+<link rel="canonical" href="http://localhost:1313/tags/%E9%97%AE%E9%A2%98%E6%8E%92%E6%9F%A5/">
+<link crossorigin="anonymous" href="/assets/css/stylesheet.a29c24210eb31d9ce56f669c66a35c9c51b17376b7764e336a49af7dec914cf0.css" integrity="sha256-opwkIQ6zHZzlb2acZqNcnFGxc3a3dk4zakmvfeyRTPA=" rel="preload stylesheet" as="style">
+<link rel="icon" href="http://localhost:1313/favicon.ico">
+<link rel="icon" type="image/png" sizes="16x16" href="http://localhost:1313/favicon-16x16.png">
+<link rel="icon" type="image/png" sizes="32x32" href="http://localhost:1313/favicon-32x32.png">
+<link rel="apple-touch-icon" href="http://localhost:1313/apple-touch-icon.png">
+<link rel="mask-icon" href="http://localhost:1313/safari-pinned-tab.svg">
+<meta name="theme-color" content="#2e2e33">
+<meta name="msapplication-TileColor" content="#2e2e33">
+<link rel="alternate" type="application/rss+xml" href="http://localhost:1313/tags/%E9%97%AE%E9%A2%98%E6%8E%92%E6%9F%A5/index.xml" title="rss">
+<link rel="alternate" hreflang="en" href="http://localhost:1313/tags/%E9%97%AE%E9%A2%98%E6%8E%92%E6%9F%A5/">
+<noscript>
+    <style>
+        #theme-toggle,
+        .top-link {
+            display: none;
+        }
+
+    </style>
+    <style>
+        @media (prefers-color-scheme: dark) {
+            :root {
+                --theme: rgb(29, 30, 32);
+                --entry: rgb(46, 46, 51);
+                --primary: rgb(218, 218, 219);
+                --secondary: rgb(155, 156, 157);
+                --tertiary: rgb(65, 66, 68);
+                --content: rgb(196, 196, 197);
+                --code-block-bg: rgb(46, 46, 51);
+                --code-bg: rgb(55, 56, 62);
+                --border: rgb(51, 51, 51);
+                color-scheme: dark;
+            }
+
+            .list {
+                background: var(--theme);
+            }
+
+            .toc {
+                background: var(--entry);
+            }
+        }
+
+        @media (prefers-color-scheme: light) {
+            .list::-webkit-scrollbar-thumb {
+                border-color: var(--code-bg);
+            }
+        }
+
+    </style>
+</noscript>
+<script>
+    if (localStorage.getItem("pref-theme") === "dark") {
+        document.querySelector("html").dataset.theme = 'dark';
+    } else if (localStorage.getItem("pref-theme") === "light") {
+       document.querySelector("html").dataset.theme = 'light';
+    } else if (window.matchMedia('(prefers-color-scheme: dark)').matches) {
+        document.querySelector("html").dataset.theme = 'dark';
+    } else {
+        document.querySelector("html").dataset.theme = 'light';
+    }
+
+</script><meta property="og:url" content="http://localhost:1313/tags/%E9%97%AE%E9%A2%98%E6%8E%92%E6%9F%A5/">
+  <meta property="og:site_name" content="博客喵">
+  <meta property="og:title" content="问题排查">
+  <meta property="og:description" content="记录技术成长，分享开发经验，专注 Java 后端与分布式系统">
+  <meta property="og:locale" content="zh-cn">
+  <meta property="og:type" content="website">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:title" content="问题排查">
+<meta name="twitter:description" content="记录技术成长，分享开发经验，专注 Java 后端与分布式系统">
+
+</head>
+<body class="list" id="top">
+    <header class="header">
+    <nav class="nav">
+        <div class="logo">
+            <a href="http://localhost:1313/" accesskey="h" title="博客喵 (Alt + H)">博客喵</a>
+            <div class="logo-switches">
+                <button id="theme-toggle" accesskey="t" title="(Alt + T)" aria-label="Toggle theme">
+                    <svg id="moon" xmlns="http://www.w3.org/2000/svg" width="24" height="18" viewBox="0 0 24 24"
+                        fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"
+                        stroke-linejoin="round">
+                        <path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"></path>
+                    </svg>
+                    <svg id="sun" xmlns="http://www.w3.org/2000/svg" width="24" height="18" viewBox="0 0 24 24"
+                        fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"
+                        stroke-linejoin="round">
+                        <circle cx="12" cy="12" r="5"></circle>
+                        <line x1="12" y1="1" x2="12" y2="3"></line>
+                        <line x1="12" y1="21" x2="12" y2="23"></line>
+                        <line x1="4.22" y1="4.22" x2="5.64" y2="5.64"></line>
+                        <line x1="18.36" y1="18.36" x2="19.78" y2="19.78"></line>
+                        <line x1="1" y1="12" x2="3" y2="12"></line>
+                        <line x1="21" y1="12" x2="23" y2="12"></line>
+                        <line x1="4.22" y1="19.78" x2="5.64" y2="18.36"></line>
+                        <line x1="18.36" y1="5.64" x2="19.78" y2="4.22"></line>
+                    </svg>
+                </button>
+            </div>
+        </div>
+        <ul id="menu">
+            <li>
+                <a href="http://localhost:1313/posts/" title="📝 文章">
+                    <span>📝 文章</span>
+                </a>
+            </li>
+            <li>
+                <a href="http://localhost:1313/tags/" title="🏷️ 标签">
+                    <span>🏷️ 标签</span>
+                </a>
+            </li>
+            <li>
+                <a href="http://localhost:1313/categories/" title="📂 分类">
+                    <span>📂 分类</span>
+                </a>
+            </li>
+            <li>
+                <a href="http://localhost:1313/skills/" title="💻 技能">
+                    <span>💻 技能</span>
+                </a>
+            </li>
+            <li>
+                <a href="http://localhost:1313/about/" title="👤 关于">
+                    <span>👤 关于</span>
+                </a>
+            </li>
+            <li>
+                <a href="http://localhost:1313/search/" title="🔍 搜索 (Alt &#43; /)" accesskey=/>
+                    <span>🔍 搜索</span>
+                </a>
+            </li>
+        </ul>
+    </nav>
+</header>
+<main class="main"> 
+<header class="page-header"><div class="breadcrumbs"><a href="http://localhost:1313/">Home</a>&nbsp;»&nbsp;<a href="http://localhost:1313/tags/">Tags</a></div>
+  <h1>
+    问题排查
+    <a href="/tags/%E9%97%AE%E9%A2%98%E6%8E%92%E6%9F%A5/index.xml" title="RSS" aria-label="RSS">
+      <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"
+        stroke-linecap="round" stroke-linejoin="round" height="23">
+        <path d="M4 11a9 9 0 0 1 9 9" />
+        <path d="M4 4a16 16 0 0 1 16 16" />
+        <circle cx="5" cy="19" r="1" />
+      </svg>
+    </a>
+  </h1>
+</header>
+
+<article class="post-entry tag-entry"> 
+  <header class="entry-header">
+    <h2 class="entry-hint-parent">接口响应慢？一次完整的性能优化之旅
+    </h2>
+  </header>
+  <div class="entry-content">
+    <p>“这个接口怎么这么慢？“这是每个后端开发都会遇到的问题。当用户抱怨系统卡顿，当监控告警频繁触发，我们该如何系统性地定位和解决性能问题？
+本文将通过一个真实的案例，带你经历一次完整的性能优化之旅，从问题发现到最终优化，将接口响应时间从3秒降低到300ms。
+本文亮点 掌握性能问题的系统性排查方法 学会使用各种性能分析工具 理解常见的性能瓶颈及解决方案 了解数据库、缓存、代码层面的优化技巧 建立完整的性能优化思维模型 问题背景 业务场景 某电商系统的订单详情接口，用户反馈页面加载缓慢，影响用户体验。
+接口定义：
+1@GetMapping(&#34;/api/orders/{orderId}&#34;) 2public Result&lt;OrderDetailVO&gt; getOrderDetail(@PathVariable Long orderId) { 3 return Result.success(orderService.getOrderDetail(orderId)); 4} 监控数据：
+平均响应时间：2.8秒 P95响应时间：3.5秒 P99响应时间：5秒 QPS：100 业务要求：
+响应时间 &lt; 500ms P99 &lt; 1秒 架构思考： 性能优化不是盲目地优化，而是要基于数据和目标。首先要明确性能指标和优化目标，然后系统性地分析和优化。
+第一步：问题定位 1. 添加监控埋点 首先，我们需要知道时间都花在哪里了：
+1@Service 2@Slf4j 3public class OrderService { 4 5 @Autowired 6 private OrderMapper orderMapper; 7 8 @Autowired 9 private UserService userService; 10 11 @Autowired 12 private ProductService productService; 13 14 @Autowired 15 private LogisticsService logisticsService; 16 17 public OrderDetailVO getOrderDetail(Long orderId) { 18 long startTime = System.currentTimeMillis(); 19 20 // 1. 查询订单基本信息 21 long step1Start = System.currentTimeMillis(); 22 Order order = orderMapper.selectById(orderId); 23 log.info(&#34;查询订单耗时：{}ms&#34;, System.currentTimeMillis() - step1Start); 24 25 // 2. 查询用户信息 26 long step2Start = System.currentTimeMillis(); 27 User user = userService.getUserById(order.getUserId()); 28 log.info(&#34;查询用户耗时：{}ms&#34;, System.currentTimeMillis() - step2Start); 29 30 // 3. 查询商品信息 31 long step3Start = System.currentTimeMillis(); 32 List&lt;OrderItem&gt; items = orderMapper.selectItemsByOrderId(orderId); 33 List&lt;Product&gt; products = new ArrayList&lt;&gt;(); 34 for (OrderItem item : items) { 35 Product product = productService.getProductById(item.getProductId()); 36 products.add(product); 37 } 38 log.info(&#34;查询商品耗时：{}ms&#34;, System.currentTimeMillis() - step3Start); 39 40 // 4. 查询物流信息 41 long step4Start = System.currentTimeMillis(); 42 Logistics logistics = logisticsService.getLogisticsByOrderId(orderId); 43 log.info(&#34;查询物流耗时：{}ms&#34;, System.currentTimeMillis() - step4Start); 44 45 // 5. 组装返回数据 46 OrderDetailVO vo = buildOrderDetailVO(order, user, products, logistics); 47 48 log.info(&#34;总耗时：{}ms&#34;, System.currentTimeMillis() - startTime); 49 return vo; 50 } 51} 日志输出：
+...</p>
+  </div>
+  <footer class="entry-footer"><span title='2025-10-12 00:00:00 +0000 UTC'>October 12, 2025</span>&nbsp;·&nbsp;<span>7 min</span>&nbsp;·&nbsp;<span>1312 words</span>&nbsp;·&nbsp;<span>wawayu</span></footer>
+  <a class="entry-link" aria-label="post link to 接口响应慢？一次完整的性能优化之旅" href="http://localhost:1313/posts/2025/10/%E6%8E%A5%E5%8F%A3%E5%93%8D%E5%BA%94%E6%85%A2%E4%B8%80%E6%AC%A1%E5%AE%8C%E6%95%B4%E7%9A%84%E6%80%A7%E8%83%BD%E4%BC%98%E5%8C%96%E4%B9%8B%E6%97%85/"></a>
+</article>
+
+<article class="post-entry tag-entry"> 
+  <header class="entry-header">
+    <h2 class="entry-hint-parent">EasyExcel 百万级数据导出的内存优化实战
+    </h2>
+  </header>
+  <div class="entry-content">
+    <p>在企业级应用中，大数据量导出是一个常见但棘手的问题。传统的 Apache POI 在处理大文件时容易出现内存溢出，而阿里开源的 EasyExcel 通过优化内存占用，可以轻松处理百万级数据导出。
+本文将从实际问题出发，深入讲解如何使用 EasyExcel 实现高性能的大数据量导出，并分享生产环境中的优化经验。
+本文亮点 理解传统 POI 的内存问题 掌握 EasyExcel 的核心原理 学会百万级数据导出的最佳实践 了解异步导出与进度反馈方案 掌握生产环境的性能调优技巧 传统 POI 的内存问题 问题场景 某电商系统需要导出订单数据，数据量达到 100 万条。使用传统的 Apache POI 实现：
+1// 传统 POI 实现（有问题的代码） 2public void exportOrders() { 3 Workbook workbook = new XSSFWorkbook(); 4 Sheet sheet = workbook.createSheet(&#34;订单数据&#34;); 5 6 // 查询 100 万条数据 7 List&lt;Order&gt; orders = orderMapper.selectAll(); 8 9 // 写入 Excel 10 for (int i = 0; i &lt; orders.size(); i&#43;&#43;) { 11 Row row = sheet.createRow(i); 12 Order order = orders.get(i); 13 row.createCell(0).setCellValue(order.getOrderNo()); 14 row.createCell(1).setCellValue(order.getUserName()); 15 // ... 更多字段 16 } 17 18 // 输出文件 19 FileOutputStream fos = new FileOutputStream(&#34;orders.xlsx&#34;); 20 workbook.write(fos); 21 fos.close(); 22} 内存分析 这段代码存在严重的内存问题：
+...</p>
+  </div>
+  <footer class="entry-footer"><span title='2025-05-22 00:00:00 +0000 UTC'>May 22, 2025</span>&nbsp;·&nbsp;<span>9 min</span>&nbsp;·&nbsp;<span>1819 words</span>&nbsp;·&nbsp;<span>wawayu</span></footer>
+  <a class="entry-link" aria-label="post link to EasyExcel 百万级数据导出的内存优化实战" href="http://localhost:1313/posts/2025/05/easyexcel-%E7%99%BE%E4%B8%87%E7%BA%A7%E6%95%B0%E6%8D%AE%E5%AF%BC%E5%87%BA%E7%9A%84%E5%86%85%E5%AD%98%E4%BC%98%E5%8C%96%E5%AE%9E%E6%88%98/"></a>
+</article>
+
+<article class="post-entry tag-entry"> 
+  <header class="entry-header">
+    <h2 class="entry-hint-parent">MySQL 慢查询优化实战案例
+    </h2>
+  </header>
+  <div class="entry-content">
+    <p>一条慢查询可能拖垮整个系统。本文通过真实的生产案例，讲解如何定位和优化慢查询，让你掌握 SQL 性能调优的完整方法论。
+本文亮点 掌握慢查询日志的分析方法 学会使用 Explain 定位性能瓶颈 了解常见的 SQL 优化技巧 理解数据库层面的性能优化 案例背景 某电商系统的订单列表查询接口响应时间达到 5 秒，用户体验极差。
+原始 SQL
+1SELECT o.*, u.username, u.phone 2FROM `order` o 3LEFT JOIN user u ON o.user_id = u.id 4WHERE o.status IN (1, 2, 3) 5 AND o.create_time &gt;= &#39;2024-01-01&#39; 6 AND u.city = &#39;Beijing&#39; 7ORDER BY o.create_time DESC 8LIMIT 20; 数据量：
+order 表：100 万条 user 表：50 万条 第一步：开启慢查询日志 配置 MySQL
+1[mysqld] 2slow_query_log = 1 3slow_query_log_file = /var/log/mysql/slow.log 4long_query_time = 1 5log_queries_not_using_indexes = 1 分析慢查询日志
+...</p>
+  </div>
+  <footer class="entry-footer"><span title='2024-12-10 00:00:00 +0000 UTC'>December 10, 2024</span>&nbsp;·&nbsp;<span>4 min</span>&nbsp;·&nbsp;<span>761 words</span>&nbsp;·&nbsp;<span>wawayu</span></footer>
+  <a class="entry-link" aria-label="post link to MySQL 慢查询优化实战案例" href="http://localhost:1313/posts/2024/12/mysql-%E6%85%A2%E6%9F%A5%E8%AF%A2%E4%BC%98%E5%8C%96%E5%AE%9E%E6%88%98%E6%A1%88%E4%BE%8B/"></a>
+</article>
+
+<article class="post-entry tag-entry"> 
+  <header class="entry-header">
+    <h2 class="entry-hint-parent">JVM OOM 问题排查实战：从 Heap Dump 到根因分析
+    </h2>
+  </header>
+  <div class="entry-content">
+    <p>生产环境的 OOM（Out Of Memory）是后端开发最头疼的问题之一。本文通过真实案例，讲解如何定位和解决 JVM 内存问题。
+本文亮点 理解 JVM 内存模型与 GC 机制 掌握 Heap Dump 的生成与分析方法 学会使用 MAT 工具定位内存泄漏 了解常见的内存泄漏场景与解决方案 JVM 内存模型 堆内存（Heap）
+年轻代（Young Generation） Eden 区：新对象分配的区域 Survivor 区：S0 和 S1，存放经过一次 GC 后存活的对象 老年代（Old Generation）：存放长期存活的对象 非堆内存
+方法区（Metaspace）：存放类信息、常量、静态变量 栈（Stack）：存放局部变量、方法调用 直接内存（Direct Memory）：NIO 使用的堆外内存 GC 机制
+Minor GC：清理年轻代 Major GC：清理老年代 Full GC：清理整个堆内存 对象晋升
+新对象在 Eden 区分配 Eden 区满了，触发 Minor GC 存活的对象移动到 Survivor 区 经过多次 GC 后，对象晋升到老年代 架构思考： JVM 的分代收集体现了&#34;大部分对象朝生夕死&#34;的特点。年轻代使用复制算法，快速回收短命对象；老年代使用标记-清除或标记-整理算法，处理长期存活的对象。这种设计在性能和内存利用率之间找到了平衡。
+...</p>
+  </div>
+  <footer class="entry-footer"><span title='2024-10-25 00:00:00 +0000 UTC'>October 25, 2024</span>&nbsp;·&nbsp;<span>4 min</span>&nbsp;·&nbsp;<span>758 words</span>&nbsp;·&nbsp;<span>wawayu</span></footer>
+  <a class="entry-link" aria-label="post link to JVM OOM 问题排查实战：从 Heap Dump 到根因分析" href="http://localhost:1313/posts/2024/10/jvm-oom-%E9%97%AE%E9%A2%98%E6%8E%92%E6%9F%A5%E5%AE%9E%E6%88%98%E4%BB%8E-heap-dump-%E5%88%B0%E6%A0%B9%E5%9B%A0%E5%88%86%E6%9E%90/"></a>
+</article>
+
+<article class="post-entry tag-entry"> 
+  <header class="entry-header">
+    <h2 class="entry-hint-parent">ThreadLocal 原理与内存泄漏排查实战
+    </h2>
+  </header>
+  <div class="entry-content">
+    <p>ThreadLocal 是 Java 并发编程中的重要工具，它为每个线程提供独立的变量副本。但很多人只知道怎么用，不知道它的实现原理，更不知道它可能导致内存泄漏。本文深入剖析 ThreadLocal 的底层机制。
+本文亮点 理解 ThreadLocal 的实现原理与 ThreadLocalMap 结构 掌握弱引用的设计意图与内存泄漏的根因 学会在线程池环境下正确使用 ThreadLocal 了解 InheritableThreadLocal 的使用场景 ThreadLocal 的使用场景 ThreadLocal 常用于以下场景：
+场景一：用户上下文传递
+1public class UserContext { 2 private static final ThreadLocal&lt;User&gt; context = new ThreadLocal&lt;&gt;(); 3 4 public static void setUser(User user) { 5 context.set(user); 6 } 7 8 public static User getUser() { 9 return context.get(); 10 } 11 12 public static void remove() { 13 context.remove(); 14 } 15} 16 17// 在 Controller 中设置用户信息 18@RestController 19public class UserController { 20 21 @GetMapping(&#34;/user/info&#34;) 22 public UserDTO getUserInfo() { 23 User user = UserContext.getUser(); 24 return UserDTO.from(user); 25 } 26} 场景二：数据库连接管理
+...</p>
+  </div>
+  <footer class="entry-footer"><span title='2024-02-20 00:00:00 +0000 UTC'>February 20, 2024</span>&nbsp;·&nbsp;<span>5 min</span>&nbsp;·&nbsp;<span>992 words</span>&nbsp;·&nbsp;<span>wawayu</span></footer>
+  <a class="entry-link" aria-label="post link to ThreadLocal 原理与内存泄漏排查实战" href="http://localhost:1313/posts/2024/02/threadlocal-%E5%8E%9F%E7%90%86%E4%B8%8E%E5%86%85%E5%AD%98%E6%B3%84%E6%BC%8F%E6%8E%92%E6%9F%A5%E5%AE%9E%E6%88%98/"></a>
+</article>
+    </main>
+    
+<footer class="footer">
+        <span>&copy; 2026 <a href="http://localhost:1313/">博客喵</a></span> · 
+
+    <span>
+        Powered by
+        <a href="https://gohugo.io/" rel="noopener noreferrer" target="_blank">Hugo</a> &
+        <a href="https://github.com/adityatelange/hugo-PaperMod/" rel="noopener" target="_blank">PaperMod</a>
+    </span>
+</footer>
+<a href="#top" aria-label="go to top" title="Go to Top (Alt + G)" class="top-link" id="top-link" accesskey="g">
+    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 12 6" fill="currentColor">
+        <path d="M12 6H0l6-6z" />
+    </svg>
+</a>
+
+<script>
+    let menu = document.getElementById('menu');
+    if (menu) {
+        
+        const scrollPosition = localStorage.getItem("menu-scroll-position");
+        if (scrollPosition) {
+            menu.scrollLeft = parseInt(scrollPosition, 10);
+        }
+        
+        menu.onscroll = function () {
+            localStorage.setItem("menu-scroll-position", menu.scrollLeft);
+        }
+    }
+
+    document.querySelectorAll('a[href^="#"]').forEach(anchor => {
+        anchor.addEventListener("click", function (e) {
+            e.preventDefault();
+            var id = this.getAttribute("href").substr(1);
+            if (!window.matchMedia('(prefers-reduced-motion: reduce)').matches) {
+                document.querySelector(`[id='${decodeURIComponent(id)}']`).scrollIntoView({
+                    behavior: "smooth"
+                });
+            } else {
+                document.querySelector(`[id='${decodeURIComponent(id)}']`).scrollIntoView();
+            }
+            if (id === "top") {
+                history.replaceState(null, null, " ");
+            } else {
+                history.pushState(null, null, `#${id}`);
+            }
+        });
+    });
+
+</script>
+<script>
+    var mybutton = document.getElementById("top-link");
+    window.onscroll = function () {
+        if (document.body.scrollTop > 800 || document.documentElement.scrollTop > 800) {
+            mybutton.style.visibility = "visible";
+            mybutton.style.opacity = "1";
+        } else {
+            mybutton.style.visibility = "hidden";
+            mybutton.style.opacity = "0";
+        }
+    };
+
+</script>
+<script>
+    document.getElementById("theme-toggle").addEventListener("click", () => {
+        const html = document.querySelector("html");
+        if (html.dataset.theme === "dark") {
+            html.dataset.theme = 'light';
+            localStorage.setItem("pref-theme", 'light');
+        } else {
+            html.dataset.theme = 'dark';
+            localStorage.setItem("pref-theme", 'dark');
+        }
+    })
+
+</script>
+</body>
+
+</html>

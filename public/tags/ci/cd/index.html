@@ -1,0 +1,296 @@
+<!DOCTYPE html>
+<html lang="en" dir="auto" data-theme="auto">
+
+<head><script src="/livereload.js?mindelay=10&amp;v=2&amp;port=1313&amp;path=livereload" data-no-instant defer></script><meta charset="utf-8">
+<meta http-equiv="X-UA-Compatible" content="IE=edge">
+<meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
+<meta name="robots" content="index, follow">
+<title>CI/CD | 博客喵</title>
+<meta name="keywords" content="">
+<meta name="description" content="记录技术成长，分享开发经验，专注 Java 后端与分布式系统">
+<meta name="author" content="wawayu">
+<link rel="canonical" href="http://localhost:1313/tags/ci/cd/">
+<link crossorigin="anonymous" href="/assets/css/stylesheet.a29c24210eb31d9ce56f669c66a35c9c51b17376b7764e336a49af7dec914cf0.css" integrity="sha256-opwkIQ6zHZzlb2acZqNcnFGxc3a3dk4zakmvfeyRTPA=" rel="preload stylesheet" as="style">
+<link rel="icon" href="http://localhost:1313/favicon.ico">
+<link rel="icon" type="image/png" sizes="16x16" href="http://localhost:1313/favicon-16x16.png">
+<link rel="icon" type="image/png" sizes="32x32" href="http://localhost:1313/favicon-32x32.png">
+<link rel="apple-touch-icon" href="http://localhost:1313/apple-touch-icon.png">
+<link rel="mask-icon" href="http://localhost:1313/safari-pinned-tab.svg">
+<meta name="theme-color" content="#2e2e33">
+<meta name="msapplication-TileColor" content="#2e2e33">
+<link rel="alternate" type="application/rss+xml" href="http://localhost:1313/tags/ci/cd/index.xml" title="rss">
+<link rel="alternate" hreflang="en" href="http://localhost:1313/tags/ci/cd/">
+<noscript>
+    <style>
+        #theme-toggle,
+        .top-link {
+            display: none;
+        }
+
+    </style>
+    <style>
+        @media (prefers-color-scheme: dark) {
+            :root {
+                --theme: rgb(29, 30, 32);
+                --entry: rgb(46, 46, 51);
+                --primary: rgb(218, 218, 219);
+                --secondary: rgb(155, 156, 157);
+                --tertiary: rgb(65, 66, 68);
+                --content: rgb(196, 196, 197);
+                --code-block-bg: rgb(46, 46, 51);
+                --code-bg: rgb(55, 56, 62);
+                --border: rgb(51, 51, 51);
+                color-scheme: dark;
+            }
+
+            .list {
+                background: var(--theme);
+            }
+
+            .toc {
+                background: var(--entry);
+            }
+        }
+
+        @media (prefers-color-scheme: light) {
+            .list::-webkit-scrollbar-thumb {
+                border-color: var(--code-bg);
+            }
+        }
+
+    </style>
+</noscript>
+<script>
+    if (localStorage.getItem("pref-theme") === "dark") {
+        document.querySelector("html").dataset.theme = 'dark';
+    } else if (localStorage.getItem("pref-theme") === "light") {
+       document.querySelector("html").dataset.theme = 'light';
+    } else if (window.matchMedia('(prefers-color-scheme: dark)').matches) {
+        document.querySelector("html").dataset.theme = 'dark';
+    } else {
+        document.querySelector("html").dataset.theme = 'light';
+    }
+
+</script><meta property="og:url" content="http://localhost:1313/tags/ci/cd/">
+  <meta property="og:site_name" content="博客喵">
+  <meta property="og:title" content="CI/CD">
+  <meta property="og:description" content="记录技术成长，分享开发经验，专注 Java 后端与分布式系统">
+  <meta property="og:locale" content="zh-cn">
+  <meta property="og:type" content="website">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:title" content="CI/CD">
+<meta name="twitter:description" content="记录技术成长，分享开发经验，专注 Java 后端与分布式系统">
+
+</head>
+<body class="list" id="top">
+    <header class="header">
+    <nav class="nav">
+        <div class="logo">
+            <a href="http://localhost:1313/" accesskey="h" title="博客喵 (Alt + H)">博客喵</a>
+            <div class="logo-switches">
+                <button id="theme-toggle" accesskey="t" title="(Alt + T)" aria-label="Toggle theme">
+                    <svg id="moon" xmlns="http://www.w3.org/2000/svg" width="24" height="18" viewBox="0 0 24 24"
+                        fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"
+                        stroke-linejoin="round">
+                        <path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"></path>
+                    </svg>
+                    <svg id="sun" xmlns="http://www.w3.org/2000/svg" width="24" height="18" viewBox="0 0 24 24"
+                        fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"
+                        stroke-linejoin="round">
+                        <circle cx="12" cy="12" r="5"></circle>
+                        <line x1="12" y1="1" x2="12" y2="3"></line>
+                        <line x1="12" y1="21" x2="12" y2="23"></line>
+                        <line x1="4.22" y1="4.22" x2="5.64" y2="5.64"></line>
+                        <line x1="18.36" y1="18.36" x2="19.78" y2="19.78"></line>
+                        <line x1="1" y1="12" x2="3" y2="12"></line>
+                        <line x1="21" y1="12" x2="23" y2="12"></line>
+                        <line x1="4.22" y1="19.78" x2="5.64" y2="18.36"></line>
+                        <line x1="18.36" y1="5.64" x2="19.78" y2="4.22"></line>
+                    </svg>
+                </button>
+            </div>
+        </div>
+        <ul id="menu">
+            <li>
+                <a href="http://localhost:1313/posts/" title="📝 文章">
+                    <span>📝 文章</span>
+                </a>
+            </li>
+            <li>
+                <a href="http://localhost:1313/tags/" title="🏷️ 标签">
+                    <span>🏷️ 标签</span>
+                </a>
+            </li>
+            <li>
+                <a href="http://localhost:1313/categories/" title="📂 分类">
+                    <span>📂 分类</span>
+                </a>
+            </li>
+            <li>
+                <a href="http://localhost:1313/skills/" title="💻 技能">
+                    <span>💻 技能</span>
+                </a>
+            </li>
+            <li>
+                <a href="http://localhost:1313/about/" title="👤 关于">
+                    <span>👤 关于</span>
+                </a>
+            </li>
+            <li>
+                <a href="http://localhost:1313/search/" title="🔍 搜索 (Alt &#43; /)" accesskey=/>
+                    <span>🔍 搜索</span>
+                </a>
+            </li>
+        </ul>
+    </nav>
+</header>
+<main class="main"> 
+<header class="page-header"><div class="breadcrumbs"><a href="http://localhost:1313/">Home</a>&nbsp;»&nbsp;<a href="http://localhost:1313/tags/">Tags</a></div>
+  <h1>
+    CI/CD
+    <a href="/tags/ci/cd/index.xml" title="RSS" aria-label="RSS">
+      <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"
+        stroke-linecap="round" stroke-linejoin="round" height="23">
+        <path d="M4 11a9 9 0 0 1 9 9" />
+        <path d="M4 4a16 16 0 0 1 16 16" />
+        <circle cx="5" cy="19" r="1" />
+      </svg>
+    </a>
+  </h1>
+</header>
+
+<article class="post-entry tag-entry"> 
+  <header class="entry-header">
+    <h2 class="entry-hint-parent">从零到一：构建 Hugo &#43; PaperMod 自动化博客系统
+    </h2>
+  </header>
+  <div class="entry-content">
+    <p>在碎片化信息爆炸的时代，拥有一套完全受自己掌控的技术专栏，是每位开发者沉淀思考、打造个人品牌的核心资产。相比于被平台算法绑架的公众号，或是充斥广告的第三方博客，Hugo 这类静态站点生成器给了我们真正的自由：毫秒级构建、Markdown 原生支持、完全的样式控制权。
+但很多人在搭建 Hugo 博客时，往往陷入&#34;照着文档敲命令&#34;的机械重复。本文不是又一篇安装教程，而是从系统架构的角度，带你理解 Hugo &#43; PaperMod 这套方案背后的设计逻辑。
+本文亮点 理解 Hugo Extended 与 PaperMod 的依赖关系 掌握 Git Submodule 的主题管理方案 设计基于 GitHub Actions 的自动化部署流水线 建立工程化思维而非&#34;跟着做&#34;的操作思维 01. 基础设施：为什么必须是 Hugo Extended？ 很多人第一次搭建 Hugo 博客时，会遇到一个诡异的报错：TOCSS: failed to transform &#34;css/main.css&#34;。明明按照官方文档装了 Hugo，为什么还会出错？
+问题出在版本选择上。Hugo 分为普通版和 Extended 版，后者内置了 LibSass 编译器。而 PaperMod 这类现代主题大量使用 SCSS/SASS 来实现主题变量、暗黑模式切换等特性。如果你用普通版 Hugo，编译流程会在 CSS 转换环节直接崩溃。
+在 Windows 环境下，我们用 Winget 来安装，而不是手动下载 zip 包：
+1# 使用包管理器安装，确保版本可追溯 2winget install Hugo.Hugo.Extended 3 4# 验证安装：必须看到 &#43;extended 标识 5hugo version 6# 预期输出: hugo v0.12x.x&#43;extended windows/amd64 为什么坚持用包管理器？因为这是&#34;可复现环境&#34;的第一步。当你的博客需要团队协作，或者换了台电脑重新部署时，一条命令就能恢复完全一致的环境，而不是在&#34;我电脑上能跑&#34;的泥潭里挣扎。
+...</p>
+  </div>
+  <footer class="entry-footer"><span title='2026-02-12 00:00:00 +0000 UTC'>February 12, 2026</span>&nbsp;·&nbsp;<span>2 min</span>&nbsp;·&nbsp;<span>397 words</span>&nbsp;·&nbsp;<span>wawayu</span></footer>
+  <a class="entry-link" aria-label="post link to 从零到一：构建 Hugo &#43; PaperMod 自动化博客系统" href="http://localhost:1313/posts/2026/02/%E4%BB%8E%E9%9B%B6%E5%88%B0%E4%B8%80%E6%9E%84%E5%BB%BA-hugo--papermod-%E8%87%AA%E5%8A%A8%E5%8C%96%E5%8D%9A%E5%AE%A2%E7%B3%BB%E7%BB%9F/"></a>
+</article>
+
+<article class="post-entry tag-entry"> 
+  <header class="entry-header">
+    <h2 class="entry-hint-parent">Git 工作流：从分支管理到代码审查的最佳实践
+    </h2>
+  </header>
+  <div class="entry-content">
+    <p>Git 已经成为现代软件开发的标准版本控制工具。然而，仅仅会用 Git 命令是不够的，如何在团队中建立高效的 Git 工作流，才是提升开发效率的关键。
+本文将从实际团队协作出发，深入讲解 Git 工作流的最佳实践，帮助你和团队建立规范、高效的开发流程。
+本文亮点 理解主流 Git 工作流模型 掌握分支管理的最佳实践 学会规范的提交信息编写 了解代码审查的流程与技巧 掌握冲突解决与回滚策略 主流 Git 工作流模型 1. Git Flow 最经典的分支模型，适合版本发布周期较长的项目：
+1master (生产环境) 2 ↓ 3develop (开发环境) 4 ↓ 5feature/* (功能分支) 6release/* (发布分支) 7hotfix/* (热修复分支) 分支说明：
+master：生产环境代码，每个提交都是一个发布版本 develop：开发环境代码，集成所有功能 feature/*：功能开发分支，从 develop 分出，完成后合并回 develop release/*：发布准备分支，从 develop 分出，测试通过后合并到 master 和 develop hotfix/*：紧急修复分支，从 master 分出，修复后合并到 master 和 develop 工作流程：
+1# 1. 创建功能分支 2git checkout -b feature/user-login develop 3 4# 2. 开发功能 5git add . 6git commit -m &#34;feat: 实现用户登录功能&#34; 7 8# 3. 合并到 develop 9git checkout develop 10git merge --no-ff feature/user-login 11git branch -d feature/user-login 12 13# 4. 创建发布分支 14git checkout -b release/1.0.0 develop 15 16# 5. 发布到生产 17git checkout master 18git merge --no-ff release/1.0.0 19git tag -a v1.0.0 -m &#34;Release version 1.0.0&#34; 20 21# 6. 合并回 develop 22git checkout develop 23git merge --no-ff release/1.0.0 24git branch -d release/1.0.0 2. GitHub Flow 简化版工作流，适合持续部署的项目：
+...</p>
+  </div>
+  <footer class="entry-footer"><span title='2025-07-30 00:00:00 +0000 UTC'>July 30, 2025</span>&nbsp;·&nbsp;<span>6 min</span>&nbsp;·&nbsp;<span>1166 words</span>&nbsp;·&nbsp;<span>wawayu</span></footer>
+  <a class="entry-link" aria-label="post link to Git 工作流：从分支管理到代码审查的最佳实践" href="http://localhost:1313/posts/2025/07/git-%E5%B7%A5%E4%BD%9C%E6%B5%81%E4%BB%8E%E5%88%86%E6%94%AF%E7%AE%A1%E7%90%86%E5%88%B0%E4%BB%A3%E7%A0%81%E5%AE%A1%E6%9F%A5%E7%9A%84%E6%9C%80%E4%BD%B3%E5%AE%9E%E8%B7%B5/"></a>
+</article>
+
+<article class="post-entry tag-entry"> 
+  <header class="entry-header">
+    <h2 class="entry-hint-parent">Docker 容器化部署最佳实践：从 Dockerfile 到生产环境
+    </h2>
+  </header>
+  <div class="entry-content">
+    <p>容器化已经成为现代应用部署的标准方式。Docker 让应用部署变得简单、可靠、可移植。本文讲解 Docker 在生产环境中的最佳实践。
+本文亮点 掌握 Dockerfile 的编写技巧与优化方法 理解 Docker 镜像的分层构建原理 学会使用多阶段构建减少镜像体积 了解 Docker Compose 编排多服务环境 为什么需要容器化？ 传统部署的痛点
+环境不一致：“在我机器上能跑” 依赖管理复杂：JDK、Tomcat、MySQL 版本不一致 部署流程繁琐：手动上传、解压、配置、启动 资源利用率低：一台服务器只跑一个应用 容器化的优势
+环境一致性：开发、测试、生产环境完全一致 快速部署：秒级启动，一键部署 资源隔离：每个容器独立运行，互不影响 易于扩展：水平扩展只需启动更多容器 Dockerfile 基础 最简单的 Dockerfile
+1FROM openjdk:11-jre-slim 2COPY app.jar /app.jar 3ENTRYPOINT [&#34;java&#34;, &#34;-jar&#34;, &#34;/app.jar&#34;] 构建镜像
+1docker build -t myapp:1.0 . 运行容器
+1docker run -d -p 8080:8080 myapp:1.0 Dockerfile 最佳实践 1. 选择合适的基础镜像 不好的做法
+1FROM ubuntu:20.04 2RUN apt-get update &amp;&amp; apt-get install -y openjdk-11-jdk 镜像大小：600MB&#43;
+...</p>
+  </div>
+  <footer class="entry-footer"><span title='2024-09-10 00:00:00 +0000 UTC'>September 10, 2024</span>&nbsp;·&nbsp;<span>5 min</span>&nbsp;·&nbsp;<span>911 words</span>&nbsp;·&nbsp;<span>wawayu</span></footer>
+  <a class="entry-link" aria-label="post link to Docker 容器化部署最佳实践：从 Dockerfile 到生产环境" href="http://localhost:1313/posts/2024/09/docker-%E5%AE%B9%E5%99%A8%E5%8C%96%E9%83%A8%E7%BD%B2%E6%9C%80%E4%BD%B3%E5%AE%9E%E8%B7%B5%E4%BB%8E-dockerfile-%E5%88%B0%E7%94%9F%E4%BA%A7%E7%8E%AF%E5%A2%83/"></a>
+</article>
+    </main>
+    
+<footer class="footer">
+        <span>&copy; 2026 <a href="http://localhost:1313/">博客喵</a></span> · 
+
+    <span>
+        Powered by
+        <a href="https://gohugo.io/" rel="noopener noreferrer" target="_blank">Hugo</a> &
+        <a href="https://github.com/adityatelange/hugo-PaperMod/" rel="noopener" target="_blank">PaperMod</a>
+    </span>
+</footer>
+<a href="#top" aria-label="go to top" title="Go to Top (Alt + G)" class="top-link" id="top-link" accesskey="g">
+    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 12 6" fill="currentColor">
+        <path d="M12 6H0l6-6z" />
+    </svg>
+</a>
+
+<script>
+    let menu = document.getElementById('menu');
+    if (menu) {
+        
+        const scrollPosition = localStorage.getItem("menu-scroll-position");
+        if (scrollPosition) {
+            menu.scrollLeft = parseInt(scrollPosition, 10);
+        }
+        
+        menu.onscroll = function () {
+            localStorage.setItem("menu-scroll-position", menu.scrollLeft);
+        }
+    }
+
+    document.querySelectorAll('a[href^="#"]').forEach(anchor => {
+        anchor.addEventListener("click", function (e) {
+            e.preventDefault();
+            var id = this.getAttribute("href").substr(1);
+            if (!window.matchMedia('(prefers-reduced-motion: reduce)').matches) {
+                document.querySelector(`[id='${decodeURIComponent(id)}']`).scrollIntoView({
+                    behavior: "smooth"
+                });
+            } else {
+                document.querySelector(`[id='${decodeURIComponent(id)}']`).scrollIntoView();
+            }
+            if (id === "top") {
+                history.replaceState(null, null, " ");
+            } else {
+                history.pushState(null, null, `#${id}`);
+            }
+        });
+    });
+
+</script>
+<script>
+    var mybutton = document.getElementById("top-link");
+    window.onscroll = function () {
+        if (document.body.scrollTop > 800 || document.documentElement.scrollTop > 800) {
+            mybutton.style.visibility = "visible";
+            mybutton.style.opacity = "1";
+        } else {
+            mybutton.style.visibility = "hidden";
+            mybutton.style.opacity = "0";
+        }
+    };
+
+</script>
+<script>
+    document.getElementById("theme-toggle").addEventListener("click", () => {
+        const html = document.querySelector("html");
+        if (html.dataset.theme === "dark") {
+            html.dataset.theme = 'light';
+            localStorage.setItem("pref-theme", 'light');
+        } else {
+            html.dataset.theme = 'dark';
+            localStorage.setItem("pref-theme", 'dark');
+        }
+    })
+
+</script>
+</body>
+
+</html>

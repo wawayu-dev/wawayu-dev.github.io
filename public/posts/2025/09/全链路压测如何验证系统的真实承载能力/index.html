@@ -1,0 +1,1065 @@
+<!DOCTYPE html>
+<html lang="en" dir="auto" data-theme="auto">
+
+<head><script src="/livereload.js?mindelay=10&amp;v=2&amp;port=1313&amp;path=livereload" data-no-instant defer></script><meta charset="utf-8">
+<meta http-equiv="X-UA-Compatible" content="IE=edge">
+<meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
+<meta name="robots" content="index, follow">
+<title>全链路压测：如何验证系统的真实承载能力 | 博客喵</title>
+<meta name="keywords" content="性能优化, 测试, 最佳实践">
+<meta name="description" content="深入讲解全链路压测的方案设计与实施，从压测环境搭建到数据隔离，帮助你验证系统的真实承载能力">
+<meta name="author" content="wawayu">
+<link rel="canonical" href="http://localhost:1313/posts/2025/09/%E5%85%A8%E9%93%BE%E8%B7%AF%E5%8E%8B%E6%B5%8B%E5%A6%82%E4%BD%95%E9%AA%8C%E8%AF%81%E7%B3%BB%E7%BB%9F%E7%9A%84%E7%9C%9F%E5%AE%9E%E6%89%BF%E8%BD%BD%E8%83%BD%E5%8A%9B/">
+<link crossorigin="anonymous" href="/assets/css/stylesheet.a29c24210eb31d9ce56f669c66a35c9c51b17376b7764e336a49af7dec914cf0.css" integrity="sha256-opwkIQ6zHZzlb2acZqNcnFGxc3a3dk4zakmvfeyRTPA=" rel="preload stylesheet" as="style">
+<link rel="icon" href="http://localhost:1313/favicon.ico">
+<link rel="icon" type="image/png" sizes="16x16" href="http://localhost:1313/favicon-16x16.png">
+<link rel="icon" type="image/png" sizes="32x32" href="http://localhost:1313/favicon-32x32.png">
+<link rel="apple-touch-icon" href="http://localhost:1313/apple-touch-icon.png">
+<link rel="mask-icon" href="http://localhost:1313/safari-pinned-tab.svg">
+<meta name="theme-color" content="#2e2e33">
+<meta name="msapplication-TileColor" content="#2e2e33">
+<link rel="alternate" hreflang="en" href="http://localhost:1313/posts/2025/09/%E5%85%A8%E9%93%BE%E8%B7%AF%E5%8E%8B%E6%B5%8B%E5%A6%82%E4%BD%95%E9%AA%8C%E8%AF%81%E7%B3%BB%E7%BB%9F%E7%9A%84%E7%9C%9F%E5%AE%9E%E6%89%BF%E8%BD%BD%E8%83%BD%E5%8A%9B/">
+<noscript>
+    <style>
+        #theme-toggle,
+        .top-link {
+            display: none;
+        }
+
+    </style>
+    <style>
+        @media (prefers-color-scheme: dark) {
+            :root {
+                --theme: rgb(29, 30, 32);
+                --entry: rgb(46, 46, 51);
+                --primary: rgb(218, 218, 219);
+                --secondary: rgb(155, 156, 157);
+                --tertiary: rgb(65, 66, 68);
+                --content: rgb(196, 196, 197);
+                --code-block-bg: rgb(46, 46, 51);
+                --code-bg: rgb(55, 56, 62);
+                --border: rgb(51, 51, 51);
+                color-scheme: dark;
+            }
+
+            .list {
+                background: var(--theme);
+            }
+
+            .toc {
+                background: var(--entry);
+            }
+        }
+
+        @media (prefers-color-scheme: light) {
+            .list::-webkit-scrollbar-thumb {
+                border-color: var(--code-bg);
+            }
+        }
+
+    </style>
+</noscript>
+<script>
+    if (localStorage.getItem("pref-theme") === "dark") {
+        document.querySelector("html").dataset.theme = 'dark';
+    } else if (localStorage.getItem("pref-theme") === "light") {
+       document.querySelector("html").dataset.theme = 'light';
+    } else if (window.matchMedia('(prefers-color-scheme: dark)').matches) {
+        document.querySelector("html").dataset.theme = 'dark';
+    } else {
+        document.querySelector("html").dataset.theme = 'light';
+    }
+
+</script><meta property="og:url" content="http://localhost:1313/posts/2025/09/%E5%85%A8%E9%93%BE%E8%B7%AF%E5%8E%8B%E6%B5%8B%E5%A6%82%E4%BD%95%E9%AA%8C%E8%AF%81%E7%B3%BB%E7%BB%9F%E7%9A%84%E7%9C%9F%E5%AE%9E%E6%89%BF%E8%BD%BD%E8%83%BD%E5%8A%9B/">
+  <meta property="og:site_name" content="博客喵">
+  <meta property="og:title" content="全链路压测：如何验证系统的真实承载能力">
+  <meta property="og:description" content="深入讲解全链路压测的方案设计与实施，从压测环境搭建到数据隔离，帮助你验证系统的真实承载能力">
+  <meta property="og:locale" content="zh-cn">
+  <meta property="og:type" content="article">
+    <meta property="article:section" content="posts">
+    <meta property="article:published_time" content="2025-09-05T00:00:00+00:00">
+    <meta property="article:modified_time" content="2025-09-05T00:00:00+00:00">
+    <meta property="article:tag" content="性能优化">
+    <meta property="article:tag" content="测试">
+    <meta property="article:tag" content="最佳实践">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:title" content="全链路压测：如何验证系统的真实承载能力">
+<meta name="twitter:description" content="深入讲解全链路压测的方案设计与实施，从压测环境搭建到数据隔离，帮助你验证系统的真实承载能力">
+
+
+<script type="application/ld+json">
+{
+  "@context": "https://schema.org",
+  "@type": "BreadcrumbList",
+  "itemListElement": [
+    {
+      "@type": "ListItem",
+      "position":  1 ,
+      "name": "Posts",
+      "item": "http://localhost:1313/posts/"
+    }, 
+    {
+      "@type": "ListItem",
+      "position":  2 ,
+      "name": "全链路压测：如何验证系统的真实承载能力",
+      "item": "http://localhost:1313/posts/2025/09/%E5%85%A8%E9%93%BE%E8%B7%AF%E5%8E%8B%E6%B5%8B%E5%A6%82%E4%BD%95%E9%AA%8C%E8%AF%81%E7%B3%BB%E7%BB%9F%E7%9A%84%E7%9C%9F%E5%AE%9E%E6%89%BF%E8%BD%BD%E8%83%BD%E5%8A%9B/"
+    }
+  ]
+}
+</script>
+<script type="application/ld+json">
+{
+  "@context": "https://schema.org",
+  "@type": "BlogPosting",
+  "headline": "全链路压测：如何验证系统的真实承载能力",
+  "name": "全链路压测：如何验证系统的真实承载能力",
+  "description": "深入讲解全链路压测的方案设计与实施，从压测环境搭建到数据隔离，帮助你验证系统的真实承载能力",
+  "keywords": [
+    "性能优化", "测试", "最佳实践"
+  ],
+  "articleBody": "在大促、秒杀等高并发场景下，系统能否扛住流量冲击是每个技术团队最关心的问题。传统的单接口压测无法真实反映系统的整体承载能力，而全链路压测通过模拟真实用户行为，可以全面验证系统的性能瓶颈。\n本文将深入讲解全链路压测的方案设计与实施，从理论到实践，帮助你构建完整的压测体系。\n本文亮点 理解全链路压测的核心价值 掌握压测环境的搭建方案 学会数据隔离与流量标记 了解压测工具的选型与使用 掌握性能瓶颈的分析与优化 什么是全链路压测 传统压测 vs 全链路压测 传统压测：\n针对单个接口或服务进行压测 使用测试环境或预发布环境 数据量小，无法反映真实情况 全链路压测：\n在生产环境进行压测 模拟真实用户的完整业务流程 使用真实的数据量和系统配置 全链路压测的价值 真实性：在生产环境验证，结果最可信 全面性：覆盖所有系统组件和依赖 及时性：提前发现性能瓶颈 指导性：为容量规划提供数据支持 压测场景 1用户访问 → 网关 → 应用服务 → 缓存 → 数据库 2 ↓ 3 消息队列 → 异步服务 4 ↓ 5 第三方服务 架构思考： 全链路压测不仅是技术问题，更是业务问题。需要产品、运营、技术团队共同参与，制定合理的压测目标和验收标准。\n压测方案设计 1. 压测目标设定 性能指标：\nTPS/QPS：每秒事务数/查询数 响应时间：P50、P95、P99 成功率：请求成功的比例 资源使用率：CPU、内存、磁盘、网络 业务指标：\n订单创建成功率 支付成功率 库存扣减准确性 示例目标：\n1大促场景： 2- 峰值 TPS：10000 3- P99 响应时间：\u003c 500ms 4- 成功率：\u003e 99.9% 5- CPU 使用率：\u003c 70% 2. 压测流量模型 流量特征：\n流量曲线：模拟真实的流量波动 用户行为：浏览、搜索、下单、支付 业务比例：读写比例、热点数据分布 压测脚本示例（JMeter）：\n1 2 3 ",
+  "wordCount" : "1174",
+  "inLanguage": "en",
+  "datePublished": "2025-09-05T00:00:00Z",
+  "dateModified": "2025-09-05T00:00:00Z",
+  "author":{
+    "@type": "Person",
+    "name": "wawayu"
+  },
+  "mainEntityOfPage": {
+    "@type": "WebPage",
+    "@id": "http://localhost:1313/posts/2025/09/%E5%85%A8%E9%93%BE%E8%B7%AF%E5%8E%8B%E6%B5%8B%E5%A6%82%E4%BD%95%E9%AA%8C%E8%AF%81%E7%B3%BB%E7%BB%9F%E7%9A%84%E7%9C%9F%E5%AE%9E%E6%89%BF%E8%BD%BD%E8%83%BD%E5%8A%9B/"
+  },
+  "publisher": {
+    "@type": "Organization",
+    "name": "博客喵",
+    "logo": {
+      "@type": "ImageObject",
+      "url": "http://localhost:1313/favicon.ico"
+    }
+  }
+}
+</script>
+</head>
+<body id="top">
+    <header class="header">
+    <nav class="nav">
+        <div class="logo">
+            <a href="http://localhost:1313/" accesskey="h" title="博客喵 (Alt + H)">博客喵</a>
+            <div class="logo-switches">
+                <button id="theme-toggle" accesskey="t" title="(Alt + T)" aria-label="Toggle theme">
+                    <svg id="moon" xmlns="http://www.w3.org/2000/svg" width="24" height="18" viewBox="0 0 24 24"
+                        fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"
+                        stroke-linejoin="round">
+                        <path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"></path>
+                    </svg>
+                    <svg id="sun" xmlns="http://www.w3.org/2000/svg" width="24" height="18" viewBox="0 0 24 24"
+                        fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"
+                        stroke-linejoin="round">
+                        <circle cx="12" cy="12" r="5"></circle>
+                        <line x1="12" y1="1" x2="12" y2="3"></line>
+                        <line x1="12" y1="21" x2="12" y2="23"></line>
+                        <line x1="4.22" y1="4.22" x2="5.64" y2="5.64"></line>
+                        <line x1="18.36" y1="18.36" x2="19.78" y2="19.78"></line>
+                        <line x1="1" y1="12" x2="3" y2="12"></line>
+                        <line x1="21" y1="12" x2="23" y2="12"></line>
+                        <line x1="4.22" y1="19.78" x2="5.64" y2="18.36"></line>
+                        <line x1="18.36" y1="5.64" x2="19.78" y2="4.22"></line>
+                    </svg>
+                </button>
+            </div>
+        </div>
+        <ul id="menu">
+            <li>
+                <a href="http://localhost:1313/posts/" title="📝 文章">
+                    <span>📝 文章</span>
+                </a>
+            </li>
+            <li>
+                <a href="http://localhost:1313/tags/" title="🏷️ 标签">
+                    <span>🏷️ 标签</span>
+                </a>
+            </li>
+            <li>
+                <a href="http://localhost:1313/categories/" title="📂 分类">
+                    <span>📂 分类</span>
+                </a>
+            </li>
+            <li>
+                <a href="http://localhost:1313/skills/" title="💻 技能">
+                    <span>💻 技能</span>
+                </a>
+            </li>
+            <li>
+                <a href="http://localhost:1313/about/" title="👤 关于">
+                    <span>👤 关于</span>
+                </a>
+            </li>
+            <li>
+                <a href="http://localhost:1313/search/" title="🔍 搜索 (Alt &#43; /)" accesskey=/>
+                    <span>🔍 搜索</span>
+                </a>
+            </li>
+        </ul>
+    </nav>
+</header>
+<main class="main">
+
+<article class="post-single">
+  <header class="post-header">
+    <div class="breadcrumbs"><a href="http://localhost:1313/">Home</a>&nbsp;»&nbsp;<a href="http://localhost:1313/posts/">Posts</a></div>
+    <h1 class="post-title entry-hint-parent">
+      全链路压测：如何验证系统的真实承载能力
+    </h1>
+    <div class="post-description">
+      深入讲解全链路压测的方案设计与实施，从压测环境搭建到数据隔离，帮助你验证系统的真实承载能力
+    </div>
+    <div class="post-meta"><span title='2025-09-05 00:00:00 +0000 UTC'>September 5, 2025</span>&nbsp;·&nbsp;<span>6 min</span>&nbsp;·&nbsp;<span>1174 words</span>&nbsp;·&nbsp;<span>wawayu</span>&nbsp;|&nbsp;<span>
+    <a href="https://github.com/wawayu-dev/wawayu-dev.github.io/tree/main/content/posts/full-link-stress-testing.md" rel="noopener noreferrer edit" target="_blank">建议修改</a>
+</span>
+
+</div>
+  </header> <div class="toc">
+    <details  open>
+        <summary accesskey="c" title="(Alt + C)">
+            <span class="details">Table of Contents</span>
+        </summary>
+
+        <div class="inner"><nav id="TableOfContents">
+  <ul>
+    <li>
+      <ul>
+        <li><a href="#本文亮点">本文亮点</a></li>
+      </ul>
+    </li>
+    <li><a href="#什么是全链路压测">什么是全链路压测</a>
+      <ul>
+        <li><a href="#传统压测-vs-全链路压测">传统压测 vs 全链路压测</a></li>
+        <li><a href="#全链路压测的价值">全链路压测的价值</a></li>
+        <li><a href="#压测场景">压测场景</a></li>
+      </ul>
+    </li>
+    <li><a href="#压测方案设计">压测方案设计</a>
+      <ul>
+        <li><a href="#1-压测目标设定">1. 压测目标设定</a></li>
+        <li><a href="#2-压测流量模型">2. 压测流量模型</a></li>
+        <li><a href="#3-数据隔离方案">3. 数据隔离方案</a></li>
+      </ul>
+    </li>
+    <li><a href="#流量标记与路由">流量标记与路由</a>
+      <ul>
+        <li><a href="#1-流量标记">1. 流量标记</a></li>
+        <li><a href="#2-数据路由">2. 数据路由</a></li>
+        <li><a href="#3-mybatis-拦截器">3. MyBatis 拦截器</a></li>
+      </ul>
+    </li>
+    <li><a href="#压测工具选型">压测工具选型</a>
+      <ul>
+        <li><a href="#1-jmeter">1. JMeter</a></li>
+        <li><a href="#2-gatling">2. Gatling</a></li>
+        <li><a href="#3-阿里云-pts">3. 阿里云 PTS</a></li>
+        <li><a href="#工具对比">工具对比</a></li>
+      </ul>
+    </li>
+    <li><a href="#监控与分析">监控与分析</a>
+      <ul>
+        <li><a href="#1-应用监控">1. 应用监控</a></li>
+        <li><a href="#2-系统监控">2. 系统监控</a></li>
+        <li><a href="#3-数据库监控">3. 数据库监控</a></li>
+        <li><a href="#4-性能分析">4. 性能分析</a></li>
+      </ul>
+    </li>
+    <li><a href="#性能优化实战">性能优化实战</a>
+      <ul>
+        <li><a href="#案例一数据库慢查询">案例一：数据库慢查询</a></li>
+        <li><a href="#案例二缓存穿透">案例二：缓存穿透</a></li>
+        <li><a href="#案例三线程池满">案例三：线程池满</a></li>
+      </ul>
+    </li>
+    <li><a href="#压测流程">压测流程</a>
+      <ul>
+        <li><a href="#1-准备阶段">1. 准备阶段</a></li>
+        <li><a href="#2-预演阶段">2. 预演阶段</a></li>
+        <li><a href="#3-正式压测">3. 正式压测</a></li>
+        <li><a href="#4-分析阶段">4. 分析阶段</a></li>
+        <li><a href="#5-优化阶段">5. 优化阶段</a></li>
+      </ul>
+    </li>
+    <li><a href="#总结与思考">总结与思考</a></li>
+  </ul>
+</nav>
+        </div>
+    </details>
+</div>
+
+  <div class="post-content"><p>在大促、秒杀等高并发场景下，系统能否扛住流量冲击是每个技术团队最关心的问题。传统的单接口压测无法真实反映系统的整体承载能力，而全链路压测通过模拟真实用户行为，可以全面验证系统的性能瓶颈。</p>
+<p>本文将深入讲解全链路压测的方案设计与实施，从理论到实践，帮助你构建完整的压测体系。</p>
+<h3 id="本文亮点">本文亮点<a hidden class="anchor" aria-hidden="true" href="#本文亮点">#</a></h3>
+<ul>
+<li><input checked="" disabled="" type="checkbox"> 理解全链路压测的核心价值</li>
+<li><input checked="" disabled="" type="checkbox"> 掌握压测环境的搭建方案</li>
+<li><input checked="" disabled="" type="checkbox"> 学会数据隔离与流量标记</li>
+<li><input checked="" disabled="" type="checkbox"> 了解压测工具的选型与使用</li>
+<li><input checked="" disabled="" type="checkbox"> 掌握性能瓶颈的分析与优化</li>
+</ul>
+<hr>
+<h2 id="什么是全链路压测">什么是全链路压测<a hidden class="anchor" aria-hidden="true" href="#什么是全链路压测">#</a></h2>
+<h3 id="传统压测-vs-全链路压测">传统压测 vs 全链路压测<a hidden class="anchor" aria-hidden="true" href="#传统压测-vs-全链路压测">#</a></h3>
+<p><strong>传统压测</strong>：</p>
+<ul>
+<li>针对单个接口或服务进行压测</li>
+<li>使用测试环境或预发布环境</li>
+<li>数据量小，无法反映真实情况</li>
+</ul>
+<p><strong>全链路压测</strong>：</p>
+<ul>
+<li>在生产环境进行压测</li>
+<li>模拟真实用户的完整业务流程</li>
+<li>使用真实的数据量和系统配置</li>
+</ul>
+<h3 id="全链路压测的价值">全链路压测的价值<a hidden class="anchor" aria-hidden="true" href="#全链路压测的价值">#</a></h3>
+<ol>
+<li><strong>真实性</strong>：在生产环境验证，结果最可信</li>
+<li><strong>全面性</strong>：覆盖所有系统组件和依赖</li>
+<li><strong>及时性</strong>：提前发现性能瓶颈</li>
+<li><strong>指导性</strong>：为容量规划提供数据支持</li>
+</ol>
+<h3 id="压测场景">压测场景<a hidden class="anchor" aria-hidden="true" href="#压测场景">#</a></h3>
+<div class="highlight"><pre tabindex="0" class="chroma"><code class="language-fallback" data-lang="fallback"><span class="line"><span class="ln">1</span><span class="cl">用户访问 → 网关 → 应用服务 → 缓存 → 数据库
+</span></span><span class="line"><span class="ln">2</span><span class="cl">                ↓
+</span></span><span class="line"><span class="ln">3</span><span class="cl">            消息队列 → 异步服务
+</span></span><span class="line"><span class="ln">4</span><span class="cl">                ↓
+</span></span><span class="line"><span class="ln">5</span><span class="cl">            第三方服务
+</span></span></code></pre></div><blockquote>
+<p><strong>架构思考：</strong> 全链路压测不仅是技术问题，更是业务问题。需要产品、运营、技术团队共同参与，制定合理的压测目标和验收标准。</p>
+</blockquote>
+<hr>
+<h2 id="压测方案设计">压测方案设计<a hidden class="anchor" aria-hidden="true" href="#压测方案设计">#</a></h2>
+<h3 id="1-压测目标设定">1. 压测目标设定<a hidden class="anchor" aria-hidden="true" href="#1-压测目标设定">#</a></h3>
+<p><strong>性能指标</strong>：</p>
+<ul>
+<li><strong>TPS/QPS</strong>：每秒事务数/查询数</li>
+<li><strong>响应时间</strong>：P50、P95、P99</li>
+<li><strong>成功率</strong>：请求成功的比例</li>
+<li><strong>资源使用率</strong>：CPU、内存、磁盘、网络</li>
+</ul>
+<p><strong>业务指标</strong>：</p>
+<ul>
+<li><strong>订单创建成功率</strong></li>
+<li><strong>支付成功率</strong></li>
+<li><strong>库存扣减准确性</strong></li>
+</ul>
+<p><strong>示例目标</strong>：</p>
+<div class="highlight"><pre tabindex="0" class="chroma"><code class="language-fallback" data-lang="fallback"><span class="line"><span class="ln">1</span><span class="cl">大促场景：
+</span></span><span class="line"><span class="ln">2</span><span class="cl">- 峰值 TPS：10000
+</span></span><span class="line"><span class="ln">3</span><span class="cl">- P99 响应时间：&lt; 500ms
+</span></span><span class="line"><span class="ln">4</span><span class="cl">- 成功率：&gt; 99.9%
+</span></span><span class="line"><span class="ln">5</span><span class="cl">- CPU 使用率：&lt; 70%
+</span></span></code></pre></div><h3 id="2-压测流量模型">2. 压测流量模型<a hidden class="anchor" aria-hidden="true" href="#2-压测流量模型">#</a></h3>
+<p><strong>流量特征</strong>：</p>
+<ul>
+<li><strong>流量曲线</strong>：模拟真实的流量波动</li>
+<li><strong>用户行为</strong>：浏览、搜索、下单、支付</li>
+<li><strong>业务比例</strong>：读写比例、热点数据分布</li>
+</ul>
+<p><strong>压测脚本示例</strong>（JMeter）：</p>
+<div class="highlight"><pre tabindex="0" class="chroma"><code class="language-xml" data-lang="xml"><span class="line"><span class="ln"> 1</span><span class="cl"><span class="nt">&lt;TestPlan&gt;</span>
+</span></span><span class="line"><span class="ln"> 2</span><span class="cl">  <span class="nt">&lt;ThreadGroup&gt;</span>
+</span></span><span class="line"><span class="ln"> 3</span><span class="cl">    <span class="nt">&lt;stringProp</span> <span class="na">name=</span><span class="s">&#34;ThreadGroup.num_threads&#34;</span><span class="nt">&gt;</span>1000<span class="nt">&lt;/stringProp&gt;</span>
+</span></span><span class="line"><span class="ln"> 4</span><span class="cl">    <span class="nt">&lt;stringProp</span> <span class="na">name=</span><span class="s">&#34;ThreadGroup.ramp_time&#34;</span><span class="nt">&gt;</span>60<span class="nt">&lt;/stringProp&gt;</span>
+</span></span><span class="line"><span class="ln"> 5</span><span class="cl">    <span class="nt">&lt;stringProp</span> <span class="na">name=</span><span class="s">&#34;ThreadGroup.duration&#34;</span><span class="nt">&gt;</span>600<span class="nt">&lt;/stringProp&gt;</span>
+</span></span><span class="line"><span class="ln"> 6</span><span class="cl">    
+</span></span><span class="line"><span class="ln"> 7</span><span class="cl">    <span class="c">&lt;!-- 浏览商品 60% --&gt;</span>
+</span></span><span class="line"><span class="ln"> 8</span><span class="cl">    <span class="nt">&lt;HTTPSamplerProxy</span> <span class="na">name=</span><span class="s">&#34;浏览商品&#34;</span><span class="nt">&gt;</span>
+</span></span><span class="line"><span class="ln"> 9</span><span class="cl">      <span class="nt">&lt;stringProp</span> <span class="na">name=</span><span class="s">&#34;HTTPSampler.path&#34;</span><span class="nt">&gt;</span>/api/products/${productId}<span class="nt">&lt;/stringProp&gt;</span>
+</span></span><span class="line"><span class="ln">10</span><span class="cl">      <span class="nt">&lt;stringProp</span> <span class="na">name=</span><span class="s">&#34;HTTPSampler.method&#34;</span><span class="nt">&gt;</span>GET<span class="nt">&lt;/stringProp&gt;</span>
+</span></span><span class="line"><span class="ln">11</span><span class="cl">    <span class="nt">&lt;/HTTPSamplerProxy&gt;</span>
+</span></span><span class="line"><span class="ln">12</span><span class="cl">    
+</span></span><span class="line"><span class="ln">13</span><span class="cl">    <span class="c">&lt;!-- 加入购物车 30% --&gt;</span>
+</span></span><span class="line"><span class="ln">14</span><span class="cl">    <span class="nt">&lt;HTTPSamplerProxy</span> <span class="na">name=</span><span class="s">&#34;加入购物车&#34;</span><span class="nt">&gt;</span>
+</span></span><span class="line"><span class="ln">15</span><span class="cl">      <span class="nt">&lt;stringProp</span> <span class="na">name=</span><span class="s">&#34;HTTPSampler.path&#34;</span><span class="nt">&gt;</span>/api/cart<span class="nt">&lt;/stringProp&gt;</span>
+</span></span><span class="line"><span class="ln">16</span><span class="cl">      <span class="nt">&lt;stringProp</span> <span class="na">name=</span><span class="s">&#34;HTTPSampler.method&#34;</span><span class="nt">&gt;</span>POST<span class="nt">&lt;/stringProp&gt;</span>
+</span></span><span class="line"><span class="ln">17</span><span class="cl">    <span class="nt">&lt;/HTTPSamplerProxy&gt;</span>
+</span></span><span class="line"><span class="ln">18</span><span class="cl">    
+</span></span><span class="line"><span class="ln">19</span><span class="cl">    <span class="c">&lt;!-- 下单 10% --&gt;</span>
+</span></span><span class="line"><span class="ln">20</span><span class="cl">    <span class="nt">&lt;HTTPSamplerProxy</span> <span class="na">name=</span><span class="s">&#34;创建订单&#34;</span><span class="nt">&gt;</span>
+</span></span><span class="line"><span class="ln">21</span><span class="cl">      <span class="nt">&lt;stringProp</span> <span class="na">name=</span><span class="s">&#34;HTTPSampler.path&#34;</span><span class="nt">&gt;</span>/api/orders<span class="nt">&lt;/stringProp&gt;</span>
+</span></span><span class="line"><span class="ln">22</span><span class="cl">      <span class="nt">&lt;stringProp</span> <span class="na">name=</span><span class="s">&#34;HTTPSampler.method&#34;</span><span class="nt">&gt;</span>POST<span class="nt">&lt;/stringProp&gt;</span>
+</span></span><span class="line"><span class="ln">23</span><span class="cl">    <span class="nt">&lt;/HTTPSamplerProxy&gt;</span>
+</span></span><span class="line"><span class="ln">24</span><span class="cl">  <span class="nt">&lt;/ThreadGroup&gt;</span>
+</span></span><span class="line"><span class="ln">25</span><span class="cl"><span class="nt">&lt;/TestPlan&gt;</span>
+</span></span></code></pre></div><h3 id="3-数据隔离方案">3. 数据隔离方案<a hidden class="anchor" aria-hidden="true" href="#3-数据隔离方案">#</a></h3>
+<p>在生产环境压测，必须做好数据隔离，避免影响真实用户：</p>
+<p><strong>方案一：影子表</strong></p>
+<div class="highlight"><pre tabindex="0" class="chroma"><code class="language-sql" data-lang="sql"><span class="line"><span class="ln"> 1</span><span class="cl"><span class="c1">-- 真实表
+</span></span></span><span class="line"><span class="ln"> 2</span><span class="cl"><span class="k">CREATE</span><span class="w"> </span><span class="k">TABLE</span><span class="w"> </span><span class="n">t_order</span><span class="w"> </span><span class="p">(</span><span class="w">
+</span></span></span><span class="line"><span class="ln"> 3</span><span class="cl"><span class="w">    </span><span class="n">id</span><span class="w"> </span><span class="nb">BIGINT</span><span class="w"> </span><span class="k">PRIMARY</span><span class="w"> </span><span class="k">KEY</span><span class="p">,</span><span class="w">
+</span></span></span><span class="line"><span class="ln"> 4</span><span class="cl"><span class="w">    </span><span class="n">user_id</span><span class="w"> </span><span class="nb">BIGINT</span><span class="p">,</span><span class="w">
+</span></span></span><span class="line"><span class="ln"> 5</span><span class="cl"><span class="w">    </span><span class="n">amount</span><span class="w"> </span><span class="nb">DECIMAL</span><span class="p">(</span><span class="mi">10</span><span class="p">,</span><span class="mi">2</span><span class="p">),</span><span class="w">
+</span></span></span><span class="line"><span class="ln"> 6</span><span class="cl"><span class="w">    </span><span class="n">status</span><span class="w"> </span><span class="nb">INT</span><span class="p">,</span><span class="w">
+</span></span></span><span class="line"><span class="ln"> 7</span><span class="cl"><span class="w">    </span><span class="n">create_time</span><span class="w"> </span><span class="n">DATETIME</span><span class="w">
+</span></span></span><span class="line"><span class="ln"> 8</span><span class="cl"><span class="p">);</span><span class="w">
+</span></span></span><span class="line"><span class="ln"> 9</span><span class="cl"><span class="w">
+</span></span></span><span class="line"><span class="ln">10</span><span class="cl"><span class="c1">-- 影子表（压测数据）
+</span></span></span><span class="line"><span class="ln">11</span><span class="cl"><span class="k">CREATE</span><span class="w"> </span><span class="k">TABLE</span><span class="w"> </span><span class="n">t_order_shadow</span><span class="w"> </span><span class="p">(</span><span class="w">
+</span></span></span><span class="line"><span class="ln">12</span><span class="cl"><span class="w">    </span><span class="n">id</span><span class="w"> </span><span class="nb">BIGINT</span><span class="w"> </span><span class="k">PRIMARY</span><span class="w"> </span><span class="k">KEY</span><span class="p">,</span><span class="w">
+</span></span></span><span class="line"><span class="ln">13</span><span class="cl"><span class="w">    </span><span class="n">user_id</span><span class="w"> </span><span class="nb">BIGINT</span><span class="p">,</span><span class="w">
+</span></span></span><span class="line"><span class="ln">14</span><span class="cl"><span class="w">    </span><span class="n">amount</span><span class="w"> </span><span class="nb">DECIMAL</span><span class="p">(</span><span class="mi">10</span><span class="p">,</span><span class="mi">2</span><span class="p">),</span><span class="w">
+</span></span></span><span class="line"><span class="ln">15</span><span class="cl"><span class="w">    </span><span class="n">status</span><span class="w"> </span><span class="nb">INT</span><span class="p">,</span><span class="w">
+</span></span></span><span class="line"><span class="ln">16</span><span class="cl"><span class="w">    </span><span class="n">create_time</span><span class="w"> </span><span class="n">DATETIME</span><span class="w">
+</span></span></span><span class="line"><span class="ln">17</span><span class="cl"><span class="p">);</span><span class="w">
+</span></span></span></code></pre></div><p><strong>方案二：影子库</strong></p>
+<div class="highlight"><pre tabindex="0" class="chroma"><code class="language-fallback" data-lang="fallback"><span class="line"><span class="ln">1</span><span class="cl">生产库：prod_db
+</span></span><span class="line"><span class="ln">2</span><span class="cl">影子库：prod_db_shadow
+</span></span></code></pre></div><p><strong>方案三：数据标记</strong></p>
+<div class="highlight"><pre tabindex="0" class="chroma"><code class="language-java" data-lang="java"><span class="line"><span class="ln">1</span><span class="cl"><span class="c1">// 在数据中添加压测标记</span><span class="w">
+</span></span></span><span class="line"><span class="ln">2</span><span class="cl"><span class="nd">@Data</span><span class="w">
+</span></span></span><span class="line"><span class="ln">3</span><span class="cl"><span class="kd">public</span><span class="w"> </span><span class="kd">class</span> <span class="nc">Order</span><span class="w"> </span><span class="p">{</span><span class="w">
+</span></span></span><span class="line"><span class="ln">4</span><span class="cl"><span class="w">    </span><span class="kd">private</span><span class="w"> </span><span class="n">Long</span><span class="w"> </span><span class="n">id</span><span class="p">;</span><span class="w">
+</span></span></span><span class="line"><span class="ln">5</span><span class="cl"><span class="w">    </span><span class="kd">private</span><span class="w"> </span><span class="n">Long</span><span class="w"> </span><span class="n">userId</span><span class="p">;</span><span class="w">
+</span></span></span><span class="line"><span class="ln">6</span><span class="cl"><span class="w">    </span><span class="kd">private</span><span class="w"> </span><span class="n">BigDecimal</span><span class="w"> </span><span class="n">amount</span><span class="p">;</span><span class="w">
+</span></span></span><span class="line"><span class="ln">7</span><span class="cl"><span class="w">    </span><span class="kd">private</span><span class="w"> </span><span class="n">Boolean</span><span class="w"> </span><span class="n">isStressTest</span><span class="p">;</span><span class="w">  </span><span class="c1">// 压测标记</span><span class="w">
+</span></span></span><span class="line"><span class="ln">8</span><span class="cl"><span class="p">}</span><span class="w">
+</span></span></span></code></pre></div><hr>
+<h2 id="流量标记与路由">流量标记与路由<a hidden class="anchor" aria-hidden="true" href="#流量标记与路由">#</a></h2>
+<h3 id="1-流量标记">1. 流量标记<a hidden class="anchor" aria-hidden="true" href="#1-流量标记">#</a></h3>
+<p>在请求头中添加压测标记：</p>
+<div class="highlight"><pre tabindex="0" class="chroma"><code class="language-java" data-lang="java"><span class="line"><span class="ln"> 1</span><span class="cl"><span class="kd">public</span><span class="w"> </span><span class="kd">class</span> <span class="nc">StressTestFilter</span><span class="w"> </span><span class="kd">implements</span><span class="w"> </span><span class="n">Filter</span><span class="w"> </span><span class="p">{</span><span class="w">
+</span></span></span><span class="line"><span class="ln"> 2</span><span class="cl"><span class="w">    
+</span></span></span><span class="line"><span class="ln"> 3</span><span class="cl"><span class="w">    </span><span class="kd">private</span><span class="w"> </span><span class="kd">static</span><span class="w"> </span><span class="kd">final</span><span class="w"> </span><span class="n">String</span><span class="w"> </span><span class="n">STRESS_TEST_HEADER</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="s">&#34;X-Stress-Test&#34;</span><span class="p">;</span><span class="w">
+</span></span></span><span class="line"><span class="ln"> 4</span><span class="cl"><span class="w">    
+</span></span></span><span class="line"><span class="ln"> 5</span><span class="cl"><span class="w">    </span><span class="nd">@Override</span><span class="w">
+</span></span></span><span class="line"><span class="ln"> 6</span><span class="cl"><span class="w">    </span><span class="kd">public</span><span class="w"> </span><span class="kt">void</span><span class="w"> </span><span class="nf">doFilter</span><span class="p">(</span><span class="n">ServletRequest</span><span class="w"> </span><span class="n">request</span><span class="p">,</span><span class="w"> </span><span class="n">ServletResponse</span><span class="w"> </span><span class="n">response</span><span class="p">,</span><span class="w"> </span><span class="n">FilterChain</span><span class="w"> </span><span class="n">chain</span><span class="p">)</span><span class="w"> </span><span class="p">{</span><span class="w">
+</span></span></span><span class="line"><span class="ln"> 7</span><span class="cl"><span class="w">        </span><span class="n">HttpServletRequest</span><span class="w"> </span><span class="n">httpRequest</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="p">(</span><span class="n">HttpServletRequest</span><span class="p">)</span><span class="w"> </span><span class="n">request</span><span class="p">;</span><span class="w">
+</span></span></span><span class="line"><span class="ln"> 8</span><span class="cl"><span class="w">        
+</span></span></span><span class="line"><span class="ln"> 9</span><span class="cl"><span class="w">        </span><span class="c1">// 检查是否为压测流量</span><span class="w">
+</span></span></span><span class="line"><span class="ln">10</span><span class="cl"><span class="w">        </span><span class="n">String</span><span class="w"> </span><span class="n">stressTest</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">httpRequest</span><span class="p">.</span><span class="na">getHeader</span><span class="p">(</span><span class="n">STRESS_TEST_HEADER</span><span class="p">);</span><span class="w">
+</span></span></span><span class="line"><span class="ln">11</span><span class="cl"><span class="w">        </span><span class="k">if</span><span class="w"> </span><span class="p">(</span><span class="s">&#34;true&#34;</span><span class="p">.</span><span class="na">equals</span><span class="p">(</span><span class="n">stressTest</span><span class="p">))</span><span class="w"> </span><span class="p">{</span><span class="w">
+</span></span></span><span class="line"><span class="ln">12</span><span class="cl"><span class="w">            </span><span class="c1">// 设置到线程上下文</span><span class="w">
+</span></span></span><span class="line"><span class="ln">13</span><span class="cl"><span class="w">            </span><span class="n">StressTestContext</span><span class="p">.</span><span class="na">setStressTest</span><span class="p">(</span><span class="kc">true</span><span class="p">);</span><span class="w">
+</span></span></span><span class="line"><span class="ln">14</span><span class="cl"><span class="w">        </span><span class="p">}</span><span class="w">
+</span></span></span><span class="line"><span class="ln">15</span><span class="cl"><span class="w">        
+</span></span></span><span class="line"><span class="ln">16</span><span class="cl"><span class="w">        </span><span class="k">try</span><span class="w"> </span><span class="p">{</span><span class="w">
+</span></span></span><span class="line"><span class="ln">17</span><span class="cl"><span class="w">            </span><span class="n">chain</span><span class="p">.</span><span class="na">doFilter</span><span class="p">(</span><span class="n">request</span><span class="p">,</span><span class="w"> </span><span class="n">response</span><span class="p">);</span><span class="w">
+</span></span></span><span class="line"><span class="ln">18</span><span class="cl"><span class="w">        </span><span class="p">}</span><span class="w"> </span><span class="k">finally</span><span class="w"> </span><span class="p">{</span><span class="w">
+</span></span></span><span class="line"><span class="ln">19</span><span class="cl"><span class="w">            </span><span class="n">StressTestContext</span><span class="p">.</span><span class="na">clear</span><span class="p">();</span><span class="w">
+</span></span></span><span class="line"><span class="ln">20</span><span class="cl"><span class="w">        </span><span class="p">}</span><span class="w">
+</span></span></span><span class="line"><span class="ln">21</span><span class="cl"><span class="w">    </span><span class="p">}</span><span class="w">
+</span></span></span><span class="line"><span class="ln">22</span><span class="cl"><span class="p">}</span><span class="w">
+</span></span></span></code></pre></div><h3 id="2-数据路由">2. 数据路由<a hidden class="anchor" aria-hidden="true" href="#2-数据路由">#</a></h3>
+<p>根据压测标记路由到影子表/影子库：</p>
+<div class="highlight"><pre tabindex="0" class="chroma"><code class="language-java" data-lang="java"><span class="line"><span class="ln"> 1</span><span class="cl"><span class="nd">@Component</span><span class="w">
+</span></span></span><span class="line"><span class="ln"> 2</span><span class="cl"><span class="kd">public</span><span class="w"> </span><span class="kd">class</span> <span class="nc">StressTestDataSourceRouter</span><span class="w"> </span><span class="kd">extends</span><span class="w"> </span><span class="n">AbstractRoutingDataSource</span><span class="w"> </span><span class="p">{</span><span class="w">
+</span></span></span><span class="line"><span class="ln"> 3</span><span class="cl"><span class="w">    
+</span></span></span><span class="line"><span class="ln"> 4</span><span class="cl"><span class="w">    </span><span class="nd">@Override</span><span class="w">
+</span></span></span><span class="line"><span class="ln"> 5</span><span class="cl"><span class="w">    </span><span class="kd">protected</span><span class="w"> </span><span class="n">Object</span><span class="w"> </span><span class="nf">determineCurrentLookupKey</span><span class="p">()</span><span class="w"> </span><span class="p">{</span><span class="w">
+</span></span></span><span class="line"><span class="ln"> 6</span><span class="cl"><span class="w">        </span><span class="c1">// 如果是压测流量，路由到影子库</span><span class="w">
+</span></span></span><span class="line"><span class="ln"> 7</span><span class="cl"><span class="w">        </span><span class="k">if</span><span class="w"> </span><span class="p">(</span><span class="n">StressTestContext</span><span class="p">.</span><span class="na">isStressTest</span><span class="p">())</span><span class="w"> </span><span class="p">{</span><span class="w">
+</span></span></span><span class="line"><span class="ln"> 8</span><span class="cl"><span class="w">            </span><span class="k">return</span><span class="w"> </span><span class="s">&#34;shadow&#34;</span><span class="p">;</span><span class="w">
+</span></span></span><span class="line"><span class="ln"> 9</span><span class="cl"><span class="w">        </span><span class="p">}</span><span class="w">
+</span></span></span><span class="line"><span class="ln">10</span><span class="cl"><span class="w">        </span><span class="k">return</span><span class="w"> </span><span class="s">&#34;master&#34;</span><span class="p">;</span><span class="w">
+</span></span></span><span class="line"><span class="ln">11</span><span class="cl"><span class="w">    </span><span class="p">}</span><span class="w">
+</span></span></span><span class="line"><span class="ln">12</span><span class="cl"><span class="p">}</span><span class="w">
+</span></span></span><span class="line"><span class="ln">13</span><span class="cl"><span class="w">
+</span></span></span><span class="line"><span class="ln">14</span><span class="cl"><span class="nd">@Configuration</span><span class="w">
+</span></span></span><span class="line"><span class="ln">15</span><span class="cl"><span class="kd">public</span><span class="w"> </span><span class="kd">class</span> <span class="nc">DataSourceConfig</span><span class="w"> </span><span class="p">{</span><span class="w">
+</span></span></span><span class="line"><span class="ln">16</span><span class="cl"><span class="w">    
+</span></span></span><span class="line"><span class="ln">17</span><span class="cl"><span class="w">    </span><span class="nd">@Bean</span><span class="w">
+</span></span></span><span class="line"><span class="ln">18</span><span class="cl"><span class="w">    </span><span class="kd">public</span><span class="w"> </span><span class="n">DataSource</span><span class="w"> </span><span class="nf">dataSource</span><span class="p">()</span><span class="w"> </span><span class="p">{</span><span class="w">
+</span></span></span><span class="line"><span class="ln">19</span><span class="cl"><span class="w">        </span><span class="n">StressTestDataSourceRouter</span><span class="w"> </span><span class="n">router</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="k">new</span><span class="w"> </span><span class="n">StressTestDataSourceRouter</span><span class="p">();</span><span class="w">
+</span></span></span><span class="line"><span class="ln">20</span><span class="cl"><span class="w">        
+</span></span></span><span class="line"><span class="ln">21</span><span class="cl"><span class="w">        </span><span class="n">Map</span><span class="o">&lt;</span><span class="n">Object</span><span class="p">,</span><span class="w"> </span><span class="n">Object</span><span class="o">&gt;</span><span class="w"> </span><span class="n">targetDataSources</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="k">new</span><span class="w"> </span><span class="n">HashMap</span><span class="o">&lt;&gt;</span><span class="p">();</span><span class="w">
+</span></span></span><span class="line"><span class="ln">22</span><span class="cl"><span class="w">        </span><span class="n">targetDataSources</span><span class="p">.</span><span class="na">put</span><span class="p">(</span><span class="s">&#34;master&#34;</span><span class="p">,</span><span class="w"> </span><span class="n">masterDataSource</span><span class="p">());</span><span class="w">
+</span></span></span><span class="line"><span class="ln">23</span><span class="cl"><span class="w">        </span><span class="n">targetDataSources</span><span class="p">.</span><span class="na">put</span><span class="p">(</span><span class="s">&#34;shadow&#34;</span><span class="p">,</span><span class="w"> </span><span class="n">shadowDataSource</span><span class="p">());</span><span class="w">
+</span></span></span><span class="line"><span class="ln">24</span><span class="cl"><span class="w">        
+</span></span></span><span class="line"><span class="ln">25</span><span class="cl"><span class="w">        </span><span class="n">router</span><span class="p">.</span><span class="na">setTargetDataSources</span><span class="p">(</span><span class="n">targetDataSources</span><span class="p">);</span><span class="w">
+</span></span></span><span class="line"><span class="ln">26</span><span class="cl"><span class="w">        </span><span class="n">router</span><span class="p">.</span><span class="na">setDefaultTargetDataSource</span><span class="p">(</span><span class="n">masterDataSource</span><span class="p">());</span><span class="w">
+</span></span></span><span class="line"><span class="ln">27</span><span class="cl"><span class="w">        
+</span></span></span><span class="line"><span class="ln">28</span><span class="cl"><span class="w">        </span><span class="k">return</span><span class="w"> </span><span class="n">router</span><span class="p">;</span><span class="w">
+</span></span></span><span class="line"><span class="ln">29</span><span class="cl"><span class="w">    </span><span class="p">}</span><span class="w">
+</span></span></span><span class="line"><span class="ln">30</span><span class="cl"><span class="p">}</span><span class="w">
+</span></span></span></code></pre></div><h3 id="3-mybatis-拦截器">3. MyBatis 拦截器<a hidden class="anchor" aria-hidden="true" href="#3-mybatis-拦截器">#</a></h3>
+<p>自动切换表名：</p>
+<div class="highlight"><pre tabindex="0" class="chroma"><code class="language-java" data-lang="java"><span class="line"><span class="ln"> 1</span><span class="cl"><span class="nd">@Intercepts</span><span class="p">({</span><span class="w">
+</span></span></span><span class="line"><span class="ln"> 2</span><span class="cl"><span class="w">    </span><span class="nd">@Signature</span><span class="p">(</span><span class="n">type</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">StatementHandler</span><span class="p">.</span><span class="na">class</span><span class="p">,</span><span class="w"> </span><span class="n">method</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="s">&#34;prepare&#34;</span><span class="p">,</span><span class="w"> </span><span class="n">args</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="p">{</span><span class="n">Connection</span><span class="p">.</span><span class="na">class</span><span class="p">,</span><span class="w"> </span><span class="n">Integer</span><span class="p">.</span><span class="na">class</span><span class="p">})</span><span class="w">
+</span></span></span><span class="line"><span class="ln"> 3</span><span class="cl"><span class="p">})</span><span class="w">
+</span></span></span><span class="line"><span class="ln"> 4</span><span class="cl"><span class="kd">public</span><span class="w"> </span><span class="kd">class</span> <span class="nc">StressTestInterceptor</span><span class="w"> </span><span class="kd">implements</span><span class="w"> </span><span class="n">Interceptor</span><span class="w"> </span><span class="p">{</span><span class="w">
+</span></span></span><span class="line"><span class="ln"> 5</span><span class="cl"><span class="w">    
+</span></span></span><span class="line"><span class="ln"> 6</span><span class="cl"><span class="w">    </span><span class="nd">@Override</span><span class="w">
+</span></span></span><span class="line"><span class="ln"> 7</span><span class="cl"><span class="w">    </span><span class="kd">public</span><span class="w"> </span><span class="n">Object</span><span class="w"> </span><span class="nf">intercept</span><span class="p">(</span><span class="n">Invocation</span><span class="w"> </span><span class="n">invocation</span><span class="p">)</span><span class="w"> </span><span class="kd">throws</span><span class="w"> </span><span class="n">Throwable</span><span class="w"> </span><span class="p">{</span><span class="w">
+</span></span></span><span class="line"><span class="ln"> 8</span><span class="cl"><span class="w">        </span><span class="n">StatementHandler</span><span class="w"> </span><span class="n">statementHandler</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="p">(</span><span class="n">StatementHandler</span><span class="p">)</span><span class="w"> </span><span class="n">invocation</span><span class="p">.</span><span class="na">getTarget</span><span class="p">();</span><span class="w">
+</span></span></span><span class="line"><span class="ln"> 9</span><span class="cl"><span class="w">        </span><span class="n">BoundSql</span><span class="w"> </span><span class="n">boundSql</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">statementHandler</span><span class="p">.</span><span class="na">getBoundSql</span><span class="p">();</span><span class="w">
+</span></span></span><span class="line"><span class="ln">10</span><span class="cl"><span class="w">        </span><span class="n">String</span><span class="w"> </span><span class="n">sql</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">boundSql</span><span class="p">.</span><span class="na">getSql</span><span class="p">();</span><span class="w">
+</span></span></span><span class="line"><span class="ln">11</span><span class="cl"><span class="w">        
+</span></span></span><span class="line"><span class="ln">12</span><span class="cl"><span class="w">        </span><span class="c1">// 如果是压测流量，替换表名</span><span class="w">
+</span></span></span><span class="line"><span class="ln">13</span><span class="cl"><span class="w">        </span><span class="k">if</span><span class="w"> </span><span class="p">(</span><span class="n">StressTestContext</span><span class="p">.</span><span class="na">isStressTest</span><span class="p">())</span><span class="w"> </span><span class="p">{</span><span class="w">
+</span></span></span><span class="line"><span class="ln">14</span><span class="cl"><span class="w">            </span><span class="n">sql</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">sql</span><span class="p">.</span><span class="na">replaceAll</span><span class="p">(</span><span class="s">&#34;t_(\\w+)&#34;</span><span class="p">,</span><span class="w"> </span><span class="s">&#34;t_$1_shadow&#34;</span><span class="p">);</span><span class="w">
+</span></span></span><span class="line"><span class="ln">15</span><span class="cl"><span class="w">            
+</span></span></span><span class="line"><span class="ln">16</span><span class="cl"><span class="w">            </span><span class="c1">// 反射修改 SQL</span><span class="w">
+</span></span></span><span class="line"><span class="ln">17</span><span class="cl"><span class="w">            </span><span class="n">Field</span><span class="w"> </span><span class="n">field</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">boundSql</span><span class="p">.</span><span class="na">getClass</span><span class="p">().</span><span class="na">getDeclaredField</span><span class="p">(</span><span class="s">&#34;sql&#34;</span><span class="p">);</span><span class="w">
+</span></span></span><span class="line"><span class="ln">18</span><span class="cl"><span class="w">            </span><span class="n">field</span><span class="p">.</span><span class="na">setAccessible</span><span class="p">(</span><span class="kc">true</span><span class="p">);</span><span class="w">
+</span></span></span><span class="line"><span class="ln">19</span><span class="cl"><span class="w">            </span><span class="n">field</span><span class="p">.</span><span class="na">set</span><span class="p">(</span><span class="n">boundSql</span><span class="p">,</span><span class="w"> </span><span class="n">sql</span><span class="p">);</span><span class="w">
+</span></span></span><span class="line"><span class="ln">20</span><span class="cl"><span class="w">        </span><span class="p">}</span><span class="w">
+</span></span></span><span class="line"><span class="ln">21</span><span class="cl"><span class="w">        
+</span></span></span><span class="line"><span class="ln">22</span><span class="cl"><span class="w">        </span><span class="k">return</span><span class="w"> </span><span class="n">invocation</span><span class="p">.</span><span class="na">proceed</span><span class="p">();</span><span class="w">
+</span></span></span><span class="line"><span class="ln">23</span><span class="cl"><span class="w">    </span><span class="p">}</span><span class="w">
+</span></span></span><span class="line"><span class="ln">24</span><span class="cl"><span class="p">}</span><span class="w">
+</span></span></span></code></pre></div><hr>
+<h2 id="压测工具选型">压测工具选型<a hidden class="anchor" aria-hidden="true" href="#压测工具选型">#</a></h2>
+<h3 id="1-jmeter">1. JMeter<a hidden class="anchor" aria-hidden="true" href="#1-jmeter">#</a></h3>
+<p><strong>优点</strong>：</p>
+<ul>
+<li>功能强大，支持多种协议</li>
+<li>图形化界面，易于使用</li>
+<li>插件丰富</li>
+</ul>
+<p><strong>缺点</strong>：</p>
+<ul>
+<li>单机性能有限</li>
+<li>资源消耗较大</li>
+</ul>
+<p><strong>使用示例</strong>：</p>
+<div class="highlight"><pre tabindex="0" class="chroma"><code class="language-bash" data-lang="bash"><span class="line"><span class="ln">1</span><span class="cl"><span class="c1"># 命令行模式运行</span>
+</span></span><span class="line"><span class="ln">2</span><span class="cl">jmeter -n -t test-plan.jmx -l result.jtl -e -o report
+</span></span><span class="line"><span class="ln">3</span><span class="cl">
+</span></span><span class="line"><span class="ln">4</span><span class="cl"><span class="c1"># 分布式压测</span>
+</span></span><span class="line"><span class="ln">5</span><span class="cl">jmeter -n -t test-plan.jmx -R 192.168.1.101,192.168.1.102,192.168.1.103
+</span></span></code></pre></div><h3 id="2-gatling">2. Gatling<a hidden class="anchor" aria-hidden="true" href="#2-gatling">#</a></h3>
+<p><strong>优点</strong>：</p>
+<ul>
+<li>基于 Scala，性能优秀</li>
+<li>DSL 脚本，易于维护</li>
+<li>报告美观</li>
+</ul>
+<p><strong>示例脚本</strong>：</p>
+<div class="highlight"><pre tabindex="0" class="chroma"><code class="language-scala" data-lang="scala"><span class="line"><span class="ln"> 1</span><span class="cl"><span class="k">import</span> <span class="nn">io.gatling.core.Predef._</span>
+</span></span><span class="line"><span class="ln"> 2</span><span class="cl"><span class="k">import</span> <span class="nn">io.gatling.http.Predef._</span>
+</span></span><span class="line"><span class="ln"> 3</span><span class="cl"><span class="k">import</span> <span class="nn">scala.concurrent.duration._</span>
+</span></span><span class="line"><span class="ln"> 4</span><span class="cl">
+</span></span><span class="line"><span class="ln"> 5</span><span class="cl"><span class="k">class</span> <span class="nc">OrderSimulation</span> <span class="k">extends</span> <span class="nc">Simulation</span> <span class="o">{</span>
+</span></span><span class="line"><span class="ln"> 6</span><span class="cl">  
+</span></span><span class="line"><span class="ln"> 7</span><span class="cl">  <span class="k">val</span> <span class="n">httpProtocol</span> <span class="k">=</span> <span class="n">http</span>
+</span></span><span class="line"><span class="ln"> 8</span><span class="cl">    <span class="o">.</span><span class="n">baseUrl</span><span class="o">(</span><span class="s">&#34;https://api.example.com&#34;</span><span class="o">)</span>
+</span></span><span class="line"><span class="ln"> 9</span><span class="cl">    <span class="o">.</span><span class="n">header</span><span class="o">(</span><span class="s">&#34;X-Stress-Test&#34;</span><span class="o">,</span> <span class="s">&#34;true&#34;</span><span class="o">)</span>
+</span></span><span class="line"><span class="ln">10</span><span class="cl">  
+</span></span><span class="line"><span class="ln">11</span><span class="cl">  <span class="k">val</span> <span class="n">scn</span> <span class="k">=</span> <span class="n">scenario</span><span class="o">(</span><span class="s">&#34;订单场景&#34;</span><span class="o">)</span>
+</span></span><span class="line"><span class="ln">12</span><span class="cl">    <span class="o">.</span><span class="n">exec</span><span class="o">(</span><span class="n">http</span><span class="o">(</span><span class="s">&#34;浏览商品&#34;</span><span class="o">)</span>
+</span></span><span class="line"><span class="ln">13</span><span class="cl">      <span class="o">.</span><span class="n">get</span><span class="o">(</span><span class="s">&#34;/api/products/${productId}&#34;</span><span class="o">)</span>
+</span></span><span class="line"><span class="ln">14</span><span class="cl">      <span class="o">.</span><span class="n">check</span><span class="o">(</span><span class="n">status</span><span class="o">.</span><span class="n">is</span><span class="o">(</span><span class="mi">200</span><span class="o">)))</span>
+</span></span><span class="line"><span class="ln">15</span><span class="cl">    <span class="o">.</span><span class="n">pause</span><span class="o">(</span><span class="mi">2</span><span class="o">)</span>
+</span></span><span class="line"><span class="ln">16</span><span class="cl">    <span class="o">.</span><span class="n">exec</span><span class="o">(</span><span class="n">http</span><span class="o">(</span><span class="s">&#34;加入购物车&#34;</span><span class="o">)</span>
+</span></span><span class="line"><span class="ln">17</span><span class="cl">      <span class="o">.</span><span class="n">post</span><span class="o">(</span><span class="s">&#34;/api/cart&#34;</span><span class="o">)</span>
+</span></span><span class="line"><span class="ln">18</span><span class="cl">      <span class="o">.</span><span class="n">body</span><span class="o">(</span><span class="nc">StringBody</span><span class="o">(</span><span class="s">&#34;&#34;&#34;{&#34;productId&#34;: &#34;${productId}&#34;, &#34;quantity&#34;: 1}&#34;&#34;&#34;</span><span class="o">))</span>
+</span></span><span class="line"><span class="ln">19</span><span class="cl">      <span class="o">.</span><span class="n">check</span><span class="o">(</span><span class="n">status</span><span class="o">.</span><span class="n">is</span><span class="o">(</span><span class="mi">200</span><span class="o">)))</span>
+</span></span><span class="line"><span class="ln">20</span><span class="cl">    <span class="o">.</span><span class="n">pause</span><span class="o">(</span><span class="mi">3</span><span class="o">)</span>
+</span></span><span class="line"><span class="ln">21</span><span class="cl">    <span class="o">.</span><span class="n">exec</span><span class="o">(</span><span class="n">http</span><span class="o">(</span><span class="s">&#34;创建订单&#34;</span><span class="o">)</span>
+</span></span><span class="line"><span class="ln">22</span><span class="cl">      <span class="o">.</span><span class="n">post</span><span class="o">(</span><span class="s">&#34;/api/orders&#34;</span><span class="o">)</span>
+</span></span><span class="line"><span class="ln">23</span><span class="cl">      <span class="o">.</span><span class="n">body</span><span class="o">(</span><span class="nc">StringBody</span><span class="o">(</span><span class="s">&#34;&#34;&#34;{&#34;items&#34;: [{&#34;productId&#34;: &#34;${productId}&#34;, &#34;quantity&#34;: 1}]}&#34;&#34;&#34;</span><span class="o">))</span>
+</span></span><span class="line"><span class="ln">24</span><span class="cl">      <span class="o">.</span><span class="n">check</span><span class="o">(</span><span class="n">status</span><span class="o">.</span><span class="n">is</span><span class="o">(</span><span class="mi">200</span><span class="o">)))</span>
+</span></span><span class="line"><span class="ln">25</span><span class="cl">  
+</span></span><span class="line"><span class="ln">26</span><span class="cl">  <span class="n">setUp</span><span class="o">(</span>
+</span></span><span class="line"><span class="ln">27</span><span class="cl">    <span class="n">scn</span><span class="o">.</span><span class="n">inject</span><span class="o">(</span>
+</span></span><span class="line"><span class="ln">28</span><span class="cl">      <span class="n">rampUsersPerSec</span><span class="o">(</span><span class="mi">10</span><span class="o">)</span> <span class="n">to</span> <span class="mi">1000</span> <span class="n">during</span> <span class="o">(</span><span class="mi">5</span> <span class="n">minutes</span><span class="o">),</span>
+</span></span><span class="line"><span class="ln">29</span><span class="cl">      <span class="n">constantUsersPerSec</span><span class="o">(</span><span class="mi">1000</span><span class="o">)</span> <span class="n">during</span> <span class="o">(</span><span class="mi">10</span> <span class="n">minutes</span><span class="o">)</span>
+</span></span><span class="line"><span class="ln">30</span><span class="cl">    <span class="o">)</span>
+</span></span><span class="line"><span class="ln">31</span><span class="cl">  <span class="o">).</span><span class="n">protocols</span><span class="o">(</span><span class="n">httpProtocol</span><span class="o">)</span>
+</span></span><span class="line"><span class="ln">32</span><span class="cl"><span class="o">}</span>
+</span></span></code></pre></div><h3 id="3-阿里云-pts">3. 阿里云 PTS<a hidden class="anchor" aria-hidden="true" href="#3-阿里云-pts">#</a></h3>
+<p><strong>优点</strong>：</p>
+<ul>
+<li>云端压测，无需搭建环境</li>
+<li>支持大规模并发</li>
+<li>集成监控和报告</li>
+</ul>
+<p><strong>适用场景</strong>：</p>
+<ul>
+<li>大规模压测（万级并发）</li>
+<li>快速验证</li>
+<li>无压测环境</li>
+</ul>
+<h3 id="工具对比">工具对比<a hidden class="anchor" aria-hidden="true" href="#工具对比">#</a></h3>
+<table>
+  <thead>
+      <tr>
+          <th>工具</th>
+          <th>性能</th>
+          <th>易用性</th>
+          <th>成本</th>
+          <th>适用场景</th>
+      </tr>
+  </thead>
+  <tbody>
+      <tr>
+          <td>JMeter</td>
+          <td>中</td>
+          <td>高</td>
+          <td>免费</td>
+          <td>中小规模压测</td>
+      </tr>
+      <tr>
+          <td>Gatling</td>
+          <td>高</td>
+          <td>中</td>
+          <td>免费</td>
+          <td>大规模压测</td>
+      </tr>
+      <tr>
+          <td>阿里云 PTS</td>
+          <td>很高</td>
+          <td>高</td>
+          <td>付费</td>
+          <td>超大规模压测</td>
+      </tr>
+  </tbody>
+</table>
+<hr>
+<h2 id="监控与分析">监控与分析<a hidden class="anchor" aria-hidden="true" href="#监控与分析">#</a></h2>
+<h3 id="1-应用监控">1. 应用监控<a hidden class="anchor" aria-hidden="true" href="#1-应用监控">#</a></h3>
+<p><strong>关键指标</strong>：</p>
+<ul>
+<li><strong>QPS/TPS</strong>：每秒请求数</li>
+<li><strong>响应时间</strong>：P50、P95、P99</li>
+<li><strong>错误率</strong>：4xx、5xx 错误</li>
+<li><strong>线程池</strong>：活跃线程数、队列长度</li>
+</ul>
+<p><strong>Prometheus + Grafana</strong>：</p>
+<div class="highlight"><pre tabindex="0" class="chroma"><code class="language-yaml" data-lang="yaml"><span class="line"><span class="ln">1</span><span class="cl"><span class="c"># prometheus.yml</span><span class="w">
+</span></span></span><span class="line"><span class="ln">2</span><span class="cl"><span class="nt">scrape_configs</span><span class="p">:</span><span class="w">
+</span></span></span><span class="line"><span class="ln">3</span><span class="cl"><span class="w">  </span>- <span class="nt">job_name</span><span class="p">:</span><span class="w"> </span><span class="s1">&#39;spring-boot&#39;</span><span class="w">
+</span></span></span><span class="line"><span class="ln">4</span><span class="cl"><span class="w">    </span><span class="nt">metrics_path</span><span class="p">:</span><span class="w"> </span><span class="s1">&#39;/actuator/prometheus&#39;</span><span class="w">
+</span></span></span><span class="line"><span class="ln">5</span><span class="cl"><span class="w">    </span><span class="nt">static_configs</span><span class="p">:</span><span class="w">
+</span></span></span><span class="line"><span class="ln">6</span><span class="cl"><span class="w">      </span>- <span class="nt">targets</span><span class="p">:</span><span class="w"> </span><span class="p">[</span><span class="s1">&#39;192.168.1.101:8080&#39;</span><span class="p">,</span><span class="w"> </span><span class="s1">&#39;192.168.1.102:8080&#39;</span><span class="p">]</span><span class="w">
+</span></span></span></code></pre></div><h3 id="2-系统监控">2. 系统监控<a hidden class="anchor" aria-hidden="true" href="#2-系统监控">#</a></h3>
+<p><strong>关键指标</strong>：</p>
+<ul>
+<li><strong>CPU</strong>：使用率、负载</li>
+<li><strong>内存</strong>：使用率、GC 频率</li>
+<li><strong>磁盘</strong>：IOPS、吞吐量</li>
+<li><strong>网络</strong>：带宽、连接数</li>
+</ul>
+<p><strong>使用 Node Exporter</strong>：</p>
+<div class="highlight"><pre tabindex="0" class="chroma"><code class="language-bash" data-lang="bash"><span class="line"><span class="ln">1</span><span class="cl"><span class="c1"># 启动 Node Exporter</span>
+</span></span><span class="line"><span class="ln">2</span><span class="cl">docker run -d <span class="se">\
+</span></span></span><span class="line"><span class="ln">3</span><span class="cl">  --name<span class="o">=</span>node-exporter <span class="se">\
+</span></span></span><span class="line"><span class="ln">4</span><span class="cl">  -p 9100:9100 <span class="se">\
+</span></span></span><span class="line"><span class="ln">5</span><span class="cl">  prom/node-exporter
+</span></span></code></pre></div><h3 id="3-数据库监控">3. 数据库监控<a hidden class="anchor" aria-hidden="true" href="#3-数据库监控">#</a></h3>
+<p><strong>关键指标</strong>：</p>
+<ul>
+<li><strong>QPS</strong>：查询数</li>
+<li><strong>慢查询</strong>：执行时间 &gt; 1s</li>
+<li><strong>连接数</strong>：活跃连接</li>
+<li><strong>锁等待</strong>：行锁、表锁</li>
+</ul>
+<p><strong>MySQL 慢查询分析</strong>：</p>
+<div class="highlight"><pre tabindex="0" class="chroma"><code class="language-sql" data-lang="sql"><span class="line"><span class="ln">1</span><span class="cl"><span class="c1">-- 开启慢查询日志
+</span></span></span><span class="line"><span class="ln">2</span><span class="cl"><span class="k">SET</span><span class="w"> </span><span class="k">GLOBAL</span><span class="w"> </span><span class="n">slow_query_log</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="s1">&#39;ON&#39;</span><span class="p">;</span><span class="w">
+</span></span></span><span class="line"><span class="ln">3</span><span class="cl"><span class="k">SET</span><span class="w"> </span><span class="k">GLOBAL</span><span class="w"> </span><span class="n">long_query_time</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="mi">1</span><span class="p">;</span><span class="w">
+</span></span></span><span class="line"><span class="ln">4</span><span class="cl"><span class="w">
+</span></span></span><span class="line"><span class="ln">5</span><span class="cl"><span class="c1">-- 查看慢查询
+</span></span></span><span class="line"><span class="ln">6</span><span class="cl"><span class="k">SELECT</span><span class="w"> </span><span class="o">*</span><span class="w"> </span><span class="k">FROM</span><span class="w"> </span><span class="n">mysql</span><span class="p">.</span><span class="n">slow_log</span><span class="w"> </span><span class="k">ORDER</span><span class="w"> </span><span class="k">BY</span><span class="w"> </span><span class="n">query_time</span><span class="w"> </span><span class="k">DESC</span><span class="w"> </span><span class="k">LIMIT</span><span class="w"> </span><span class="mi">10</span><span class="p">;</span><span class="w">
+</span></span></span></code></pre></div><h3 id="4-性能分析">4. 性能分析<a hidden class="anchor" aria-hidden="true" href="#4-性能分析">#</a></h3>
+<p><strong>火焰图</strong>：</p>
+<div class="highlight"><pre tabindex="0" class="chroma"><code class="language-bash" data-lang="bash"><span class="line"><span class="ln">1</span><span class="cl"><span class="c1"># 使用 async-profiler</span>
+</span></span><span class="line"><span class="ln">2</span><span class="cl">./profiler.sh -d <span class="m">60</span> -f flamegraph.html &lt;pid&gt;
+</span></span></code></pre></div><p><strong>JVM 分析</strong>：</p>
+<div class="highlight"><pre tabindex="0" class="chroma"><code class="language-bash" data-lang="bash"><span class="line"><span class="ln">1</span><span class="cl"><span class="c1"># 查看 GC 情况</span>
+</span></span><span class="line"><span class="ln">2</span><span class="cl">jstat -gcutil &lt;pid&gt; <span class="m">1000</span>
+</span></span><span class="line"><span class="ln">3</span><span class="cl">
+</span></span><span class="line"><span class="ln">4</span><span class="cl"><span class="c1"># 生成堆转储</span>
+</span></span><span class="line"><span class="ln">5</span><span class="cl">jmap -dump:format<span class="o">=</span>b,file<span class="o">=</span>heap.hprof &lt;pid&gt;
+</span></span><span class="line"><span class="ln">6</span><span class="cl">
+</span></span><span class="line"><span class="ln">7</span><span class="cl"><span class="c1"># 分析堆转储</span>
+</span></span><span class="line"><span class="ln">8</span><span class="cl">jhat heap.hprof
+</span></span></code></pre></div><hr>
+<h2 id="性能优化实战">性能优化实战<a hidden class="anchor" aria-hidden="true" href="#性能优化实战">#</a></h2>
+<h3 id="案例一数据库慢查询">案例一：数据库慢查询<a hidden class="anchor" aria-hidden="true" href="#案例一数据库慢查询">#</a></h3>
+<p><strong>问题</strong>：订单查询接口响应时间 P99 达到 2 秒</p>
+<p><strong>分析</strong>：</p>
+<div class="highlight"><pre tabindex="0" class="chroma"><code class="language-sql" data-lang="sql"><span class="line"><span class="ln"> 1</span><span class="cl"><span class="c1">-- 慢查询 SQL
+</span></span></span><span class="line"><span class="ln"> 2</span><span class="cl"><span class="k">SELECT</span><span class="w"> </span><span class="o">*</span><span class="w"> </span><span class="k">FROM</span><span class="w"> </span><span class="n">t_order</span><span class="w"> 
+</span></span></span><span class="line"><span class="ln"> 3</span><span class="cl"><span class="k">WHERE</span><span class="w"> </span><span class="n">user_id</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="mi">123</span><span class="w"> </span><span class="k">AND</span><span class="w"> </span><span class="n">status</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="mi">1</span><span class="w"> 
+</span></span></span><span class="line"><span class="ln"> 4</span><span class="cl"><span class="k">ORDER</span><span class="w"> </span><span class="k">BY</span><span class="w"> </span><span class="n">create_time</span><span class="w"> </span><span class="k">DESC</span><span class="w"> 
+</span></span></span><span class="line"><span class="ln"> 5</span><span class="cl"><span class="k">LIMIT</span><span class="w"> </span><span class="mi">10</span><span class="p">;</span><span class="w">
+</span></span></span><span class="line"><span class="ln"> 6</span><span class="cl"><span class="w">
+</span></span></span><span class="line"><span class="ln"> 7</span><span class="cl"><span class="c1">-- 执行计划
+</span></span></span><span class="line"><span class="ln"> 8</span><span class="cl"><span class="k">EXPLAIN</span><span class="w"> </span><span class="k">SELECT</span><span class="w"> </span><span class="o">*</span><span class="w"> </span><span class="k">FROM</span><span class="w"> </span><span class="n">t_order</span><span class="w"> 
+</span></span></span><span class="line"><span class="ln"> 9</span><span class="cl"><span class="k">WHERE</span><span class="w"> </span><span class="n">user_id</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="mi">123</span><span class="w"> </span><span class="k">AND</span><span class="w"> </span><span class="n">status</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="mi">1</span><span class="w"> 
+</span></span></span><span class="line"><span class="ln">10</span><span class="cl"><span class="k">ORDER</span><span class="w"> </span><span class="k">BY</span><span class="w"> </span><span class="n">create_time</span><span class="w"> </span><span class="k">DESC</span><span class="w"> 
+</span></span></span><span class="line"><span class="ln">11</span><span class="cl"><span class="k">LIMIT</span><span class="w"> </span><span class="mi">10</span><span class="p">;</span><span class="w">
+</span></span></span><span class="line"><span class="ln">12</span><span class="cl"><span class="w">
+</span></span></span><span class="line"><span class="ln">13</span><span class="cl"><span class="c1">-- 结果：type=ALL，全表扫描
+</span></span></span></code></pre></div><p><strong>优化</strong>：</p>
+<div class="highlight"><pre tabindex="0" class="chroma"><code class="language-sql" data-lang="sql"><span class="line"><span class="ln">1</span><span class="cl"><span class="c1">-- 添加复合索引
+</span></span></span><span class="line"><span class="ln">2</span><span class="cl"><span class="k">CREATE</span><span class="w"> </span><span class="k">INDEX</span><span class="w"> </span><span class="n">idx_user_status_time</span><span class="w"> </span><span class="k">ON</span><span class="w"> </span><span class="n">t_order</span><span class="p">(</span><span class="n">user_id</span><span class="p">,</span><span class="w"> </span><span class="n">status</span><span class="p">,</span><span class="w"> </span><span class="n">create_time</span><span class="p">);</span><span class="w">
+</span></span></span><span class="line"><span class="ln">3</span><span class="cl"><span class="w">
+</span></span></span><span class="line"><span class="ln">4</span><span class="cl"><span class="c1">-- 优化后：type=ref，使用索引
+</span></span></span></code></pre></div><p><strong>效果</strong>：响应时间降低到 50ms</p>
+<h3 id="案例二缓存穿透">案例二：缓存穿透<a hidden class="anchor" aria-hidden="true" href="#案例二缓存穿透">#</a></h3>
+<p><strong>问题</strong>：Redis 缓存未命中，大量请求打到数据库</p>
+<p><strong>分析</strong>：</p>
+<div class="highlight"><pre tabindex="0" class="chroma"><code class="language-java" data-lang="java"><span class="line"><span class="ln"> 1</span><span class="cl"><span class="c1">// 原代码</span><span class="w">
+</span></span></span><span class="line"><span class="ln"> 2</span><span class="cl"><span class="kd">public</span><span class="w"> </span><span class="n">Order</span><span class="w"> </span><span class="nf">getOrder</span><span class="p">(</span><span class="n">Long</span><span class="w"> </span><span class="n">orderId</span><span class="p">)</span><span class="w"> </span><span class="p">{</span><span class="w">
+</span></span></span><span class="line"><span class="ln"> 3</span><span class="cl"><span class="w">    </span><span class="c1">// 查询缓存</span><span class="w">
+</span></span></span><span class="line"><span class="ln"> 4</span><span class="cl"><span class="w">    </span><span class="n">Order</span><span class="w"> </span><span class="n">order</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">redisTemplate</span><span class="p">.</span><span class="na">opsForValue</span><span class="p">().</span><span class="na">get</span><span class="p">(</span><span class="s">&#34;order:&#34;</span><span class="w"> </span><span class="o">+</span><span class="w"> </span><span class="n">orderId</span><span class="p">);</span><span class="w">
+</span></span></span><span class="line"><span class="ln"> 5</span><span class="cl"><span class="w">    </span><span class="k">if</span><span class="w"> </span><span class="p">(</span><span class="n">order</span><span class="w"> </span><span class="o">==</span><span class="w"> </span><span class="kc">null</span><span class="p">)</span><span class="w"> </span><span class="p">{</span><span class="w">
+</span></span></span><span class="line"><span class="ln"> 6</span><span class="cl"><span class="w">        </span><span class="c1">// 缓存未命中，查询数据库</span><span class="w">
+</span></span></span><span class="line"><span class="ln"> 7</span><span class="cl"><span class="w">        </span><span class="n">order</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">orderMapper</span><span class="p">.</span><span class="na">selectById</span><span class="p">(</span><span class="n">orderId</span><span class="p">);</span><span class="w">
+</span></span></span><span class="line"><span class="ln"> 8</span><span class="cl"><span class="w">        </span><span class="k">if</span><span class="w"> </span><span class="p">(</span><span class="n">order</span><span class="w"> </span><span class="o">!=</span><span class="w"> </span><span class="kc">null</span><span class="p">)</span><span class="w"> </span><span class="p">{</span><span class="w">
+</span></span></span><span class="line"><span class="ln"> 9</span><span class="cl"><span class="w">            </span><span class="n">redisTemplate</span><span class="p">.</span><span class="na">opsForValue</span><span class="p">().</span><span class="na">set</span><span class="p">(</span><span class="s">&#34;order:&#34;</span><span class="w"> </span><span class="o">+</span><span class="w"> </span><span class="n">orderId</span><span class="p">,</span><span class="w"> </span><span class="n">order</span><span class="p">,</span><span class="w"> </span><span class="n">30</span><span class="p">,</span><span class="w"> </span><span class="n">TimeUnit</span><span class="p">.</span><span class="na">MINUTES</span><span class="p">);</span><span class="w">
+</span></span></span><span class="line"><span class="ln">10</span><span class="cl"><span class="w">        </span><span class="p">}</span><span class="w">
+</span></span></span><span class="line"><span class="ln">11</span><span class="cl"><span class="w">    </span><span class="p">}</span><span class="w">
+</span></span></span><span class="line"><span class="ln">12</span><span class="cl"><span class="w">    </span><span class="k">return</span><span class="w"> </span><span class="n">order</span><span class="p">;</span><span class="w">
+</span></span></span><span class="line"><span class="ln">13</span><span class="cl"><span class="p">}</span><span class="w">
+</span></span></span></code></pre></div><p><strong>优化</strong>：</p>
+<div class="highlight"><pre tabindex="0" class="chroma"><code class="language-java" data-lang="java"><span class="line"><span class="ln"> 1</span><span class="cl"><span class="c1">// 使用布隆过滤器</span><span class="w">
+</span></span></span><span class="line"><span class="ln"> 2</span><span class="cl"><span class="nd">@Autowired</span><span class="w">
+</span></span></span><span class="line"><span class="ln"> 3</span><span class="cl"><span class="kd">private</span><span class="w"> </span><span class="n">BloomFilter</span><span class="o">&lt;</span><span class="n">Long</span><span class="o">&gt;</span><span class="w"> </span><span class="n">orderBloomFilter</span><span class="p">;</span><span class="w">
+</span></span></span><span class="line"><span class="ln"> 4</span><span class="cl"><span class="w">
+</span></span></span><span class="line"><span class="ln"> 5</span><span class="cl"><span class="kd">public</span><span class="w"> </span><span class="n">Order</span><span class="w"> </span><span class="nf">getOrder</span><span class="p">(</span><span class="n">Long</span><span class="w"> </span><span class="n">orderId</span><span class="p">)</span><span class="w"> </span><span class="p">{</span><span class="w">
+</span></span></span><span class="line"><span class="ln"> 6</span><span class="cl"><span class="w">    </span><span class="c1">// 先检查布隆过滤器</span><span class="w">
+</span></span></span><span class="line"><span class="ln"> 7</span><span class="cl"><span class="w">    </span><span class="k">if</span><span class="w"> </span><span class="p">(</span><span class="o">!</span><span class="n">orderBloomFilter</span><span class="p">.</span><span class="na">mightContain</span><span class="p">(</span><span class="n">orderId</span><span class="p">))</span><span class="w"> </span><span class="p">{</span><span class="w">
+</span></span></span><span class="line"><span class="ln"> 8</span><span class="cl"><span class="w">        </span><span class="k">return</span><span class="w"> </span><span class="kc">null</span><span class="p">;</span><span class="w">  </span><span class="c1">// 订单不存在</span><span class="w">
+</span></span></span><span class="line"><span class="ln"> 9</span><span class="cl"><span class="w">    </span><span class="p">}</span><span class="w">
+</span></span></span><span class="line"><span class="ln">10</span><span class="cl"><span class="w">    
+</span></span></span><span class="line"><span class="ln">11</span><span class="cl"><span class="w">    </span><span class="c1">// 查询缓存</span><span class="w">
+</span></span></span><span class="line"><span class="ln">12</span><span class="cl"><span class="w">    </span><span class="n">Order</span><span class="w"> </span><span class="n">order</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">redisTemplate</span><span class="p">.</span><span class="na">opsForValue</span><span class="p">().</span><span class="na">get</span><span class="p">(</span><span class="s">&#34;order:&#34;</span><span class="w"> </span><span class="o">+</span><span class="w"> </span><span class="n">orderId</span><span class="p">);</span><span class="w">
+</span></span></span><span class="line"><span class="ln">13</span><span class="cl"><span class="w">    </span><span class="k">if</span><span class="w"> </span><span class="p">(</span><span class="n">order</span><span class="w"> </span><span class="o">==</span><span class="w"> </span><span class="kc">null</span><span class="p">)</span><span class="w"> </span><span class="p">{</span><span class="w">
+</span></span></span><span class="line"><span class="ln">14</span><span class="cl"><span class="w">        </span><span class="c1">// 使用分布式锁防止缓存击穿</span><span class="w">
+</span></span></span><span class="line"><span class="ln">15</span><span class="cl"><span class="w">        </span><span class="n">String</span><span class="w"> </span><span class="n">lockKey</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="s">&#34;lock:order:&#34;</span><span class="w"> </span><span class="o">+</span><span class="w"> </span><span class="n">orderId</span><span class="p">;</span><span class="w">
+</span></span></span><span class="line"><span class="ln">16</span><span class="cl"><span class="w">        </span><span class="k">if</span><span class="w"> </span><span class="p">(</span><span class="n">redisTemplate</span><span class="p">.</span><span class="na">opsForValue</span><span class="p">().</span><span class="na">setIfAbsent</span><span class="p">(</span><span class="n">lockKey</span><span class="p">,</span><span class="w"> </span><span class="s">&#34;1&#34;</span><span class="p">,</span><span class="w"> </span><span class="n">10</span><span class="p">,</span><span class="w"> </span><span class="n">TimeUnit</span><span class="p">.</span><span class="na">SECONDS</span><span class="p">))</span><span class="w"> </span><span class="p">{</span><span class="w">
+</span></span></span><span class="line"><span class="ln">17</span><span class="cl"><span class="w">            </span><span class="k">try</span><span class="w"> </span><span class="p">{</span><span class="w">
+</span></span></span><span class="line"><span class="ln">18</span><span class="cl"><span class="w">                </span><span class="c1">// 再次检查缓存</span><span class="w">
+</span></span></span><span class="line"><span class="ln">19</span><span class="cl"><span class="w">                </span><span class="n">order</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">redisTemplate</span><span class="p">.</span><span class="na">opsForValue</span><span class="p">().</span><span class="na">get</span><span class="p">(</span><span class="s">&#34;order:&#34;</span><span class="w"> </span><span class="o">+</span><span class="w"> </span><span class="n">orderId</span><span class="p">);</span><span class="w">
+</span></span></span><span class="line"><span class="ln">20</span><span class="cl"><span class="w">                </span><span class="k">if</span><span class="w"> </span><span class="p">(</span><span class="n">order</span><span class="w"> </span><span class="o">==</span><span class="w"> </span><span class="kc">null</span><span class="p">)</span><span class="w"> </span><span class="p">{</span><span class="w">
+</span></span></span><span class="line"><span class="ln">21</span><span class="cl"><span class="w">                    </span><span class="c1">// 查询数据库</span><span class="w">
+</span></span></span><span class="line"><span class="ln">22</span><span class="cl"><span class="w">                    </span><span class="n">order</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">orderMapper</span><span class="p">.</span><span class="na">selectById</span><span class="p">(</span><span class="n">orderId</span><span class="p">);</span><span class="w">
+</span></span></span><span class="line"><span class="ln">23</span><span class="cl"><span class="w">                    </span><span class="k">if</span><span class="w"> </span><span class="p">(</span><span class="n">order</span><span class="w"> </span><span class="o">!=</span><span class="w"> </span><span class="kc">null</span><span class="p">)</span><span class="w"> </span><span class="p">{</span><span class="w">
+</span></span></span><span class="line"><span class="ln">24</span><span class="cl"><span class="w">                        </span><span class="n">redisTemplate</span><span class="p">.</span><span class="na">opsForValue</span><span class="p">().</span><span class="na">set</span><span class="p">(</span><span class="s">&#34;order:&#34;</span><span class="w"> </span><span class="o">+</span><span class="w"> </span><span class="n">orderId</span><span class="p">,</span><span class="w"> </span><span class="n">order</span><span class="p">,</span><span class="w"> </span><span class="n">30</span><span class="p">,</span><span class="w"> </span><span class="n">TimeUnit</span><span class="p">.</span><span class="na">MINUTES</span><span class="p">);</span><span class="w">
+</span></span></span><span class="line"><span class="ln">25</span><span class="cl"><span class="w">                    </span><span class="p">}</span><span class="w"> </span><span class="k">else</span><span class="w"> </span><span class="p">{</span><span class="w">
+</span></span></span><span class="line"><span class="ln">26</span><span class="cl"><span class="w">                        </span><span class="c1">// 缓存空值，防止穿透</span><span class="w">
+</span></span></span><span class="line"><span class="ln">27</span><span class="cl"><span class="w">                        </span><span class="n">redisTemplate</span><span class="p">.</span><span class="na">opsForValue</span><span class="p">().</span><span class="na">set</span><span class="p">(</span><span class="s">&#34;order:&#34;</span><span class="w"> </span><span class="o">+</span><span class="w"> </span><span class="n">orderId</span><span class="p">,</span><span class="w"> </span><span class="k">new</span><span class="w"> </span><span class="n">Order</span><span class="p">(),</span><span class="w"> </span><span class="n">5</span><span class="p">,</span><span class="w"> </span><span class="n">TimeUnit</span><span class="p">.</span><span class="na">MINUTES</span><span class="p">);</span><span class="w">
+</span></span></span><span class="line"><span class="ln">28</span><span class="cl"><span class="w">                    </span><span class="p">}</span><span class="w">
+</span></span></span><span class="line"><span class="ln">29</span><span class="cl"><span class="w">                </span><span class="p">}</span><span class="w">
+</span></span></span><span class="line"><span class="ln">30</span><span class="cl"><span class="w">            </span><span class="p">}</span><span class="w"> </span><span class="k">finally</span><span class="w"> </span><span class="p">{</span><span class="w">
+</span></span></span><span class="line"><span class="ln">31</span><span class="cl"><span class="w">                </span><span class="n">redisTemplate</span><span class="p">.</span><span class="na">delete</span><span class="p">(</span><span class="n">lockKey</span><span class="p">);</span><span class="w">
+</span></span></span><span class="line"><span class="ln">32</span><span class="cl"><span class="w">            </span><span class="p">}</span><span class="w">
+</span></span></span><span class="line"><span class="ln">33</span><span class="cl"><span class="w">        </span><span class="p">}</span><span class="w">
+</span></span></span><span class="line"><span class="ln">34</span><span class="cl"><span class="w">    </span><span class="p">}</span><span class="w">
+</span></span></span><span class="line"><span class="ln">35</span><span class="cl"><span class="w">    </span><span class="k">return</span><span class="w"> </span><span class="n">order</span><span class="p">;</span><span class="w">
+</span></span></span><span class="line"><span class="ln">36</span><span class="cl"><span class="p">}</span><span class="w">
+</span></span></span></code></pre></div><h3 id="案例三线程池满">案例三：线程池满<a hidden class="anchor" aria-hidden="true" href="#案例三线程池满">#</a></h3>
+<p><strong>问题</strong>：线程池队列满，请求被拒绝</p>
+<p><strong>分析</strong>：</p>
+<div class="highlight"><pre tabindex="0" class="chroma"><code class="language-java" data-lang="java"><span class="line"><span class="ln"> 1</span><span class="cl"><span class="c1">// 原配置</span><span class="w">
+</span></span></span><span class="line"><span class="ln"> 2</span><span class="cl"><span class="nd">@Bean</span><span class="w">
+</span></span></span><span class="line"><span class="ln"> 3</span><span class="cl"><span class="kd">public</span><span class="w"> </span><span class="n">ThreadPoolExecutor</span><span class="w"> </span><span class="nf">executor</span><span class="p">()</span><span class="w"> </span><span class="p">{</span><span class="w">
+</span></span></span><span class="line"><span class="ln"> 4</span><span class="cl"><span class="w">    </span><span class="k">return</span><span class="w"> </span><span class="k">new</span><span class="w"> </span><span class="n">ThreadPoolExecutor</span><span class="p">(</span><span class="w">
+</span></span></span><span class="line"><span class="ln"> 5</span><span class="cl"><span class="w">        </span><span class="n">10</span><span class="p">,</span><span class="w">  </span><span class="c1">// 核心线程数</span><span class="w">
+</span></span></span><span class="line"><span class="ln"> 6</span><span class="cl"><span class="w">        </span><span class="n">20</span><span class="p">,</span><span class="w">  </span><span class="c1">// 最大线程数</span><span class="w">
+</span></span></span><span class="line"><span class="ln"> 7</span><span class="cl"><span class="w">        </span><span class="n">60L</span><span class="p">,</span><span class="w"> </span><span class="n">TimeUnit</span><span class="p">.</span><span class="na">SECONDS</span><span class="p">,</span><span class="w">
+</span></span></span><span class="line"><span class="ln"> 8</span><span class="cl"><span class="w">        </span><span class="k">new</span><span class="w"> </span><span class="n">LinkedBlockingQueue</span><span class="o">&lt;&gt;</span><span class="p">(</span><span class="n">100</span><span class="p">),</span><span class="w">  </span><span class="c1">// 队列容量 100</span><span class="w">
+</span></span></span><span class="line"><span class="ln"> 9</span><span class="cl"><span class="w">        </span><span class="k">new</span><span class="w"> </span><span class="n">ThreadPoolExecutor</span><span class="p">.</span><span class="na">AbortPolicy</span><span class="p">()</span><span class="w">  </span><span class="c1">// 拒绝策略：抛异常</span><span class="w">
+</span></span></span><span class="line"><span class="ln">10</span><span class="cl"><span class="w">    </span><span class="p">);</span><span class="w">
+</span></span></span><span class="line"><span class="ln">11</span><span class="cl"><span class="p">}</span><span class="w">
+</span></span></span></code></pre></div><p><strong>优化</strong>：</p>
+<div class="highlight"><pre tabindex="0" class="chroma"><code class="language-java" data-lang="java"><span class="line"><span class="ln"> 1</span><span class="cl"><span class="nd">@Bean</span><span class="w">
+</span></span></span><span class="line"><span class="ln"> 2</span><span class="cl"><span class="kd">public</span><span class="w"> </span><span class="n">ThreadPoolExecutor</span><span class="w"> </span><span class="nf">executor</span><span class="p">()</span><span class="w"> </span><span class="p">{</span><span class="w">
+</span></span></span><span class="line"><span class="ln"> 3</span><span class="cl"><span class="w">    </span><span class="k">return</span><span class="w"> </span><span class="k">new</span><span class="w"> </span><span class="n">ThreadPoolExecutor</span><span class="p">(</span><span class="w">
+</span></span></span><span class="line"><span class="ln"> 4</span><span class="cl"><span class="w">        </span><span class="n">50</span><span class="p">,</span><span class="w">  </span><span class="c1">// 增加核心线程数</span><span class="w">
+</span></span></span><span class="line"><span class="ln"> 5</span><span class="cl"><span class="w">        </span><span class="n">100</span><span class="p">,</span><span class="w">  </span><span class="c1">// 增加最大线程数</span><span class="w">
+</span></span></span><span class="line"><span class="ln"> 6</span><span class="cl"><span class="w">        </span><span class="n">60L</span><span class="p">,</span><span class="w"> </span><span class="n">TimeUnit</span><span class="p">.</span><span class="na">SECONDS</span><span class="p">,</span><span class="w">
+</span></span></span><span class="line"><span class="ln"> 7</span><span class="cl"><span class="w">        </span><span class="k">new</span><span class="w"> </span><span class="n">LinkedBlockingQueue</span><span class="o">&lt;&gt;</span><span class="p">(</span><span class="n">1000</span><span class="p">),</span><span class="w">  </span><span class="c1">// 增加队列容量</span><span class="w">
+</span></span></span><span class="line"><span class="ln"> 8</span><span class="cl"><span class="w">        </span><span class="k">new</span><span class="w"> </span><span class="n">ThreadFactoryBuilder</span><span class="p">()</span><span class="w">
+</span></span></span><span class="line"><span class="ln"> 9</span><span class="cl"><span class="w">            </span><span class="p">.</span><span class="na">setNameFormat</span><span class="p">(</span><span class="s">&#34;business-thread-%d&#34;</span><span class="p">)</span><span class="w">
+</span></span></span><span class="line"><span class="ln">10</span><span class="cl"><span class="w">            </span><span class="p">.</span><span class="na">build</span><span class="p">(),</span><span class="w">
+</span></span></span><span class="line"><span class="ln">11</span><span class="cl"><span class="w">        </span><span class="k">new</span><span class="w"> </span><span class="n">ThreadPoolExecutor</span><span class="p">.</span><span class="na">CallerRunsPolicy</span><span class="p">()</span><span class="w">  </span><span class="c1">// 改为调用者运行策略</span><span class="w">
+</span></span></span><span class="line"><span class="ln">12</span><span class="cl"><span class="w">    </span><span class="p">);</span><span class="w">
+</span></span></span><span class="line"><span class="ln">13</span><span class="cl"><span class="p">}</span><span class="w">
+</span></span></span><span class="line"><span class="ln">14</span><span class="cl"><span class="w">
+</span></span></span><span class="line"><span class="ln">15</span><span class="cl"><span class="c1">// 添加监控</span><span class="w">
+</span></span></span><span class="line"><span class="ln">16</span><span class="cl"><span class="nd">@Scheduled</span><span class="p">(</span><span class="n">fixedRate</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">5000</span><span class="p">)</span><span class="w">
+</span></span></span><span class="line"><span class="ln">17</span><span class="cl"><span class="kd">public</span><span class="w"> </span><span class="kt">void</span><span class="w"> </span><span class="nf">monitorThreadPool</span><span class="p">()</span><span class="w"> </span><span class="p">{</span><span class="w">
+</span></span></span><span class="line"><span class="ln">18</span><span class="cl"><span class="w">    </span><span class="n">ThreadPoolExecutor</span><span class="w"> </span><span class="n">executor</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="p">(</span><span class="n">ThreadPoolExecutor</span><span class="p">)</span><span class="w"> </span><span class="k">this</span><span class="p">.</span><span class="na">executor</span><span class="p">;</span><span class="w">
+</span></span></span><span class="line"><span class="ln">19</span><span class="cl"><span class="w">    </span><span class="n">log</span><span class="p">.</span><span class="na">info</span><span class="p">(</span><span class="s">&#34;线程池状态 - 活跃线程：{}，队列大小：{}，完成任务：{}&#34;</span><span class="p">,</span><span class="w">
+</span></span></span><span class="line"><span class="ln">20</span><span class="cl"><span class="w">            </span><span class="n">executor</span><span class="p">.</span><span class="na">getActiveCount</span><span class="p">(),</span><span class="w">
+</span></span></span><span class="line"><span class="ln">21</span><span class="cl"><span class="w">            </span><span class="n">executor</span><span class="p">.</span><span class="na">getQueue</span><span class="p">().</span><span class="na">size</span><span class="p">(),</span><span class="w">
+</span></span></span><span class="line"><span class="ln">22</span><span class="cl"><span class="w">            </span><span class="n">executor</span><span class="p">.</span><span class="na">getCompletedTaskCount</span><span class="p">());</span><span class="w">
+</span></span></span><span class="line"><span class="ln">23</span><span class="cl"><span class="p">}</span><span class="w">
+</span></span></span></code></pre></div><hr>
+<h2 id="压测流程">压测流程<a hidden class="anchor" aria-hidden="true" href="#压测流程">#</a></h2>
+<h3 id="1-准备阶段">1. 准备阶段<a hidden class="anchor" aria-hidden="true" href="#1-准备阶段">#</a></h3>
+<ul>
+<li><input disabled="" type="checkbox"> 确定压测目标和验收标准</li>
+<li><input disabled="" type="checkbox"> 准备压测环境和数据</li>
+<li><input disabled="" type="checkbox"> 配置流量标记和数据隔离</li>
+<li><input disabled="" type="checkbox"> 编写压测脚本</li>
+<li><input disabled="" type="checkbox"> 搭建监控系统</li>
+</ul>
+<h3 id="2-预演阶段">2. 预演阶段<a hidden class="anchor" aria-hidden="true" href="#2-预演阶段">#</a></h3>
+<ul>
+<li><input disabled="" type="checkbox"> 小流量压测（10% 目标流量）</li>
+<li><input disabled="" type="checkbox"> 验证数据隔离是否生效</li>
+<li><input disabled="" type="checkbox"> 检查监控指标是否正常</li>
+<li><input disabled="" type="checkbox"> 确认无真实用户影响</li>
+</ul>
+<h3 id="3-正式压测">3. 正式压测<a hidden class="anchor" aria-hidden="true" href="#3-正式压测">#</a></h3>
+<ul>
+<li><input disabled="" type="checkbox"> 逐步增加压力（梯度压测）</li>
+<li><input disabled="" type="checkbox"> 实时监控系统指标</li>
+<li><input disabled="" type="checkbox"> 记录性能瓶颈</li>
+<li><input disabled="" type="checkbox"> 达到目标后持续 10-30 分钟</li>
+</ul>
+<h3 id="4-分析阶段">4. 分析阶段<a hidden class="anchor" aria-hidden="true" href="#4-分析阶段">#</a></h3>
+<ul>
+<li><input disabled="" type="checkbox"> 汇总压测数据</li>
+<li><input disabled="" type="checkbox"> 分析性能瓶颈</li>
+<li><input disabled="" type="checkbox"> 制定优化方案</li>
+<li><input disabled="" type="checkbox"> 评估容量规划</li>
+</ul>
+<h3 id="5-优化阶段">5. 优化阶段<a hidden class="anchor" aria-hidden="true" href="#5-优化阶段">#</a></h3>
+<ul>
+<li><input disabled="" type="checkbox"> 实施优化方案</li>
+<li><input disabled="" type="checkbox"> 回归压测验证</li>
+<li><input disabled="" type="checkbox"> 持续迭代优化</li>
+</ul>
+<hr>
+<h2 id="总结与思考">总结与思考<a hidden class="anchor" aria-hidden="true" href="#总结与思考">#</a></h2>
+<p>本文深入讲解了全链路压测的方案设计与实施，从理论到实践：</p>
+<ul>
+<li><strong>压测价值</strong>：在生产环境验证系统真实承载能力</li>
+<li><strong>方案设计</strong>：目标设定、流量模型、数据隔离</li>
+<li><strong>流量标记</strong>：请求标记、数据路由、表名切换</li>
+<li><strong>工具选型</strong>：JMeter、Gatling、阿里云 PTS</li>
+<li><strong>监控分析</strong>：应用监控、系统监控、数据库监控</li>
+<li><strong>性能优化</strong>：慢查询、缓存穿透、线程池</li>
+<li><strong>压测流程</strong>：准备、预演、正式、分析、优化</li>
+</ul>
+<p>在实际应用中，全链路压测是一个持续的过程，需要：</p>
+<ul>
+<li><strong>定期压测</strong>：每次大促前、重大功能上线前</li>
+<li><strong>持续优化</strong>：根据压测结果不断优化</li>
+<li><strong>容量规划</strong>：为业务增长预留资源</li>
+<li><strong>应急预案</strong>：制定降级、限流、熔断策略</li>
+</ul>
+<p>下次当你需要验证系统承载能力时，不妨试试全链路压测这个强大的工具。</p>
+
+
+  </div>
+
+  <footer class="post-footer">
+    <ul class="post-tags">
+      <li><a href="http://localhost:1313/tags/%E6%80%A7%E8%83%BD%E4%BC%98%E5%8C%96/">性能优化</a></li>
+      <li><a href="http://localhost:1313/tags/%E6%B5%8B%E8%AF%95/">测试</a></li>
+      <li><a href="http://localhost:1313/tags/%E6%9C%80%E4%BD%B3%E5%AE%9E%E8%B7%B5/">最佳实践</a></li>
+    </ul>
+<nav class="paginav">
+  <a class="prev" href="http://localhost:1313/posts/2025/10/%E6%8E%A5%E5%8F%A3%E5%93%8D%E5%BA%94%E6%85%A2%E4%B8%80%E6%AC%A1%E5%AE%8C%E6%95%B4%E7%9A%84%E6%80%A7%E8%83%BD%E4%BC%98%E5%8C%96%E4%B9%8B%E6%97%85/">
+    <span class="title">« Prev</span>
+    <br>
+    <span>接口响应慢？一次完整的性能优化之旅</span>
+  </a>
+  <a class="next" href="http://localhost:1313/posts/2025/07/git-%E5%B7%A5%E4%BD%9C%E6%B5%81%E4%BB%8E%E5%88%86%E6%94%AF%E7%AE%A1%E7%90%86%E5%88%B0%E4%BB%A3%E7%A0%81%E5%AE%A1%E6%9F%A5%E7%9A%84%E6%9C%80%E4%BD%B3%E5%AE%9E%E8%B7%B5/">
+    <span class="title">Next »</span>
+    <br>
+    <span>Git 工作流：从分支管理到代码审查的最佳实践</span>
+  </a>
+</nav>
+
+
+<ul class="share-buttons">
+    <li>
+        <a target="_blank" rel="noopener noreferrer" aria-label="share 全链路压测：如何验证系统的真实承载能力 on x"
+            href="https://x.com/intent/tweet/?text=%e5%85%a8%e9%93%be%e8%b7%af%e5%8e%8b%e6%b5%8b%ef%bc%9a%e5%a6%82%e4%bd%95%e9%aa%8c%e8%af%81%e7%b3%bb%e7%bb%9f%e7%9a%84%e7%9c%9f%e5%ae%9e%e6%89%bf%e8%bd%bd%e8%83%bd%e5%8a%9b&amp;url=http%3a%2f%2flocalhost%3a1313%2fposts%2f2025%2f09%2f%25E5%2585%25A8%25E9%2593%25BE%25E8%25B7%25AF%25E5%258E%258B%25E6%25B5%258B%25E5%25A6%2582%25E4%25BD%2595%25E9%25AA%258C%25E8%25AF%2581%25E7%25B3%25BB%25E7%25BB%259F%25E7%259A%2584%25E7%259C%259F%25E5%25AE%259E%25E6%2589%25BF%25E8%25BD%25BD%25E8%2583%25BD%25E5%258A%259B%2f&amp;hashtags=%e6%80%a7%e8%83%bd%e4%bc%98%e5%8c%96%2c%e6%b5%8b%e8%af%95%2c%e6%9c%80%e4%bd%b3%e5%ae%9e%e8%b7%b5">
+            <svg version="1.1" viewBox="0 0 512 512" xml:space="preserve" height="30px" width="30px" fill="currentColor">
+                <path
+                    d="M512 62.554 L 512 449.446 C 512 483.97 483.97 512 449.446 512 L 62.554 512 C 28.03 512 0 483.97 0 449.446 L 0 62.554 C 0 28.03 28.029 0 62.554 0 L 449.446 0 C 483.971 0 512 28.03 512 62.554 Z M 269.951 190.75 L 182.567 75.216 L 56 75.216 L 207.216 272.95 L 63.9 436.783 L 125.266 436.783 L 235.9 310.383 L 332.567 436.783 L 456 436.783 L 298.367 228.367 L 432.367 75.216 L 371.033 75.216 Z M 127.633 110 L 164.101 110 L 383.481 400.065 L 349.5 400.065 Z" />
+            </svg>
+        </a>
+    </li>
+    <li>
+        <a target="_blank" rel="noopener noreferrer" aria-label="share 全链路压测：如何验证系统的真实承载能力 on linkedin"
+            href="https://www.linkedin.com/shareArticle?mini=true&amp;url=http%3a%2f%2flocalhost%3a1313%2fposts%2f2025%2f09%2f%25E5%2585%25A8%25E9%2593%25BE%25E8%25B7%25AF%25E5%258E%258B%25E6%25B5%258B%25E5%25A6%2582%25E4%25BD%2595%25E9%25AA%258C%25E8%25AF%2581%25E7%25B3%25BB%25E7%25BB%259F%25E7%259A%2584%25E7%259C%259F%25E5%25AE%259E%25E6%2589%25BF%25E8%25BD%25BD%25E8%2583%25BD%25E5%258A%259B%2f&amp;title=%e5%85%a8%e9%93%be%e8%b7%af%e5%8e%8b%e6%b5%8b%ef%bc%9a%e5%a6%82%e4%bd%95%e9%aa%8c%e8%af%81%e7%b3%bb%e7%bb%9f%e7%9a%84%e7%9c%9f%e5%ae%9e%e6%89%bf%e8%bd%bd%e8%83%bd%e5%8a%9b&amp;summary=%e5%85%a8%e9%93%be%e8%b7%af%e5%8e%8b%e6%b5%8b%ef%bc%9a%e5%a6%82%e4%bd%95%e9%aa%8c%e8%af%81%e7%b3%bb%e7%bb%9f%e7%9a%84%e7%9c%9f%e5%ae%9e%e6%89%bf%e8%bd%bd%e8%83%bd%e5%8a%9b&amp;source=http%3a%2f%2flocalhost%3a1313%2fposts%2f2025%2f09%2f%25E5%2585%25A8%25E9%2593%25BE%25E8%25B7%25AF%25E5%258E%258B%25E6%25B5%258B%25E5%25A6%2582%25E4%25BD%2595%25E9%25AA%258C%25E8%25AF%2581%25E7%25B3%25BB%25E7%25BB%259F%25E7%259A%2584%25E7%259C%259F%25E5%25AE%259E%25E6%2589%25BF%25E8%25BD%25BD%25E8%2583%25BD%25E5%258A%259B%2f">
+            <svg version="1.1" viewBox="0 0 512 512" xml:space="preserve" height="30px" width="30px" fill="currentColor">
+                <path
+                    d="M449.446,0c34.525,0 62.554,28.03 62.554,62.554l0,386.892c0,34.524 -28.03,62.554 -62.554,62.554l-386.892,0c-34.524,0 -62.554,-28.03 -62.554,-62.554l0,-386.892c0,-34.524 28.029,-62.554 62.554,-62.554l386.892,0Zm-288.985,423.278l0,-225.717l-75.04,0l0,225.717l75.04,0Zm270.539,0l0,-129.439c0,-69.333 -37.018,-101.586 -86.381,-101.586c-39.804,0 -57.634,21.891 -67.617,37.266l0,-31.958l-75.021,0c0.995,21.181 0,225.717 0,225.717l75.02,0l0,-126.056c0,-6.748 0.486,-13.492 2.474,-18.315c5.414,-13.475 17.767,-27.434 38.494,-27.434c27.135,0 38.007,20.707 38.007,51.037l0,120.768l75.024,0Zm-307.552,-334.556c-25.674,0 -42.448,16.879 -42.448,39.002c0,21.658 16.264,39.002 41.455,39.002l0.484,0c26.165,0 42.452,-17.344 42.452,-39.002c-0.485,-22.092 -16.241,-38.954 -41.943,-39.002Z" />
+            </svg>
+        </a>
+    </li>
+    <li>
+        <a target="_blank" rel="noopener noreferrer" aria-label="share 全链路压测：如何验证系统的真实承载能力 on reddit"
+            href="https://reddit.com/submit?url=http%3a%2f%2flocalhost%3a1313%2fposts%2f2025%2f09%2f%25E5%2585%25A8%25E9%2593%25BE%25E8%25B7%25AF%25E5%258E%258B%25E6%25B5%258B%25E5%25A6%2582%25E4%25BD%2595%25E9%25AA%258C%25E8%25AF%2581%25E7%25B3%25BB%25E7%25BB%259F%25E7%259A%2584%25E7%259C%259F%25E5%25AE%259E%25E6%2589%25BF%25E8%25BD%25BD%25E8%2583%25BD%25E5%258A%259B%2f&title=%e5%85%a8%e9%93%be%e8%b7%af%e5%8e%8b%e6%b5%8b%ef%bc%9a%e5%a6%82%e4%bd%95%e9%aa%8c%e8%af%81%e7%b3%bb%e7%bb%9f%e7%9a%84%e7%9c%9f%e5%ae%9e%e6%89%bf%e8%bd%bd%e8%83%bd%e5%8a%9b">
+            <svg version="1.1" viewBox="0 0 512 512" xml:space="preserve" height="30px" width="30px" fill="currentColor">
+                <path
+                    d="M449.446,0c34.525,0 62.554,28.03 62.554,62.554l0,386.892c0,34.524 -28.03,62.554 -62.554,62.554l-386.892,0c-34.524,0 -62.554,-28.03 -62.554,-62.554l0,-386.892c0,-34.524 28.029,-62.554 62.554,-62.554l386.892,0Zm-3.446,265.638c0,-22.964 -18.616,-41.58 -41.58,-41.58c-11.211,0 -21.361,4.457 -28.841,11.666c-28.424,-20.508 -67.586,-33.757 -111.204,-35.278l18.941,-89.121l61.884,13.157c0.756,15.734 13.642,28.29 29.56,28.29c16.407,0 29.706,-13.299 29.706,-29.701c0,-16.403 -13.299,-29.702 -29.706,-29.702c-11.666,0 -21.657,6.792 -26.515,16.578l-69.105,-14.69c-1.922,-0.418 -3.939,-0.042 -5.585,1.036c-1.658,1.073 -2.811,2.761 -3.224,4.686l-21.152,99.438c-44.258,1.228 -84.046,14.494 -112.837,35.232c-7.468,-7.164 -17.589,-11.591 -28.757,-11.591c-22.965,0 -41.585,18.616 -41.585,41.58c0,16.896 10.095,31.41 24.568,37.918c-0.639,4.135 -0.99,8.328 -0.99,12.576c0,63.977 74.469,115.836 166.33,115.836c91.861,0 166.334,-51.859 166.334,-115.836c0,-4.218 -0.347,-8.387 -0.977,-12.493c14.564,-6.47 24.735,-21.034 24.735,-38.001Zm-119.474,108.193c-20.27,20.241 -59.115,21.816 -70.534,21.816c-11.428,0 -50.277,-1.575 -70.522,-21.82c-3.007,-3.008 -3.007,-7.882 0,-10.889c3.003,-2.999 7.882,-3.003 10.885,0c12.777,12.781 40.11,17.317 59.637,17.317c19.522,0 46.86,-4.536 59.657,-17.321c3.016,-2.999 7.886,-2.995 10.885,0.008c3.008,3.011 3.003,7.882 -0.008,10.889Zm-5.23,-48.781c-16.373,0 -29.701,-13.324 -29.701,-29.698c0,-16.381 13.328,-29.714 29.701,-29.714c16.378,0 29.706,13.333 29.706,29.714c0,16.374 -13.328,29.698 -29.706,29.698Zm-160.386,-29.702c0,-16.381 13.328,-29.71 29.714,-29.71c16.369,0 29.689,13.329 29.689,29.71c0,16.373 -13.32,29.693 -29.689,29.693c-16.386,0 -29.714,-13.32 -29.714,-29.693Z" />
+            </svg>
+        </a>
+    </li>
+    <li>
+        <a target="_blank" rel="noopener noreferrer" aria-label="share 全链路压测：如何验证系统的真实承载能力 on facebook"
+            href="https://facebook.com/sharer/sharer.php?u=http%3a%2f%2flocalhost%3a1313%2fposts%2f2025%2f09%2f%25E5%2585%25A8%25E9%2593%25BE%25E8%25B7%25AF%25E5%258E%258B%25E6%25B5%258B%25E5%25A6%2582%25E4%25BD%2595%25E9%25AA%258C%25E8%25AF%2581%25E7%25B3%25BB%25E7%25BB%259F%25E7%259A%2584%25E7%259C%259F%25E5%25AE%259E%25E6%2589%25BF%25E8%25BD%25BD%25E8%2583%25BD%25E5%258A%259B%2f">
+            <svg version="1.1" viewBox="0 0 512 512" xml:space="preserve" height="30px" width="30px" fill="currentColor">
+                <path
+                    d="M449.446,0c34.525,0 62.554,28.03 62.554,62.554l0,386.892c0,34.524 -28.03,62.554 -62.554,62.554l-106.468,0l0,-192.915l66.6,0l12.672,-82.621l-79.272,0l0,-53.617c0,-22.603 11.073,-44.636 46.58,-44.636l36.042,0l0,-70.34c0,0 -32.71,-5.582 -63.982,-5.582c-65.288,0 -107.96,39.569 -107.96,111.204l0,62.971l-72.573,0l0,82.621l72.573,0l0,192.915l-191.104,0c-34.524,0 -62.554,-28.03 -62.554,-62.554l0,-386.892c0,-34.524 28.029,-62.554 62.554,-62.554l386.892,0Z" />
+            </svg>
+        </a>
+    </li>
+    <li>
+        <a target="_blank" rel="noopener noreferrer" aria-label="share 全链路压测：如何验证系统的真实承载能力 on whatsapp"
+            href="https://api.whatsapp.com/send?text=%e5%85%a8%e9%93%be%e8%b7%af%e5%8e%8b%e6%b5%8b%ef%bc%9a%e5%a6%82%e4%bd%95%e9%aa%8c%e8%af%81%e7%b3%bb%e7%bb%9f%e7%9a%84%e7%9c%9f%e5%ae%9e%e6%89%bf%e8%bd%bd%e8%83%bd%e5%8a%9b%20-%20http%3a%2f%2flocalhost%3a1313%2fposts%2f2025%2f09%2f%25E5%2585%25A8%25E9%2593%25BE%25E8%25B7%25AF%25E5%258E%258B%25E6%25B5%258B%25E5%25A6%2582%25E4%25BD%2595%25E9%25AA%258C%25E8%25AF%2581%25E7%25B3%25BB%25E7%25BB%259F%25E7%259A%2584%25E7%259C%259F%25E5%25AE%259E%25E6%2589%25BF%25E8%25BD%25BD%25E8%2583%25BD%25E5%258A%259B%2f">
+            <svg version="1.1" viewBox="0 0 512 512" xml:space="preserve" height="30px" width="30px" fill="currentColor">
+                <path
+                    d="M449.446,0c34.525,0 62.554,28.03 62.554,62.554l0,386.892c0,34.524 -28.03,62.554 -62.554,62.554l-386.892,0c-34.524,0 -62.554,-28.03 -62.554,-62.554l0,-386.892c0,-34.524 28.029,-62.554 62.554,-62.554l386.892,0Zm-58.673,127.703c-33.842,-33.881 -78.847,-52.548 -126.798,-52.568c-98.799,0 -179.21,80.405 -179.249,179.234c-0.013,31.593 8.241,62.428 23.927,89.612l-25.429,92.884l95.021,-24.925c26.181,14.28 55.659,21.807 85.658,21.816l0.074,0c98.789,0 179.206,-80.413 179.247,-179.243c0.018,-47.895 -18.61,-92.93 -52.451,-126.81Zm-126.797,275.782l-0.06,0c-26.734,-0.01 -52.954,-7.193 -75.828,-20.767l-5.441,-3.229l-56.386,14.792l15.05,-54.977l-3.542,-5.637c-14.913,-23.72 -22.791,-51.136 -22.779,-79.287c0.033,-82.142 66.867,-148.971 149.046,-148.971c39.793,0.014 77.199,15.531 105.329,43.692c28.128,28.16 43.609,65.592 43.594,105.4c-0.034,82.149 -66.866,148.983 -148.983,148.984Zm81.721,-111.581c-4.479,-2.242 -26.499,-13.075 -30.604,-14.571c-4.105,-1.495 -7.091,-2.241 -10.077,2.241c-2.986,4.483 -11.569,14.572 -14.182,17.562c-2.612,2.988 -5.225,3.364 -9.703,1.12c-4.479,-2.241 -18.91,-6.97 -36.017,-22.23c-13.314,-11.876 -22.304,-26.542 -24.916,-31.026c-2.612,-4.484 -0.279,-6.908 1.963,-9.14c2.016,-2.007 4.48,-5.232 6.719,-7.847c2.24,-2.615 2.986,-4.484 4.479,-7.472c1.493,-2.99 0.747,-5.604 -0.374,-7.846c-1.119,-2.241 -10.077,-24.288 -13.809,-33.256c-3.635,-8.733 -7.327,-7.55 -10.077,-7.688c-2.609,-0.13 -5.598,-0.158 -8.583,-0.158c-2.986,0 -7.839,1.121 -11.944,5.604c-4.105,4.484 -15.675,15.32 -15.675,37.364c0,22.046 16.048,43.342 18.287,46.332c2.24,2.99 31.582,48.227 76.511,67.627c10.685,4.615 19.028,7.371 25.533,9.434c10.728,3.41 20.492,2.929 28.209,1.775c8.605,-1.285 26.499,-10.833 30.231,-21.295c3.732,-10.464 3.732,-19.431 2.612,-21.298c-1.119,-1.869 -4.105,-2.99 -8.583,-5.232Z" />
+            </svg>
+        </a>
+    </li>
+    <li>
+        <a target="_blank" rel="noopener noreferrer" aria-label="share 全链路压测：如何验证系统的真实承载能力 on telegram"
+            href="https://telegram.me/share/url?text=%e5%85%a8%e9%93%be%e8%b7%af%e5%8e%8b%e6%b5%8b%ef%bc%9a%e5%a6%82%e4%bd%95%e9%aa%8c%e8%af%81%e7%b3%bb%e7%bb%9f%e7%9a%84%e7%9c%9f%e5%ae%9e%e6%89%bf%e8%bd%bd%e8%83%bd%e5%8a%9b&amp;url=http%3a%2f%2flocalhost%3a1313%2fposts%2f2025%2f09%2f%25E5%2585%25A8%25E9%2593%25BE%25E8%25B7%25AF%25E5%258E%258B%25E6%25B5%258B%25E5%25A6%2582%25E4%25BD%2595%25E9%25AA%258C%25E8%25AF%2581%25E7%25B3%25BB%25E7%25BB%259F%25E7%259A%2584%25E7%259C%259F%25E5%25AE%259E%25E6%2589%25BF%25E8%25BD%25BD%25E8%2583%25BD%25E5%258A%259B%2f">
+            <svg version="1.1" xml:space="preserve" viewBox="2 2 28 28" height="30px" width="30px" fill="currentColor">
+                <path
+                    d="M26.49,29.86H5.5a3.37,3.37,0,0,1-2.47-1,3.35,3.35,0,0,1-1-2.47V5.48A3.36,3.36,0,0,1,3,3,3.37,3.37,0,0,1,5.5,2h21A3.38,3.38,0,0,1,29,3a3.36,3.36,0,0,1,1,2.46V26.37a3.35,3.35,0,0,1-1,2.47A3.38,3.38,0,0,1,26.49,29.86Zm-5.38-6.71a.79.79,0,0,0,.85-.66L24.73,9.24a.55.55,0,0,0-.18-.46.62.62,0,0,0-.41-.17q-.08,0-16.53,6.11a.59.59,0,0,0-.41.59.57.57,0,0,0,.43.52l4,1.24,1.61,4.83a.62.62,0,0,0,.63.43.56.56,0,0,0,.4-.17L16.54,20l4.09,3A.9.9,0,0,0,21.11,23.15ZM13.8,20.71l-1.21-4q8.72-5.55,8.78-5.55c.15,0,.23,0,.23.16a.18.18,0,0,1,0,.06s-2.51,2.3-7.52,6.8Z" />
+            </svg>
+        </a>
+    </li>
+    <li>
+        <a target="_blank" rel="noopener noreferrer" aria-label="share 全链路压测：如何验证系统的真实承载能力 on ycombinator"
+            href="https://news.ycombinator.com/submitlink?t=%e5%85%a8%e9%93%be%e8%b7%af%e5%8e%8b%e6%b5%8b%ef%bc%9a%e5%a6%82%e4%bd%95%e9%aa%8c%e8%af%81%e7%b3%bb%e7%bb%9f%e7%9a%84%e7%9c%9f%e5%ae%9e%e6%89%bf%e8%bd%bd%e8%83%bd%e5%8a%9b&u=http%3a%2f%2flocalhost%3a1313%2fposts%2f2025%2f09%2f%25E5%2585%25A8%25E9%2593%25BE%25E8%25B7%25AF%25E5%258E%258B%25E6%25B5%258B%25E5%25A6%2582%25E4%25BD%2595%25E9%25AA%258C%25E8%25AF%2581%25E7%25B3%25BB%25E7%25BB%259F%25E7%259A%2584%25E7%259C%259F%25E5%25AE%259E%25E6%2589%25BF%25E8%25BD%25BD%25E8%2583%25BD%25E5%258A%259B%2f">
+            <svg version="1.1" xml:space="preserve" width="30px" height="30px" viewBox="0 0 512 512" fill="currentColor"
+                xmlns:inkscape="http://www.inkscape.org/namespaces/inkscape">
+                <path
+                    d="M449.446 0C483.971 0 512 28.03 512 62.554L512 449.446C512 483.97 483.97 512 449.446 512L62.554 512C28.03 512 0 483.97 0 449.446L0 62.554C0 28.03 28.029 0 62.554 0L449.446 0ZM183.8767 87.9921H121.8427L230.6673 292.4508V424.0079H281.3328V292.4508L390.1575 87.9921H328.1233L256 238.2489z" />
+            </svg>
+        </a>
+    </li>
+</ul>
+
+  </footer>
+</article>
+    </main>
+    
+<footer class="footer">
+        <span>&copy; 2026 <a href="http://localhost:1313/">博客喵</a></span> · 
+
+    <span>
+        Powered by
+        <a href="https://gohugo.io/" rel="noopener noreferrer" target="_blank">Hugo</a> &
+        <a href="https://github.com/adityatelange/hugo-PaperMod/" rel="noopener" target="_blank">PaperMod</a>
+    </span>
+</footer>
+<a href="#top" aria-label="go to top" title="Go to Top (Alt + G)" class="top-link" id="top-link" accesskey="g">
+    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 12 6" fill="currentColor">
+        <path d="M12 6H0l6-6z" />
+    </svg>
+</a>
+
+<script>
+    let menu = document.getElementById('menu');
+    if (menu) {
+        
+        const scrollPosition = localStorage.getItem("menu-scroll-position");
+        if (scrollPosition) {
+            menu.scrollLeft = parseInt(scrollPosition, 10);
+        }
+        
+        menu.onscroll = function () {
+            localStorage.setItem("menu-scroll-position", menu.scrollLeft);
+        }
+    }
+
+    document.querySelectorAll('a[href^="#"]').forEach(anchor => {
+        anchor.addEventListener("click", function (e) {
+            e.preventDefault();
+            var id = this.getAttribute("href").substr(1);
+            if (!window.matchMedia('(prefers-reduced-motion: reduce)').matches) {
+                document.querySelector(`[id='${decodeURIComponent(id)}']`).scrollIntoView({
+                    behavior: "smooth"
+                });
+            } else {
+                document.querySelector(`[id='${decodeURIComponent(id)}']`).scrollIntoView();
+            }
+            if (id === "top") {
+                history.replaceState(null, null, " ");
+            } else {
+                history.pushState(null, null, `#${id}`);
+            }
+        });
+    });
+
+</script>
+<script>
+    var mybutton = document.getElementById("top-link");
+    window.onscroll = function () {
+        if (document.body.scrollTop > 800 || document.documentElement.scrollTop > 800) {
+            mybutton.style.visibility = "visible";
+            mybutton.style.opacity = "1";
+        } else {
+            mybutton.style.visibility = "hidden";
+            mybutton.style.opacity = "0";
+        }
+    };
+
+</script>
+<script>
+    document.getElementById("theme-toggle").addEventListener("click", () => {
+        const html = document.querySelector("html");
+        if (html.dataset.theme === "dark") {
+            html.dataset.theme = 'light';
+            localStorage.setItem("pref-theme", 'light');
+        } else {
+            html.dataset.theme = 'dark';
+            localStorage.setItem("pref-theme", 'dark');
+        }
+    })
+
+</script>
+<script>
+    document.querySelectorAll('pre > code').forEach((codeblock) => {
+        const container = codeblock.parentNode.parentNode;
+
+        const copybutton = document.createElement('button');
+        copybutton.classList.add('copy-code');
+        copybutton.innerHTML = 'copy';
+
+        function copyingDone() {
+            copybutton.innerHTML = 'copied!';
+            setTimeout(() => {
+                copybutton.innerHTML = 'copy';
+            }, 2000);
+        }
+
+        copybutton.addEventListener('click', (cb) => {
+            if ('clipboard' in navigator) {
+                navigator.clipboard.writeText(codeblock.textContent);
+                copyingDone();
+                return;
+            }
+
+            const range = document.createRange();
+            range.selectNodeContents(codeblock);
+            const selection = window.getSelection();
+            selection.removeAllRanges();
+            selection.addRange(range);
+            try {
+                document.execCommand('copy');
+                copyingDone();
+            } catch (e) { };
+            selection.removeRange(range);
+        });
+
+        if (container.classList.contains("highlight")) {
+            container.appendChild(copybutton);
+        } else if (container.parentNode.firstChild == container) {
+            
+        } else if (codeblock.parentNode.parentNode.parentNode.parentNode.parentNode.nodeName == "TABLE") {
+            
+            codeblock.parentNode.parentNode.parentNode.parentNode.parentNode.appendChild(copybutton);
+        } else {
+            
+            codeblock.parentNode.appendChild(copybutton);
+        }
+    });
+</script>
+</body>
+
+</html>

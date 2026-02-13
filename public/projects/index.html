@@ -1,0 +1,640 @@
+<!DOCTYPE html>
+<html lang="en" dir="auto" data-theme="auto">
+
+<head><script src="/livereload.js?mindelay=10&amp;v=2&amp;port=1313&amp;path=livereload" data-no-instant defer></script><meta charset="utf-8">
+<meta http-equiv="X-UA-Compatible" content="IE=edge">
+<meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
+<meta name="robots" content="index, follow">
+<title>项目展示 | 博客喵</title>
+<meta name="keywords" content="">
+<meta name="description" content="我的技术项目集合">
+<meta name="author" content="wawayu">
+<link rel="canonical" href="http://localhost:1313/projects/">
+<link crossorigin="anonymous" href="/assets/css/stylesheet.a29c24210eb31d9ce56f669c66a35c9c51b17376b7764e336a49af7dec914cf0.css" integrity="sha256-opwkIQ6zHZzlb2acZqNcnFGxc3a3dk4zakmvfeyRTPA=" rel="preload stylesheet" as="style">
+<link rel="icon" href="http://localhost:1313/favicon.ico">
+<link rel="icon" type="image/png" sizes="16x16" href="http://localhost:1313/favicon-16x16.png">
+<link rel="icon" type="image/png" sizes="32x32" href="http://localhost:1313/favicon-32x32.png">
+<link rel="apple-touch-icon" href="http://localhost:1313/apple-touch-icon.png">
+<link rel="mask-icon" href="http://localhost:1313/safari-pinned-tab.svg">
+<meta name="theme-color" content="#2e2e33">
+<meta name="msapplication-TileColor" content="#2e2e33">
+<link rel="alternate" type="application/rss+xml" href="http://localhost:1313/projects/index.xml" title="rss">
+<link rel="alternate" hreflang="en" href="http://localhost:1313/projects/">
+<noscript>
+    <style>
+        #theme-toggle,
+        .top-link {
+            display: none;
+        }
+
+    </style>
+    <style>
+        @media (prefers-color-scheme: dark) {
+            :root {
+                --theme: rgb(29, 30, 32);
+                --entry: rgb(46, 46, 51);
+                --primary: rgb(218, 218, 219);
+                --secondary: rgb(155, 156, 157);
+                --tertiary: rgb(65, 66, 68);
+                --content: rgb(196, 196, 197);
+                --code-block-bg: rgb(46, 46, 51);
+                --code-bg: rgb(55, 56, 62);
+                --border: rgb(51, 51, 51);
+                color-scheme: dark;
+            }
+
+            .list {
+                background: var(--theme);
+            }
+
+            .toc {
+                background: var(--entry);
+            }
+        }
+
+        @media (prefers-color-scheme: light) {
+            .list::-webkit-scrollbar-thumb {
+                border-color: var(--code-bg);
+            }
+        }
+
+    </style>
+</noscript>
+<script>
+    if (localStorage.getItem("pref-theme") === "dark") {
+        document.querySelector("html").dataset.theme = 'dark';
+    } else if (localStorage.getItem("pref-theme") === "light") {
+       document.querySelector("html").dataset.theme = 'light';
+    } else if (window.matchMedia('(prefers-color-scheme: dark)').matches) {
+        document.querySelector("html").dataset.theme = 'dark';
+    } else {
+        document.querySelector("html").dataset.theme = 'light';
+    }
+
+</script><meta property="og:url" content="http://localhost:1313/projects/">
+  <meta property="og:site_name" content="博客喵">
+  <meta property="og:title" content="项目展示">
+  <meta property="og:description" content="我的技术项目集合">
+  <meta property="og:locale" content="zh-cn">
+  <meta property="og:type" content="website">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:title" content="项目展示">
+<meta name="twitter:description" content="记录技术成长，分享开发经验，专注 Java 后端与分布式系统">
+
+
+<script type="application/ld+json">
+{
+  "@context": "https://schema.org",
+  "@type": "BreadcrumbList",
+  "itemListElement": [
+    {
+      "@type": "ListItem",
+      "position":  1 ,
+      "name": "项目展示",
+      "item": "http://localhost:1313/projects/"
+    }
+  ]
+}
+</script>
+</head>
+<body class="list" id="top">
+    <header class="header">
+    <nav class="nav">
+        <div class="logo">
+            <a href="http://localhost:1313/" accesskey="h" title="博客喵 (Alt + H)">博客喵</a>
+            <div class="logo-switches">
+                <button id="theme-toggle" accesskey="t" title="(Alt + T)" aria-label="Toggle theme">
+                    <svg id="moon" xmlns="http://www.w3.org/2000/svg" width="24" height="18" viewBox="0 0 24 24"
+                        fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"
+                        stroke-linejoin="round">
+                        <path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"></path>
+                    </svg>
+                    <svg id="sun" xmlns="http://www.w3.org/2000/svg" width="24" height="18" viewBox="0 0 24 24"
+                        fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"
+                        stroke-linejoin="round">
+                        <circle cx="12" cy="12" r="5"></circle>
+                        <line x1="12" y1="1" x2="12" y2="3"></line>
+                        <line x1="12" y1="21" x2="12" y2="23"></line>
+                        <line x1="4.22" y1="4.22" x2="5.64" y2="5.64"></line>
+                        <line x1="18.36" y1="18.36" x2="19.78" y2="19.78"></line>
+                        <line x1="1" y1="12" x2="3" y2="12"></line>
+                        <line x1="21" y1="12" x2="23" y2="12"></line>
+                        <line x1="4.22" y1="19.78" x2="5.64" y2="18.36"></line>
+                        <line x1="18.36" y1="5.64" x2="19.78" y2="4.22"></line>
+                    </svg>
+                </button>
+            </div>
+        </div>
+        <ul id="menu">
+            <li>
+                <a href="http://localhost:1313/posts/" title="📝 文章">
+                    <span>📝 文章</span>
+                </a>
+            </li>
+            <li>
+                <a href="http://localhost:1313/tags/" title="🏷️ 标签">
+                    <span>🏷️ 标签</span>
+                </a>
+            </li>
+            <li>
+                <a href="http://localhost:1313/categories/" title="📂 分类">
+                    <span>📂 分类</span>
+                </a>
+            </li>
+            <li>
+                <a href="http://localhost:1313/skills/" title="💻 技能">
+                    <span>💻 技能</span>
+                </a>
+            </li>
+            <li>
+                <a href="http://localhost:1313/about/" title="👤 关于">
+                    <span>👤 关于</span>
+                </a>
+            </li>
+            <li>
+                <a href="http://localhost:1313/search/" title="🔍 搜索 (Alt &#43; /)" accesskey=/>
+                    <span>🔍 搜索</span>
+                </a>
+            </li>
+        </ul>
+    </nav>
+</header>
+<main class="main">
+
+<header class="page-header">
+  <h1>
+    项目展示
+    <a href="/projects/index.xml" title="RSS" aria-label="RSS">
+      <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"
+        stroke-linecap="round" stroke-linejoin="round" height="23">
+        <path d="M4 11a9 9 0 0 1 9 9" />
+        <path d="M4 4a16 16 0 0 1 16 16" />
+        <circle cx="5" cy="19" r="1" />
+      </svg>
+    </a>
+  </h1>
+</header>
+<div class="archive-year">
+  <h2 class="archive-year-header" id="2026">
+    <a class="archive-header-link" href="#2026">2026</a>
+    <sup class="archive-count">&nbsp;2</sup>
+  </h2>
+  <div class="archive-month">
+    <h3 class="archive-month-header" id="2026-February">
+      <a class="archive-header-link" href="#2026-February">February</a>
+      <sup class="archive-count">&nbsp;2</sup>
+    </h3>
+    <div class="archive-posts">
+      <div class="archive-entry">
+        <h3 class="archive-entry-title entry-hint-parent">从零到一：构建 Hugo + PaperMod 自动化博客系统
+        </h3>
+        <div class="archive-meta"><span title='2026-02-12 00:00:00 +0000 UTC'>February 12, 2026</span>&nbsp;·&nbsp;<span>2 min</span>&nbsp;·&nbsp;<span>397 words</span>&nbsp;·&nbsp;<span>wawayu</span></div>
+        <a class="entry-link" aria-label="post link to 从零到一：构建 Hugo &#43; PaperMod 自动化博客系统" href="http://localhost:1313/posts/2026/02/%E4%BB%8E%E9%9B%B6%E5%88%B0%E4%B8%80%E6%9E%84%E5%BB%BA-hugo--papermod-%E8%87%AA%E5%8A%A8%E5%8C%96%E5%8D%9A%E5%AE%A2%E7%B3%BB%E7%BB%9F/"></a>
+      </div>
+      <div class="archive-entry">
+        <h3 class="archive-entry-title entry-hint-parent">我的第一篇博客文章
+        </h3>
+        <div class="archive-meta"><span title='2026-02-11 21:03:25 +0800 CST'>February 11, 2026</span>&nbsp;·&nbsp;<span>1 min</span>&nbsp;·&nbsp;<span>32 words</span>&nbsp;·&nbsp;<span>你的名字</span></div>
+        <a class="entry-link" aria-label="post link to 我的第一篇博客文章" href="http://localhost:1313/posts/2026/02/%E6%88%91%E7%9A%84%E7%AC%AC%E4%B8%80%E7%AF%87%E5%8D%9A%E5%AE%A2%E6%96%87%E7%AB%A0/"></a>
+      </div>
+    </div>
+  </div>
+</div>
+<div class="archive-year">
+  <h2 class="archive-year-header" id="2025">
+    <a class="archive-header-link" href="#2025">2025</a>
+    <sup class="archive-count">&nbsp;11</sup>
+  </h2>
+  <div class="archive-month">
+    <h3 class="archive-month-header" id="2025-December">
+      <a class="archive-header-link" href="#2025-December">December</a>
+      <sup class="archive-count">&nbsp;1</sup>
+    </h3>
+    <div class="archive-posts">
+      <div class="archive-entry">
+        <h3 class="archive-entry-title entry-hint-parent">分布式事务解决方案：从 2PC 到 Seata 的演进与实战
+        </h3>
+        <div class="archive-meta"><span title='2025-12-20 00:00:00 +0000 UTC'>December 20, 2025</span>&nbsp;·&nbsp;<span>8 min</span>&nbsp;·&nbsp;<span>1522 words</span>&nbsp;·&nbsp;<span>wawayu</span></div>
+        <a class="entry-link" aria-label="post link to 分布式事务解决方案：从 2PC 到 Seata 的演进与实战" href="http://localhost:1313/posts/2025/12/%E5%88%86%E5%B8%83%E5%BC%8F%E4%BA%8B%E5%8A%A1%E8%A7%A3%E5%86%B3%E6%96%B9%E6%A1%88%E4%BB%8E-2pc-%E5%88%B0-seata-%E7%9A%84%E6%BC%94%E8%BF%9B%E4%B8%8E%E5%AE%9E%E6%88%98/"></a>
+      </div>
+    </div>
+  </div>
+  <div class="archive-month">
+    <h3 class="archive-month-header" id="2025-November">
+      <a class="archive-header-link" href="#2025-November">November</a>
+      <sup class="archive-count">&nbsp;1</sup>
+    </h3>
+    <div class="archive-posts">
+      <div class="archive-entry">
+        <h3 class="archive-entry-title entry-hint-parent">如何阅读开源项目源码：以 Spring Boot 为例
+        </h3>
+        <div class="archive-meta"><span title='2025-11-18 00:00:00 +0000 UTC'>November 18, 2025</span>&nbsp;·&nbsp;<span>7 min</span>&nbsp;·&nbsp;<span>1409 words</span>&nbsp;·&nbsp;<span>wawayu</span></div>
+        <a class="entry-link" aria-label="post link to 如何阅读开源项目源码：以 Spring Boot 为例" href="http://localhost:1313/posts/2025/11/%E5%A6%82%E4%BD%95%E9%98%85%E8%AF%BB%E5%BC%80%E6%BA%90%E9%A1%B9%E7%9B%AE%E6%BA%90%E7%A0%81%E4%BB%A5-spring-boot-%E4%B8%BA%E4%BE%8B/"></a>
+      </div>
+    </div>
+  </div>
+  <div class="archive-month">
+    <h3 class="archive-month-header" id="2025-October">
+      <a class="archive-header-link" href="#2025-October">October</a>
+      <sup class="archive-count">&nbsp;1</sup>
+    </h3>
+    <div class="archive-posts">
+      <div class="archive-entry">
+        <h3 class="archive-entry-title entry-hint-parent">接口响应慢？一次完整的性能优化之旅
+        </h3>
+        <div class="archive-meta"><span title='2025-10-12 00:00:00 +0000 UTC'>October 12, 2025</span>&nbsp;·&nbsp;<span>7 min</span>&nbsp;·&nbsp;<span>1312 words</span>&nbsp;·&nbsp;<span>wawayu</span></div>
+        <a class="entry-link" aria-label="post link to 接口响应慢？一次完整的性能优化之旅" href="http://localhost:1313/posts/2025/10/%E6%8E%A5%E5%8F%A3%E5%93%8D%E5%BA%94%E6%85%A2%E4%B8%80%E6%AC%A1%E5%AE%8C%E6%95%B4%E7%9A%84%E6%80%A7%E8%83%BD%E4%BC%98%E5%8C%96%E4%B9%8B%E6%97%85/"></a>
+      </div>
+    </div>
+  </div>
+  <div class="archive-month">
+    <h3 class="archive-month-header" id="2025-September">
+      <a class="archive-header-link" href="#2025-September">September</a>
+      <sup class="archive-count">&nbsp;1</sup>
+    </h3>
+    <div class="archive-posts">
+      <div class="archive-entry">
+        <h3 class="archive-entry-title entry-hint-parent">全链路压测：如何验证系统的真实承载能力
+        </h3>
+        <div class="archive-meta"><span title='2025-09-05 00:00:00 +0000 UTC'>September 5, 2025</span>&nbsp;·&nbsp;<span>6 min</span>&nbsp;·&nbsp;<span>1174 words</span>&nbsp;·&nbsp;<span>wawayu</span></div>
+        <a class="entry-link" aria-label="post link to 全链路压测：如何验证系统的真实承载能力" href="http://localhost:1313/posts/2025/09/%E5%85%A8%E9%93%BE%E8%B7%AF%E5%8E%8B%E6%B5%8B%E5%A6%82%E4%BD%95%E9%AA%8C%E8%AF%81%E7%B3%BB%E7%BB%9F%E7%9A%84%E7%9C%9F%E5%AE%9E%E6%89%BF%E8%BD%BD%E8%83%BD%E5%8A%9B/"></a>
+      </div>
+    </div>
+  </div>
+  <div class="archive-month">
+    <h3 class="archive-month-header" id="2025-July">
+      <a class="archive-header-link" href="#2025-July">July</a>
+      <sup class="archive-count">&nbsp;1</sup>
+    </h3>
+    <div class="archive-posts">
+      <div class="archive-entry">
+        <h3 class="archive-entry-title entry-hint-parent">Git 工作流：从分支管理到代码审查的最佳实践
+        </h3>
+        <div class="archive-meta"><span title='2025-07-30 00:00:00 +0000 UTC'>July 30, 2025</span>&nbsp;·&nbsp;<span>6 min</span>&nbsp;·&nbsp;<span>1166 words</span>&nbsp;·&nbsp;<span>wawayu</span></div>
+        <a class="entry-link" aria-label="post link to Git 工作流：从分支管理到代码审查的最佳实践" href="http://localhost:1313/posts/2025/07/git-%E5%B7%A5%E4%BD%9C%E6%B5%81%E4%BB%8E%E5%88%86%E6%94%AF%E7%AE%A1%E7%90%86%E5%88%B0%E4%BB%A3%E7%A0%81%E5%AE%A1%E6%9F%A5%E7%9A%84%E6%9C%80%E4%BD%B3%E5%AE%9E%E8%B7%B5/"></a>
+      </div>
+    </div>
+  </div>
+  <div class="archive-month">
+    <h3 class="archive-month-header" id="2025-June">
+      <a class="archive-header-link" href="#2025-June">June</a>
+      <sup class="archive-count">&nbsp;1</sup>
+    </h3>
+    <div class="archive-posts">
+      <div class="archive-entry">
+        <h3 class="archive-entry-title entry-hint-parent">Nginx 反向代理与负载均衡实战：从入门到生产优化
+        </h3>
+        <div class="archive-meta"><span title='2025-06-25 00:00:00 +0000 UTC'>June 25, 2025</span>&nbsp;·&nbsp;<span>7 min</span>&nbsp;·&nbsp;<span>1443 words</span>&nbsp;·&nbsp;<span>wawayu</span></div>
+        <a class="entry-link" aria-label="post link to Nginx 反向代理与负载均衡实战：从入门到生产优化" href="http://localhost:1313/posts/2025/06/nginx-%E5%8F%8D%E5%90%91%E4%BB%A3%E7%90%86%E4%B8%8E%E8%B4%9F%E8%BD%BD%E5%9D%87%E8%A1%A1%E5%AE%9E%E6%88%98%E4%BB%8E%E5%85%A5%E9%97%A8%E5%88%B0%E7%94%9F%E4%BA%A7%E4%BC%98%E5%8C%96/"></a>
+      </div>
+    </div>
+  </div>
+  <div class="archive-month">
+    <h3 class="archive-month-header" id="2025-May">
+      <a class="archive-header-link" href="#2025-May">May</a>
+      <sup class="archive-count">&nbsp;1</sup>
+    </h3>
+    <div class="archive-posts">
+      <div class="archive-entry">
+        <h3 class="archive-entry-title entry-hint-parent">EasyExcel 百万级数据导出的内存优化实战
+        </h3>
+        <div class="archive-meta"><span title='2025-05-22 00:00:00 +0000 UTC'>May 22, 2025</span>&nbsp;·&nbsp;<span>9 min</span>&nbsp;·&nbsp;<span>1819 words</span>&nbsp;·&nbsp;<span>wawayu</span></div>
+        <a class="entry-link" aria-label="post link to EasyExcel 百万级数据导出的内存优化实战" href="http://localhost:1313/posts/2025/05/easyexcel-%E7%99%BE%E4%B8%87%E7%BA%A7%E6%95%B0%E6%8D%AE%E5%AF%BC%E5%87%BA%E7%9A%84%E5%86%85%E5%AD%98%E4%BC%98%E5%8C%96%E5%AE%9E%E6%88%98/"></a>
+      </div>
+    </div>
+  </div>
+  <div class="archive-month">
+    <h3 class="archive-month-header" id="2025-April">
+      <a class="archive-header-link" href="#2025-April">April</a>
+      <sup class="archive-count">&nbsp;1</sup>
+    </h3>
+    <div class="archive-posts">
+      <div class="archive-entry">
+        <h3 class="archive-entry-title entry-hint-parent">Netty + WebSocket 实现实时消息推送：从原理到生产实战
+        </h3>
+        <div class="archive-meta"><span title='2025-04-18 00:00:00 +0000 UTC'>April 18, 2025</span>&nbsp;·&nbsp;<span>11 min</span>&nbsp;·&nbsp;<span>2175 words</span>&nbsp;·&nbsp;<span>wawayu</span></div>
+        <a class="entry-link" aria-label="post link to Netty &#43; WebSocket 实现实时消息推送：从原理到生产实战" href="http://localhost:1313/posts/2025/04/netty--websocket-%E5%AE%9E%E7%8E%B0%E5%AE%9E%E6%97%B6%E6%B6%88%E6%81%AF%E6%8E%A8%E9%80%81%E4%BB%8E%E5%8E%9F%E7%90%86%E5%88%B0%E7%94%9F%E4%BA%A7%E5%AE%9E%E6%88%98/"></a>
+      </div>
+    </div>
+  </div>
+  <div class="archive-month">
+    <h3 class="archive-month-header" id="2025-March">
+      <a class="archive-header-link" href="#2025-March">March</a>
+      <sup class="archive-count">&nbsp;1</sup>
+    </h3>
+    <div class="archive-posts">
+      <div class="archive-entry">
+        <h3 class="archive-entry-title entry-hint-parent">Redis 缓存架构：从穿透到雪崩的全链路防护
+        </h3>
+        <div class="archive-meta"><span title='2025-03-20 00:00:00 +0000 UTC'>March 20, 2025</span>&nbsp;·&nbsp;<span>8 min</span>&nbsp;·&nbsp;<span>1679 words</span>&nbsp;·&nbsp;<span>wawayu</span></div>
+        <a class="entry-link" aria-label="post link to Redis 缓存架构：从穿透到雪崩的全链路防护" href="http://localhost:1313/posts/2025/03/redis-%E7%BC%93%E5%AD%98%E6%9E%B6%E6%9E%84%E4%BB%8E%E7%A9%BF%E9%80%8F%E5%88%B0%E9%9B%AA%E5%B4%A9%E7%9A%84%E5%85%A8%E9%93%BE%E8%B7%AF%E9%98%B2%E6%8A%A4/"></a>
+      </div>
+    </div>
+  </div>
+  <div class="archive-month">
+    <h3 class="archive-month-header" id="2025-February">
+      <a class="archive-header-link" href="#2025-February">February</a>
+      <sup class="archive-count">&nbsp;1</sup>
+    </h3>
+    <div class="archive-posts">
+      <div class="archive-entry">
+        <h3 class="archive-entry-title entry-hint-parent">ShardingSphere 分库分表的生产实战
+        </h3>
+        <div class="archive-meta"><span title='2025-02-15 00:00:00 +0000 UTC'>February 15, 2025</span>&nbsp;·&nbsp;<span>6 min</span>&nbsp;·&nbsp;<span>1274 words</span>&nbsp;·&nbsp;<span>wawayu</span></div>
+        <a class="entry-link" aria-label="post link to ShardingSphere 分库分表的生产实战" href="http://localhost:1313/posts/2025/02/shardingsphere-%E5%88%86%E5%BA%93%E5%88%86%E8%A1%A8%E7%9A%84%E7%94%9F%E4%BA%A7%E5%AE%9E%E6%88%98/"></a>
+      </div>
+    </div>
+  </div>
+  <div class="archive-month">
+    <h3 class="archive-month-header" id="2025-January">
+      <a class="archive-header-link" href="#2025-January">January</a>
+      <sup class="archive-count">&nbsp;1</sup>
+    </h3>
+    <div class="archive-posts">
+      <div class="archive-entry">
+        <h3 class="archive-entry-title entry-hint-parent">线程池参数动态配置：Admin 管理后台设计
+        </h3>
+        <div class="archive-meta"><span title='2025-01-08 00:00:00 +0000 UTC'>January 8, 2025</span>&nbsp;·&nbsp;<span>9 min</span>&nbsp;·&nbsp;<span>1834 words</span>&nbsp;·&nbsp;<span>wawayu</span></div>
+        <a class="entry-link" aria-label="post link to 线程池参数动态配置：Admin 管理后台设计" href="http://localhost:1313/posts/2025/01/%E7%BA%BF%E7%A8%8B%E6%B1%A0%E5%8F%82%E6%95%B0%E5%8A%A8%E6%80%81%E9%85%8D%E7%BD%AEadmin-%E7%AE%A1%E7%90%86%E5%90%8E%E5%8F%B0%E8%AE%BE%E8%AE%A1/"></a>
+      </div>
+    </div>
+  </div>
+</div>
+<div class="archive-year">
+  <h2 class="archive-year-header" id="2024">
+    <a class="archive-header-link" href="#2024">2024</a>
+    <sup class="archive-count">&nbsp;16</sup>
+  </h2>
+  <div class="archive-month">
+    <h3 class="archive-month-header" id="2024-December">
+      <a class="archive-header-link" href="#2024-December">December</a>
+      <sup class="archive-count">&nbsp;1</sup>
+    </h3>
+    <div class="archive-posts">
+      <div class="archive-entry">
+        <h3 class="archive-entry-title entry-hint-parent">MySQL 慢查询优化实战案例
+        </h3>
+        <div class="archive-meta"><span title='2024-12-10 00:00:00 +0000 UTC'>December 10, 2024</span>&nbsp;·&nbsp;<span>4 min</span>&nbsp;·&nbsp;<span>761 words</span>&nbsp;·&nbsp;<span>wawayu</span></div>
+        <a class="entry-link" aria-label="post link to MySQL 慢查询优化实战案例" href="http://localhost:1313/posts/2024/12/mysql-%E6%85%A2%E6%9F%A5%E8%AF%A2%E4%BC%98%E5%8C%96%E5%AE%9E%E6%88%98%E6%A1%88%E4%BE%8B/"></a>
+      </div>
+    </div>
+  </div>
+  <div class="archive-month">
+    <h3 class="archive-month-header" id="2024-November">
+      <a class="archive-header-link" href="#2024-November">November</a>
+      <sup class="archive-count">&nbsp;2</sup>
+    </h3>
+    <div class="archive-posts">
+      <div class="archive-entry">
+        <h3 class="archive-entry-title entry-hint-parent">MySQL 事务隔离级别与 MVCC 机制深度解析
+        </h3>
+        <div class="archive-meta"><span title='2024-11-28 00:00:00 +0000 UTC'>November 28, 2024</span>&nbsp;·&nbsp;<span>6 min</span>&nbsp;·&nbsp;<span>1093 words</span>&nbsp;·&nbsp;<span>wawayu</span></div>
+        <a class="entry-link" aria-label="post link to MySQL 事务隔离级别与 MVCC 机制深度解析" href="http://localhost:1313/posts/2024/11/mysql-%E4%BA%8B%E5%8A%A1%E9%9A%94%E7%A6%BB%E7%BA%A7%E5%88%AB%E4%B8%8E-mvcc-%E6%9C%BA%E5%88%B6%E6%B7%B1%E5%BA%A6%E8%A7%A3%E6%9E%90/"></a>
+      </div>
+      <div class="archive-entry">
+        <h3 class="archive-entry-title entry-hint-parent">MySQL 索引优化：从 Explain 到执行计划
+        </h3>
+        <div class="archive-meta"><span title='2024-11-15 00:00:00 +0000 UTC'>November 15, 2024</span>&nbsp;·&nbsp;<span>5 min</span>&nbsp;·&nbsp;<span>1007 words</span>&nbsp;·&nbsp;<span>wawayu</span></div>
+        <a class="entry-link" aria-label="post link to MySQL 索引优化：从 Explain 到执行计划" href="http://localhost:1313/posts/2024/11/mysql-%E7%B4%A2%E5%BC%95%E4%BC%98%E5%8C%96%E4%BB%8E-explain-%E5%88%B0%E6%89%A7%E8%A1%8C%E8%AE%A1%E5%88%92/"></a>
+      </div>
+    </div>
+  </div>
+  <div class="archive-month">
+    <h3 class="archive-month-header" id="2024-October">
+      <a class="archive-header-link" href="#2024-October">October</a>
+      <sup class="archive-count">&nbsp;2</sup>
+    </h3>
+    <div class="archive-posts">
+      <div class="archive-entry">
+        <h3 class="archive-entry-title entry-hint-parent">JVM OOM 问题排查实战：从 Heap Dump 到根因分析
+        </h3>
+        <div class="archive-meta"><span title='2024-10-25 00:00:00 +0000 UTC'>October 25, 2024</span>&nbsp;·&nbsp;<span>4 min</span>&nbsp;·&nbsp;<span>758 words</span>&nbsp;·&nbsp;<span>wawayu</span></div>
+        <a class="entry-link" aria-label="post link to JVM OOM 问题排查实战：从 Heap Dump 到根因分析" href="http://localhost:1313/posts/2024/10/jvm-oom-%E9%97%AE%E9%A2%98%E6%8E%92%E6%9F%A5%E5%AE%9E%E6%88%98%E4%BB%8E-heap-dump-%E5%88%B0%E6%A0%B9%E5%9B%A0%E5%88%86%E6%9E%90/"></a>
+      </div>
+      <div class="archive-entry">
+        <h3 class="archive-entry-title entry-hint-parent">RabbitMQ 在交易系统中的异步解耦实践
+        </h3>
+        <div class="archive-meta"><span title='2024-10-20 00:00:00 +0000 UTC'>October 20, 2024</span>&nbsp;·&nbsp;<span>5 min</span>&nbsp;·&nbsp;<span>1007 words</span>&nbsp;·&nbsp;<span>wawayu</span></div>
+        <a class="entry-link" aria-label="post link to RabbitMQ 在交易系统中的异步解耦实践" href="http://localhost:1313/posts/2024/10/rabbitmq-%E5%9C%A8%E4%BA%A4%E6%98%93%E7%B3%BB%E7%BB%9F%E4%B8%AD%E7%9A%84%E5%BC%82%E6%AD%A5%E8%A7%A3%E8%80%A6%E5%AE%9E%E8%B7%B5/"></a>
+      </div>
+    </div>
+  </div>
+  <div class="archive-month">
+    <h3 class="archive-month-header" id="2024-September">
+      <a class="archive-header-link" href="#2024-September">September</a>
+      <sup class="archive-count">&nbsp;2</sup>
+    </h3>
+    <div class="archive-posts">
+      <div class="archive-entry">
+        <h3 class="archive-entry-title entry-hint-parent">领域驱动设计（DDD）落地实践：从理论到代码
+        </h3>
+        <div class="archive-meta"><span title='2024-09-25 00:00:00 +0000 UTC'>September 25, 2024</span>&nbsp;·&nbsp;<span>4 min</span>&nbsp;·&nbsp;<span>703 words</span>&nbsp;·&nbsp;<span>wawayu</span></div>
+        <a class="entry-link" aria-label="post link to 领域驱动设计（DDD）落地实践：从理论到代码" href="http://localhost:1313/posts/2024/09/%E9%A2%86%E5%9F%9F%E9%A9%B1%E5%8A%A8%E8%AE%BE%E8%AE%A1ddd%E8%90%BD%E5%9C%B0%E5%AE%9E%E8%B7%B5%E4%BB%8E%E7%90%86%E8%AE%BA%E5%88%B0%E4%BB%A3%E7%A0%81/"></a>
+      </div>
+      <div class="archive-entry">
+        <h3 class="archive-entry-title entry-hint-parent">Docker 容器化部署最佳实践：从 Dockerfile 到生产环境
+        </h3>
+        <div class="archive-meta"><span title='2024-09-10 00:00:00 +0000 UTC'>September 10, 2024</span>&nbsp;·&nbsp;<span>5 min</span>&nbsp;·&nbsp;<span>911 words</span>&nbsp;·&nbsp;<span>wawayu</span></div>
+        <a class="entry-link" aria-label="post link to Docker 容器化部署最佳实践：从 Dockerfile 到生产环境" href="http://localhost:1313/posts/2024/09/docker-%E5%AE%B9%E5%99%A8%E5%8C%96%E9%83%A8%E7%BD%B2%E6%9C%80%E4%BD%B3%E5%AE%9E%E8%B7%B5%E4%BB%8E-dockerfile-%E5%88%B0%E7%94%9F%E4%BA%A7%E7%8E%AF%E5%A2%83/"></a>
+      </div>
+    </div>
+  </div>
+  <div class="archive-month">
+    <h3 class="archive-month-header" id="2024-August">
+      <a class="archive-header-link" href="#2024-August">August</a>
+      <sup class="archive-count">&nbsp;2</sup>
+    </h3>
+    <div class="archive-posts">
+      <div class="archive-entry">
+        <h3 class="archive-entry-title entry-hint-parent">Redis 分布式锁的生产级实践：从原理到 Redisson
+        </h3>
+        <div class="archive-meta"><span title='2024-08-15 00:00:00 +0000 UTC'>August 15, 2024</span>&nbsp;·&nbsp;<span>5 min</span>&nbsp;·&nbsp;<span>883 words</span>&nbsp;·&nbsp;<span>wawayu</span></div>
+        <a class="entry-link" aria-label="post link to Redis 分布式锁的生产级实践：从原理到 Redisson" href="http://localhost:1313/posts/2024/08/redis-%E5%88%86%E5%B8%83%E5%BC%8F%E9%94%81%E7%9A%84%E7%94%9F%E4%BA%A7%E7%BA%A7%E5%AE%9E%E8%B7%B5%E4%BB%8E%E5%8E%9F%E7%90%86%E5%88%B0-redisson/"></a>
+      </div>
+      <div class="archive-entry">
+        <h3 class="archive-entry-title entry-hint-parent">Spring Boot Starter 自定义开发：从原理到实战
+        </h3>
+        <div class="archive-meta"><span title='2024-08-05 00:00:00 +0000 UTC'>August 5, 2024</span>&nbsp;·&nbsp;<span>4 min</span>&nbsp;·&nbsp;<span>845 words</span>&nbsp;·&nbsp;<span>wawayu</span></div>
+        <a class="entry-link" aria-label="post link to Spring Boot Starter 自定义开发：从原理到实战" href="http://localhost:1313/posts/2024/08/spring-boot-starter-%E8%87%AA%E5%AE%9A%E4%B9%89%E5%BC%80%E5%8F%91%E4%BB%8E%E5%8E%9F%E7%90%86%E5%88%B0%E5%AE%9E%E6%88%98/"></a>
+      </div>
+    </div>
+  </div>
+  <div class="archive-month">
+    <h3 class="archive-month-header" id="2024-July">
+      <a class="archive-header-link" href="#2024-July">July</a>
+      <sup class="archive-count">&nbsp;1</sup>
+    </h3>
+    <div class="archive-posts">
+      <div class="archive-entry">
+        <h3 class="archive-entry-title entry-hint-parent">分布式 ID 生成方案对比与选型指南
+        </h3>
+        <div class="archive-meta"><span title='2024-07-05 00:00:00 +0000 UTC'>July 5, 2024</span>&nbsp;·&nbsp;<span>3 min</span>&nbsp;·&nbsp;<span>459 words</span>&nbsp;·&nbsp;<span>wawayu</span></div>
+        <a class="entry-link" aria-label="post link to 分布式 ID 生成方案对比与选型指南" href="http://localhost:1313/posts/2024/07/%E5%88%86%E5%B8%83%E5%BC%8F-id-%E7%94%9F%E6%88%90%E6%96%B9%E6%A1%88%E5%AF%B9%E6%AF%94%E4%B8%8E%E9%80%89%E5%9E%8B%E6%8C%87%E5%8D%97/"></a>
+      </div>
+    </div>
+  </div>
+  <div class="archive-month">
+    <h3 class="archive-month-header" id="2024-June">
+      <a class="archive-header-link" href="#2024-June">June</a>
+      <sup class="archive-count">&nbsp;1</sup>
+    </h3>
+    <div class="archive-posts">
+      <div class="archive-entry">
+        <h3 class="archive-entry-title entry-hint-parent">Spring Bean 生命周期完全解析
+        </h3>
+        <div class="archive-meta"><span title='2024-06-20 00:00:00 +0000 UTC'>June 20, 2024</span>&nbsp;·&nbsp;<span>3 min</span>&nbsp;·&nbsp;<span>433 words</span>&nbsp;·&nbsp;<span>wawayu</span></div>
+        <a class="entry-link" aria-label="post link to Spring Bean 生命周期完全解析" href="http://localhost:1313/posts/2024/06/spring-bean-%E7%94%9F%E5%91%BD%E5%91%A8%E6%9C%9F%E5%AE%8C%E5%85%A8%E8%A7%A3%E6%9E%90/"></a>
+      </div>
+    </div>
+  </div>
+  <div class="archive-month">
+    <h3 class="archive-month-header" id="2024-May">
+      <a class="archive-header-link" href="#2024-May">May</a>
+      <sup class="archive-count">&nbsp;1</sup>
+    </h3>
+    <div class="archive-posts">
+      <div class="archive-entry">
+        <h3 class="archive-entry-title entry-hint-parent">Spring 事务传播机制与失效场景完全解析
+        </h3>
+        <div class="archive-meta"><span title='2024-05-15 00:00:00 +0000 UTC'>May 15, 2024</span>&nbsp;·&nbsp;<span>3 min</span>&nbsp;·&nbsp;<span>491 words</span>&nbsp;·&nbsp;<span>wawayu</span></div>
+        <a class="entry-link" aria-label="post link to Spring 事务传播机制与失效场景完全解析" href="http://localhost:1313/posts/2024/05/spring-%E4%BA%8B%E5%8A%A1%E4%BC%A0%E6%92%AD%E6%9C%BA%E5%88%B6%E4%B8%8E%E5%A4%B1%E6%95%88%E5%9C%BA%E6%99%AF%E5%AE%8C%E5%85%A8%E8%A7%A3%E6%9E%90/"></a>
+      </div>
+    </div>
+  </div>
+  <div class="archive-month">
+    <h3 class="archive-month-header" id="2024-April">
+      <a class="archive-header-link" href="#2024-April">April</a>
+      <sup class="archive-count">&nbsp;1</sup>
+    </h3>
+    <div class="archive-posts">
+      <div class="archive-entry">
+        <h3 class="archive-entry-title entry-hint-parent">Spring AOP 原理与动态代理实现深度解析
+        </h3>
+        <div class="archive-meta"><span title='2024-04-10 00:00:00 +0000 UTC'>April 10, 2024</span>&nbsp;·&nbsp;<span>3 min</span>&nbsp;·&nbsp;<span>514 words</span>&nbsp;·&nbsp;<span>wawayu</span></div>
+        <a class="entry-link" aria-label="post link to Spring AOP 原理与动态代理实现深度解析" href="http://localhost:1313/posts/2024/04/spring-aop-%E5%8E%9F%E7%90%86%E4%B8%8E%E5%8A%A8%E6%80%81%E4%BB%A3%E7%90%86%E5%AE%9E%E7%8E%B0%E6%B7%B1%E5%BA%A6%E8%A7%A3%E6%9E%90/"></a>
+      </div>
+    </div>
+  </div>
+  <div class="archive-month">
+    <h3 class="archive-month-header" id="2024-March">
+      <a class="archive-header-link" href="#2024-March">March</a>
+      <sup class="archive-count">&nbsp;1</sup>
+    </h3>
+    <div class="archive-posts">
+      <div class="archive-entry">
+        <h3 class="archive-entry-title entry-hint-parent">CompletableFuture 异步编程实战指南
+        </h3>
+        <div class="archive-meta"><span title='2024-03-25 00:00:00 +0000 UTC'>March 25, 2024</span>&nbsp;·&nbsp;<span>4 min</span>&nbsp;·&nbsp;<span>783 words</span>&nbsp;·&nbsp;<span>wawayu</span></div>
+        <a class="entry-link" aria-label="post link to CompletableFuture 异步编程实战指南" href="http://localhost:1313/posts/2024/03/completablefuture-%E5%BC%82%E6%AD%A5%E7%BC%96%E7%A8%8B%E5%AE%9E%E6%88%98%E6%8C%87%E5%8D%97/"></a>
+      </div>
+    </div>
+  </div>
+  <div class="archive-month">
+    <h3 class="archive-month-header" id="2024-February">
+      <a class="archive-header-link" href="#2024-February">February</a>
+      <sup class="archive-count">&nbsp;1</sup>
+    </h3>
+    <div class="archive-posts">
+      <div class="archive-entry">
+        <h3 class="archive-entry-title entry-hint-parent">ThreadLocal 原理与内存泄漏排查实战
+        </h3>
+        <div class="archive-meta"><span title='2024-02-20 00:00:00 +0000 UTC'>February 20, 2024</span>&nbsp;·&nbsp;<span>5 min</span>&nbsp;·&nbsp;<span>992 words</span>&nbsp;·&nbsp;<span>wawayu</span></div>
+        <a class="entry-link" aria-label="post link to ThreadLocal 原理与内存泄漏排查实战" href="http://localhost:1313/posts/2024/02/threadlocal-%E5%8E%9F%E7%90%86%E4%B8%8E%E5%86%85%E5%AD%98%E6%B3%84%E6%BC%8F%E6%8E%92%E6%9F%A5%E5%AE%9E%E6%88%98/"></a>
+      </div>
+    </div>
+  </div>
+  <div class="archive-month">
+    <h3 class="archive-month-header" id="2024-January">
+      <a class="archive-header-link" href="#2024-January">January</a>
+      <sup class="archive-count">&nbsp;1</sup>
+    </h3>
+    <div class="archive-posts">
+      <div class="archive-entry">
+        <h3 class="archive-entry-title entry-hint-parent">Java 并发编程：从 synchronized 到 AQS 的演进
+        </h3>
+        <div class="archive-meta"><span title='2024-01-15 00:00:00 +0000 UTC'>January 15, 2024</span>&nbsp;·&nbsp;<span>5 min</span>&nbsp;·&nbsp;<span>878 words</span>&nbsp;·&nbsp;<span>wawayu</span></div>
+        <a class="entry-link" aria-label="post link to Java 并发编程：从 synchronized 到 AQS 的演进" href="http://localhost:1313/posts/2024/01/java-%E5%B9%B6%E5%8F%91%E7%BC%96%E7%A8%8B%E4%BB%8E-synchronized-%E5%88%B0-aqs-%E7%9A%84%E6%BC%94%E8%BF%9B/"></a>
+      </div>
+    </div>
+  </div>
+</div>
+    </main>
+    
+<footer class="footer">
+        <span>&copy; 2026 <a href="http://localhost:1313/">博客喵</a></span> · 
+
+    <span>
+        Powered by
+        <a href="https://gohugo.io/" rel="noopener noreferrer" target="_blank">Hugo</a> &
+        <a href="https://github.com/adityatelange/hugo-PaperMod/" rel="noopener" target="_blank">PaperMod</a>
+    </span>
+</footer>
+<a href="#top" aria-label="go to top" title="Go to Top (Alt + G)" class="top-link" id="top-link" accesskey="g">
+    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 12 6" fill="currentColor">
+        <path d="M12 6H0l6-6z" />
+    </svg>
+</a>
+
+<script>
+    let menu = document.getElementById('menu');
+    if (menu) {
+        
+        const scrollPosition = localStorage.getItem("menu-scroll-position");
+        if (scrollPosition) {
+            menu.scrollLeft = parseInt(scrollPosition, 10);
+        }
+        
+        menu.onscroll = function () {
+            localStorage.setItem("menu-scroll-position", menu.scrollLeft);
+        }
+    }
+
+    document.querySelectorAll('a[href^="#"]').forEach(anchor => {
+        anchor.addEventListener("click", function (e) {
+            e.preventDefault();
+            var id = this.getAttribute("href").substr(1);
+            if (!window.matchMedia('(prefers-reduced-motion: reduce)').matches) {
+                document.querySelector(`[id='${decodeURIComponent(id)}']`).scrollIntoView({
+                    behavior: "smooth"
+                });
+            } else {
+                document.querySelector(`[id='${decodeURIComponent(id)}']`).scrollIntoView();
+            }
+            if (id === "top") {
+                history.replaceState(null, null, " ");
+            } else {
+                history.pushState(null, null, `#${id}`);
+            }
+        });
+    });
+
+</script>
+<script>
+    var mybutton = document.getElementById("top-link");
+    window.onscroll = function () {
+        if (document.body.scrollTop > 800 || document.documentElement.scrollTop > 800) {
+            mybutton.style.visibility = "visible";
+            mybutton.style.opacity = "1";
+        } else {
+            mybutton.style.visibility = "hidden";
+            mybutton.style.opacity = "0";
+        }
+    };
+
+</script>
+<script>
+    document.getElementById("theme-toggle").addEventListener("click", () => {
+        const html = document.querySelector("html");
+        if (html.dataset.theme === "dark") {
+            html.dataset.theme = 'light';
+            localStorage.setItem("pref-theme", 'light');
+        } else {
+            html.dataset.theme = 'dark';
+            localStorage.setItem("pref-theme", 'dark');
+        }
+    })
+
+</script>
+</body>
+
+</html>

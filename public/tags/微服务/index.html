@@ -1,0 +1,286 @@
+<!DOCTYPE html>
+<html lang="en" dir="auto" data-theme="auto">
+
+<head><script src="/livereload.js?mindelay=10&amp;v=2&amp;port=1313&amp;path=livereload" data-no-instant defer></script><meta charset="utf-8">
+<meta http-equiv="X-UA-Compatible" content="IE=edge">
+<meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
+<meta name="robots" content="index, follow">
+<title>微服务 | 博客喵</title>
+<meta name="keywords" content="">
+<meta name="description" content="记录技术成长，分享开发经验，专注 Java 后端与分布式系统">
+<meta name="author" content="wawayu">
+<link rel="canonical" href="http://localhost:1313/tags/%E5%BE%AE%E6%9C%8D%E5%8A%A1/">
+<link crossorigin="anonymous" href="/assets/css/stylesheet.a29c24210eb31d9ce56f669c66a35c9c51b17376b7764e336a49af7dec914cf0.css" integrity="sha256-opwkIQ6zHZzlb2acZqNcnFGxc3a3dk4zakmvfeyRTPA=" rel="preload stylesheet" as="style">
+<link rel="icon" href="http://localhost:1313/favicon.ico">
+<link rel="icon" type="image/png" sizes="16x16" href="http://localhost:1313/favicon-16x16.png">
+<link rel="icon" type="image/png" sizes="32x32" href="http://localhost:1313/favicon-32x32.png">
+<link rel="apple-touch-icon" href="http://localhost:1313/apple-touch-icon.png">
+<link rel="mask-icon" href="http://localhost:1313/safari-pinned-tab.svg">
+<meta name="theme-color" content="#2e2e33">
+<meta name="msapplication-TileColor" content="#2e2e33">
+<link rel="alternate" type="application/rss+xml" href="http://localhost:1313/tags/%E5%BE%AE%E6%9C%8D%E5%8A%A1/index.xml" title="rss">
+<link rel="alternate" hreflang="en" href="http://localhost:1313/tags/%E5%BE%AE%E6%9C%8D%E5%8A%A1/">
+<noscript>
+    <style>
+        #theme-toggle,
+        .top-link {
+            display: none;
+        }
+
+    </style>
+    <style>
+        @media (prefers-color-scheme: dark) {
+            :root {
+                --theme: rgb(29, 30, 32);
+                --entry: rgb(46, 46, 51);
+                --primary: rgb(218, 218, 219);
+                --secondary: rgb(155, 156, 157);
+                --tertiary: rgb(65, 66, 68);
+                --content: rgb(196, 196, 197);
+                --code-block-bg: rgb(46, 46, 51);
+                --code-bg: rgb(55, 56, 62);
+                --border: rgb(51, 51, 51);
+                color-scheme: dark;
+            }
+
+            .list {
+                background: var(--theme);
+            }
+
+            .toc {
+                background: var(--entry);
+            }
+        }
+
+        @media (prefers-color-scheme: light) {
+            .list::-webkit-scrollbar-thumb {
+                border-color: var(--code-bg);
+            }
+        }
+
+    </style>
+</noscript>
+<script>
+    if (localStorage.getItem("pref-theme") === "dark") {
+        document.querySelector("html").dataset.theme = 'dark';
+    } else if (localStorage.getItem("pref-theme") === "light") {
+       document.querySelector("html").dataset.theme = 'light';
+    } else if (window.matchMedia('(prefers-color-scheme: dark)').matches) {
+        document.querySelector("html").dataset.theme = 'dark';
+    } else {
+        document.querySelector("html").dataset.theme = 'light';
+    }
+
+</script><meta property="og:url" content="http://localhost:1313/tags/%E5%BE%AE%E6%9C%8D%E5%8A%A1/">
+  <meta property="og:site_name" content="博客喵">
+  <meta property="og:title" content="微服务">
+  <meta property="og:description" content="记录技术成长，分享开发经验，专注 Java 后端与分布式系统">
+  <meta property="og:locale" content="zh-cn">
+  <meta property="og:type" content="website">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:title" content="微服务">
+<meta name="twitter:description" content="记录技术成长，分享开发经验，专注 Java 后端与分布式系统">
+
+</head>
+<body class="list" id="top">
+    <header class="header">
+    <nav class="nav">
+        <div class="logo">
+            <a href="http://localhost:1313/" accesskey="h" title="博客喵 (Alt + H)">博客喵</a>
+            <div class="logo-switches">
+                <button id="theme-toggle" accesskey="t" title="(Alt + T)" aria-label="Toggle theme">
+                    <svg id="moon" xmlns="http://www.w3.org/2000/svg" width="24" height="18" viewBox="0 0 24 24"
+                        fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"
+                        stroke-linejoin="round">
+                        <path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"></path>
+                    </svg>
+                    <svg id="sun" xmlns="http://www.w3.org/2000/svg" width="24" height="18" viewBox="0 0 24 24"
+                        fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"
+                        stroke-linejoin="round">
+                        <circle cx="12" cy="12" r="5"></circle>
+                        <line x1="12" y1="1" x2="12" y2="3"></line>
+                        <line x1="12" y1="21" x2="12" y2="23"></line>
+                        <line x1="4.22" y1="4.22" x2="5.64" y2="5.64"></line>
+                        <line x1="18.36" y1="18.36" x2="19.78" y2="19.78"></line>
+                        <line x1="1" y1="12" x2="3" y2="12"></line>
+                        <line x1="21" y1="12" x2="23" y2="12"></line>
+                        <line x1="4.22" y1="19.78" x2="5.64" y2="18.36"></line>
+                        <line x1="18.36" y1="5.64" x2="19.78" y2="4.22"></line>
+                    </svg>
+                </button>
+            </div>
+        </div>
+        <ul id="menu">
+            <li>
+                <a href="http://localhost:1313/posts/" title="📝 文章">
+                    <span>📝 文章</span>
+                </a>
+            </li>
+            <li>
+                <a href="http://localhost:1313/tags/" title="🏷️ 标签">
+                    <span>🏷️ 标签</span>
+                </a>
+            </li>
+            <li>
+                <a href="http://localhost:1313/categories/" title="📂 分类">
+                    <span>📂 分类</span>
+                </a>
+            </li>
+            <li>
+                <a href="http://localhost:1313/skills/" title="💻 技能">
+                    <span>💻 技能</span>
+                </a>
+            </li>
+            <li>
+                <a href="http://localhost:1313/about/" title="👤 关于">
+                    <span>👤 关于</span>
+                </a>
+            </li>
+            <li>
+                <a href="http://localhost:1313/search/" title="🔍 搜索 (Alt &#43; /)" accesskey=/>
+                    <span>🔍 搜索</span>
+                </a>
+            </li>
+        </ul>
+    </nav>
+</header>
+<main class="main"> 
+<header class="page-header"><div class="breadcrumbs"><a href="http://localhost:1313/">Home</a>&nbsp;»&nbsp;<a href="http://localhost:1313/tags/">Tags</a></div>
+  <h1>
+    微服务
+    <a href="/tags/%E5%BE%AE%E6%9C%8D%E5%8A%A1/index.xml" title="RSS" aria-label="RSS">
+      <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"
+        stroke-linecap="round" stroke-linejoin="round" height="23">
+        <path d="M4 11a9 9 0 0 1 9 9" />
+        <path d="M4 4a16 16 0 0 1 16 16" />
+        <circle cx="5" cy="19" r="1" />
+      </svg>
+    </a>
+  </h1>
+</header>
+
+<article class="post-entry tag-entry"> 
+  <header class="entry-header">
+    <h2 class="entry-hint-parent">分布式事务解决方案：从 2PC 到 Seata 的演进与实战
+    </h2>
+  </header>
+  <div class="entry-content">
+    <p>在微服务架构中，一个业务操作往往需要跨越多个服务，如何保证这些操作的一致性是一个经典难题。本文将系统讲解分布式事务的各种解决方案，从理论到实践，帮助你选择合适的方案。
+本文亮点 理解分布式事务的核心问题 掌握2PC、3PC、TCC、Saga等方案 学会使用Seata框架解决分布式事务 了解各方案的优缺点和适用场景 掌握生产环境的最佳实践 分布式事务问题 业务场景 电商下单场景，涉及多个服务：
+1用户下单 2 ↓ 3订单服务：创建订单 4 ↓ 5库存服务：扣减库存 6 ↓ 7账户服务：扣减余额 8 ↓ 9积分服务：增加积分 问题：如果某个服务失败，如何保证数据一致性？
+CAP理论 分布式系统的三个特性：
+C (Consistency)：一致性 A (Availability)：可用性 P (Partition Tolerance)：分区容错性 CAP定理：三者最多只能同时满足两个
+实际选择：
+CP：牺牲可用性，保证一致性（如ZooKeeper） AP：牺牲一致性，保证可用性（如Eureka） BASE理论 BA (Basically Available)：基本可用 S (Soft State)：软状态 E (Eventually Consistent)：最终一致性 架构思考： 在分布式系统中，强一致性往往难以实现且代价高昂。大多数业务场景可以接受最终一致性，这也是现代分布式事务方案的基础。
+2PC（两阶段提交） 原理 第一阶段：准备阶段（Prepare）
+协调者向所有参与者发送Prepare请求 参与者执行事务操作，但不提交 参与者返回Yes或No 第二阶段：提交阶段（Commit）
+如果所有参与者都返回Yes，协调者发送Commit请求 如果有参与者返回No，协调者发送Rollback请求 流程图 1协调者 参与者1 参与者2 2 | | | 3 |---Prepare----------&gt;| | 4 |---Prepare----------------------------&gt;| 5 | | | 6 |&lt;--Yes/No------------| | 7 |&lt;--Yes/No-------------------------------| 8 | | | 9 |---Commit/Rollback--&gt;| | 10 |---Commit/Rollback----------------------&gt;| 代码示例 1public class TwoPhaseCommitCoordinator { 2 3 private List&lt;Participant&gt; participants; 4 5 public boolean executeTransaction() { 6 // 第一阶段：准备 7 boolean canCommit = prepare(); 8 9 // 第二阶段：提交或回滚 10 if (canCommit) { 11 commit(); 12 return true; 13 } else { 14 rollback(); 15 return false; 16 } 17 } 18 19 private boolean prepare() { 20 for (Participant participant : participants) { 21 if (!participant.prepare()) { 22 return false; 23 } 24 } 25 return true; 26 } 27 28 private void commit() { 29 for (Participant participant : participants) { 30 participant.commit(); 31 } 32 } 33 34 private void rollback() { 35 for (Participant participant : participants) { 36 participant.rollback(); 37 } 38 } 39} 40 41interface Participant { 42 boolean prepare(); 43 void commit(); 44 void rollback(); 45} 优缺点 优点：
+...</p>
+  </div>
+  <footer class="entry-footer"><span title='2025-12-20 00:00:00 +0000 UTC'>December 20, 2025</span>&nbsp;·&nbsp;<span>8 min</span>&nbsp;·&nbsp;<span>1522 words</span>&nbsp;·&nbsp;<span>wawayu</span></footer>
+  <a class="entry-link" aria-label="post link to 分布式事务解决方案：从 2PC 到 Seata 的演进与实战" href="http://localhost:1313/posts/2025/12/%E5%88%86%E5%B8%83%E5%BC%8F%E4%BA%8B%E5%8A%A1%E8%A7%A3%E5%86%B3%E6%96%B9%E6%A1%88%E4%BB%8E-2pc-%E5%88%B0-seata-%E7%9A%84%E6%BC%94%E8%BF%9B%E4%B8%8E%E5%AE%9E%E6%88%98/"></a>
+</article>
+
+<article class="post-entry tag-entry"> 
+  <header class="entry-header">
+    <h2 class="entry-hint-parent">领域驱动设计（DDD）落地实践：从理论到代码
+    </h2>
+  </header>
+  <div class="entry-content">
+    <p>DDD（Domain-Driven Design）是一套复杂业务系统的设计方法论。但很多人学了 DDD 的概念，却不知道如何落地。本文通过一个电商订单系统的案例，讲解 DDD 的实战应用。
+本文亮点 理解 DDD 的核心概念：实体、值对象、聚合根、领域服务 掌握限界上下文的划分方法 学会用领域事件实现服务解耦 了解 DDD 分层架构的代码组织 为什么需要 DDD？ 传统的三层架构（Controller-Service-DAO）在简单业务场景下够用，但当业务复杂度增加时，会出现几个问题：
+Service 层逻辑臃肿
+所有业务逻辑都堆在 Service 层，一个 OrderService 可能有几千行代码。
+业务规则散落各处
+订单的状态流转规则可能分散在多个 Service 方法中，难以维护。
+领域知识流失
+代码中充斥着 updateStatus(orderId, 3)，没人知道 3 代表什么状态。
+DDD 通过领域建模，让代码更贴近业务，提升可维护性。
+DDD 核心概念 实体（Entity）
+有唯一标识的对象，生命周期内标识不变。比如订单、用户。
+1public class Order { 2 private OrderId id; // 唯一标识 3 private UserId userId; 4 private OrderStatus status; 5 private List&lt;OrderItem&gt; items; 6 7 // 业务方法 8 public void pay() { 9 if (this.status != OrderStatus.PENDING_PAYMENT) { 10 throw new IllegalStateException(&#34;订单状态不允许支付&#34;); 11 } 12 this.status = OrderStatus.PAID; 13 } 14} 值对象（Value Object）
+...</p>
+  </div>
+  <footer class="entry-footer"><span title='2024-09-25 00:00:00 +0000 UTC'>September 25, 2024</span>&nbsp;·&nbsp;<span>4 min</span>&nbsp;·&nbsp;<span>703 words</span>&nbsp;·&nbsp;<span>wawayu</span></footer>
+  <a class="entry-link" aria-label="post link to 领域驱动设计（DDD）落地实践：从理论到代码" href="http://localhost:1313/posts/2024/09/%E9%A2%86%E5%9F%9F%E9%A9%B1%E5%8A%A8%E8%AE%BE%E8%AE%A1ddd%E8%90%BD%E5%9C%B0%E5%AE%9E%E8%B7%B5%E4%BB%8E%E7%90%86%E8%AE%BA%E5%88%B0%E4%BB%A3%E7%A0%81/"></a>
+</article>
+    </main>
+    
+<footer class="footer">
+        <span>&copy; 2026 <a href="http://localhost:1313/">博客喵</a></span> · 
+
+    <span>
+        Powered by
+        <a href="https://gohugo.io/" rel="noopener noreferrer" target="_blank">Hugo</a> &
+        <a href="https://github.com/adityatelange/hugo-PaperMod/" rel="noopener" target="_blank">PaperMod</a>
+    </span>
+</footer>
+<a href="#top" aria-label="go to top" title="Go to Top (Alt + G)" class="top-link" id="top-link" accesskey="g">
+    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 12 6" fill="currentColor">
+        <path d="M12 6H0l6-6z" />
+    </svg>
+</a>
+
+<script>
+    let menu = document.getElementById('menu');
+    if (menu) {
+        
+        const scrollPosition = localStorage.getItem("menu-scroll-position");
+        if (scrollPosition) {
+            menu.scrollLeft = parseInt(scrollPosition, 10);
+        }
+        
+        menu.onscroll = function () {
+            localStorage.setItem("menu-scroll-position", menu.scrollLeft);
+        }
+    }
+
+    document.querySelectorAll('a[href^="#"]').forEach(anchor => {
+        anchor.addEventListener("click", function (e) {
+            e.preventDefault();
+            var id = this.getAttribute("href").substr(1);
+            if (!window.matchMedia('(prefers-reduced-motion: reduce)').matches) {
+                document.querySelector(`[id='${decodeURIComponent(id)}']`).scrollIntoView({
+                    behavior: "smooth"
+                });
+            } else {
+                document.querySelector(`[id='${decodeURIComponent(id)}']`).scrollIntoView();
+            }
+            if (id === "top") {
+                history.replaceState(null, null, " ");
+            } else {
+                history.pushState(null, null, `#${id}`);
+            }
+        });
+    });
+
+</script>
+<script>
+    var mybutton = document.getElementById("top-link");
+    window.onscroll = function () {
+        if (document.body.scrollTop > 800 || document.documentElement.scrollTop > 800) {
+            mybutton.style.visibility = "visible";
+            mybutton.style.opacity = "1";
+        } else {
+            mybutton.style.visibility = "hidden";
+            mybutton.style.opacity = "0";
+        }
+    };
+
+</script>
+<script>
+    document.getElementById("theme-toggle").addEventListener("click", () => {
+        const html = document.querySelector("html");
+        if (html.dataset.theme === "dark") {
+            html.dataset.theme = 'light';
+            localStorage.setItem("pref-theme", 'light');
+        } else {
+            html.dataset.theme = 'dark';
+            localStorage.setItem("pref-theme", 'dark');
+        }
+    })
+
+</script>
+</body>
+
+</html>

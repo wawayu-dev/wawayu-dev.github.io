@@ -1,65 +1,172 @@
 baseURL = 'https://wawayu-dev.github.io/'
-languageCode = 'en-us'
-title = 'My New Hugo Site'
+languageCode = 'zh-cn'
+title = '博客喵'
 theme = "PaperMod"
 
 # 开启代码高亮
 pygmentsCodeFences = true
-pygmentsUseClasses = false
-pygmentsStyle = "monokai" # 技术人最爱的暗黑高亮
+pygmentsUseClasses = true
+pygmentsStyle = "monokai"
+
+# 启用 emoji
+enableEmoji = true
+
+# 启用 Git 信息
+enableGitInfo = true
+
+# 输出格式（支持搜索）
+[outputs]
+    home = ["HTML", "RSS", "JSON"]
+
+# 永久链接配置
+[permalinks]
+    posts = "/posts/:year/:month/:slug/"
 
 [params]
     env = "production"
-    title = "某某的技术随笔"
-    description = "专注于技术输出与价值展示"
-    author = "你的名字"
+    title = "技术与思考"
+    description = "记录技术成长，分享开发经验，专注 Java 后端与分布式系统"
+    author = "wawayu"
+    keywords = ["Java", "Spring Boot", "分布式系统", "后端开发", "技术博客"]
     
-    # 允许切换深色/浅色模式
+    # 主题设置
     defaultTheme = "auto"
     disableThemeToggle = false
-    
-    # 显示目录 (TOC)
-    ShowToc = true
-    TocOpen = true # 默认打开目录
-    
-    # 文章列表显示缩略图
-    ShowReadingTime = true
     ShowShareButtons = true
+    ShowReadingTime = true
     ShowPostNavLinks = true
-    
-    # 主页正中间的欢迎词 (Profile Mode)
-    [params.profileMode]
-        enabled = true
-        title = "你好，我是某某 👋"
-        subtitle = "后端开发者 / 终身学习者 / 正在分享我的技术价值"
-        imageUrl = "https://github.com/你的用户名.png" # 自动调用你的GitHub头像
-        imageTitle = "My Avatar"
-        
-        [[params.profileMode.buttons]]
-            name = "阅读博客"
-            url = "posts"
-        [[params.profileMode.buttons]]
-            name = "关于我"
-            url = "about"
+    ShowBreadCrumbs = true
+    ShowCodeCopyButtons = true
+    ShowWordCount = true
+    ShowRssButtonInSectionTermList = true
+    UseHugoToc = true
+    disableSpecial1stPost = false
+    disableScrollToTop = false
+    comments = false
+    hidemeta = false
+    hideSummary = false
+    showtoc = true
+    tocopen = true
 
-    # 社交链接（会显示图标）
+    # 首页 - 简洁的个人定位
+    [params.homeInfoParams]
+        Title = "Java 后端开发工程师"
+        Content = """
+        专注分布式系统与高并发架构
+        
+        记录技术，分享经验，持续成长
+        """
+
+    # 社交链接
     [[params.socialIcons]]
         name = "github"
-        url = "https://github.com/你的用户名"
+        url = "https://github.com/wawayu-dev"
     [[params.socialIcons]]
         name = "email"
-        url = "mailto:你的邮箱"
+        url = "mailto:your-email@example.com"
+    [[params.socialIcons]]
+        name = "rss"
+        url = "/index.xml"
+
+    # 封面图片设置
+    [params.cover]
+        hidden = false
+        hiddenInList = false
+        hiddenInSingle = false
+
+    # 编辑建议
+    [params.editPost]
+        URL = "https://github.com/wawayu-dev/wawayu-dev.github.io/tree/main/content"
+        Text = "建议修改"
+        appendFilePath = true
+
+    # 搜索配置
+    [params.fuseOpts]
+        isCaseSensitive = false
+        shouldSort = true
+        location = 0
+        distance = 1000
+        threshold = 0.4
+        minMatchCharLength = 0
+        keys = ["title", "permalink", "summary", "content"]
+
+    # 分析工具（可选）
+    # [params.analytics]
+    #     google = "G-XXXXXXXXXX"
 
 # 导航栏菜单
 [[menu.main]]
-    name = "文章"
-    url = "posts"
+    identifier = "posts"
+    name = "📝 文章"
+    url = "/posts/"
     weight = 10
+
 [[menu.main]]
-    name = "搜索"
-    url = "search"
+    identifier = "tags"
+    name = "🏷️ 标签"
+    url = "/tags/"
     weight = 20
+
 [[menu.main]]
-    name = "关于"
-    url = "about"
+    identifier = "categories"
+    name = "📂 分类"
+    url = "/categories/"
     weight = 30
+
+[[menu.main]]
+    identifier = "skills"
+    name = "💻 技能"
+    url = "/skills/"
+    weight = 40
+
+[[menu.main]]
+    identifier = "about"
+    name = "👤 关于"
+    url = "/about/"
+    weight = 50
+
+[[menu.main]]
+    identifier = "search"
+    name = "🔍 搜索"
+    url = "/search/"
+    weight = 60
+
+# 分类法
+[taxonomies]
+    category = "categories"
+    tag = "tags"
+    series = "series"
+
+# 标记设置
+[markup]
+    [markup.highlight]
+        anchorLineNos = false
+        codeFences = true
+        guessSyntax = true
+        lineNos = true
+        lineNumbersInTable = false
+        noClasses = false
+        style = "monokai"
+        tabWidth = 4
+    
+    [markup.goldmark]
+        [markup.goldmark.renderer]
+            unsafe = true
+    
+    [markup.tableOfContents]
+        endLevel = 4
+        ordered = false
+        startLevel = 2
+
+# 隐私设置
+[privacy]
+    [privacy.twitter]
+        enableDNT = true
+    [privacy.youtube]
+        privacyEnhanced = true
+
+# 站点地图
+[sitemap]
+    changefreq = "weekly"
+    filename = "sitemap.xml"
+    priority = 0.5

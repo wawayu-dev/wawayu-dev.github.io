@@ -1,0 +1,572 @@
+<!DOCTYPE html>
+<html lang="en" dir="auto" data-theme="auto">
+
+<head><script src="/livereload.js?mindelay=10&amp;v=2&amp;port=1313&amp;path=livereload" data-no-instant defer></script><meta charset="utf-8">
+<meta http-equiv="X-UA-Compatible" content="IE=edge">
+<meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
+<meta name="robots" content="index, follow">
+<title>从零到一：构建 Hugo &#43; PaperMod 自动化博客系统 | 博客喵</title>
+<meta name="keywords" content="CI/CD, 最佳实践">
+<meta name="description" content="跳出文档式教程，从架构视角理解 Hugo 静态博客的工程化实践">
+<meta name="author" content="wawayu">
+<link rel="canonical" href="http://localhost:1313/posts/2026/02/%E4%BB%8E%E9%9B%B6%E5%88%B0%E4%B8%80%E6%9E%84%E5%BB%BA-hugo--papermod-%E8%87%AA%E5%8A%A8%E5%8C%96%E5%8D%9A%E5%AE%A2%E7%B3%BB%E7%BB%9F/">
+<link crossorigin="anonymous" href="/assets/css/stylesheet.a29c24210eb31d9ce56f669c66a35c9c51b17376b7764e336a49af7dec914cf0.css" integrity="sha256-opwkIQ6zHZzlb2acZqNcnFGxc3a3dk4zakmvfeyRTPA=" rel="preload stylesheet" as="style">
+<link rel="icon" href="http://localhost:1313/favicon.ico">
+<link rel="icon" type="image/png" sizes="16x16" href="http://localhost:1313/favicon-16x16.png">
+<link rel="icon" type="image/png" sizes="32x32" href="http://localhost:1313/favicon-32x32.png">
+<link rel="apple-touch-icon" href="http://localhost:1313/apple-touch-icon.png">
+<link rel="mask-icon" href="http://localhost:1313/safari-pinned-tab.svg">
+<meta name="theme-color" content="#2e2e33">
+<meta name="msapplication-TileColor" content="#2e2e33">
+<link rel="alternate" hreflang="en" href="http://localhost:1313/posts/2026/02/%E4%BB%8E%E9%9B%B6%E5%88%B0%E4%B8%80%E6%9E%84%E5%BB%BA-hugo--papermod-%E8%87%AA%E5%8A%A8%E5%8C%96%E5%8D%9A%E5%AE%A2%E7%B3%BB%E7%BB%9F/">
+<noscript>
+    <style>
+        #theme-toggle,
+        .top-link {
+            display: none;
+        }
+
+    </style>
+    <style>
+        @media (prefers-color-scheme: dark) {
+            :root {
+                --theme: rgb(29, 30, 32);
+                --entry: rgb(46, 46, 51);
+                --primary: rgb(218, 218, 219);
+                --secondary: rgb(155, 156, 157);
+                --tertiary: rgb(65, 66, 68);
+                --content: rgb(196, 196, 197);
+                --code-block-bg: rgb(46, 46, 51);
+                --code-bg: rgb(55, 56, 62);
+                --border: rgb(51, 51, 51);
+                color-scheme: dark;
+            }
+
+            .list {
+                background: var(--theme);
+            }
+
+            .toc {
+                background: var(--entry);
+            }
+        }
+
+        @media (prefers-color-scheme: light) {
+            .list::-webkit-scrollbar-thumb {
+                border-color: var(--code-bg);
+            }
+        }
+
+    </style>
+</noscript>
+<script>
+    if (localStorage.getItem("pref-theme") === "dark") {
+        document.querySelector("html").dataset.theme = 'dark';
+    } else if (localStorage.getItem("pref-theme") === "light") {
+       document.querySelector("html").dataset.theme = 'light';
+    } else if (window.matchMedia('(prefers-color-scheme: dark)').matches) {
+        document.querySelector("html").dataset.theme = 'dark';
+    } else {
+        document.querySelector("html").dataset.theme = 'light';
+    }
+
+</script><meta property="og:url" content="http://localhost:1313/posts/2026/02/%E4%BB%8E%E9%9B%B6%E5%88%B0%E4%B8%80%E6%9E%84%E5%BB%BA-hugo--papermod-%E8%87%AA%E5%8A%A8%E5%8C%96%E5%8D%9A%E5%AE%A2%E7%B3%BB%E7%BB%9F/">
+  <meta property="og:site_name" content="博客喵">
+  <meta property="og:title" content="从零到一：构建 Hugo &#43; PaperMod 自动化博客系统">
+  <meta property="og:description" content="跳出文档式教程，从架构视角理解 Hugo 静态博客的工程化实践">
+  <meta property="og:locale" content="zh-cn">
+  <meta property="og:type" content="article">
+    <meta property="article:section" content="posts">
+    <meta property="article:published_time" content="2026-02-12T00:00:00+00:00">
+    <meta property="article:modified_time" content="2026-02-12T00:00:00+00:00">
+    <meta property="article:tag" content="CI/CD">
+    <meta property="article:tag" content="最佳实践">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:title" content="从零到一：构建 Hugo &#43; PaperMod 自动化博客系统">
+<meta name="twitter:description" content="跳出文档式教程，从架构视角理解 Hugo 静态博客的工程化实践">
+
+
+<script type="application/ld+json">
+{
+  "@context": "https://schema.org",
+  "@type": "BreadcrumbList",
+  "itemListElement": [
+    {
+      "@type": "ListItem",
+      "position":  1 ,
+      "name": "Posts",
+      "item": "http://localhost:1313/posts/"
+    }, 
+    {
+      "@type": "ListItem",
+      "position":  2 ,
+      "name": "从零到一：构建 Hugo + PaperMod 自动化博客系统",
+      "item": "http://localhost:1313/posts/2026/02/%E4%BB%8E%E9%9B%B6%E5%88%B0%E4%B8%80%E6%9E%84%E5%BB%BA-hugo--papermod-%E8%87%AA%E5%8A%A8%E5%8C%96%E5%8D%9A%E5%AE%A2%E7%B3%BB%E7%BB%9F/"
+    }
+  ]
+}
+</script>
+<script type="application/ld+json">
+{
+  "@context": "https://schema.org",
+  "@type": "BlogPosting",
+  "headline": "从零到一：构建 Hugo + PaperMod 自动化博客系统",
+  "name": "从零到一：构建 Hugo \u002b PaperMod 自动化博客系统",
+  "description": "跳出文档式教程，从架构视角理解 Hugo 静态博客的工程化实践",
+  "keywords": [
+    "CI/CD", "最佳实践"
+  ],
+  "articleBody": "在碎片化信息爆炸的时代，拥有一套完全受自己掌控的技术专栏，是每位开发者沉淀思考、打造个人品牌的核心资产。相比于被平台算法绑架的公众号，或是充斥广告的第三方博客，Hugo 这类静态站点生成器给了我们真正的自由：毫秒级构建、Markdown 原生支持、完全的样式控制权。\n但很多人在搭建 Hugo 博客时，往往陷入\"照着文档敲命令\"的机械重复。本文不是又一篇安装教程，而是从系统架构的角度，带你理解 Hugo + PaperMod 这套方案背后的设计逻辑。\n本文亮点 理解 Hugo Extended 与 PaperMod 的依赖关系 掌握 Git Submodule 的主题管理方案 设计基于 GitHub Actions 的自动化部署流水线 建立工程化思维而非\"跟着做\"的操作思维 01. 基础设施：为什么必须是 Hugo Extended？ 很多人第一次搭建 Hugo 博客时，会遇到一个诡异的报错：TOCSS: failed to transform \"css/main.css\"。明明按照官方文档装了 Hugo，为什么还会出错？\n问题出在版本选择上。Hugo 分为普通版和 Extended 版，后者内置了 LibSass 编译器。而 PaperMod 这类现代主题大量使用 SCSS/SASS 来实现主题变量、暗黑模式切换等特性。如果你用普通版 Hugo，编译流程会在 CSS 转换环节直接崩溃。\n在 Windows 环境下，我们用 Winget 来安装，而不是手动下载 zip 包：\n1# 使用包管理器安装，确保版本可追溯 2winget install Hugo.Hugo.Extended 3 4# 验证安装：必须看到 +extended 标识 5hugo version 6# 预期输出: hugo v0.12x.x+extended windows/amd64 为什么坚持用包管理器？因为这是\"可复现环境\"的第一步。当你的博客需要团队协作，或者换了台电脑重新部署时，一条命令就能恢复完全一致的环境，而不是在\"我电脑上能跑\"的泥潭里挣扎。\n接下来初始化站点骨架：\n1hugo new site myblog 2cd myblog 3git init 这三行命令看似简单，但背后是 Hugo 的\"约定优于配置\"哲学：content/ 存放内容源文件，themes/ 管理视觉层，public/ 作为编译产物输出。这种清晰的职责分离，让我们可以独立管理内容、主题和构建流程。\n架构思考： Hugo 的目录结构本质上是一种\"关注点分离\"的设计模式。内容创作者只需要关心 content/ 下的 Markdown，主题开发者专注于 themes/ 的模板逻辑，而 CI/CD 流水线只需要处理 public/ 的部署。这种解耦设计，是大规模内容生产的基础。\n02. 主题依赖：为什么选择 Git Submodule？ 引入 PaperMod 主题有两种方式：直接下载 zip 包解压到 themes/ 目录，或者用 Git Submodule。很多教程会推荐前者，因为\"简单\"。但这种简单是有代价的。\n想象一个场景：PaperMod 官方修复了一个暗黑模式的 Bug，或者新增了搜索功能。如果你是直接下载的主题，更新流程会变成：去 GitHub 下载新版 → 删除旧文件 → 解压覆盖 → 祈祷没有冲突。而如果用 Submodule，只需要一条命令：\n1# 建立主题子模块依赖 2git submodule add --depth=1 https://github.com/adityatelange/hugo-PaperMod.git themes/PaperMod 3 4# 未来更新主题只需要 5git submodule update --remote --merge Submodule 的本质是\"依赖外部化\"。主题代码不会污染你的主仓库提交历史，同时又能通过 .gitmodules 文件精确锁定依赖版本。这种设计在大型开源项目中极为常见（比如 Linux 内核的驱动模块管理）。\n然后在 hugo.toml 中激活主题：\n1theme = \"PaperMod\" 这一行配置是整个站点的\"控制枢纽\"，它告诉 Hugo 在编译时去 themes/PaperMod/ 目录寻找模板文件。\n避坑提示： 如果你克隆了别人的 Hugo 项目，记得执行 git submodule update --init --recursive，否则 themes/ 目录会是空的，导致编译失败。\n03. 内容生产：从模板到实时预览 创建第一篇文章：\n1hugo new posts/my-first-post.md 这条命令会根据 archetypes/default.md 模板自动生成文章骨架，包括 Front Matter（标题、日期、标签等元数据）。这保证了全站文章格式的一致性，避免了手动编写 YAML 时的低级错误。\n默认生成的文章包含 draft: true 字段，这是 Hugo 的\"草稿态\"机制。在正式构建时，草稿不会被编译。这个设计很贴心：你可以在本地随意写半成品文章，不用担心它们被意外发布。\n启动本地预览服务器：\n1hugo server -D 2# 访问 http://localhost:1313 -D 参数表示预览草稿。Hugo 的实时预览能力源于其\"增量编译\"设计：它不会在每次文件变更时重新构建整个站点，而是通过依赖图分析，只重新编译受影响的页面。即使你的博客有上千篇文章，预览延迟也能控制在 100ms 以内。\n这种毫秒级的反馈循环，让写作变成了一种\"所见即所得\"的流畅体验。你改一个标点，浏览器立刻刷新；你调整一个样式，效果瞬间呈现。这种即时反馈，是保持创作心流的关键。\n04. 自动化流水线：提交即发布的魔法 手动构建、手动上传的时代早该结束了。我们要的是\"git push 之后喝杯咖啡，回来博客就更新了\"的丝滑体验。\nGitHub Actions 是实现这个目标的最佳工具。它的工作流程是：你推送代码到 GitHub → Actions 自动拉取代码 → 调用 Hugo 编译 → 将生成的静态文件部署到 GitHub Pages。\n在 .github/workflows/hugo.yml 中创建工作流配置：\n1name: Deploy Hugo site to Pages 2 3on: 4 push: 5 branches: [\"main\"] 6 7permissions: 8 contents: read 9 pages: write 10 id-token: write 11 12jobs: 13 build: 14 runs-on: ubuntu-latest 15 steps: 16 - name: Checkout 17 uses: actions/checkout@v4 18 with: 19 submodules: recursive # 关键：递归拉取主题子模块 20 fetch-depth: 0 21 22 - name: Setup Hugo 23 uses: peaceiris/actions-hugo@v3 24 with: 25 hugo-version: 'latest' 26 extended: true # 必须开启 Extended 支持 27 28 - name: Build 29 run: hugo --minify # 压缩 HTML/CSS/JS 30 31 - name: Upload artifact 32 uses: actions/upload-pages-artifact@v3 33 with: 34 path: ./public 35 36 deploy: 37 environment: 38 name: github-pages 39 runs-on: ubuntu-latest 40 needs: build 41 steps: 42 - id: deployment 43 uses: actions/deploy-pages@v4 这个配置文件的核心是 submodules: recursive。如果漏掉这一行，Actions 拉取代码时不会下载 PaperMod 主题，导致编译失败。这是很多人第一次配置 CI/CD 时踩的坑。\nhugo --minify 会压缩生成的 HTML、CSS、JS 文件，减少传输体积。对于一个中等规模的博客，这能节省 30-40% 的带宽。\n架构思考： 这套 CI/CD 流水线的本质是\"基础设施即代码\"（Infrastructure as Code）。部署流程不再是口口相传的操作手册，而是版本控制的 YAML 文件。任何人都能看到部署逻辑，任何修改都有审计记录。这种透明性和可复现性，是现代 DevOps 的核心理念。\n05. 总结与思考 我们从 Hugo Extended 的版本选择，到 Git Submodule 的依赖管理，再到 GitHub Actions 的自动化部署，构建了一套完整的博客工程化方案。这不仅仅是为了\"搭个博客\"，更是一次对静态站点编译流程、依赖管理思想、CI/CD 实践的深度理解。\n如果你的博客未来需要支持多语言版本，或者需要针对不同终端提供差异化的搜索体验，你会如何从 hugo.toml 的配置层级进行解耦设计？提示：可以研究 Hugo 的 languages 配置和 outputFormats 机制。\n技术的本质不是工具的堆砌，而是对问题的深度理解。希望这篇文章能让你跳出\"照着做\"的思维定式，真正理解 Hugo 这套方案背后的设计哲学。\n",
+  "wordCount" : "397",
+  "inLanguage": "en",
+  "datePublished": "2026-02-12T00:00:00Z",
+  "dateModified": "2026-02-12T00:00:00Z",
+  "author":{
+    "@type": "Person",
+    "name": "wawayu"
+  },
+  "mainEntityOfPage": {
+    "@type": "WebPage",
+    "@id": "http://localhost:1313/posts/2026/02/%E4%BB%8E%E9%9B%B6%E5%88%B0%E4%B8%80%E6%9E%84%E5%BB%BA-hugo--papermod-%E8%87%AA%E5%8A%A8%E5%8C%96%E5%8D%9A%E5%AE%A2%E7%B3%BB%E7%BB%9F/"
+  },
+  "publisher": {
+    "@type": "Organization",
+    "name": "博客喵",
+    "logo": {
+      "@type": "ImageObject",
+      "url": "http://localhost:1313/favicon.ico"
+    }
+  }
+}
+</script>
+</head>
+<body id="top">
+    <header class="header">
+    <nav class="nav">
+        <div class="logo">
+            <a href="http://localhost:1313/" accesskey="h" title="博客喵 (Alt + H)">博客喵</a>
+            <div class="logo-switches">
+                <button id="theme-toggle" accesskey="t" title="(Alt + T)" aria-label="Toggle theme">
+                    <svg id="moon" xmlns="http://www.w3.org/2000/svg" width="24" height="18" viewBox="0 0 24 24"
+                        fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"
+                        stroke-linejoin="round">
+                        <path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"></path>
+                    </svg>
+                    <svg id="sun" xmlns="http://www.w3.org/2000/svg" width="24" height="18" viewBox="0 0 24 24"
+                        fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"
+                        stroke-linejoin="round">
+                        <circle cx="12" cy="12" r="5"></circle>
+                        <line x1="12" y1="1" x2="12" y2="3"></line>
+                        <line x1="12" y1="21" x2="12" y2="23"></line>
+                        <line x1="4.22" y1="4.22" x2="5.64" y2="5.64"></line>
+                        <line x1="18.36" y1="18.36" x2="19.78" y2="19.78"></line>
+                        <line x1="1" y1="12" x2="3" y2="12"></line>
+                        <line x1="21" y1="12" x2="23" y2="12"></line>
+                        <line x1="4.22" y1="19.78" x2="5.64" y2="18.36"></line>
+                        <line x1="18.36" y1="5.64" x2="19.78" y2="4.22"></line>
+                    </svg>
+                </button>
+            </div>
+        </div>
+        <ul id="menu">
+            <li>
+                <a href="http://localhost:1313/posts/" title="📝 文章">
+                    <span>📝 文章</span>
+                </a>
+            </li>
+            <li>
+                <a href="http://localhost:1313/tags/" title="🏷️ 标签">
+                    <span>🏷️ 标签</span>
+                </a>
+            </li>
+            <li>
+                <a href="http://localhost:1313/categories/" title="📂 分类">
+                    <span>📂 分类</span>
+                </a>
+            </li>
+            <li>
+                <a href="http://localhost:1313/skills/" title="💻 技能">
+                    <span>💻 技能</span>
+                </a>
+            </li>
+            <li>
+                <a href="http://localhost:1313/about/" title="👤 关于">
+                    <span>👤 关于</span>
+                </a>
+            </li>
+            <li>
+                <a href="http://localhost:1313/search/" title="🔍 搜索 (Alt &#43; /)" accesskey=/>
+                    <span>🔍 搜索</span>
+                </a>
+            </li>
+        </ul>
+    </nav>
+</header>
+<main class="main">
+
+<article class="post-single">
+  <header class="post-header">
+    <div class="breadcrumbs"><a href="http://localhost:1313/">Home</a>&nbsp;»&nbsp;<a href="http://localhost:1313/posts/">Posts</a></div>
+    <h1 class="post-title entry-hint-parent">
+      从零到一：构建 Hugo &#43; PaperMod 自动化博客系统
+    </h1>
+    <div class="post-description">
+      跳出文档式教程，从架构视角理解 Hugo 静态博客的工程化实践
+    </div>
+    <div class="post-meta"><span title='2026-02-12 00:00:00 +0000 UTC'>February 12, 2026</span>&nbsp;·&nbsp;<span>2 min</span>&nbsp;·&nbsp;<span>397 words</span>&nbsp;·&nbsp;<span>wawayu</span>&nbsp;|&nbsp;<span>
+    <a href="https://github.com/wawayu-dev/wawayu-dev.github.io/tree/main/content/posts/Hogo%e5%bf%ab%e9%80%9f%e5%90%af%e5%8a%a8.md" rel="noopener noreferrer edit" target="_blank">建议修改</a>
+</span>
+
+</div>
+  </header> <div class="toc">
+    <details  open>
+        <summary accesskey="c" title="(Alt + C)">
+            <span class="details">Table of Contents</span>
+        </summary>
+
+        <div class="inner"><nav id="TableOfContents">
+  <ul>
+    <li>
+      <ul>
+        <li><a href="#本文亮点">本文亮点</a></li>
+      </ul>
+    </li>
+    <li><a href="#01-基础设施为什么必须是-hugo-extended">01. 基础设施：为什么必须是 Hugo Extended？</a></li>
+    <li><a href="#02-主题依赖为什么选择-git-submodule">02. 主题依赖：为什么选择 Git Submodule？</a></li>
+    <li><a href="#03-内容生产从模板到实时预览">03. 内容生产：从模板到实时预览</a></li>
+    <li><a href="#04-自动化流水线提交即发布的魔法">04. 自动化流水线：提交即发布的魔法</a></li>
+    <li><a href="#05-总结与思考">05. 总结与思考</a></li>
+  </ul>
+</nav>
+        </div>
+    </details>
+</div>
+
+  <div class="post-content"><p>在碎片化信息爆炸的时代，拥有一套完全受自己掌控的技术专栏，是每位开发者沉淀思考、打造个人品牌的核心资产。相比于被平台算法绑架的公众号，或是充斥广告的第三方博客，Hugo 这类静态站点生成器给了我们真正的自由：毫秒级构建、Markdown 原生支持、完全的样式控制权。</p>
+<p>但很多人在搭建 Hugo 博客时，往往陷入&quot;照着文档敲命令&quot;的机械重复。本文不是又一篇安装教程，而是从系统架构的角度，带你理解 Hugo + PaperMod 这套方案背后的设计逻辑。</p>
+<h3 id="本文亮点">本文亮点<a hidden class="anchor" aria-hidden="true" href="#本文亮点">#</a></h3>
+<ul>
+<li><input checked="" disabled="" type="checkbox"> 理解 Hugo Extended 与 PaperMod 的依赖关系</li>
+<li><input checked="" disabled="" type="checkbox"> 掌握 Git Submodule 的主题管理方案</li>
+<li><input checked="" disabled="" type="checkbox"> 设计基于 GitHub Actions 的自动化部署流水线</li>
+<li><input checked="" disabled="" type="checkbox"> 建立工程化思维而非&quot;跟着做&quot;的操作思维</li>
+</ul>
+<hr>
+<h2 id="01-基础设施为什么必须是-hugo-extended">01. 基础设施：为什么必须是 Hugo Extended？<a hidden class="anchor" aria-hidden="true" href="#01-基础设施为什么必须是-hugo-extended">#</a></h2>
+<p>很多人第一次搭建 Hugo 博客时，会遇到一个诡异的报错：<code>TOCSS: failed to transform &quot;css/main.css&quot;</code>。明明按照官方文档装了 Hugo，为什么还会出错？</p>
+<p>问题出在版本选择上。Hugo 分为普通版和 Extended 版，后者内置了 LibSass 编译器。而 PaperMod 这类现代主题大量使用 SCSS/SASS 来实现主题变量、暗黑模式切换等特性。如果你用普通版 Hugo，编译流程会在 CSS 转换环节直接崩溃。</p>
+<p>在 Windows 环境下，我们用 Winget 来安装，而不是手动下载 zip 包：</p>
+<div class="highlight"><pre tabindex="0" class="chroma"><code class="language-powershell" data-lang="powershell"><span class="line"><span class="ln">1</span><span class="cl"><span class="c"># 使用包管理器安装，确保版本可追溯</span>
+</span></span><span class="line"><span class="ln">2</span><span class="cl"><span class="n">winget</span> <span class="n">install</span> <span class="n">Hugo</span><span class="p">.</span><span class="py">Hugo</span><span class="p">.</span><span class="py">Extended</span>
+</span></span><span class="line"><span class="ln">3</span><span class="cl">
+</span></span><span class="line"><span class="ln">4</span><span class="cl"><span class="c"># 验证安装：必须看到 +extended 标识</span>
+</span></span><span class="line"><span class="ln">5</span><span class="cl"><span class="n">hugo</span> <span class="n">version</span>
+</span></span><span class="line"><span class="ln">6</span><span class="cl"><span class="c"># 预期输出: hugo v0.12x.x+extended windows/amd64</span>
+</span></span></code></pre></div><p>为什么坚持用包管理器？因为这是&quot;可复现环境&quot;的第一步。当你的博客需要团队协作，或者换了台电脑重新部署时，一条命令就能恢复完全一致的环境，而不是在&quot;我电脑上能跑&quot;的泥潭里挣扎。</p>
+<p>接下来初始化站点骨架：</p>
+<div class="highlight"><pre tabindex="0" class="chroma"><code class="language-powershell" data-lang="powershell"><span class="line"><span class="ln">1</span><span class="cl"><span class="n">hugo</span> <span class="n">new</span> <span class="n">site</span> <span class="n">myblog</span>
+</span></span><span class="line"><span class="ln">2</span><span class="cl"><span class="nb">cd </span><span class="n">myblog</span>
+</span></span><span class="line"><span class="ln">3</span><span class="cl"><span class="n">git</span> <span class="n">init</span>
+</span></span></code></pre></div><p>这三行命令看似简单，但背后是 Hugo 的&quot;约定优于配置&quot;哲学：<code>content/</code> 存放内容源文件，<code>themes/</code> 管理视觉层，<code>public/</code> 作为编译产物输出。这种清晰的职责分离，让我们可以独立管理内容、主题和构建流程。</p>
+<blockquote>
+<p><strong>架构思考：</strong> Hugo 的目录结构本质上是一种&quot;关注点分离&quot;的设计模式。内容创作者只需要关心 <code>content/</code> 下的 Markdown，主题开发者专注于 <code>themes/</code> 的模板逻辑，而 CI/CD 流水线只需要处理 <code>public/</code> 的部署。这种解耦设计，是大规模内容生产的基础。</p>
+</blockquote>
+<hr>
+<h2 id="02-主题依赖为什么选择-git-submodule">02. 主题依赖：为什么选择 Git Submodule？<a hidden class="anchor" aria-hidden="true" href="#02-主题依赖为什么选择-git-submodule">#</a></h2>
+<p>引入 PaperMod 主题有两种方式：直接下载 zip 包解压到 <code>themes/</code> 目录，或者用 Git Submodule。很多教程会推荐前者，因为&quot;简单&quot;。但这种简单是有代价的。</p>
+<p>想象一个场景：PaperMod 官方修复了一个暗黑模式的 Bug，或者新增了搜索功能。如果你是直接下载的主题，更新流程会变成：去 GitHub 下载新版 → 删除旧文件 → 解压覆盖 → 祈祷没有冲突。而如果用 Submodule，只需要一条命令：</p>
+<div class="highlight"><pre tabindex="0" class="chroma"><code class="language-powershell" data-lang="powershell"><span class="line"><span class="ln">1</span><span class="cl"><span class="c"># 建立主题子模块依赖</span>
+</span></span><span class="line"><span class="ln">2</span><span class="cl"><span class="n">git</span> <span class="n">submodule</span> <span class="n">add</span> <span class="p">-</span><span class="n">-depth</span><span class="p">=</span><span class="mf">1</span> <span class="n">https</span><span class="err">:</span><span class="p">//</span><span class="n">github</span><span class="p">.</span><span class="n">com</span><span class="p">/</span><span class="n">adityatelange</span><span class="p">/</span><span class="nb">hugo-PaperMod</span><span class="p">.</span><span class="py">git</span> <span class="n">themes</span><span class="p">/</span><span class="n">PaperMod</span>
+</span></span><span class="line"><span class="ln">3</span><span class="cl">
+</span></span><span class="line"><span class="ln">4</span><span class="cl"><span class="c"># 未来更新主题只需要</span>
+</span></span><span class="line"><span class="ln">5</span><span class="cl"><span class="n">git</span> <span class="n">submodule</span> <span class="n">update</span> <span class="p">-</span><span class="n">-remote</span> <span class="p">-</span><span class="n">-merge</span>
+</span></span></code></pre></div><p>Submodule 的本质是&quot;依赖外部化&quot;。主题代码不会污染你的主仓库提交历史，同时又能通过 <code>.gitmodules</code> 文件精确锁定依赖版本。这种设计在大型开源项目中极为常见（比如 Linux 内核的驱动模块管理）。</p>
+<p>然后在 <code>hugo.toml</code> 中激活主题：</p>
+<div class="highlight"><pre tabindex="0" class="chroma"><code class="language-toml" data-lang="toml"><span class="line"><span class="ln">1</span><span class="cl"><span class="nx">theme</span> <span class="p">=</span> <span class="s2">&#34;PaperMod&#34;</span>
+</span></span></code></pre></div><p>这一行配置是整个站点的&quot;控制枢纽&quot;，它告诉 Hugo 在编译时去 <code>themes/PaperMod/</code> 目录寻找模板文件。</p>
+<blockquote>
+<p><strong>避坑提示：</strong> 如果你克隆了别人的 Hugo 项目，记得执行 <code>git submodule update --init --recursive</code>，否则 <code>themes/</code> 目录会是空的，导致编译失败。</p>
+</blockquote>
+<hr>
+<h2 id="03-内容生产从模板到实时预览">03. 内容生产：从模板到实时预览<a hidden class="anchor" aria-hidden="true" href="#03-内容生产从模板到实时预览">#</a></h2>
+<p>创建第一篇文章：</p>
+<div class="highlight"><pre tabindex="0" class="chroma"><code class="language-powershell" data-lang="powershell"><span class="line"><span class="ln">1</span><span class="cl"><span class="n">hugo</span> <span class="n">new</span> <span class="n">posts</span><span class="p">/</span><span class="nb">my-first</span><span class="n">-post</span><span class="p">.</span><span class="nb">md
+</span></span></span></code></pre></div><p>这条命令会根据 <code>archetypes/default.md</code> 模板自动生成文章骨架，包括 Front Matter（标题、日期、标签等元数据）。这保证了全站文章格式的一致性，避免了手动编写 YAML 时的低级错误。</p>
+<p>默认生成的文章包含 <code>draft: true</code> 字段，这是 Hugo 的&quot;草稿态&quot;机制。在正式构建时，草稿不会被编译。这个设计很贴心：你可以在本地随意写半成品文章，不用担心它们被意外发布。</p>
+<p>启动本地预览服务器：</p>
+<div class="highlight"><pre tabindex="0" class="chroma"><code class="language-powershell" data-lang="powershell"><span class="line"><span class="ln">1</span><span class="cl"><span class="n">hugo</span> <span class="n">server</span> <span class="n">-D</span>
+</span></span><span class="line"><span class="ln">2</span><span class="cl"><span class="c"># 访问 http://localhost:1313</span>
+</span></span></code></pre></div><p><code>-D</code> 参数表示预览草稿。Hugo 的实时预览能力源于其&quot;增量编译&quot;设计：它不会在每次文件变更时重新构建整个站点，而是通过依赖图分析，只重新编译受影响的页面。即使你的博客有上千篇文章，预览延迟也能控制在 100ms 以内。</p>
+<p>这种毫秒级的反馈循环，让写作变成了一种&quot;所见即所得&quot;的流畅体验。你改一个标点，浏览器立刻刷新；你调整一个样式，效果瞬间呈现。这种即时反馈，是保持创作心流的关键。</p>
+<hr>
+<h2 id="04-自动化流水线提交即发布的魔法">04. 自动化流水线：提交即发布的魔法<a hidden class="anchor" aria-hidden="true" href="#04-自动化流水线提交即发布的魔法">#</a></h2>
+<p>手动构建、手动上传的时代早该结束了。我们要的是&quot;git push 之后喝杯咖啡，回来博客就更新了&quot;的丝滑体验。</p>
+<p>GitHub Actions 是实现这个目标的最佳工具。它的工作流程是：你推送代码到 GitHub → Actions 自动拉取代码 → 调用 Hugo 编译 → 将生成的静态文件部署到 GitHub Pages。</p>
+<p>在 <code>.github/workflows/hugo.yml</code> 中创建工作流配置：</p>
+<div class="highlight"><pre tabindex="0" class="chroma"><code class="language-yaml" data-lang="yaml"><span class="line"><span class="ln"> 1</span><span class="cl"><span class="nt">name</span><span class="p">:</span><span class="w"> </span><span class="l">Deploy Hugo site to Pages</span><span class="w">
+</span></span></span><span class="line"><span class="ln"> 2</span><span class="cl"><span class="w">
+</span></span></span><span class="line"><span class="ln"> 3</span><span class="cl"><span class="nt">on</span><span class="p">:</span><span class="w">
+</span></span></span><span class="line"><span class="ln"> 4</span><span class="cl"><span class="w">  </span><span class="nt">push</span><span class="p">:</span><span class="w">
+</span></span></span><span class="line"><span class="ln"> 5</span><span class="cl"><span class="w">    </span><span class="nt">branches</span><span class="p">:</span><span class="w"> </span><span class="p">[</span><span class="s2">&#34;main&#34;</span><span class="p">]</span><span class="w">
+</span></span></span><span class="line"><span class="ln"> 6</span><span class="cl"><span class="w">
+</span></span></span><span class="line"><span class="ln"> 7</span><span class="cl"><span class="nt">permissions</span><span class="p">:</span><span class="w">
+</span></span></span><span class="line"><span class="ln"> 8</span><span class="cl"><span class="w">  </span><span class="nt">contents</span><span class="p">:</span><span class="w"> </span><span class="l">read</span><span class="w">
+</span></span></span><span class="line"><span class="ln"> 9</span><span class="cl"><span class="w">  </span><span class="nt">pages</span><span class="p">:</span><span class="w"> </span><span class="l">write</span><span class="w">
+</span></span></span><span class="line"><span class="ln">10</span><span class="cl"><span class="w">  </span><span class="nt">id-token</span><span class="p">:</span><span class="w"> </span><span class="l">write</span><span class="w">
+</span></span></span><span class="line"><span class="ln">11</span><span class="cl"><span class="w">
+</span></span></span><span class="line"><span class="ln">12</span><span class="cl"><span class="nt">jobs</span><span class="p">:</span><span class="w">
+</span></span></span><span class="line"><span class="ln">13</span><span class="cl"><span class="w">  </span><span class="nt">build</span><span class="p">:</span><span class="w">
+</span></span></span><span class="line"><span class="ln">14</span><span class="cl"><span class="w">    </span><span class="nt">runs-on</span><span class="p">:</span><span class="w"> </span><span class="l">ubuntu-latest</span><span class="w">
+</span></span></span><span class="line"><span class="ln">15</span><span class="cl"><span class="w">    </span><span class="nt">steps</span><span class="p">:</span><span class="w">
+</span></span></span><span class="line"><span class="ln">16</span><span class="cl"><span class="w">      </span>- <span class="nt">name</span><span class="p">:</span><span class="w"> </span><span class="l">Checkout</span><span class="w">
+</span></span></span><span class="line"><span class="ln">17</span><span class="cl"><span class="w">        </span><span class="nt">uses</span><span class="p">:</span><span class="w"> </span><span class="l">actions/checkout@v4</span><span class="w">
+</span></span></span><span class="line"><span class="ln">18</span><span class="cl"><span class="w">        </span><span class="nt">with</span><span class="p">:</span><span class="w">
+</span></span></span><span class="line"><span class="ln">19</span><span class="cl"><span class="w">          </span><span class="nt">submodules</span><span class="p">:</span><span class="w"> </span><span class="l">recursive </span><span class="w"> </span><span class="c"># 关键：递归拉取主题子模块</span><span class="w">
+</span></span></span><span class="line"><span class="ln">20</span><span class="cl"><span class="w">          </span><span class="nt">fetch-depth</span><span class="p">:</span><span class="w"> </span><span class="m">0</span><span class="w">
+</span></span></span><span class="line"><span class="ln">21</span><span class="cl"><span class="w">
+</span></span></span><span class="line"><span class="ln">22</span><span class="cl"><span class="w">      </span>- <span class="nt">name</span><span class="p">:</span><span class="w"> </span><span class="l">Setup Hugo</span><span class="w">
+</span></span></span><span class="line"><span class="ln">23</span><span class="cl"><span class="w">        </span><span class="nt">uses</span><span class="p">:</span><span class="w"> </span><span class="l">peaceiris/actions-hugo@v3</span><span class="w">
+</span></span></span><span class="line"><span class="ln">24</span><span class="cl"><span class="w">        </span><span class="nt">with</span><span class="p">:</span><span class="w">
+</span></span></span><span class="line"><span class="ln">25</span><span class="cl"><span class="w">          </span><span class="nt">hugo-version</span><span class="p">:</span><span class="w"> </span><span class="s1">&#39;latest&#39;</span><span class="w">
+</span></span></span><span class="line"><span class="ln">26</span><span class="cl"><span class="w">          </span><span class="nt">extended</span><span class="p">:</span><span class="w"> </span><span class="kc">true</span><span class="w">  </span><span class="c"># 必须开启 Extended 支持</span><span class="w">
+</span></span></span><span class="line"><span class="ln">27</span><span class="cl"><span class="w">
+</span></span></span><span class="line"><span class="ln">28</span><span class="cl"><span class="w">      </span>- <span class="nt">name</span><span class="p">:</span><span class="w"> </span><span class="l">Build</span><span class="w">
+</span></span></span><span class="line"><span class="ln">29</span><span class="cl"><span class="w">        </span><span class="nt">run</span><span class="p">:</span><span class="w"> </span><span class="l">hugo --minify </span><span class="w"> </span><span class="c"># 压缩 HTML/CSS/JS</span><span class="w">
+</span></span></span><span class="line"><span class="ln">30</span><span class="cl"><span class="w">
+</span></span></span><span class="line"><span class="ln">31</span><span class="cl"><span class="w">      </span>- <span class="nt">name</span><span class="p">:</span><span class="w"> </span><span class="l">Upload artifact</span><span class="w">
+</span></span></span><span class="line"><span class="ln">32</span><span class="cl"><span class="w">        </span><span class="nt">uses</span><span class="p">:</span><span class="w"> </span><span class="l">actions/upload-pages-artifact@v3</span><span class="w">
+</span></span></span><span class="line"><span class="ln">33</span><span class="cl"><span class="w">        </span><span class="nt">with</span><span class="p">:</span><span class="w">
+</span></span></span><span class="line"><span class="ln">34</span><span class="cl"><span class="w">          </span><span class="nt">path</span><span class="p">:</span><span class="w"> </span><span class="l">./public</span><span class="w">
+</span></span></span><span class="line"><span class="ln">35</span><span class="cl"><span class="w">
+</span></span></span><span class="line"><span class="ln">36</span><span class="cl"><span class="w">  </span><span class="nt">deploy</span><span class="p">:</span><span class="w">
+</span></span></span><span class="line"><span class="ln">37</span><span class="cl"><span class="w">    </span><span class="nt">environment</span><span class="p">:</span><span class="w">
+</span></span></span><span class="line"><span class="ln">38</span><span class="cl"><span class="w">      </span><span class="nt">name</span><span class="p">:</span><span class="w"> </span><span class="l">github-pages</span><span class="w">
+</span></span></span><span class="line"><span class="ln">39</span><span class="cl"><span class="w">    </span><span class="nt">runs-on</span><span class="p">:</span><span class="w"> </span><span class="l">ubuntu-latest</span><span class="w">
+</span></span></span><span class="line"><span class="ln">40</span><span class="cl"><span class="w">    </span><span class="nt">needs</span><span class="p">:</span><span class="w"> </span><span class="l">build</span><span class="w">
+</span></span></span><span class="line"><span class="ln">41</span><span class="cl"><span class="w">    </span><span class="nt">steps</span><span class="p">:</span><span class="w">
+</span></span></span><span class="line"><span class="ln">42</span><span class="cl"><span class="w">      </span>- <span class="nt">id</span><span class="p">:</span><span class="w"> </span><span class="l">deployment</span><span class="w">
+</span></span></span><span class="line"><span class="ln">43</span><span class="cl"><span class="w">        </span><span class="nt">uses</span><span class="p">:</span><span class="w"> </span><span class="l">actions/deploy-pages@v4</span><span class="w">
+</span></span></span></code></pre></div><p>这个配置文件的核心是 <code>submodules: recursive</code>。如果漏掉这一行，Actions 拉取代码时不会下载 PaperMod 主题，导致编译失败。这是很多人第一次配置 CI/CD 时踩的坑。</p>
+<p><code>hugo --minify</code> 会压缩生成的 HTML、CSS、JS 文件，减少传输体积。对于一个中等规模的博客，这能节省 30-40% 的带宽。</p>
+<blockquote>
+<p><strong>架构思考：</strong> 这套 CI/CD 流水线的本质是&quot;基础设施即代码&quot;（Infrastructure as Code）。部署流程不再是口口相传的操作手册，而是版本控制的 YAML 文件。任何人都能看到部署逻辑，任何修改都有审计记录。这种透明性和可复现性，是现代 DevOps 的核心理念。</p>
+</blockquote>
+<hr>
+<h2 id="05-总结与思考">05. 总结与思考<a hidden class="anchor" aria-hidden="true" href="#05-总结与思考">#</a></h2>
+<p>我们从 Hugo Extended 的版本选择，到 Git Submodule 的依赖管理，再到 GitHub Actions 的自动化部署，构建了一套完整的博客工程化方案。这不仅仅是为了&quot;搭个博客&quot;，更是一次对静态站点编译流程、依赖管理思想、CI/CD 实践的深度理解。</p>
+<p>如果你的博客未来需要支持多语言版本，或者需要针对不同终端提供差异化的搜索体验，你会如何从 <code>hugo.toml</code> 的配置层级进行解耦设计？提示：可以研究 Hugo 的 <code>languages</code> 配置和 <code>outputFormats</code> 机制。</p>
+<p>技术的本质不是工具的堆砌，而是对问题的深度理解。希望这篇文章能让你跳出&quot;照着做&quot;的思维定式，真正理解 Hugo 这套方案背后的设计哲学。</p>
+
+
+  </div>
+
+  <footer class="post-footer">
+    <ul class="post-tags">
+      <li><a href="http://localhost:1313/tags/ci/cd/">CI/CD</a></li>
+      <li><a href="http://localhost:1313/tags/%E6%9C%80%E4%BD%B3%E5%AE%9E%E8%B7%B5/">最佳实践</a></li>
+    </ul>
+<nav class="paginav">
+  <a class="next" href="http://localhost:1313/posts/2026/02/%E6%88%91%E7%9A%84%E7%AC%AC%E4%B8%80%E7%AF%87%E5%8D%9A%E5%AE%A2%E6%96%87%E7%AB%A0/">
+    <span class="title">Next »</span>
+    <br>
+    <span>我的第一篇博客文章</span>
+  </a>
+</nav>
+
+
+<ul class="share-buttons">
+    <li>
+        <a target="_blank" rel="noopener noreferrer" aria-label="share 从零到一：构建 Hugo &#43; PaperMod 自动化博客系统 on x"
+            href="https://x.com/intent/tweet/?text=%e4%bb%8e%e9%9b%b6%e5%88%b0%e4%b8%80%ef%bc%9a%e6%9e%84%e5%bb%ba%20Hugo%20%2b%20PaperMod%20%e8%87%aa%e5%8a%a8%e5%8c%96%e5%8d%9a%e5%ae%a2%e7%b3%bb%e7%bb%9f&amp;url=http%3a%2f%2flocalhost%3a1313%2fposts%2f2026%2f02%2f%25E4%25BB%258E%25E9%259B%25B6%25E5%2588%25B0%25E4%25B8%2580%25E6%259E%2584%25E5%25BB%25BA-hugo--papermod-%25E8%2587%25AA%25E5%258A%25A8%25E5%258C%2596%25E5%258D%259A%25E5%25AE%25A2%25E7%25B3%25BB%25E7%25BB%259F%2f&amp;hashtags=CI%2fCD%2c%e6%9c%80%e4%bd%b3%e5%ae%9e%e8%b7%b5">
+            <svg version="1.1" viewBox="0 0 512 512" xml:space="preserve" height="30px" width="30px" fill="currentColor">
+                <path
+                    d="M512 62.554 L 512 449.446 C 512 483.97 483.97 512 449.446 512 L 62.554 512 C 28.03 512 0 483.97 0 449.446 L 0 62.554 C 0 28.03 28.029 0 62.554 0 L 449.446 0 C 483.971 0 512 28.03 512 62.554 Z M 269.951 190.75 L 182.567 75.216 L 56 75.216 L 207.216 272.95 L 63.9 436.783 L 125.266 436.783 L 235.9 310.383 L 332.567 436.783 L 456 436.783 L 298.367 228.367 L 432.367 75.216 L 371.033 75.216 Z M 127.633 110 L 164.101 110 L 383.481 400.065 L 349.5 400.065 Z" />
+            </svg>
+        </a>
+    </li>
+    <li>
+        <a target="_blank" rel="noopener noreferrer" aria-label="share 从零到一：构建 Hugo &#43; PaperMod 自动化博客系统 on linkedin"
+            href="https://www.linkedin.com/shareArticle?mini=true&amp;url=http%3a%2f%2flocalhost%3a1313%2fposts%2f2026%2f02%2f%25E4%25BB%258E%25E9%259B%25B6%25E5%2588%25B0%25E4%25B8%2580%25E6%259E%2584%25E5%25BB%25BA-hugo--papermod-%25E8%2587%25AA%25E5%258A%25A8%25E5%258C%2596%25E5%258D%259A%25E5%25AE%25A2%25E7%25B3%25BB%25E7%25BB%259F%2f&amp;title=%e4%bb%8e%e9%9b%b6%e5%88%b0%e4%b8%80%ef%bc%9a%e6%9e%84%e5%bb%ba%20Hugo%20%2b%20PaperMod%20%e8%87%aa%e5%8a%a8%e5%8c%96%e5%8d%9a%e5%ae%a2%e7%b3%bb%e7%bb%9f&amp;summary=%e4%bb%8e%e9%9b%b6%e5%88%b0%e4%b8%80%ef%bc%9a%e6%9e%84%e5%bb%ba%20Hugo%20%2b%20PaperMod%20%e8%87%aa%e5%8a%a8%e5%8c%96%e5%8d%9a%e5%ae%a2%e7%b3%bb%e7%bb%9f&amp;source=http%3a%2f%2flocalhost%3a1313%2fposts%2f2026%2f02%2f%25E4%25BB%258E%25E9%259B%25B6%25E5%2588%25B0%25E4%25B8%2580%25E6%259E%2584%25E5%25BB%25BA-hugo--papermod-%25E8%2587%25AA%25E5%258A%25A8%25E5%258C%2596%25E5%258D%259A%25E5%25AE%25A2%25E7%25B3%25BB%25E7%25BB%259F%2f">
+            <svg version="1.1" viewBox="0 0 512 512" xml:space="preserve" height="30px" width="30px" fill="currentColor">
+                <path
+                    d="M449.446,0c34.525,0 62.554,28.03 62.554,62.554l0,386.892c0,34.524 -28.03,62.554 -62.554,62.554l-386.892,0c-34.524,0 -62.554,-28.03 -62.554,-62.554l0,-386.892c0,-34.524 28.029,-62.554 62.554,-62.554l386.892,0Zm-288.985,423.278l0,-225.717l-75.04,0l0,225.717l75.04,0Zm270.539,0l0,-129.439c0,-69.333 -37.018,-101.586 -86.381,-101.586c-39.804,0 -57.634,21.891 -67.617,37.266l0,-31.958l-75.021,0c0.995,21.181 0,225.717 0,225.717l75.02,0l0,-126.056c0,-6.748 0.486,-13.492 2.474,-18.315c5.414,-13.475 17.767,-27.434 38.494,-27.434c27.135,0 38.007,20.707 38.007,51.037l0,120.768l75.024,0Zm-307.552,-334.556c-25.674,0 -42.448,16.879 -42.448,39.002c0,21.658 16.264,39.002 41.455,39.002l0.484,0c26.165,0 42.452,-17.344 42.452,-39.002c-0.485,-22.092 -16.241,-38.954 -41.943,-39.002Z" />
+            </svg>
+        </a>
+    </li>
+    <li>
+        <a target="_blank" rel="noopener noreferrer" aria-label="share 从零到一：构建 Hugo &#43; PaperMod 自动化博客系统 on reddit"
+            href="https://reddit.com/submit?url=http%3a%2f%2flocalhost%3a1313%2fposts%2f2026%2f02%2f%25E4%25BB%258E%25E9%259B%25B6%25E5%2588%25B0%25E4%25B8%2580%25E6%259E%2584%25E5%25BB%25BA-hugo--papermod-%25E8%2587%25AA%25E5%258A%25A8%25E5%258C%2596%25E5%258D%259A%25E5%25AE%25A2%25E7%25B3%25BB%25E7%25BB%259F%2f&title=%e4%bb%8e%e9%9b%b6%e5%88%b0%e4%b8%80%ef%bc%9a%e6%9e%84%e5%bb%ba%20Hugo%20%2b%20PaperMod%20%e8%87%aa%e5%8a%a8%e5%8c%96%e5%8d%9a%e5%ae%a2%e7%b3%bb%e7%bb%9f">
+            <svg version="1.1" viewBox="0 0 512 512" xml:space="preserve" height="30px" width="30px" fill="currentColor">
+                <path
+                    d="M449.446,0c34.525,0 62.554,28.03 62.554,62.554l0,386.892c0,34.524 -28.03,62.554 -62.554,62.554l-386.892,0c-34.524,0 -62.554,-28.03 -62.554,-62.554l0,-386.892c0,-34.524 28.029,-62.554 62.554,-62.554l386.892,0Zm-3.446,265.638c0,-22.964 -18.616,-41.58 -41.58,-41.58c-11.211,0 -21.361,4.457 -28.841,11.666c-28.424,-20.508 -67.586,-33.757 -111.204,-35.278l18.941,-89.121l61.884,13.157c0.756,15.734 13.642,28.29 29.56,28.29c16.407,0 29.706,-13.299 29.706,-29.701c0,-16.403 -13.299,-29.702 -29.706,-29.702c-11.666,0 -21.657,6.792 -26.515,16.578l-69.105,-14.69c-1.922,-0.418 -3.939,-0.042 -5.585,1.036c-1.658,1.073 -2.811,2.761 -3.224,4.686l-21.152,99.438c-44.258,1.228 -84.046,14.494 -112.837,35.232c-7.468,-7.164 -17.589,-11.591 -28.757,-11.591c-22.965,0 -41.585,18.616 -41.585,41.58c0,16.896 10.095,31.41 24.568,37.918c-0.639,4.135 -0.99,8.328 -0.99,12.576c0,63.977 74.469,115.836 166.33,115.836c91.861,0 166.334,-51.859 166.334,-115.836c0,-4.218 -0.347,-8.387 -0.977,-12.493c14.564,-6.47 24.735,-21.034 24.735,-38.001Zm-119.474,108.193c-20.27,20.241 -59.115,21.816 -70.534,21.816c-11.428,0 -50.277,-1.575 -70.522,-21.82c-3.007,-3.008 -3.007,-7.882 0,-10.889c3.003,-2.999 7.882,-3.003 10.885,0c12.777,12.781 40.11,17.317 59.637,17.317c19.522,0 46.86,-4.536 59.657,-17.321c3.016,-2.999 7.886,-2.995 10.885,0.008c3.008,3.011 3.003,7.882 -0.008,10.889Zm-5.23,-48.781c-16.373,0 -29.701,-13.324 -29.701,-29.698c0,-16.381 13.328,-29.714 29.701,-29.714c16.378,0 29.706,13.333 29.706,29.714c0,16.374 -13.328,29.698 -29.706,29.698Zm-160.386,-29.702c0,-16.381 13.328,-29.71 29.714,-29.71c16.369,0 29.689,13.329 29.689,29.71c0,16.373 -13.32,29.693 -29.689,29.693c-16.386,0 -29.714,-13.32 -29.714,-29.693Z" />
+            </svg>
+        </a>
+    </li>
+    <li>
+        <a target="_blank" rel="noopener noreferrer" aria-label="share 从零到一：构建 Hugo &#43; PaperMod 自动化博客系统 on facebook"
+            href="https://facebook.com/sharer/sharer.php?u=http%3a%2f%2flocalhost%3a1313%2fposts%2f2026%2f02%2f%25E4%25BB%258E%25E9%259B%25B6%25E5%2588%25B0%25E4%25B8%2580%25E6%259E%2584%25E5%25BB%25BA-hugo--papermod-%25E8%2587%25AA%25E5%258A%25A8%25E5%258C%2596%25E5%258D%259A%25E5%25AE%25A2%25E7%25B3%25BB%25E7%25BB%259F%2f">
+            <svg version="1.1" viewBox="0 0 512 512" xml:space="preserve" height="30px" width="30px" fill="currentColor">
+                <path
+                    d="M449.446,0c34.525,0 62.554,28.03 62.554,62.554l0,386.892c0,34.524 -28.03,62.554 -62.554,62.554l-106.468,0l0,-192.915l66.6,0l12.672,-82.621l-79.272,0l0,-53.617c0,-22.603 11.073,-44.636 46.58,-44.636l36.042,0l0,-70.34c0,0 -32.71,-5.582 -63.982,-5.582c-65.288,0 -107.96,39.569 -107.96,111.204l0,62.971l-72.573,0l0,82.621l72.573,0l0,192.915l-191.104,0c-34.524,0 -62.554,-28.03 -62.554,-62.554l0,-386.892c0,-34.524 28.029,-62.554 62.554,-62.554l386.892,0Z" />
+            </svg>
+        </a>
+    </li>
+    <li>
+        <a target="_blank" rel="noopener noreferrer" aria-label="share 从零到一：构建 Hugo &#43; PaperMod 自动化博客系统 on whatsapp"
+            href="https://api.whatsapp.com/send?text=%e4%bb%8e%e9%9b%b6%e5%88%b0%e4%b8%80%ef%bc%9a%e6%9e%84%e5%bb%ba%20Hugo%20%2b%20PaperMod%20%e8%87%aa%e5%8a%a8%e5%8c%96%e5%8d%9a%e5%ae%a2%e7%b3%bb%e7%bb%9f%20-%20http%3a%2f%2flocalhost%3a1313%2fposts%2f2026%2f02%2f%25E4%25BB%258E%25E9%259B%25B6%25E5%2588%25B0%25E4%25B8%2580%25E6%259E%2584%25E5%25BB%25BA-hugo--papermod-%25E8%2587%25AA%25E5%258A%25A8%25E5%258C%2596%25E5%258D%259A%25E5%25AE%25A2%25E7%25B3%25BB%25E7%25BB%259F%2f">
+            <svg version="1.1" viewBox="0 0 512 512" xml:space="preserve" height="30px" width="30px" fill="currentColor">
+                <path
+                    d="M449.446,0c34.525,0 62.554,28.03 62.554,62.554l0,386.892c0,34.524 -28.03,62.554 -62.554,62.554l-386.892,0c-34.524,0 -62.554,-28.03 -62.554,-62.554l0,-386.892c0,-34.524 28.029,-62.554 62.554,-62.554l386.892,0Zm-58.673,127.703c-33.842,-33.881 -78.847,-52.548 -126.798,-52.568c-98.799,0 -179.21,80.405 -179.249,179.234c-0.013,31.593 8.241,62.428 23.927,89.612l-25.429,92.884l95.021,-24.925c26.181,14.28 55.659,21.807 85.658,21.816l0.074,0c98.789,0 179.206,-80.413 179.247,-179.243c0.018,-47.895 -18.61,-92.93 -52.451,-126.81Zm-126.797,275.782l-0.06,0c-26.734,-0.01 -52.954,-7.193 -75.828,-20.767l-5.441,-3.229l-56.386,14.792l15.05,-54.977l-3.542,-5.637c-14.913,-23.72 -22.791,-51.136 -22.779,-79.287c0.033,-82.142 66.867,-148.971 149.046,-148.971c39.793,0.014 77.199,15.531 105.329,43.692c28.128,28.16 43.609,65.592 43.594,105.4c-0.034,82.149 -66.866,148.983 -148.983,148.984Zm81.721,-111.581c-4.479,-2.242 -26.499,-13.075 -30.604,-14.571c-4.105,-1.495 -7.091,-2.241 -10.077,2.241c-2.986,4.483 -11.569,14.572 -14.182,17.562c-2.612,2.988 -5.225,3.364 -9.703,1.12c-4.479,-2.241 -18.91,-6.97 -36.017,-22.23c-13.314,-11.876 -22.304,-26.542 -24.916,-31.026c-2.612,-4.484 -0.279,-6.908 1.963,-9.14c2.016,-2.007 4.48,-5.232 6.719,-7.847c2.24,-2.615 2.986,-4.484 4.479,-7.472c1.493,-2.99 0.747,-5.604 -0.374,-7.846c-1.119,-2.241 -10.077,-24.288 -13.809,-33.256c-3.635,-8.733 -7.327,-7.55 -10.077,-7.688c-2.609,-0.13 -5.598,-0.158 -8.583,-0.158c-2.986,0 -7.839,1.121 -11.944,5.604c-4.105,4.484 -15.675,15.32 -15.675,37.364c0,22.046 16.048,43.342 18.287,46.332c2.24,2.99 31.582,48.227 76.511,67.627c10.685,4.615 19.028,7.371 25.533,9.434c10.728,3.41 20.492,2.929 28.209,1.775c8.605,-1.285 26.499,-10.833 30.231,-21.295c3.732,-10.464 3.732,-19.431 2.612,-21.298c-1.119,-1.869 -4.105,-2.99 -8.583,-5.232Z" />
+            </svg>
+        </a>
+    </li>
+    <li>
+        <a target="_blank" rel="noopener noreferrer" aria-label="share 从零到一：构建 Hugo &#43; PaperMod 自动化博客系统 on telegram"
+            href="https://telegram.me/share/url?text=%e4%bb%8e%e9%9b%b6%e5%88%b0%e4%b8%80%ef%bc%9a%e6%9e%84%e5%bb%ba%20Hugo%20%2b%20PaperMod%20%e8%87%aa%e5%8a%a8%e5%8c%96%e5%8d%9a%e5%ae%a2%e7%b3%bb%e7%bb%9f&amp;url=http%3a%2f%2flocalhost%3a1313%2fposts%2f2026%2f02%2f%25E4%25BB%258E%25E9%259B%25B6%25E5%2588%25B0%25E4%25B8%2580%25E6%259E%2584%25E5%25BB%25BA-hugo--papermod-%25E8%2587%25AA%25E5%258A%25A8%25E5%258C%2596%25E5%258D%259A%25E5%25AE%25A2%25E7%25B3%25BB%25E7%25BB%259F%2f">
+            <svg version="1.1" xml:space="preserve" viewBox="2 2 28 28" height="30px" width="30px" fill="currentColor">
+                <path
+                    d="M26.49,29.86H5.5a3.37,3.37,0,0,1-2.47-1,3.35,3.35,0,0,1-1-2.47V5.48A3.36,3.36,0,0,1,3,3,3.37,3.37,0,0,1,5.5,2h21A3.38,3.38,0,0,1,29,3a3.36,3.36,0,0,1,1,2.46V26.37a3.35,3.35,0,0,1-1,2.47A3.38,3.38,0,0,1,26.49,29.86Zm-5.38-6.71a.79.79,0,0,0,.85-.66L24.73,9.24a.55.55,0,0,0-.18-.46.62.62,0,0,0-.41-.17q-.08,0-16.53,6.11a.59.59,0,0,0-.41.59.57.57,0,0,0,.43.52l4,1.24,1.61,4.83a.62.62,0,0,0,.63.43.56.56,0,0,0,.4-.17L16.54,20l4.09,3A.9.9,0,0,0,21.11,23.15ZM13.8,20.71l-1.21-4q8.72-5.55,8.78-5.55c.15,0,.23,0,.23.16a.18.18,0,0,1,0,.06s-2.51,2.3-7.52,6.8Z" />
+            </svg>
+        </a>
+    </li>
+    <li>
+        <a target="_blank" rel="noopener noreferrer" aria-label="share 从零到一：构建 Hugo &#43; PaperMod 自动化博客系统 on ycombinator"
+            href="https://news.ycombinator.com/submitlink?t=%e4%bb%8e%e9%9b%b6%e5%88%b0%e4%b8%80%ef%bc%9a%e6%9e%84%e5%bb%ba%20Hugo%20%2b%20PaperMod%20%e8%87%aa%e5%8a%a8%e5%8c%96%e5%8d%9a%e5%ae%a2%e7%b3%bb%e7%bb%9f&u=http%3a%2f%2flocalhost%3a1313%2fposts%2f2026%2f02%2f%25E4%25BB%258E%25E9%259B%25B6%25E5%2588%25B0%25E4%25B8%2580%25E6%259E%2584%25E5%25BB%25BA-hugo--papermod-%25E8%2587%25AA%25E5%258A%25A8%25E5%258C%2596%25E5%258D%259A%25E5%25AE%25A2%25E7%25B3%25BB%25E7%25BB%259F%2f">
+            <svg version="1.1" xml:space="preserve" width="30px" height="30px" viewBox="0 0 512 512" fill="currentColor"
+                xmlns:inkscape="http://www.inkscape.org/namespaces/inkscape">
+                <path
+                    d="M449.446 0C483.971 0 512 28.03 512 62.554L512 449.446C512 483.97 483.97 512 449.446 512L62.554 512C28.03 512 0 483.97 0 449.446L0 62.554C0 28.03 28.029 0 62.554 0L449.446 0ZM183.8767 87.9921H121.8427L230.6673 292.4508V424.0079H281.3328V292.4508L390.1575 87.9921H328.1233L256 238.2489z" />
+            </svg>
+        </a>
+    </li>
+</ul>
+
+  </footer>
+</article>
+    </main>
+    
+<footer class="footer">
+        <span>&copy; 2026 <a href="http://localhost:1313/">博客喵</a></span> · 
+
+    <span>
+        Powered by
+        <a href="https://gohugo.io/" rel="noopener noreferrer" target="_blank">Hugo</a> &
+        <a href="https://github.com/adityatelange/hugo-PaperMod/" rel="noopener" target="_blank">PaperMod</a>
+    </span>
+</footer>
+<a href="#top" aria-label="go to top" title="Go to Top (Alt + G)" class="top-link" id="top-link" accesskey="g">
+    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 12 6" fill="currentColor">
+        <path d="M12 6H0l6-6z" />
+    </svg>
+</a>
+
+<script>
+    let menu = document.getElementById('menu');
+    if (menu) {
+        
+        const scrollPosition = localStorage.getItem("menu-scroll-position");
+        if (scrollPosition) {
+            menu.scrollLeft = parseInt(scrollPosition, 10);
+        }
+        
+        menu.onscroll = function () {
+            localStorage.setItem("menu-scroll-position", menu.scrollLeft);
+        }
+    }
+
+    document.querySelectorAll('a[href^="#"]').forEach(anchor => {
+        anchor.addEventListener("click", function (e) {
+            e.preventDefault();
+            var id = this.getAttribute("href").substr(1);
+            if (!window.matchMedia('(prefers-reduced-motion: reduce)').matches) {
+                document.querySelector(`[id='${decodeURIComponent(id)}']`).scrollIntoView({
+                    behavior: "smooth"
+                });
+            } else {
+                document.querySelector(`[id='${decodeURIComponent(id)}']`).scrollIntoView();
+            }
+            if (id === "top") {
+                history.replaceState(null, null, " ");
+            } else {
+                history.pushState(null, null, `#${id}`);
+            }
+        });
+    });
+
+</script>
+<script>
+    var mybutton = document.getElementById("top-link");
+    window.onscroll = function () {
+        if (document.body.scrollTop > 800 || document.documentElement.scrollTop > 800) {
+            mybutton.style.visibility = "visible";
+            mybutton.style.opacity = "1";
+        } else {
+            mybutton.style.visibility = "hidden";
+            mybutton.style.opacity = "0";
+        }
+    };
+
+</script>
+<script>
+    document.getElementById("theme-toggle").addEventListener("click", () => {
+        const html = document.querySelector("html");
+        if (html.dataset.theme === "dark") {
+            html.dataset.theme = 'light';
+            localStorage.setItem("pref-theme", 'light');
+        } else {
+            html.dataset.theme = 'dark';
+            localStorage.setItem("pref-theme", 'dark');
+        }
+    })
+
+</script>
+<script>
+    document.querySelectorAll('pre > code').forEach((codeblock) => {
+        const container = codeblock.parentNode.parentNode;
+
+        const copybutton = document.createElement('button');
+        copybutton.classList.add('copy-code');
+        copybutton.innerHTML = 'copy';
+
+        function copyingDone() {
+            copybutton.innerHTML = 'copied!';
+            setTimeout(() => {
+                copybutton.innerHTML = 'copy';
+            }, 2000);
+        }
+
+        copybutton.addEventListener('click', (cb) => {
+            if ('clipboard' in navigator) {
+                navigator.clipboard.writeText(codeblock.textContent);
+                copyingDone();
+                return;
+            }
+
+            const range = document.createRange();
+            range.selectNodeContents(codeblock);
+            const selection = window.getSelection();
+            selection.removeAllRanges();
+            selection.addRange(range);
+            try {
+                document.execCommand('copy');
+                copyingDone();
+            } catch (e) { };
+            selection.removeRange(range);
+        });
+
+        if (container.classList.contains("highlight")) {
+            container.appendChild(copybutton);
+        } else if (container.parentNode.firstChild == container) {
+            
+        } else if (codeblock.parentNode.parentNode.parentNode.parentNode.parentNode.nodeName == "TABLE") {
+            
+            codeblock.parentNode.parentNode.parentNode.parentNode.parentNode.appendChild(copybutton);
+        } else {
+            
+            codeblock.parentNode.appendChild(copybutton);
+        }
+    });
+</script>
+</body>
+
+</html>

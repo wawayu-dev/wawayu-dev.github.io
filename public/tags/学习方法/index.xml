@@ -1,0 +1,19 @@
+<?xml version="1.0" encoding="utf-8" standalone="yes"?>
+<rss version="2.0" xmlns:atom="http://www.w3.org/2005/Atom" xmlns:content="http://purl.org/rss/1.0/modules/content/">
+  <channel>
+    <title>学习方法 on 博客喵</title>
+    <link>http://localhost:1313/tags/%E5%AD%A6%E4%B9%A0%E6%96%B9%E6%B3%95/</link>
+    <description>Recent content in 学习方法 on 博客喵</description>
+    <generator>Hugo -- 0.155.3</generator>
+    <language>zh-cn</language>
+    <lastBuildDate>Tue, 18 Nov 2025 00:00:00 +0000</lastBuildDate>
+    <atom:link href="http://localhost:1313/tags/%E5%AD%A6%E4%B9%A0%E6%96%B9%E6%B3%95/index.xml" rel="self" type="application/rss+xml" />
+    <item>
+      <title>如何阅读开源项目源码：以 Spring Boot 为例</title>
+      <link>http://localhost:1313/posts/2025/11/%E5%A6%82%E4%BD%95%E9%98%85%E8%AF%BB%E5%BC%80%E6%BA%90%E9%A1%B9%E7%9B%AE%E6%BA%90%E7%A0%81%E4%BB%A5-spring-boot-%E4%B8%BA%E4%BE%8B/</link>
+      <pubDate>Tue, 18 Nov 2025 00:00:00 +0000</pubDate>
+      <guid>http://localhost:1313/posts/2025/11/%E5%A6%82%E4%BD%95%E9%98%85%E8%AF%BB%E5%BC%80%E6%BA%90%E9%A1%B9%E7%9B%AE%E6%BA%90%E7%A0%81%E4%BB%A5-spring-boot-%E4%B8%BA%E4%BE%8B/</guid>
+      <description>系统讲解如何高效阅读开源项目源码，以Spring Boot为例，从入门到精通的完整学习路径</description>
+    </item>
+  </channel>
+</rss>

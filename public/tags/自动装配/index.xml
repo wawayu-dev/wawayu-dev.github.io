@@ -1,0 +1,19 @@
+<?xml version="1.0" encoding="utf-8" standalone="yes"?>
+<rss version="2.0" xmlns:atom="http://www.w3.org/2005/Atom" xmlns:content="http://purl.org/rss/1.0/modules/content/">
+  <channel>
+    <title>自动装配 on 博客喵</title>
+    <link>http://localhost:1313/tags/%E8%87%AA%E5%8A%A8%E8%A3%85%E9%85%8D/</link>
+    <description>Recent content in 自动装配 on 博客喵</description>
+    <generator>Hugo -- 0.155.3</generator>
+    <language>zh-cn</language>
+    <lastBuildDate>Sat, 15 Jun 2024 00:00:00 +0000</lastBuildDate>
+    <atom:link href="http://localhost:1313/tags/%E8%87%AA%E5%8A%A8%E8%A3%85%E9%85%8D/index.xml" rel="self" type="application/rss+xml" />
+    <item>
+      <title>Spring Boot Starter 自动装配原理深度解析</title>
+      <link>http://localhost:1313/posts/2024/06/spring-boot-starter-%E8%87%AA%E5%8A%A8%E8%A3%85%E9%85%8D%E5%8E%9F%E7%90%86%E6%B7%B1%E5%BA%A6%E8%A7%A3%E6%9E%90/</link>
+      <pubDate>Sat, 15 Jun 2024 00:00:00 +0000</pubDate>
+      <guid>http://localhost:1313/posts/2024/06/spring-boot-starter-%E8%87%AA%E5%8A%A8%E8%A3%85%E9%85%8D%E5%8E%9F%E7%90%86%E6%B7%B1%E5%BA%A6%E8%A7%A3%E6%9E%90/</guid>
+      <description>从 @SpringBootApplication 到 BeanPostProcessor，揭秘 Spring Boot 自动装配的底层机制</description>
+    </item>
+  </channel>
+</rss>

@@ -1,0 +1,19 @@
+<?xml version="1.0" encoding="utf-8" standalone="yes"?>
+<rss version="2.0" xmlns:atom="http://www.w3.org/2005/Atom" xmlns:content="http://purl.org/rss/1.0/modules/content/">
+  <channel>
+    <title>Netty on 博客喵</title>
+    <link>http://localhost:1313/tags/netty/</link>
+    <description>Recent content in Netty on 博客喵</description>
+    <generator>Hugo -- 0.155.3</generator>
+    <language>zh-cn</language>
+    <lastBuildDate>Fri, 18 Apr 2025 00:00:00 +0000</lastBuildDate>
+    <atom:link href="http://localhost:1313/tags/netty/index.xml" rel="self" type="application/rss+xml" />
+    <item>
+      <title>Netty &#43; WebSocket 实现实时消息推送：从原理到生产实战</title>
+      <link>http://localhost:1313/posts/2025/04/netty--websocket-%E5%AE%9E%E7%8E%B0%E5%AE%9E%E6%97%B6%E6%B6%88%E6%81%AF%E6%8E%A8%E9%80%81%E4%BB%8E%E5%8E%9F%E7%90%86%E5%88%B0%E7%94%9F%E4%BA%A7%E5%AE%9E%E6%88%98/</link>
+      <pubDate>Fri, 18 Apr 2025 00:00:00 +0000</pubDate>
+      <guid>http://localhost:1313/posts/2025/04/netty--websocket-%E5%AE%9E%E7%8E%B0%E5%AE%9E%E6%97%B6%E6%B6%88%E6%81%AF%E6%8E%A8%E9%80%81%E4%BB%8E%E5%8E%9F%E7%90%86%E5%88%B0%E7%94%9F%E4%BA%A7%E5%AE%9E%E6%88%98/</guid>
+      <description>深入讲解如何使用 Netty 和 WebSocket 构建高性能实时消息推送系统，涵盖协议升级、心跳机制、集群部署等生产级实践</description>
+    </item>
+  </channel>
+</rss>

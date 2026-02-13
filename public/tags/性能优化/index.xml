@@ -1,0 +1,61 @@
+<?xml version="1.0" encoding="utf-8" standalone="yes"?>
+<rss version="2.0" xmlns:atom="http://www.w3.org/2005/Atom" xmlns:content="http://purl.org/rss/1.0/modules/content/">
+  <channel>
+    <title>性能优化 on 博客喵</title>
+    <link>http://localhost:1313/tags/%E6%80%A7%E8%83%BD%E4%BC%98%E5%8C%96/</link>
+    <description>Recent content in 性能优化 on 博客喵</description>
+    <generator>Hugo -- 0.155.3</generator>
+    <language>zh-cn</language>
+    <lastBuildDate>Sun, 12 Oct 2025 00:00:00 +0000</lastBuildDate>
+    <atom:link href="http://localhost:1313/tags/%E6%80%A7%E8%83%BD%E4%BC%98%E5%8C%96/index.xml" rel="self" type="application/rss+xml" />
+    <item>
+      <title>接口响应慢？一次完整的性能优化之旅</title>
+      <link>http://localhost:1313/posts/2025/10/%E6%8E%A5%E5%8F%A3%E5%93%8D%E5%BA%94%E6%85%A2%E4%B8%80%E6%AC%A1%E5%AE%8C%E6%95%B4%E7%9A%84%E6%80%A7%E8%83%BD%E4%BC%98%E5%8C%96%E4%B9%8B%E6%97%85/</link>
+      <pubDate>Sun, 12 Oct 2025 00:00:00 +0000</pubDate>
+      <guid>http://localhost:1313/posts/2025/10/%E6%8E%A5%E5%8F%A3%E5%93%8D%E5%BA%94%E6%85%A2%E4%B8%80%E6%AC%A1%E5%AE%8C%E6%95%B4%E7%9A%84%E6%80%A7%E8%83%BD%E4%BC%98%E5%8C%96%E4%B9%8B%E6%97%85/</guid>
+      <description>从一个真实的接口性能问题出发，深入讲解如何系统性地进行性能优化，从3秒优化到300ms的完整实战</description>
+    </item>
+    <item>
+      <title>全链路压测：如何验证系统的真实承载能力</title>
+      <link>http://localhost:1313/posts/2025/09/%E5%85%A8%E9%93%BE%E8%B7%AF%E5%8E%8B%E6%B5%8B%E5%A6%82%E4%BD%95%E9%AA%8C%E8%AF%81%E7%B3%BB%E7%BB%9F%E7%9A%84%E7%9C%9F%E5%AE%9E%E6%89%BF%E8%BD%BD%E8%83%BD%E5%8A%9B/</link>
+      <pubDate>Fri, 05 Sep 2025 00:00:00 +0000</pubDate>
+      <guid>http://localhost:1313/posts/2025/09/%E5%85%A8%E9%93%BE%E8%B7%AF%E5%8E%8B%E6%B5%8B%E5%A6%82%E4%BD%95%E9%AA%8C%E8%AF%81%E7%B3%BB%E7%BB%9F%E7%9A%84%E7%9C%9F%E5%AE%9E%E6%89%BF%E8%BD%BD%E8%83%BD%E5%8A%9B/</guid>
+      <description>深入讲解全链路压测的方案设计与实施，从压测环境搭建到数据隔离，帮助你验证系统的真实承载能力</description>
+    </item>
+    <item>
+      <title>EasyExcel 百万级数据导出的内存优化实战</title>
+      <link>http://localhost:1313/posts/2025/05/easyexcel-%E7%99%BE%E4%B8%87%E7%BA%A7%E6%95%B0%E6%8D%AE%E5%AF%BC%E5%87%BA%E7%9A%84%E5%86%85%E5%AD%98%E4%BC%98%E5%8C%96%E5%AE%9E%E6%88%98/</link>
+      <pubDate>Thu, 22 May 2025 00:00:00 +0000</pubDate>
+      <guid>http://localhost:1313/posts/2025/05/easyexcel-%E7%99%BE%E4%B8%87%E7%BA%A7%E6%95%B0%E6%8D%AE%E5%AF%BC%E5%87%BA%E7%9A%84%E5%86%85%E5%AD%98%E4%BC%98%E5%8C%96%E5%AE%9E%E6%88%98/</guid>
+      <description>深入讲解如何使用 EasyExcel 实现百万级数据导出，从内存溢出到性能优化，提供完整的生产级解决方案</description>
+    </item>
+    <item>
+      <title>ShardingSphere 分库分表的生产实战</title>
+      <link>http://localhost:1313/posts/2025/02/shardingsphere-%E5%88%86%E5%BA%93%E5%88%86%E8%A1%A8%E7%9A%84%E7%94%9F%E4%BA%A7%E5%AE%9E%E6%88%98/</link>
+      <pubDate>Sat, 15 Feb 2025 00:00:00 +0000</pubDate>
+      <guid>http://localhost:1313/posts/2025/02/shardingsphere-%E5%88%86%E5%BA%93%E5%88%86%E8%A1%A8%E7%9A%84%E7%94%9F%E4%BA%A7%E5%AE%9E%E6%88%98/</guid>
+      <description>从单表千万级数据到分库分表，掌握ShardingSphere的生产级应用</description>
+    </item>
+    <item>
+      <title>线程池参数动态配置：Admin 管理后台设计</title>
+      <link>http://localhost:1313/posts/2025/01/%E7%BA%BF%E7%A8%8B%E6%B1%A0%E5%8F%82%E6%95%B0%E5%8A%A8%E6%80%81%E9%85%8D%E7%BD%AEadmin-%E7%AE%A1%E7%90%86%E5%90%8E%E5%8F%B0%E8%AE%BE%E8%AE%A1/</link>
+      <pubDate>Wed, 08 Jan 2025 00:00:00 +0000</pubDate>
+      <guid>http://localhost:1313/posts/2025/01/%E7%BA%BF%E7%A8%8B%E6%B1%A0%E5%8F%82%E6%95%B0%E5%8A%A8%E6%80%81%E9%85%8D%E7%BD%AEadmin-%E7%AE%A1%E7%90%86%E5%90%8E%E5%8F%B0%E8%AE%BE%E8%AE%A1/</guid>
+      <description>从线程池监控到参数动态调整，打造生产级线程池管理平台</description>
+    </item>
+    <item>
+      <title>MySQL 慢查询优化实战案例</title>
+      <link>http://localhost:1313/posts/2024/12/mysql-%E6%85%A2%E6%9F%A5%E8%AF%A2%E4%BC%98%E5%8C%96%E5%AE%9E%E6%88%98%E6%A1%88%E4%BE%8B/</link>
+      <pubDate>Tue, 10 Dec 2024 00:00:00 +0000</pubDate>
+      <guid>http://localhost:1313/posts/2024/12/mysql-%E6%85%A2%E6%9F%A5%E8%AF%A2%E4%BC%98%E5%8C%96%E5%AE%9E%E6%88%98%E6%A1%88%E4%BE%8B/</guid>
+      <description>从 5 秒到 50ms 的优化之路，真实案例讲解 SQL 性能调优方法</description>
+    </item>
+    <item>
+      <title>MySQL 索引优化：从 Explain 到执行计划</title>
+      <link>http://localhost:1313/posts/2024/11/mysql-%E7%B4%A2%E5%BC%95%E4%BC%98%E5%8C%96%E4%BB%8E-explain-%E5%88%B0%E6%89%A7%E8%A1%8C%E8%AE%A1%E5%88%92/</link>
+      <pubDate>Fri, 15 Nov 2024 00:00:00 +0000</pubDate>
+      <guid>http://localhost:1313/posts/2024/11/mysql-%E7%B4%A2%E5%BC%95%E4%BC%98%E5%8C%96%E4%BB%8E-explain-%E5%88%B0%E6%89%A7%E8%A1%8C%E8%AE%A1%E5%88%92/</guid>
+      <description>系统掌握 MySQL 索引优化方法，从 B&#43; 树原理到执行计划分析</description>
+    </item>
+  </channel>
+</rss>

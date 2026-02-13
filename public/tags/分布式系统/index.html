@@ -1,0 +1,330 @@
+<!DOCTYPE html>
+<html lang="en" dir="auto" data-theme="auto">
+
+<head><script src="/livereload.js?mindelay=10&amp;v=2&amp;port=1313&amp;path=livereload" data-no-instant defer></script><meta charset="utf-8">
+<meta http-equiv="X-UA-Compatible" content="IE=edge">
+<meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
+<meta name="robots" content="index, follow">
+<title>分布式系统 | 博客喵</title>
+<meta name="keywords" content="">
+<meta name="description" content="记录技术成长，分享开发经验，专注 Java 后端与分布式系统">
+<meta name="author" content="wawayu">
+<link rel="canonical" href="http://localhost:1313/tags/%E5%88%86%E5%B8%83%E5%BC%8F%E7%B3%BB%E7%BB%9F/">
+<link crossorigin="anonymous" href="/assets/css/stylesheet.a29c24210eb31d9ce56f669c66a35c9c51b17376b7764e336a49af7dec914cf0.css" integrity="sha256-opwkIQ6zHZzlb2acZqNcnFGxc3a3dk4zakmvfeyRTPA=" rel="preload stylesheet" as="style">
+<link rel="icon" href="http://localhost:1313/favicon.ico">
+<link rel="icon" type="image/png" sizes="16x16" href="http://localhost:1313/favicon-16x16.png">
+<link rel="icon" type="image/png" sizes="32x32" href="http://localhost:1313/favicon-32x32.png">
+<link rel="apple-touch-icon" href="http://localhost:1313/apple-touch-icon.png">
+<link rel="mask-icon" href="http://localhost:1313/safari-pinned-tab.svg">
+<meta name="theme-color" content="#2e2e33">
+<meta name="msapplication-TileColor" content="#2e2e33">
+<link rel="alternate" type="application/rss+xml" href="http://localhost:1313/tags/%E5%88%86%E5%B8%83%E5%BC%8F%E7%B3%BB%E7%BB%9F/index.xml" title="rss">
+<link rel="alternate" hreflang="en" href="http://localhost:1313/tags/%E5%88%86%E5%B8%83%E5%BC%8F%E7%B3%BB%E7%BB%9F/">
+<noscript>
+    <style>
+        #theme-toggle,
+        .top-link {
+            display: none;
+        }
+
+    </style>
+    <style>
+        @media (prefers-color-scheme: dark) {
+            :root {
+                --theme: rgb(29, 30, 32);
+                --entry: rgb(46, 46, 51);
+                --primary: rgb(218, 218, 219);
+                --secondary: rgb(155, 156, 157);
+                --tertiary: rgb(65, 66, 68);
+                --content: rgb(196, 196, 197);
+                --code-block-bg: rgb(46, 46, 51);
+                --code-bg: rgb(55, 56, 62);
+                --border: rgb(51, 51, 51);
+                color-scheme: dark;
+            }
+
+            .list {
+                background: var(--theme);
+            }
+
+            .toc {
+                background: var(--entry);
+            }
+        }
+
+        @media (prefers-color-scheme: light) {
+            .list::-webkit-scrollbar-thumb {
+                border-color: var(--code-bg);
+            }
+        }
+
+    </style>
+</noscript>
+<script>
+    if (localStorage.getItem("pref-theme") === "dark") {
+        document.querySelector("html").dataset.theme = 'dark';
+    } else if (localStorage.getItem("pref-theme") === "light") {
+       document.querySelector("html").dataset.theme = 'light';
+    } else if (window.matchMedia('(prefers-color-scheme: dark)').matches) {
+        document.querySelector("html").dataset.theme = 'dark';
+    } else {
+        document.querySelector("html").dataset.theme = 'light';
+    }
+
+</script><meta property="og:url" content="http://localhost:1313/tags/%E5%88%86%E5%B8%83%E5%BC%8F%E7%B3%BB%E7%BB%9F/">
+  <meta property="og:site_name" content="博客喵">
+  <meta property="og:title" content="分布式系统">
+  <meta property="og:description" content="记录技术成长，分享开发经验，专注 Java 后端与分布式系统">
+  <meta property="og:locale" content="zh-cn">
+  <meta property="og:type" content="website">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:title" content="分布式系统">
+<meta name="twitter:description" content="记录技术成长，分享开发经验，专注 Java 后端与分布式系统">
+
+</head>
+<body class="list" id="top">
+    <header class="header">
+    <nav class="nav">
+        <div class="logo">
+            <a href="http://localhost:1313/" accesskey="h" title="博客喵 (Alt + H)">博客喵</a>
+            <div class="logo-switches">
+                <button id="theme-toggle" accesskey="t" title="(Alt + T)" aria-label="Toggle theme">
+                    <svg id="moon" xmlns="http://www.w3.org/2000/svg" width="24" height="18" viewBox="0 0 24 24"
+                        fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"
+                        stroke-linejoin="round">
+                        <path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"></path>
+                    </svg>
+                    <svg id="sun" xmlns="http://www.w3.org/2000/svg" width="24" height="18" viewBox="0 0 24 24"
+                        fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"
+                        stroke-linejoin="round">
+                        <circle cx="12" cy="12" r="5"></circle>
+                        <line x1="12" y1="1" x2="12" y2="3"></line>
+                        <line x1="12" y1="21" x2="12" y2="23"></line>
+                        <line x1="4.22" y1="4.22" x2="5.64" y2="5.64"></line>
+                        <line x1="18.36" y1="18.36" x2="19.78" y2="19.78"></line>
+                        <line x1="1" y1="12" x2="3" y2="12"></line>
+                        <line x1="21" y1="12" x2="23" y2="12"></line>
+                        <line x1="4.22" y1="19.78" x2="5.64" y2="18.36"></line>
+                        <line x1="18.36" y1="5.64" x2="19.78" y2="4.22"></line>
+                    </svg>
+                </button>
+            </div>
+        </div>
+        <ul id="menu">
+            <li>
+                <a href="http://localhost:1313/posts/" title="📝 文章">
+                    <span>📝 文章</span>
+                </a>
+            </li>
+            <li>
+                <a href="http://localhost:1313/tags/" title="🏷️ 标签">
+                    <span>🏷️ 标签</span>
+                </a>
+            </li>
+            <li>
+                <a href="http://localhost:1313/categories/" title="📂 分类">
+                    <span>📂 分类</span>
+                </a>
+            </li>
+            <li>
+                <a href="http://localhost:1313/skills/" title="💻 技能">
+                    <span>💻 技能</span>
+                </a>
+            </li>
+            <li>
+                <a href="http://localhost:1313/about/" title="👤 关于">
+                    <span>👤 关于</span>
+                </a>
+            </li>
+            <li>
+                <a href="http://localhost:1313/search/" title="🔍 搜索 (Alt &#43; /)" accesskey=/>
+                    <span>🔍 搜索</span>
+                </a>
+            </li>
+        </ul>
+    </nav>
+</header>
+<main class="main"> 
+<header class="page-header"><div class="breadcrumbs"><a href="http://localhost:1313/">Home</a>&nbsp;»&nbsp;<a href="http://localhost:1313/tags/">Tags</a></div>
+  <h1>
+    分布式系统
+    <a href="/tags/%E5%88%86%E5%B8%83%E5%BC%8F%E7%B3%BB%E7%BB%9F/index.xml" title="RSS" aria-label="RSS">
+      <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"
+        stroke-linecap="round" stroke-linejoin="round" height="23">
+        <path d="M4 11a9 9 0 0 1 9 9" />
+        <path d="M4 4a16 16 0 0 1 16 16" />
+        <circle cx="5" cy="19" r="1" />
+      </svg>
+    </a>
+  </h1>
+</header>
+
+<article class="post-entry tag-entry"> 
+  <header class="entry-header">
+    <h2 class="entry-hint-parent">分布式事务解决方案：从 2PC 到 Seata 的演进与实战
+    </h2>
+  </header>
+  <div class="entry-content">
+    <p>在微服务架构中，一个业务操作往往需要跨越多个服务，如何保证这些操作的一致性是一个经典难题。本文将系统讲解分布式事务的各种解决方案，从理论到实践，帮助你选择合适的方案。
+本文亮点 理解分布式事务的核心问题 掌握2PC、3PC、TCC、Saga等方案 学会使用Seata框架解决分布式事务 了解各方案的优缺点和适用场景 掌握生产环境的最佳实践 分布式事务问题 业务场景 电商下单场景，涉及多个服务：
+1用户下单 2 ↓ 3订单服务：创建订单 4 ↓ 5库存服务：扣减库存 6 ↓ 7账户服务：扣减余额 8 ↓ 9积分服务：增加积分 问题：如果某个服务失败，如何保证数据一致性？
+CAP理论 分布式系统的三个特性：
+C (Consistency)：一致性 A (Availability)：可用性 P (Partition Tolerance)：分区容错性 CAP定理：三者最多只能同时满足两个
+实际选择：
+CP：牺牲可用性，保证一致性（如ZooKeeper） AP：牺牲一致性，保证可用性（如Eureka） BASE理论 BA (Basically Available)：基本可用 S (Soft State)：软状态 E (Eventually Consistent)：最终一致性 架构思考： 在分布式系统中，强一致性往往难以实现且代价高昂。大多数业务场景可以接受最终一致性，这也是现代分布式事务方案的基础。
+2PC（两阶段提交） 原理 第一阶段：准备阶段（Prepare）
+协调者向所有参与者发送Prepare请求 参与者执行事务操作，但不提交 参与者返回Yes或No 第二阶段：提交阶段（Commit）
+如果所有参与者都返回Yes，协调者发送Commit请求 如果有参与者返回No，协调者发送Rollback请求 流程图 1协调者 参与者1 参与者2 2 | | | 3 |---Prepare----------&gt;| | 4 |---Prepare----------------------------&gt;| 5 | | | 6 |&lt;--Yes/No------------| | 7 |&lt;--Yes/No-------------------------------| 8 | | | 9 |---Commit/Rollback--&gt;| | 10 |---Commit/Rollback----------------------&gt;| 代码示例 1public class TwoPhaseCommitCoordinator { 2 3 private List&lt;Participant&gt; participants; 4 5 public boolean executeTransaction() { 6 // 第一阶段：准备 7 boolean canCommit = prepare(); 8 9 // 第二阶段：提交或回滚 10 if (canCommit) { 11 commit(); 12 return true; 13 } else { 14 rollback(); 15 return false; 16 } 17 } 18 19 private boolean prepare() { 20 for (Participant participant : participants) { 21 if (!participant.prepare()) { 22 return false; 23 } 24 } 25 return true; 26 } 27 28 private void commit() { 29 for (Participant participant : participants) { 30 participant.commit(); 31 } 32 } 33 34 private void rollback() { 35 for (Participant participant : participants) { 36 participant.rollback(); 37 } 38 } 39} 40 41interface Participant { 42 boolean prepare(); 43 void commit(); 44 void rollback(); 45} 优缺点 优点：
+...</p>
+  </div>
+  <footer class="entry-footer"><span title='2025-12-20 00:00:00 +0000 UTC'>December 20, 2025</span>&nbsp;·&nbsp;<span>8 min</span>&nbsp;·&nbsp;<span>1522 words</span>&nbsp;·&nbsp;<span>wawayu</span></footer>
+  <a class="entry-link" aria-label="post link to 分布式事务解决方案：从 2PC 到 Seata 的演进与实战" href="http://localhost:1313/posts/2025/12/%E5%88%86%E5%B8%83%E5%BC%8F%E4%BA%8B%E5%8A%A1%E8%A7%A3%E5%86%B3%E6%96%B9%E6%A1%88%E4%BB%8E-2pc-%E5%88%B0-seata-%E7%9A%84%E6%BC%94%E8%BF%9B%E4%B8%8E%E5%AE%9E%E6%88%98/"></a>
+</article>
+
+<article class="post-entry tag-entry"> 
+  <header class="entry-header">
+    <h2 class="entry-hint-parent">Netty &#43; WebSocket 实现实时消息推送：从原理到生产实战
+    </h2>
+  </header>
+  <div class="entry-content">
+    <p>在现代互联网应用中，实时消息推送已成为标配功能。从即时通讯、在线客服到实时监控大屏，都离不开高性能的消息推送能力。传统的 HTTP 轮询方式存在延迟高、资源浪费等问题，而 WebSocket 协议的出现完美解决了这些痛点。
+本文将深入讲解如何使用 Netty 框架实现基于 WebSocket 的实时消息推送系统，从协议原理到生产实战，帮助你构建一个高性能、高可用的推送服务。
+本文亮点 掌握 WebSocket 协议原理与握手流程 学会使用 Netty 构建 WebSocket 服务器 理解心跳机制与连接管理策略 掌握集群部署与消息路由方案 了解生产环境的性能优化技巧 为什么选择 Netty &#43; WebSocket WebSocket 协议优势 相比传统的 HTTP 轮询，WebSocket 具有以下优势：
+特性 HTTP 轮询 WebSocket 通信方式 半双工 全双工 连接开销 每次请求都需要建立连接 一次握手，持久连接 实时性 取决于轮询间隔（秒级） 毫秒级 服务器压力 高（频繁的 HTTP 请求） 低（长连接） 带宽消耗 高（每次都有 HTTP 头） 低（只传输数据帧） Netty 框架优势 Netty 是一个高性能的异步事件驱动网络框架，具有以下特点：
+高性能：基于 NIO，支持百万级并发连接 易用性：提供了丰富的编解码器和处理器 稳定性：经过大量生产环境验证 扩展性：灵活的 Pipeline 机制 架构思考： 选择技术方案时，不仅要看技术本身的优势，更要考虑团队的技术栈、运维成本和社区生态。Netty 在 Java 生态中已经成为事实标准，Dubbo、RocketMQ、Elasticsearch 等知名项目都在使用。
+...</p>
+  </div>
+  <footer class="entry-footer"><span title='2025-04-18 00:00:00 +0000 UTC'>April 18, 2025</span>&nbsp;·&nbsp;<span>11 min</span>&nbsp;·&nbsp;<span>2175 words</span>&nbsp;·&nbsp;<span>wawayu</span></footer>
+  <a class="entry-link" aria-label="post link to Netty &#43; WebSocket 实现实时消息推送：从原理到生产实战" href="http://localhost:1313/posts/2025/04/netty--websocket-%E5%AE%9E%E7%8E%B0%E5%AE%9E%E6%97%B6%E6%B6%88%E6%81%AF%E6%8E%A8%E9%80%81%E4%BB%8E%E5%8E%9F%E7%90%86%E5%88%B0%E7%94%9F%E4%BA%A7%E5%AE%9E%E6%88%98/"></a>
+</article>
+
+<article class="post-entry tag-entry"> 
+  <header class="entry-header">
+    <h2 class="entry-hint-parent">ShardingSphere 分库分表的生产实战
+    </h2>
+  </header>
+  <div class="entry-content">
+    <p>当单表数据量达到千万级别时，查询性能会急剧下降。分库分表是解决大数据量问题的有效方案。本文将深入讲解如何使用 ShardingSphere 实现分库分表，并分享生产环境的实战经验。
+本文亮点 理解分库分表的核心概念和应用场景 掌握 ShardingSphere 的配置和使用方法 学会选择合适的分片策略 了解分库分表的最佳实践和常见问题 为什么需要分库分表？ 场景：订单表数据爆炸
+电商系统的订单表，每天新增10万条数据，一年就是3600万条。随着数据量增长：
+查询变慢：单表查询从毫秒级变成秒级 索引失效：B&#43;树层级增加，索引效率下降 锁竞争：大表的锁粒度大，并发性能差 备份困难：单表备份时间过长 传统优化方案的局限
+1-- 优化索引 2CREATE INDEX idx_user_id_create_time ON orders(user_id, create_time); 3 4-- 分区表 5ALTER TABLE orders PARTITION BY RANGE (YEAR(create_time)) ( 6 PARTITION p2023 VALUES LESS THAN (2024), 7 PARTITION p2024 VALUES LESS THAN (2025) 8); 这些方案只能缓解问题，无法根本解决。当数据量达到亿级时，分库分表是必然选择。
+分库分表核心概念 垂直拆分 vs 水平拆分 垂直拆分：按业务模块拆分
+1原始数据库 2├── 用户表 3├── 订单表 4├── 商品表 5└── 支付表 6 7拆分后 8├── 用户库 9│ └── 用户表 10├── 订单库 11│ └── 订单表 12├── 商品库 13│ └── 商品表 14└── 支付库 15 └── 支付表 水平拆分：按数据行拆分
+...</p>
+  </div>
+  <footer class="entry-footer"><span title='2025-02-15 00:00:00 +0000 UTC'>February 15, 2025</span>&nbsp;·&nbsp;<span>6 min</span>&nbsp;·&nbsp;<span>1274 words</span>&nbsp;·&nbsp;<span>wawayu</span></footer>
+  <a class="entry-link" aria-label="post link to ShardingSphere 分库分表的生产实战" href="http://localhost:1313/posts/2025/02/shardingsphere-%E5%88%86%E5%BA%93%E5%88%86%E8%A1%A8%E7%9A%84%E7%94%9F%E4%BA%A7%E5%AE%9E%E6%88%98/"></a>
+</article>
+
+<article class="post-entry tag-entry"> 
+  <header class="entry-header">
+    <h2 class="entry-hint-parent">RabbitMQ 在交易系统中的异步解耦实践
+    </h2>
+  </header>
+  <div class="entry-content">
+    <p>在微服务架构中，服务之间的同步调用会导致强耦合和性能瓶颈。消息队列通过异步解耦，提升了系统的可扩展性和容错能力。本文讲解 RabbitMQ 在交易系统中的实战应用。
+本文亮点 理解消息队列的核心价值与选型标准 掌握 RabbitMQ 的核心概念与工作模式 学会保障消息可靠性的完整方案 了解消息幂等性与顺序性的处理 为什么需要消息队列？ 场景：订单创建流程
+同步调用的问题：
+1@Service 2public class OrderService { 3 4 @Autowired 5 private InventoryService inventoryService; 6 7 @Autowired 8 private PaymentService paymentService; 9 10 @Autowired 11 private NotificationService notificationService; 12 13 public void createOrder(Order order) { 14 // 1. 保存订单 15 orderMapper.insert(order); 16 17 // 2. 扣减库存（同步调用） 18 inventoryService.deduct(order.getProductId(), order.getQuantity()); 19 20 // 3. 创建支付单（同步调用） 21 paymentService.createPayment(order.getId()); 22 23 // 4. 发送通知（同步调用） 24 notificationService.sendOrderCreatedNotification(order.getUserId()); 25 } 26} 问题：
+...</p>
+  </div>
+  <footer class="entry-footer"><span title='2024-10-20 00:00:00 +0000 UTC'>October 20, 2024</span>&nbsp;·&nbsp;<span>5 min</span>&nbsp;·&nbsp;<span>1007 words</span>&nbsp;·&nbsp;<span>wawayu</span></footer>
+  <a class="entry-link" aria-label="post link to RabbitMQ 在交易系统中的异步解耦实践" href="http://localhost:1313/posts/2024/10/rabbitmq-%E5%9C%A8%E4%BA%A4%E6%98%93%E7%B3%BB%E7%BB%9F%E4%B8%AD%E7%9A%84%E5%BC%82%E6%AD%A5%E8%A7%A3%E8%80%A6%E5%AE%9E%E8%B7%B5/"></a>
+</article>
+
+<article class="post-entry tag-entry"> 
+  <header class="entry-header">
+    <h2 class="entry-hint-parent">分布式 ID 生成方案对比与选型指南
+    </h2>
+  </header>
+  <div class="entry-content">
+    <p>在分布式系统中，生成全局唯一 ID 是一个基础需求。数据库自增 ID 在分库分表后无法使用，UUID 虽然简单但不适合作为主键。本文对比主流的分布式 ID 生成方案。
+本文亮点 理解分布式 ID 的核心要求 掌握雪花算法的实现与时钟回拨问题 了解美团 Leaf 方案的设计思想 学会根据业务场景选择合适方案 分布式 ID 的核心要求 全局唯一性：不能重复 趋势递增：方便排序和索引 高性能：生成速度快 高可用：服务不能挂 信息安全：不能泄露业务信息 方案一：数据库自增 ID 1CREATE TABLE id_generator ( 2 id BIGINT NOT NULL AUTO_INCREMENT PRIMARY KEY, 3 stub CHAR(1) NOT NULL DEFAULT &#39;&#39;, 4 UNIQUE KEY stub (stub) 5); 6 7INSERT INTO id_generator (stub) VALUES (&#39;a&#39;); 8SELECT LAST_INSERT_ID(); 优点：简单，趋势递增
+缺点：
+性能瓶颈：数据库压力大 单点故障：数据库挂了就无法生成 ID 扩展性差：分库分表后需要设置不同的步长 方案二：UUID 1String id = UUID.randomUUID().toString(); 优点：简单，本地生成，性能高
+...</p>
+  </div>
+  <footer class="entry-footer"><span title='2024-07-05 00:00:00 +0000 UTC'>July 5, 2024</span>&nbsp;·&nbsp;<span>3 min</span>&nbsp;·&nbsp;<span>459 words</span>&nbsp;·&nbsp;<span>wawayu</span></footer>
+  <a class="entry-link" aria-label="post link to 分布式 ID 生成方案对比与选型指南" href="http://localhost:1313/posts/2024/07/%E5%88%86%E5%B8%83%E5%BC%8F-id-%E7%94%9F%E6%88%90%E6%96%B9%E6%A1%88%E5%AF%B9%E6%AF%94%E4%B8%8E%E9%80%89%E5%9E%8B%E6%8C%87%E5%8D%97/"></a>
+</article>
+    </main>
+    
+<footer class="footer">
+        <span>&copy; 2026 <a href="http://localhost:1313/">博客喵</a></span> · 
+
+    <span>
+        Powered by
+        <a href="https://gohugo.io/" rel="noopener noreferrer" target="_blank">Hugo</a> &
+        <a href="https://github.com/adityatelange/hugo-PaperMod/" rel="noopener" target="_blank">PaperMod</a>
+    </span>
+</footer>
+<a href="#top" aria-label="go to top" title="Go to Top (Alt + G)" class="top-link" id="top-link" accesskey="g">
+    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 12 6" fill="currentColor">
+        <path d="M12 6H0l6-6z" />
+    </svg>
+</a>
+
+<script>
+    let menu = document.getElementById('menu');
+    if (menu) {
+        
+        const scrollPosition = localStorage.getItem("menu-scroll-position");
+        if (scrollPosition) {
+            menu.scrollLeft = parseInt(scrollPosition, 10);
+        }
+        
+        menu.onscroll = function () {
+            localStorage.setItem("menu-scroll-position", menu.scrollLeft);
+        }
+    }
+
+    document.querySelectorAll('a[href^="#"]').forEach(anchor => {
+        anchor.addEventListener("click", function (e) {
+            e.preventDefault();
+            var id = this.getAttribute("href").substr(1);
+            if (!window.matchMedia('(prefers-reduced-motion: reduce)').matches) {
+                document.querySelector(`[id='${decodeURIComponent(id)}']`).scrollIntoView({
+                    behavior: "smooth"
+                });
+            } else {
+                document.querySelector(`[id='${decodeURIComponent(id)}']`).scrollIntoView();
+            }
+            if (id === "top") {
+                history.replaceState(null, null, " ");
+            } else {
+                history.pushState(null, null, `#${id}`);
+            }
+        });
+    });
+
+</script>
+<script>
+    var mybutton = document.getElementById("top-link");
+    window.onscroll = function () {
+        if (document.body.scrollTop > 800 || document.documentElement.scrollTop > 800) {
+            mybutton.style.visibility = "visible";
+            mybutton.style.opacity = "1";
+        } else {
+            mybutton.style.visibility = "hidden";
+            mybutton.style.opacity = "0";
+        }
+    };
+
+</script>
+<script>
+    document.getElementById("theme-toggle").addEventListener("click", () => {
+        const html = document.querySelector("html");
+        if (html.dataset.theme === "dark") {
+            html.dataset.theme = 'light';
+            localStorage.setItem("pref-theme", 'light');
+        } else {
+            html.dataset.theme = 'dark';
+            localStorage.setItem("pref-theme", 'dark');
+        }
+    })
+
+</script>
+</body>
+
+</html>

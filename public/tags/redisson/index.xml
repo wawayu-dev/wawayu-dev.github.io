@@ -1,0 +1,19 @@
+<?xml version="1.0" encoding="utf-8" standalone="yes"?>
+<rss version="2.0" xmlns:atom="http://www.w3.org/2005/Atom" xmlns:content="http://purl.org/rss/1.0/modules/content/">
+  <channel>
+    <title>Redisson on 博客喵</title>
+    <link>http://localhost:1313/tags/redisson/</link>
+    <description>Recent content in Redisson on 博客喵</description>
+    <generator>Hugo -- 0.155.3</generator>
+    <language>zh-cn</language>
+    <lastBuildDate>Sat, 20 Jul 2024 00:00:00 +0000</lastBuildDate>
+    <atom:link href="http://localhost:1313/tags/redisson/index.xml" rel="self" type="application/rss+xml" />
+    <item>
+      <title>Redis 分布式锁的生产级实践与 Redisson 源码分析</title>
+      <link>http://localhost:1313/posts/2024/07/redis-%E5%88%86%E5%B8%83%E5%BC%8F%E9%94%81%E7%9A%84%E7%94%9F%E4%BA%A7%E7%BA%A7%E5%AE%9E%E8%B7%B5%E4%B8%8E-redisson-%E6%BA%90%E7%A0%81%E5%88%86%E6%9E%90/</link>
+      <pubDate>Sat, 20 Jul 2024 00:00:00 +0000</pubDate>
+      <guid>http://localhost:1313/posts/2024/07/redis-%E5%88%86%E5%B8%83%E5%BC%8F%E9%94%81%E7%9A%84%E7%94%9F%E4%BA%A7%E7%BA%A7%E5%AE%9E%E8%B7%B5%E4%B8%8E-redisson-%E6%BA%90%E7%A0%81%E5%88%86%E6%9E%90/</guid>
+      <description>从 SETNX 到 Redisson 看门狗，深度剖析分布式锁的常见坑与解决方案</description>
+    </item>
+  </channel>
+</rss>

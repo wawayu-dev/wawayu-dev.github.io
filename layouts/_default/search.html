@@ -1,0 +1,207 @@
+{{- define "main" }}
+
+<div class="post-content">
+  {{- if .Content }}
+  <div class="post-description">{{ .Content }}</div>
+  {{- end }}
+</div>
+
+<div id="searchResults"></div>
+
+<script src="https://cdn.jsdelivr.net/npm/fuse.js@6.6.2"></script>
+
+<script>
+let fuse;
+let searchVisible = false;
+let firstRun = true;
+let list = document.getElementById("searchResults");
+let first = list.firstChild;
+let last = list.lastChild;
+let maininput = document.getElementById("searchInput");
+
+function inputFocus() {
+  maininput.focus();
+}
+
+document.addEventListener("DOMContentLoaded", function () {
+  inputFocus();
+});
+
+document.addEventListener("keydown", function (event) {
+  if (event.key === "/") {
+    event.preventDefault();
+    inputFocus();
+  }
+  if (event.key === "Escape") {
+    maininput.blur();
+    searchVisible = false;
+  }
+});
+
+function fetchJSON(path, callback) {
+  let httpRequest = new XMLHttpRequest();
+  httpRequest.onreadystatechange = function () {
+    if (httpRequest.readyState === 4) {
+      if (httpRequest.status === 200) {
+        let data = JSON.parse(httpRequest.responseText);
+        if (callback) callback(data);
+      }
+    }
+  };
+  httpRequest.open("GET", path);
+  httpRequest.send();
+}
+
+function executeSearch(searchQuery) {
+  fetchJSON("/index.json", function (data) {
+    let options = {
+      distance: 100,
+      threshold: 0.4,
+      ignoreLocation: true,
+      keys: [
+        "title",
+        "permalink",
+        "summary",
+        "content"
+      ]
+    };
+    fuse = new Fuse(data, options);
+    if (searchQuery) {
+      let result = fuse.search(searchQuery);
+      if (result.length > 0) {
+        populateResults(result);
+      } else {
+        list.innerHTML = '<p class="search-results-empty">没有找到匹配的结果</p>';
+      }
+    }
+  });
+}
+
+function populateResults(results) {
+  list.innerHTML = "";
+  results.forEach(function (value, key) {
+    let contents = value.item.contents;
+    let snippet = "";
+    let snippetHighlights = [];
+
+    snippetHighlights.push(searchQuery);
+    snippet = contents.substring(0, 200);
+
+    let tags = "";
+    if (value.item.tags) {
+      value.item.tags.forEach(function (tag) {
+        tags += `<a href="/tags/${tag.toLowerCase()}/" class="post-tag">${tag}</a>`;
+      });
+    }
+
+    let output = `
+      <article class="post-entry">
+        <header class="entry-header">
+          <h2><a href="${value.item.permalink}">${value.item.title}</a></h2>
+        </header>
+        <div class="entry-content">
+          <p>${snippet}...</p>
+        </div>
+        <footer class="entry-footer">
+          ${tags}
+        </footer>
+      </article>
+    `;
+    list.innerHTML += output;
+  });
+  searchVisible = true;
+  firstRun = false;
+}
+
+let searchQuery = "";
+if (window.location.search) {
+  let params = new URLSearchParams(window.location.search);
+  searchQuery = params.get("q");
+  if (searchQuery) {
+    document.getElementById("searchInput").value = searchQuery;
+    executeSearch(searchQuery);
+  }
+}
+</script>
+
+<style>
+#searchInput {
+  width: 100%;
+  padding: 12px 20px;
+  margin: 20px 0;
+  font-size: 16px;
+  border: 1px solid var(--border);
+  border-radius: 8px;
+  background: var(--entry);
+  color: var(--content);
+}
+
+#searchInput:focus {
+  outline: none;
+  border-color: var(--primary);
+}
+
+#searchResults {
+  margin-top: 20px;
+}
+
+.search-results-empty {
+  text-align: center;
+  padding: 40px 20px;
+  color: var(--secondary);
+}
+
+.post-entry {
+  margin-bottom: 30px;
+  padding: 20px;
+  background: var(--entry);
+  border-radius: 8px;
+  border: 1px solid var(--border);
+}
+
+.post-entry:hover {
+  border-color: var(--primary);
+}
+
+.entry-header h2 {
+  margin: 0 0 10px 0;
+  font-size: 1.5rem;
+}
+
+.entry-header h2 a {
+  color: var(--content);
+  text-decoration: none;
+}
+
+.entry-header h2 a:hover {
+  color: var(--primary);
+}
+
+.entry-content {
+  margin: 10px 0;
+  color: var(--secondary);
+}
+
+.entry-footer {
+  margin-top: 15px;
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+}
+
+.post-tag {
+  padding: 4px 12px;
+  background: var(--code-bg);
+  border-radius: 4px;
+  font-size: 0.875rem;
+  text-decoration: none;
+  color: var(--content);
+}
+
+.post-tag:hover {
+  background: var(--primary);
+  color: var(--theme);
+}
+</style>
+
+{{- end }}

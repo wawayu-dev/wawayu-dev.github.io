@@ -1,0 +1,437 @@
+<!DOCTYPE html>
+<html lang="en" dir="auto" data-theme="auto">
+
+<head><script src="/livereload.js?mindelay=10&amp;v=2&amp;port=1313&amp;path=livereload" data-no-instant defer></script><meta charset="utf-8">
+<meta http-equiv="X-UA-Compatible" content="IE=edge">
+<meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
+<meta name="robots" content="index, follow">
+<title>最佳实践 | 博客喵</title>
+<meta name="keywords" content="">
+<meta name="description" content="记录技术成长，分享开发经验，专注 Java 后端与分布式系统">
+<meta name="author" content="wawayu">
+<link rel="canonical" href="http://localhost:1313/tags/%E6%9C%80%E4%BD%B3%E5%AE%9E%E8%B7%B5/">
+<link crossorigin="anonymous" href="/assets/css/stylesheet.a29c24210eb31d9ce56f669c66a35c9c51b17376b7764e336a49af7dec914cf0.css" integrity="sha256-opwkIQ6zHZzlb2acZqNcnFGxc3a3dk4zakmvfeyRTPA=" rel="preload stylesheet" as="style">
+<link rel="icon" href="http://localhost:1313/favicon.ico">
+<link rel="icon" type="image/png" sizes="16x16" href="http://localhost:1313/favicon-16x16.png">
+<link rel="icon" type="image/png" sizes="32x32" href="http://localhost:1313/favicon-32x32.png">
+<link rel="apple-touch-icon" href="http://localhost:1313/apple-touch-icon.png">
+<link rel="mask-icon" href="http://localhost:1313/safari-pinned-tab.svg">
+<meta name="theme-color" content="#2e2e33">
+<meta name="msapplication-TileColor" content="#2e2e33">
+<link rel="alternate" type="application/rss+xml" href="http://localhost:1313/tags/%E6%9C%80%E4%BD%B3%E5%AE%9E%E8%B7%B5/index.xml" title="rss">
+<link rel="alternate" hreflang="en" href="http://localhost:1313/tags/%E6%9C%80%E4%BD%B3%E5%AE%9E%E8%B7%B5/">
+<noscript>
+    <style>
+        #theme-toggle,
+        .top-link {
+            display: none;
+        }
+
+    </style>
+    <style>
+        @media (prefers-color-scheme: dark) {
+            :root {
+                --theme: rgb(29, 30, 32);
+                --entry: rgb(46, 46, 51);
+                --primary: rgb(218, 218, 219);
+                --secondary: rgb(155, 156, 157);
+                --tertiary: rgb(65, 66, 68);
+                --content: rgb(196, 196, 197);
+                --code-block-bg: rgb(46, 46, 51);
+                --code-bg: rgb(55, 56, 62);
+                --border: rgb(51, 51, 51);
+                color-scheme: dark;
+            }
+
+            .list {
+                background: var(--theme);
+            }
+
+            .toc {
+                background: var(--entry);
+            }
+        }
+
+        @media (prefers-color-scheme: light) {
+            .list::-webkit-scrollbar-thumb {
+                border-color: var(--code-bg);
+            }
+        }
+
+    </style>
+</noscript>
+<script>
+    if (localStorage.getItem("pref-theme") === "dark") {
+        document.querySelector("html").dataset.theme = 'dark';
+    } else if (localStorage.getItem("pref-theme") === "light") {
+       document.querySelector("html").dataset.theme = 'light';
+    } else if (window.matchMedia('(prefers-color-scheme: dark)').matches) {
+        document.querySelector("html").dataset.theme = 'dark';
+    } else {
+        document.querySelector("html").dataset.theme = 'light';
+    }
+
+</script><meta property="og:url" content="http://localhost:1313/tags/%E6%9C%80%E4%BD%B3%E5%AE%9E%E8%B7%B5/">
+  <meta property="og:site_name" content="博客喵">
+  <meta property="og:title" content="最佳实践">
+  <meta property="og:description" content="记录技术成长，分享开发经验，专注 Java 后端与分布式系统">
+  <meta property="og:locale" content="zh-cn">
+  <meta property="og:type" content="website">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:title" content="最佳实践">
+<meta name="twitter:description" content="记录技术成长，分享开发经验，专注 Java 后端与分布式系统">
+
+</head>
+<body class="list" id="top">
+    <header class="header">
+    <nav class="nav">
+        <div class="logo">
+            <a href="http://localhost:1313/" accesskey="h" title="博客喵 (Alt + H)">博客喵</a>
+            <div class="logo-switches">
+                <button id="theme-toggle" accesskey="t" title="(Alt + T)" aria-label="Toggle theme">
+                    <svg id="moon" xmlns="http://www.w3.org/2000/svg" width="24" height="18" viewBox="0 0 24 24"
+                        fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"
+                        stroke-linejoin="round">
+                        <path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"></path>
+                    </svg>
+                    <svg id="sun" xmlns="http://www.w3.org/2000/svg" width="24" height="18" viewBox="0 0 24 24"
+                        fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"
+                        stroke-linejoin="round">
+                        <circle cx="12" cy="12" r="5"></circle>
+                        <line x1="12" y1="1" x2="12" y2="3"></line>
+                        <line x1="12" y1="21" x2="12" y2="23"></line>
+                        <line x1="4.22" y1="4.22" x2="5.64" y2="5.64"></line>
+                        <line x1="18.36" y1="18.36" x2="19.78" y2="19.78"></line>
+                        <line x1="1" y1="12" x2="3" y2="12"></line>
+                        <line x1="21" y1="12" x2="23" y2="12"></line>
+                        <line x1="4.22" y1="19.78" x2="5.64" y2="18.36"></line>
+                        <line x1="18.36" y1="5.64" x2="19.78" y2="4.22"></line>
+                    </svg>
+                </button>
+            </div>
+        </div>
+        <ul id="menu">
+            <li>
+                <a href="http://localhost:1313/posts/" title="📝 文章">
+                    <span>📝 文章</span>
+                </a>
+            </li>
+            <li>
+                <a href="http://localhost:1313/tags/" title="🏷️ 标签">
+                    <span>🏷️ 标签</span>
+                </a>
+            </li>
+            <li>
+                <a href="http://localhost:1313/categories/" title="📂 分类">
+                    <span>📂 分类</span>
+                </a>
+            </li>
+            <li>
+                <a href="http://localhost:1313/skills/" title="💻 技能">
+                    <span>💻 技能</span>
+                </a>
+            </li>
+            <li>
+                <a href="http://localhost:1313/about/" title="👤 关于">
+                    <span>👤 关于</span>
+                </a>
+            </li>
+            <li>
+                <a href="http://localhost:1313/search/" title="🔍 搜索 (Alt &#43; /)" accesskey=/>
+                    <span>🔍 搜索</span>
+                </a>
+            </li>
+        </ul>
+    </nav>
+</header>
+<main class="main"> 
+<header class="page-header"><div class="breadcrumbs"><a href="http://localhost:1313/">Home</a>&nbsp;»&nbsp;<a href="http://localhost:1313/tags/">Tags</a></div>
+  <h1>
+    最佳实践
+    <a href="/tags/%E6%9C%80%E4%BD%B3%E5%AE%9E%E8%B7%B5/index.xml" title="RSS" aria-label="RSS">
+      <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"
+        stroke-linecap="round" stroke-linejoin="round" height="23">
+        <path d="M4 11a9 9 0 0 1 9 9" />
+        <path d="M4 4a16 16 0 0 1 16 16" />
+        <circle cx="5" cy="19" r="1" />
+      </svg>
+    </a>
+  </h1>
+</header>
+
+<article class="post-entry tag-entry"> 
+  <header class="entry-header">
+    <h2 class="entry-hint-parent">线程池参数动态配置：Admin 管理后台设计
+    </h2>
+  </header>
+  <div class="entry-content">
+    <p>在生产环境中，线程池参数的配置往往需要根据实际负载动态调整。硬编码的参数配置缺乏灵活性，重启服务又会影响业务。本文将介绍如何设计一个线程池管理后台，实现参数的动态配置和实时监控。
+本文亮点 理解线程池参数动态调整的原理与实现 掌握线程池监控指标的采集与展示 学会设计生产级的线程池管理平台 了解线程池参数调优的最佳实践 为什么需要动态配置？ 场景一：流量突增
+双十一期间，订单处理线程池的核心线程数设置为 10，最大线程数 20。突然流量暴增，队列堆积严重，导致订单处理延迟。
+如果能动态调整线程池参数，将核心线程数调整为 50，最大线程数调整为 100，就能快速应对流量高峰。
+场景二：资源浪费
+凌晨时段流量很低，但线程池仍然保持高峰期的配置，浪费了大量系统资源。
+传统做法的问题
+1@Configuration 2public class ThreadPoolConfig { 3 @Bean(&#34;orderThreadPool&#34;) 4 public ThreadPoolExecutor orderThreadPool() { 5 return new ThreadPoolExecutor( 6 10, // 核心线程数：硬编码 7 20, // 最大线程数：硬编码 8 60, TimeUnit.SECONDS, 9 new LinkedBlockingQueue&lt;&gt;(100), 10 new ThreadFactoryBuilder().setNameFormat(&#34;order-pool-%d&#34;).build(), 11 new ThreadPoolExecutor.CallerRunsPolicy() 12 ); 13 } 14} 问题：
+...</p>
+  </div>
+  <footer class="entry-footer"><span title='2025-01-08 00:00:00 +0000 UTC'>January 8, 2025</span>&nbsp;·&nbsp;<span>9 min</span>&nbsp;·&nbsp;<span>1834 words</span>&nbsp;·&nbsp;<span>wawayu</span></footer>
+  <a class="entry-link" aria-label="post link to 线程池参数动态配置：Admin 管理后台设计" href="http://localhost:1313/posts/2025/01/%E7%BA%BF%E7%A8%8B%E6%B1%A0%E5%8F%82%E6%95%B0%E5%8A%A8%E6%80%81%E9%85%8D%E7%BD%AEadmin-%E7%AE%A1%E7%90%86%E5%90%8E%E5%8F%B0%E8%AE%BE%E8%AE%A1/"></a>
+</article>
+
+<article class="post-entry tag-entry"> 
+  <header class="entry-header">
+    <h2 class="entry-hint-parent">RabbitMQ 在交易系统中的异步解耦实践
+    </h2>
+  </header>
+  <div class="entry-content">
+    <p>在微服务架构中，服务之间的同步调用会导致强耦合和性能瓶颈。消息队列通过异步解耦，提升了系统的可扩展性和容错能力。本文讲解 RabbitMQ 在交易系统中的实战应用。
+本文亮点 理解消息队列的核心价值与选型标准 掌握 RabbitMQ 的核心概念与工作模式 学会保障消息可靠性的完整方案 了解消息幂等性与顺序性的处理 为什么需要消息队列？ 场景：订单创建流程
+同步调用的问题：
+1@Service 2public class OrderService { 3 4 @Autowired 5 private InventoryService inventoryService; 6 7 @Autowired 8 private PaymentService paymentService; 9 10 @Autowired 11 private NotificationService notificationService; 12 13 public void createOrder(Order order) { 14 // 1. 保存订单 15 orderMapper.insert(order); 16 17 // 2. 扣减库存（同步调用） 18 inventoryService.deduct(order.getProductId(), order.getQuantity()); 19 20 // 3. 创建支付单（同步调用） 21 paymentService.createPayment(order.getId()); 22 23 // 4. 发送通知（同步调用） 24 notificationService.sendOrderCreatedNotification(order.getUserId()); 25 } 26} 问题：
+...</p>
+  </div>
+  <footer class="entry-footer"><span title='2024-10-20 00:00:00 +0000 UTC'>October 20, 2024</span>&nbsp;·&nbsp;<span>5 min</span>&nbsp;·&nbsp;<span>1007 words</span>&nbsp;·&nbsp;<span>wawayu</span></footer>
+  <a class="entry-link" aria-label="post link to RabbitMQ 在交易系统中的异步解耦实践" href="http://localhost:1313/posts/2024/10/rabbitmq-%E5%9C%A8%E4%BA%A4%E6%98%93%E7%B3%BB%E7%BB%9F%E4%B8%AD%E7%9A%84%E5%BC%82%E6%AD%A5%E8%A7%A3%E8%80%A6%E5%AE%9E%E8%B7%B5/"></a>
+</article>
+
+<article class="post-entry tag-entry"> 
+  <header class="entry-header">
+    <h2 class="entry-hint-parent">领域驱动设计（DDD）落地实践：从理论到代码
+    </h2>
+  </header>
+  <div class="entry-content">
+    <p>DDD（Domain-Driven Design）是一套复杂业务系统的设计方法论。但很多人学了 DDD 的概念，却不知道如何落地。本文通过一个电商订单系统的案例，讲解 DDD 的实战应用。
+本文亮点 理解 DDD 的核心概念：实体、值对象、聚合根、领域服务 掌握限界上下文的划分方法 学会用领域事件实现服务解耦 了解 DDD 分层架构的代码组织 为什么需要 DDD？ 传统的三层架构（Controller-Service-DAO）在简单业务场景下够用，但当业务复杂度增加时，会出现几个问题：
+Service 层逻辑臃肿
+所有业务逻辑都堆在 Service 层，一个 OrderService 可能有几千行代码。
+业务规则散落各处
+订单的状态流转规则可能分散在多个 Service 方法中，难以维护。
+领域知识流失
+代码中充斥着 updateStatus(orderId, 3)，没人知道 3 代表什么状态。
+DDD 通过领域建模，让代码更贴近业务，提升可维护性。
+DDD 核心概念 实体（Entity）
+有唯一标识的对象，生命周期内标识不变。比如订单、用户。
+1public class Order { 2 private OrderId id; // 唯一标识 3 private UserId userId; 4 private OrderStatus status; 5 private List&lt;OrderItem&gt; items; 6 7 // 业务方法 8 public void pay() { 9 if (this.status != OrderStatus.PENDING_PAYMENT) { 10 throw new IllegalStateException(&#34;订单状态不允许支付&#34;); 11 } 12 this.status = OrderStatus.PAID; 13 } 14} 值对象（Value Object）
+...</p>
+  </div>
+  <footer class="entry-footer"><span title='2024-09-25 00:00:00 +0000 UTC'>September 25, 2024</span>&nbsp;·&nbsp;<span>4 min</span>&nbsp;·&nbsp;<span>703 words</span>&nbsp;·&nbsp;<span>wawayu</span></footer>
+  <a class="entry-link" aria-label="post link to 领域驱动设计（DDD）落地实践：从理论到代码" href="http://localhost:1313/posts/2024/09/%E9%A2%86%E5%9F%9F%E9%A9%B1%E5%8A%A8%E8%AE%BE%E8%AE%A1ddd%E8%90%BD%E5%9C%B0%E5%AE%9E%E8%B7%B5%E4%BB%8E%E7%90%86%E8%AE%BA%E5%88%B0%E4%BB%A3%E7%A0%81/"></a>
+</article>
+
+<article class="post-entry tag-entry"> 
+  <header class="entry-header">
+    <h2 class="entry-hint-parent">Docker 容器化部署最佳实践：从 Dockerfile 到生产环境
+    </h2>
+  </header>
+  <div class="entry-content">
+    <p>容器化已经成为现代应用部署的标准方式。Docker 让应用部署变得简单、可靠、可移植。本文讲解 Docker 在生产环境中的最佳实践。
+本文亮点 掌握 Dockerfile 的编写技巧与优化方法 理解 Docker 镜像的分层构建原理 学会使用多阶段构建减少镜像体积 了解 Docker Compose 编排多服务环境 为什么需要容器化？ 传统部署的痛点
+环境不一致：“在我机器上能跑” 依赖管理复杂：JDK、Tomcat、MySQL 版本不一致 部署流程繁琐：手动上传、解压、配置、启动 资源利用率低：一台服务器只跑一个应用 容器化的优势
+环境一致性：开发、测试、生产环境完全一致 快速部署：秒级启动，一键部署 资源隔离：每个容器独立运行，互不影响 易于扩展：水平扩展只需启动更多容器 Dockerfile 基础 最简单的 Dockerfile
+1FROM openjdk:11-jre-slim 2COPY app.jar /app.jar 3ENTRYPOINT [&#34;java&#34;, &#34;-jar&#34;, &#34;/app.jar&#34;] 构建镜像
+1docker build -t myapp:1.0 . 运行容器
+1docker run -d -p 8080:8080 myapp:1.0 Dockerfile 最佳实践 1. 选择合适的基础镜像 不好的做法
+1FROM ubuntu:20.04 2RUN apt-get update &amp;&amp; apt-get install -y openjdk-11-jdk 镜像大小：600MB&#43;
+...</p>
+  </div>
+  <footer class="entry-footer"><span title='2024-09-10 00:00:00 +0000 UTC'>September 10, 2024</span>&nbsp;·&nbsp;<span>5 min</span>&nbsp;·&nbsp;<span>911 words</span>&nbsp;·&nbsp;<span>wawayu</span></footer>
+  <a class="entry-link" aria-label="post link to Docker 容器化部署最佳实践：从 Dockerfile 到生产环境" href="http://localhost:1313/posts/2024/09/docker-%E5%AE%B9%E5%99%A8%E5%8C%96%E9%83%A8%E7%BD%B2%E6%9C%80%E4%BD%B3%E5%AE%9E%E8%B7%B5%E4%BB%8E-dockerfile-%E5%88%B0%E7%94%9F%E4%BA%A7%E7%8E%AF%E5%A2%83/"></a>
+</article>
+
+<article class="post-entry tag-entry"> 
+  <header class="entry-header">
+    <h2 class="entry-hint-parent">Redis 分布式锁的生产级实践：从原理到 Redisson
+    </h2>
+  </header>
+  <div class="entry-content">
+    <p>在分布式系统中，多个服务实例可能同时访问共享资源，需要分布式锁来保证数据一致性。Redis 是实现分布式锁的常用方案，但很多人只会用 SETNX，不知道其中的坑。本文深入剖析 Redis 分布式锁的实现。
+本文亮点 理解 Redis 分布式锁的实现原理与常见问题 掌握 Redisson 看门狗机制的设计思想 学会高并发场景下的锁优化方案 了解分布式锁的最佳实践 为什么需要分布式锁？ 场景一：库存扣减
+1// 错误示例：没有加锁 2public void deductStock(Long productId, int quantity) { 3 Stock stock = stockMapper.selectById(productId); 4 if (stock.getQuantity() &gt;= quantity) { 5 stock.setQuantity(stock.getQuantity() - quantity); 6 stockMapper.updateById(stock); 7 } 8} 在高并发场景下，多个线程同时读取库存，可能导致超卖。
+场景二：定时任务去重
+多个服务实例部署时，定时任务会重复执行，需要分布式锁保证只有一个实例执行。
+基础实现：SETNX &#43; EXPIRE 版本一：最简单的实现
+1public boolean tryLock(String key) { 2 return redisTemplate.opsForValue().setIfAbsent(key, &#34;1&#34;); 3} 4 5public void unlock(String key) { 6 redisTemplate.delete(key); 7} 问题：如果获取锁后，服务宕机，锁永远不会释放，导致死锁。
+...</p>
+  </div>
+  <footer class="entry-footer"><span title='2024-08-15 00:00:00 +0000 UTC'>August 15, 2024</span>&nbsp;·&nbsp;<span>5 min</span>&nbsp;·&nbsp;<span>883 words</span>&nbsp;·&nbsp;<span>wawayu</span></footer>
+  <a class="entry-link" aria-label="post link to Redis 分布式锁的生产级实践：从原理到 Redisson" href="http://localhost:1313/posts/2024/08/redis-%E5%88%86%E5%B8%83%E5%BC%8F%E9%94%81%E7%9A%84%E7%94%9F%E4%BA%A7%E7%BA%A7%E5%AE%9E%E8%B7%B5%E4%BB%8E%E5%8E%9F%E7%90%86%E5%88%B0-redisson/"></a>
+</article>
+
+<article class="post-entry tag-entry"> 
+  <header class="entry-header">
+    <h2 class="entry-hint-parent">Spring Boot Starter 自定义开发：从原理到实战
+    </h2>
+  </header>
+  <div class="entry-content">
+    <p>Spring Boot 的核心魅力在于&#34;约定优于配置&#34;，而 Starter 机制是实现这一理念的关键。本文通过实战案例，讲解如何开发一个生产级的自定义 Starter。
+本文亮点 理解 Spring Boot 自动装配的底层原理 掌握 BeanPostProcessor 的使用场景 学会设计零侵入式的基础组件 了解 Starter 的最佳实践与规范 为什么需要自定义 Starter？ 场景： 公司有多个 Spring Boot 项目，都需要集成线程池监控功能。
+传统做法： 每个项目都复制一遍配置代码。
+问题：
+代码重复，维护成本高 配置不统一，容易出错 升级困难，需要修改所有项目 Starter 的优势：
+一次开发，多处复用 零侵入，引入依赖即可使用 统一管理，升级方便 案例：开发线程池监控 Starter 功能需求：
+自动扫描项目中的 ThreadPoolExecutor 定时上报线程池指标（活跃线程数、队列长度、拒绝次数） 提供管理后台查看和调整线程池参数 第一步：创建 Starter 项目 项目结构
+1threadpool-spring-boot-starter 2├── src/main/java 3│ └── com/example/threadpool 4│ ├── autoconfigure 5│ │ ├── ThreadPoolAutoConfiguration.java 6│ │ └── ThreadPoolProperties.java 7│ ├── core 8│ │ ├── ThreadPoolMonitor.java 9│ │ └── ThreadPoolRegistry.java 10│ └── processor 11│ └── ThreadPoolBeanPostProcessor.java 12├── src/main/resources 13│ └── META-INF 14│ └── spring.factories 15└── pom.xml pom.xml
+...</p>
+  </div>
+  <footer class="entry-footer"><span title='2024-08-05 00:00:00 +0000 UTC'>August 5, 2024</span>&nbsp;·&nbsp;<span>4 min</span>&nbsp;·&nbsp;<span>845 words</span>&nbsp;·&nbsp;<span>wawayu</span></footer>
+  <a class="entry-link" aria-label="post link to Spring Boot Starter 自定义开发：从原理到实战" href="http://localhost:1313/posts/2024/08/spring-boot-starter-%E8%87%AA%E5%AE%9A%E4%B9%89%E5%BC%80%E5%8F%91%E4%BB%8E%E5%8E%9F%E7%90%86%E5%88%B0%E5%AE%9E%E6%88%98/"></a>
+</article>
+
+<article class="post-entry tag-entry"> 
+  <header class="entry-header">
+    <h2 class="entry-hint-parent">Spring Bean 生命周期完全解析
+    </h2>
+  </header>
+  <div class="entry-content">
+    <p>理解 Spring Bean 的生命周期，是掌握 Spring 框架的关键。本文从源码层面剖析 Bean 的创建过程，帮助你深入理解 Spring 的核心机制。
+本文亮点 掌握 Bean 生命周期的完整流程 理解 BeanPostProcessor 的执行时机 学会解决循环依赖问题 了解 InitializingBean vs @PostConstruct 的区别 Bean 生命周期概览 1实例化 → 属性填充 → 初始化前 → 初始化 → 初始化后 → 使用 → 销毁 详细流程：
+实例化（Instantiation）：通过反射创建 Bean 实例 属性填充（Populate）：注入依赖的 Bean Aware 接口回调：BeanNameAware、BeanFactoryAware 等 BeanPostProcessor.postProcessBeforeInitialization InitializingBean.afterPropertiesSet 自定义 init-method BeanPostProcessor.postProcessAfterInitialization Bean 可以使用 DisposableBean.destroy 自定义 destroy-method 实例化：反射创建对象 1protected Object doCreateBean(String beanName, RootBeanDefinition mbd, Object[] args) { 2 // 1. 实例化 Bean 3 BeanWrapper instanceWrapper = createBeanInstance(beanName, mbd, args); 4 Object bean = instanceWrapper.getWrappedInstance(); 5 6 // 2. 属性填充 7 populateBean(beanName, mbd, instanceWrapper); 8 9 // 3. 初始化 10 Object exposedObject = initializeBean(beanName, bean, mbd); 11 12 return exposedObject; 13} 属性填充：依赖注入 1protected void populateBean(String beanName, RootBeanDefinition mbd, BeanWrapper bw) { 2 // 获取属性值 3 PropertyValues pvs = mbd.getPropertyValues(); 4 5 // 自动装配（byName、byType） 6 if (mbd.getResolvedAutowireMode() == AUTOWIRE_BY_NAME) { 7 autowireByName(beanName, mbd, bw, newPvs); 8 } 9 if (mbd.getResolvedAutowireMode() == AUTOWIRE_BY_TYPE) { 10 autowireByType(beanName, mbd, bw, newPvs); 11 } 12 13 // 应用属性值 14 applyPropertyValues(beanName, mbd, bw, pvs); 15} 初始化：回调与自定义逻辑 1protected Object initializeBean(String beanName, Object bean, RootBeanDefinition mbd) { 2 // 1. Aware 接口回调 3 invokeAwareMethods(beanName, bean); 4 5 // 2. BeanPostProcessor 前置处理 6 Object wrappedBean = applyBeanPostProcessorsBeforeInitialization(bean, beanName); 7 8 // 3. 初始化方法 9 invokeInitMethods(beanName, wrappedBean, mbd); 10 11 // 4. BeanPostProcessor 后置处理 12 wrappedBean = applyBeanPostProcessorsAfterInitialization(wrappedBean, beanName); 13 14 return wrappedBean; 15} BeanPostProcessor：扩展点 1public interface BeanPostProcessor { 2 3 // 初始化前回调 4 default Object postProcessBeforeInitialization(Object bean, String beanName) { 5 return bean; 6 } 7 8 // 初始化后回调 9 default Object postProcessAfterInitialization(Object bean, String beanName) { 10 return bean; 11 } 12} 应用场景：
+...</p>
+  </div>
+  <footer class="entry-footer"><span title='2024-06-20 00:00:00 +0000 UTC'>June 20, 2024</span>&nbsp;·&nbsp;<span>3 min</span>&nbsp;·&nbsp;<span>433 words</span>&nbsp;·&nbsp;<span>wawayu</span></footer>
+  <a class="entry-link" aria-label="post link to Spring Bean 生命周期完全解析" href="http://localhost:1313/posts/2024/06/spring-bean-%E7%94%9F%E5%91%BD%E5%91%A8%E6%9C%9F%E5%AE%8C%E5%85%A8%E8%A7%A3%E6%9E%90/"></a>
+</article>
+
+<article class="post-entry tag-entry"> 
+  <header class="entry-header">
+    <h2 class="entry-hint-parent">Spring 事务传播机制与失效场景完全解析
+    </h2>
+  </header>
+  <div class="entry-content">
+    <p>Spring 事务管理是后端开发的基础技能，但很多人只会在方法上加 @Transactional，却不知道事务传播机制和失效场景。本文系统讲解 Spring 事务的核心原理。
+本文亮点 理解 7 种事务传播行为的区别与适用场景 掌握事务失效的 5 种常见场景 学会编程式事务的使用方法 了解分布式事务的解决方案 事务的 ACID 特性 Atomicity（原子性）：事务中的操作要么全部成功，要么全部失败 Consistency（一致性）：事务执行前后，数据保持一致状态 Isolation（隔离性）：并发事务之间互不干扰 Durability（持久性）：事务提交后，数据永久保存 7 种事务传播行为 REQUIRED（默认）
+如果当前存在事务，加入该事务；如果不存在，创建新事务。
+1@Transactional(propagation = Propagation.REQUIRED) 2public void methodA() { 3 // 操作 1 4 methodB(); // 加入 methodA 的事务 5} 6 7@Transactional(propagation = Propagation.REQUIRED) 8public void methodB() { 9 // 操作 2 10} 如果 methodB 抛出异常，methodA 和 methodB 的操作都会回滚。
+...</p>
+  </div>
+  <footer class="entry-footer"><span title='2024-05-15 00:00:00 +0000 UTC'>May 15, 2024</span>&nbsp;·&nbsp;<span>3 min</span>&nbsp;·&nbsp;<span>491 words</span>&nbsp;·&nbsp;<span>wawayu</span></footer>
+  <a class="entry-link" aria-label="post link to Spring 事务传播机制与失效场景完全解析" href="http://localhost:1313/posts/2024/05/spring-%E4%BA%8B%E5%8A%A1%E4%BC%A0%E6%92%AD%E6%9C%BA%E5%88%B6%E4%B8%8E%E5%A4%B1%E6%95%88%E5%9C%BA%E6%99%AF%E5%AE%8C%E5%85%A8%E8%A7%A3%E6%9E%90/"></a>
+</article>
+
+<article class="post-entry tag-entry"> 
+  <header class="entry-header">
+    <h2 class="entry-hint-parent">Spring AOP 原理与动态代理实现深度解析
+    </h2>
+  </header>
+  <div class="entry-content">
+    <p>AOP（面向切面编程）是 Spring 框架的核心特性之一。通过 AOP，我们可以将横切关注点（如日志、事务、权限）从业务逻辑中分离出来。但 AOP 是如何实现的？本文深入剖析 Spring AOP 的底层机制。
+本文亮点 理解 AOP 的核心概念：切面、切点、通知、连接点 掌握 JDK 动态代理与 CGLIB 代理的实现原理 学会 ProxyFactory 的创建流程 了解切面执行顺序与责任链模式 AOP 核心概念 切面（Aspect）
+横切关注点的模块化，比如日志切面、事务切面。
+1@Aspect 2@Component 3public class LogAspect { 4 5 @Before(&#34;execution(* com.example.service.*.*(..))&#34;) 6 public void logBefore(JoinPoint joinPoint) { 7 log.info(&#34;方法执行前: {}&#34;, joinPoint.getSignature().getName()); 8 } 9} 切点（Pointcut）
+定义在哪些连接点上应用通知，通过表达式匹配。
+1@Pointcut(&#34;execution(* com.example.service.*.*(..))&#34;) 2public void serviceLayer() {} 通知（Advice）
+在切点上执行的动作，分为五种类型：
+@Before：前置通知 @After：后置通知 @AfterReturning：返回通知 @AfterThrowing：异常通知 @Around：环绕通知 连接点（JoinPoint）
+程序执行的某个点，比如方法调用、异常抛出。
+JDK 动态代理 vs CGLIB 代理 Spring AOP 使用两种代理方式：
+...</p>
+  </div>
+  <footer class="entry-footer"><span title='2024-04-10 00:00:00 +0000 UTC'>April 10, 2024</span>&nbsp;·&nbsp;<span>3 min</span>&nbsp;·&nbsp;<span>514 words</span>&nbsp;·&nbsp;<span>wawayu</span></footer>
+  <a class="entry-link" aria-label="post link to Spring AOP 原理与动态代理实现深度解析" href="http://localhost:1313/posts/2024/04/spring-aop-%E5%8E%9F%E7%90%86%E4%B8%8E%E5%8A%A8%E6%80%81%E4%BB%A3%E7%90%86%E5%AE%9E%E7%8E%B0%E6%B7%B1%E5%BA%A6%E8%A7%A3%E6%9E%90/"></a>
+</article>
+
+<article class="post-entry tag-entry"> 
+  <header class="entry-header">
+    <h2 class="entry-hint-parent">CompletableFuture 异步编程实战指南
+    </h2>
+  </header>
+  <div class="entry-content">
+    <p>在微服务架构中，一个接口往往需要调用多个下游服务。如果串行调用，响应时间会累加；如果用传统的 Future，代码会变得复杂难维护。CompletableFuture 提供了优雅的异步编程方案。
+本文亮点 掌握 CompletableFuture 的链式调用与组合操作 学会异常处理与超时控制 理解与线程池的配合使用 了解异步编程的最佳实践 传统 Future 的痛点 JDK 1.5 引入的 Future 接口只能通过 get() 方法阻塞等待结果：
+1ExecutorService executor = Executors.newFixedThreadPool(10); 2 3Future&lt;String&gt; future = executor.submit(() -&gt; { 4 Thread.sleep(1000); 5 return &#34;Hello&#34;; 6}); 7 8// 阻塞等待结果 9String result = future.get(); 问题：
+get() 会阻塞当前线程，无法异步处理结果 无法组合多个异步任务 异常处理不方便 CompletableFuture 解决了这些问题。
+CompletableFuture 基础用法 创建 CompletableFuture
+1// 方式一：手动完成 2CompletableFuture&lt;String&gt; future = new CompletableFuture&lt;&gt;(); 3future.complete(&#34;Hello&#34;); 4 5// 方式二：异步执行 6CompletableFuture&lt;String&gt; future = CompletableFuture.supplyAsync(() -&gt; { 7 return &#34;Hello&#34;; 8}); 9 10// 方式三：无返回值的异步执行 11CompletableFuture&lt;Void&gt; future = CompletableFuture.runAsync(() -&gt; { 12 System.out.println(&#34;Hello&#34;); 13}); 获取结果
+...</p>
+  </div>
+  <footer class="entry-footer"><span title='2024-03-25 00:00:00 +0000 UTC'>March 25, 2024</span>&nbsp;·&nbsp;<span>4 min</span>&nbsp;·&nbsp;<span>783 words</span>&nbsp;·&nbsp;<span>wawayu</span></footer>
+  <a class="entry-link" aria-label="post link to CompletableFuture 异步编程实战指南" href="http://localhost:1313/posts/2024/03/completablefuture-%E5%BC%82%E6%AD%A5%E7%BC%96%E7%A8%8B%E5%AE%9E%E6%88%98%E6%8C%87%E5%8D%97/"></a>
+</article>
+<footer class="page-footer">
+  <nav class="pagination">
+    <a class="prev" href="http://localhost:1313/tags/%E6%9C%80%E4%BD%B3%E5%AE%9E%E8%B7%B5/">
+      «&nbsp;Prev&nbsp;
+    </a>
+  </nav>
+</footer>
+    </main>
+    
+<footer class="footer">
+        <span>&copy; 2026 <a href="http://localhost:1313/">博客喵</a></span> · 
+
+    <span>
+        Powered by
+        <a href="https://gohugo.io/" rel="noopener noreferrer" target="_blank">Hugo</a> &
+        <a href="https://github.com/adityatelange/hugo-PaperMod/" rel="noopener" target="_blank">PaperMod</a>
+    </span>
+</footer>
+<a href="#top" aria-label="go to top" title="Go to Top (Alt + G)" class="top-link" id="top-link" accesskey="g">
+    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 12 6" fill="currentColor">
+        <path d="M12 6H0l6-6z" />
+    </svg>
+</a>
+
+<script>
+    let menu = document.getElementById('menu');
+    if (menu) {
+        
+        const scrollPosition = localStorage.getItem("menu-scroll-position");
+        if (scrollPosition) {
+            menu.scrollLeft = parseInt(scrollPosition, 10);
+        }
+        
+        menu.onscroll = function () {
+            localStorage.setItem("menu-scroll-position", menu.scrollLeft);
+        }
+    }
+
+    document.querySelectorAll('a[href^="#"]').forEach(anchor => {
+        anchor.addEventListener("click", function (e) {
+            e.preventDefault();
+            var id = this.getAttribute("href").substr(1);
+            if (!window.matchMedia('(prefers-reduced-motion: reduce)').matches) {
+                document.querySelector(`[id='${decodeURIComponent(id)}']`).scrollIntoView({
+                    behavior: "smooth"
+                });
+            } else {
+                document.querySelector(`[id='${decodeURIComponent(id)}']`).scrollIntoView();
+            }
+            if (id === "top") {
+                history.replaceState(null, null, " ");
+            } else {
+                history.pushState(null, null, `#${id}`);
+            }
+        });
+    });
+
+</script>
+<script>
+    var mybutton = document.getElementById("top-link");
+    window.onscroll = function () {
+        if (document.body.scrollTop > 800 || document.documentElement.scrollTop > 800) {
+            mybutton.style.visibility = "visible";
+            mybutton.style.opacity = "1";
+        } else {
+            mybutton.style.visibility = "hidden";
+            mybutton.style.opacity = "0";
+        }
+    };
+
+</script>
+<script>
+    document.getElementById("theme-toggle").addEventListener("click", () => {
+        const html = document.querySelector("html");
+        if (html.dataset.theme === "dark") {
+            html.dataset.theme = 'light';
+            localStorage.setItem("pref-theme", 'light');
+        } else {
+            html.dataset.theme = 'dark';
+            localStorage.setItem("pref-theme", 'dark');
+        }
+    })
+
+</script>
+</body>
+
+</html>

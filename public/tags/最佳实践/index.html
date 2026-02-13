@@ -1,0 +1,433 @@
+<!DOCTYPE html>
+<html lang="en" dir="auto" data-theme="auto">
+
+<head><script src="/livereload.js?mindelay=10&amp;v=2&amp;port=1313&amp;path=livereload" data-no-instant defer></script><meta charset="utf-8">
+<meta http-equiv="X-UA-Compatible" content="IE=edge">
+<meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
+<meta name="robots" content="index, follow">
+<title>最佳实践 | 博客喵</title>
+<meta name="keywords" content="">
+<meta name="description" content="记录技术成长，分享开发经验，专注 Java 后端与分布式系统">
+<meta name="author" content="wawayu">
+<link rel="canonical" href="http://localhost:1313/tags/%E6%9C%80%E4%BD%B3%E5%AE%9E%E8%B7%B5/">
+<link crossorigin="anonymous" href="/assets/css/stylesheet.a29c24210eb31d9ce56f669c66a35c9c51b17376b7764e336a49af7dec914cf0.css" integrity="sha256-opwkIQ6zHZzlb2acZqNcnFGxc3a3dk4zakmvfeyRTPA=" rel="preload stylesheet" as="style">
+<link rel="icon" href="http://localhost:1313/favicon.ico">
+<link rel="icon" type="image/png" sizes="16x16" href="http://localhost:1313/favicon-16x16.png">
+<link rel="icon" type="image/png" sizes="32x32" href="http://localhost:1313/favicon-32x32.png">
+<link rel="apple-touch-icon" href="http://localhost:1313/apple-touch-icon.png">
+<link rel="mask-icon" href="http://localhost:1313/safari-pinned-tab.svg">
+<meta name="theme-color" content="#2e2e33">
+<meta name="msapplication-TileColor" content="#2e2e33">
+<link rel="alternate" type="application/rss+xml" href="http://localhost:1313/tags/%E6%9C%80%E4%BD%B3%E5%AE%9E%E8%B7%B5/index.xml" title="rss">
+<link rel="alternate" hreflang="en" href="http://localhost:1313/tags/%E6%9C%80%E4%BD%B3%E5%AE%9E%E8%B7%B5/">
+<noscript>
+    <style>
+        #theme-toggle,
+        .top-link {
+            display: none;
+        }
+
+    </style>
+    <style>
+        @media (prefers-color-scheme: dark) {
+            :root {
+                --theme: rgb(29, 30, 32);
+                --entry: rgb(46, 46, 51);
+                --primary: rgb(218, 218, 219);
+                --secondary: rgb(155, 156, 157);
+                --tertiary: rgb(65, 66, 68);
+                --content: rgb(196, 196, 197);
+                --code-block-bg: rgb(46, 46, 51);
+                --code-bg: rgb(55, 56, 62);
+                --border: rgb(51, 51, 51);
+                color-scheme: dark;
+            }
+
+            .list {
+                background: var(--theme);
+            }
+
+            .toc {
+                background: var(--entry);
+            }
+        }
+
+        @media (prefers-color-scheme: light) {
+            .list::-webkit-scrollbar-thumb {
+                border-color: var(--code-bg);
+            }
+        }
+
+    </style>
+</noscript>
+<script>
+    if (localStorage.getItem("pref-theme") === "dark") {
+        document.querySelector("html").dataset.theme = 'dark';
+    } else if (localStorage.getItem("pref-theme") === "light") {
+       document.querySelector("html").dataset.theme = 'light';
+    } else if (window.matchMedia('(prefers-color-scheme: dark)').matches) {
+        document.querySelector("html").dataset.theme = 'dark';
+    } else {
+        document.querySelector("html").dataset.theme = 'light';
+    }
+
+</script><meta property="og:url" content="http://localhost:1313/tags/%E6%9C%80%E4%BD%B3%E5%AE%9E%E8%B7%B5/">
+  <meta property="og:site_name" content="博客喵">
+  <meta property="og:title" content="最佳实践">
+  <meta property="og:description" content="记录技术成长，分享开发经验，专注 Java 后端与分布式系统">
+  <meta property="og:locale" content="zh-cn">
+  <meta property="og:type" content="website">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:title" content="最佳实践">
+<meta name="twitter:description" content="记录技术成长，分享开发经验，专注 Java 后端与分布式系统">
+
+</head>
+<body class="list" id="top">
+    <header class="header">
+    <nav class="nav">
+        <div class="logo">
+            <a href="http://localhost:1313/" accesskey="h" title="博客喵 (Alt + H)">博客喵</a>
+            <div class="logo-switches">
+                <button id="theme-toggle" accesskey="t" title="(Alt + T)" aria-label="Toggle theme">
+                    <svg id="moon" xmlns="http://www.w3.org/2000/svg" width="24" height="18" viewBox="0 0 24 24"
+                        fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"
+                        stroke-linejoin="round">
+                        <path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"></path>
+                    </svg>
+                    <svg id="sun" xmlns="http://www.w3.org/2000/svg" width="24" height="18" viewBox="0 0 24 24"
+                        fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"
+                        stroke-linejoin="round">
+                        <circle cx="12" cy="12" r="5"></circle>
+                        <line x1="12" y1="1" x2="12" y2="3"></line>
+                        <line x1="12" y1="21" x2="12" y2="23"></line>
+                        <line x1="4.22" y1="4.22" x2="5.64" y2="5.64"></line>
+                        <line x1="18.36" y1="18.36" x2="19.78" y2="19.78"></line>
+                        <line x1="1" y1="12" x2="3" y2="12"></line>
+                        <line x1="21" y1="12" x2="23" y2="12"></line>
+                        <line x1="4.22" y1="19.78" x2="5.64" y2="18.36"></line>
+                        <line x1="18.36" y1="5.64" x2="19.78" y2="4.22"></line>
+                    </svg>
+                </button>
+            </div>
+        </div>
+        <ul id="menu">
+            <li>
+                <a href="http://localhost:1313/posts/" title="📝 文章">
+                    <span>📝 文章</span>
+                </a>
+            </li>
+            <li>
+                <a href="http://localhost:1313/tags/" title="🏷️ 标签">
+                    <span>🏷️ 标签</span>
+                </a>
+            </li>
+            <li>
+                <a href="http://localhost:1313/categories/" title="📂 分类">
+                    <span>📂 分类</span>
+                </a>
+            </li>
+            <li>
+                <a href="http://localhost:1313/skills/" title="💻 技能">
+                    <span>💻 技能</span>
+                </a>
+            </li>
+            <li>
+                <a href="http://localhost:1313/about/" title="👤 关于">
+                    <span>👤 关于</span>
+                </a>
+            </li>
+            <li>
+                <a href="http://localhost:1313/search/" title="🔍 搜索 (Alt &#43; /)" accesskey=/>
+                    <span>🔍 搜索</span>
+                </a>
+            </li>
+        </ul>
+    </nav>
+</header>
+<main class="main"> 
+<header class="page-header"><div class="breadcrumbs"><a href="http://localhost:1313/">Home</a>&nbsp;»&nbsp;<a href="http://localhost:1313/tags/">Tags</a></div>
+  <h1>
+    最佳实践
+    <a href="/tags/%E6%9C%80%E4%BD%B3%E5%AE%9E%E8%B7%B5/index.xml" title="RSS" aria-label="RSS">
+      <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"
+        stroke-linecap="round" stroke-linejoin="round" height="23">
+        <path d="M4 11a9 9 0 0 1 9 9" />
+        <path d="M4 4a16 16 0 0 1 16 16" />
+        <circle cx="5" cy="19" r="1" />
+      </svg>
+    </a>
+  </h1>
+</header>
+
+<article class="post-entry tag-entry"> 
+  <header class="entry-header">
+    <h2 class="entry-hint-parent">从零到一：构建 Hugo &#43; PaperMod 自动化博客系统
+    </h2>
+  </header>
+  <div class="entry-content">
+    <p>在碎片化信息爆炸的时代，拥有一套完全受自己掌控的技术专栏，是每位开发者沉淀思考、打造个人品牌的核心资产。相比于被平台算法绑架的公众号，或是充斥广告的第三方博客，Hugo 这类静态站点生成器给了我们真正的自由：毫秒级构建、Markdown 原生支持、完全的样式控制权。
+但很多人在搭建 Hugo 博客时，往往陷入&#34;照着文档敲命令&#34;的机械重复。本文不是又一篇安装教程，而是从系统架构的角度，带你理解 Hugo &#43; PaperMod 这套方案背后的设计逻辑。
+本文亮点 理解 Hugo Extended 与 PaperMod 的依赖关系 掌握 Git Submodule 的主题管理方案 设计基于 GitHub Actions 的自动化部署流水线 建立工程化思维而非&#34;跟着做&#34;的操作思维 01. 基础设施：为什么必须是 Hugo Extended？ 很多人第一次搭建 Hugo 博客时，会遇到一个诡异的报错：TOCSS: failed to transform &#34;css/main.css&#34;。明明按照官方文档装了 Hugo，为什么还会出错？
+问题出在版本选择上。Hugo 分为普通版和 Extended 版，后者内置了 LibSass 编译器。而 PaperMod 这类现代主题大量使用 SCSS/SASS 来实现主题变量、暗黑模式切换等特性。如果你用普通版 Hugo，编译流程会在 CSS 转换环节直接崩溃。
+在 Windows 环境下，我们用 Winget 来安装，而不是手动下载 zip 包：
+1# 使用包管理器安装，确保版本可追溯 2winget install Hugo.Hugo.Extended 3 4# 验证安装：必须看到 &#43;extended 标识 5hugo version 6# 预期输出: hugo v0.12x.x&#43;extended windows/amd64 为什么坚持用包管理器？因为这是&#34;可复现环境&#34;的第一步。当你的博客需要团队协作，或者换了台电脑重新部署时，一条命令就能恢复完全一致的环境，而不是在&#34;我电脑上能跑&#34;的泥潭里挣扎。
+...</p>
+  </div>
+  <footer class="entry-footer"><span title='2026-02-12 00:00:00 +0000 UTC'>February 12, 2026</span>&nbsp;·&nbsp;<span>2 min</span>&nbsp;·&nbsp;<span>397 words</span>&nbsp;·&nbsp;<span>wawayu</span></footer>
+  <a class="entry-link" aria-label="post link to 从零到一：构建 Hugo &#43; PaperMod 自动化博客系统" href="http://localhost:1313/posts/2026/02/%E4%BB%8E%E9%9B%B6%E5%88%B0%E4%B8%80%E6%9E%84%E5%BB%BA-hugo--papermod-%E8%87%AA%E5%8A%A8%E5%8C%96%E5%8D%9A%E5%AE%A2%E7%B3%BB%E7%BB%9F/"></a>
+</article>
+
+<article class="post-entry tag-entry"> 
+  <header class="entry-header">
+    <h2 class="entry-hint-parent">分布式事务解决方案：从 2PC 到 Seata 的演进与实战
+    </h2>
+  </header>
+  <div class="entry-content">
+    <p>在微服务架构中，一个业务操作往往需要跨越多个服务，如何保证这些操作的一致性是一个经典难题。本文将系统讲解分布式事务的各种解决方案，从理论到实践，帮助你选择合适的方案。
+本文亮点 理解分布式事务的核心问题 掌握2PC、3PC、TCC、Saga等方案 学会使用Seata框架解决分布式事务 了解各方案的优缺点和适用场景 掌握生产环境的最佳实践 分布式事务问题 业务场景 电商下单场景，涉及多个服务：
+1用户下单 2 ↓ 3订单服务：创建订单 4 ↓ 5库存服务：扣减库存 6 ↓ 7账户服务：扣减余额 8 ↓ 9积分服务：增加积分 问题：如果某个服务失败，如何保证数据一致性？
+CAP理论 分布式系统的三个特性：
+C (Consistency)：一致性 A (Availability)：可用性 P (Partition Tolerance)：分区容错性 CAP定理：三者最多只能同时满足两个
+实际选择：
+CP：牺牲可用性，保证一致性（如ZooKeeper） AP：牺牲一致性，保证可用性（如Eureka） BASE理论 BA (Basically Available)：基本可用 S (Soft State)：软状态 E (Eventually Consistent)：最终一致性 架构思考： 在分布式系统中，强一致性往往难以实现且代价高昂。大多数业务场景可以接受最终一致性，这也是现代分布式事务方案的基础。
+2PC（两阶段提交） 原理 第一阶段：准备阶段（Prepare）
+协调者向所有参与者发送Prepare请求 参与者执行事务操作，但不提交 参与者返回Yes或No 第二阶段：提交阶段（Commit）
+如果所有参与者都返回Yes，协调者发送Commit请求 如果有参与者返回No，协调者发送Rollback请求 流程图 1协调者 参与者1 参与者2 2 | | | 3 |---Prepare----------&gt;| | 4 |---Prepare----------------------------&gt;| 5 | | | 6 |&lt;--Yes/No------------| | 7 |&lt;--Yes/No-------------------------------| 8 | | | 9 |---Commit/Rollback--&gt;| | 10 |---Commit/Rollback----------------------&gt;| 代码示例 1public class TwoPhaseCommitCoordinator { 2 3 private List&lt;Participant&gt; participants; 4 5 public boolean executeTransaction() { 6 // 第一阶段：准备 7 boolean canCommit = prepare(); 8 9 // 第二阶段：提交或回滚 10 if (canCommit) { 11 commit(); 12 return true; 13 } else { 14 rollback(); 15 return false; 16 } 17 } 18 19 private boolean prepare() { 20 for (Participant participant : participants) { 21 if (!participant.prepare()) { 22 return false; 23 } 24 } 25 return true; 26 } 27 28 private void commit() { 29 for (Participant participant : participants) { 30 participant.commit(); 31 } 32 } 33 34 private void rollback() { 35 for (Participant participant : participants) { 36 participant.rollback(); 37 } 38 } 39} 40 41interface Participant { 42 boolean prepare(); 43 void commit(); 44 void rollback(); 45} 优缺点 优点：
+...</p>
+  </div>
+  <footer class="entry-footer"><span title='2025-12-20 00:00:00 +0000 UTC'>December 20, 2025</span>&nbsp;·&nbsp;<span>8 min</span>&nbsp;·&nbsp;<span>1522 words</span>&nbsp;·&nbsp;<span>wawayu</span></footer>
+  <a class="entry-link" aria-label="post link to 分布式事务解决方案：从 2PC 到 Seata 的演进与实战" href="http://localhost:1313/posts/2025/12/%E5%88%86%E5%B8%83%E5%BC%8F%E4%BA%8B%E5%8A%A1%E8%A7%A3%E5%86%B3%E6%96%B9%E6%A1%88%E4%BB%8E-2pc-%E5%88%B0-seata-%E7%9A%84%E6%BC%94%E8%BF%9B%E4%B8%8E%E5%AE%9E%E6%88%98/"></a>
+</article>
+
+<article class="post-entry tag-entry"> 
+  <header class="entry-header">
+    <h2 class="entry-hint-parent">接口响应慢？一次完整的性能优化之旅
+    </h2>
+  </header>
+  <div class="entry-content">
+    <p>“这个接口怎么这么慢？“这是每个后端开发都会遇到的问题。当用户抱怨系统卡顿，当监控告警频繁触发，我们该如何系统性地定位和解决性能问题？
+本文将通过一个真实的案例，带你经历一次完整的性能优化之旅，从问题发现到最终优化，将接口响应时间从3秒降低到300ms。
+本文亮点 掌握性能问题的系统性排查方法 学会使用各种性能分析工具 理解常见的性能瓶颈及解决方案 了解数据库、缓存、代码层面的优化技巧 建立完整的性能优化思维模型 问题背景 业务场景 某电商系统的订单详情接口，用户反馈页面加载缓慢，影响用户体验。
+接口定义：
+1@GetMapping(&#34;/api/orders/{orderId}&#34;) 2public Result&lt;OrderDetailVO&gt; getOrderDetail(@PathVariable Long orderId) { 3 return Result.success(orderService.getOrderDetail(orderId)); 4} 监控数据：
+平均响应时间：2.8秒 P95响应时间：3.5秒 P99响应时间：5秒 QPS：100 业务要求：
+响应时间 &lt; 500ms P99 &lt; 1秒 架构思考： 性能优化不是盲目地优化，而是要基于数据和目标。首先要明确性能指标和优化目标，然后系统性地分析和优化。
+第一步：问题定位 1. 添加监控埋点 首先，我们需要知道时间都花在哪里了：
+1@Service 2@Slf4j 3public class OrderService { 4 5 @Autowired 6 private OrderMapper orderMapper; 7 8 @Autowired 9 private UserService userService; 10 11 @Autowired 12 private ProductService productService; 13 14 @Autowired 15 private LogisticsService logisticsService; 16 17 public OrderDetailVO getOrderDetail(Long orderId) { 18 long startTime = System.currentTimeMillis(); 19 20 // 1. 查询订单基本信息 21 long step1Start = System.currentTimeMillis(); 22 Order order = orderMapper.selectById(orderId); 23 log.info(&#34;查询订单耗时：{}ms&#34;, System.currentTimeMillis() - step1Start); 24 25 // 2. 查询用户信息 26 long step2Start = System.currentTimeMillis(); 27 User user = userService.getUserById(order.getUserId()); 28 log.info(&#34;查询用户耗时：{}ms&#34;, System.currentTimeMillis() - step2Start); 29 30 // 3. 查询商品信息 31 long step3Start = System.currentTimeMillis(); 32 List&lt;OrderItem&gt; items = orderMapper.selectItemsByOrderId(orderId); 33 List&lt;Product&gt; products = new ArrayList&lt;&gt;(); 34 for (OrderItem item : items) { 35 Product product = productService.getProductById(item.getProductId()); 36 products.add(product); 37 } 38 log.info(&#34;查询商品耗时：{}ms&#34;, System.currentTimeMillis() - step3Start); 39 40 // 4. 查询物流信息 41 long step4Start = System.currentTimeMillis(); 42 Logistics logistics = logisticsService.getLogisticsByOrderId(orderId); 43 log.info(&#34;查询物流耗时：{}ms&#34;, System.currentTimeMillis() - step4Start); 44 45 // 5. 组装返回数据 46 OrderDetailVO vo = buildOrderDetailVO(order, user, products, logistics); 47 48 log.info(&#34;总耗时：{}ms&#34;, System.currentTimeMillis() - startTime); 49 return vo; 50 } 51} 日志输出：
+...</p>
+  </div>
+  <footer class="entry-footer"><span title='2025-10-12 00:00:00 +0000 UTC'>October 12, 2025</span>&nbsp;·&nbsp;<span>7 min</span>&nbsp;·&nbsp;<span>1312 words</span>&nbsp;·&nbsp;<span>wawayu</span></footer>
+  <a class="entry-link" aria-label="post link to 接口响应慢？一次完整的性能优化之旅" href="http://localhost:1313/posts/2025/10/%E6%8E%A5%E5%8F%A3%E5%93%8D%E5%BA%94%E6%85%A2%E4%B8%80%E6%AC%A1%E5%AE%8C%E6%95%B4%E7%9A%84%E6%80%A7%E8%83%BD%E4%BC%98%E5%8C%96%E4%B9%8B%E6%97%85/"></a>
+</article>
+
+<article class="post-entry tag-entry"> 
+  <header class="entry-header">
+    <h2 class="entry-hint-parent">全链路压测：如何验证系统的真实承载能力
+    </h2>
+  </header>
+  <div class="entry-content">
+    <p>在大促、秒杀等高并发场景下，系统能否扛住流量冲击是每个技术团队最关心的问题。传统的单接口压测无法真实反映系统的整体承载能力，而全链路压测通过模拟真实用户行为，可以全面验证系统的性能瓶颈。
+本文将深入讲解全链路压测的方案设计与实施，从理论到实践，帮助你构建完整的压测体系。
+本文亮点 理解全链路压测的核心价值 掌握压测环境的搭建方案 学会数据隔离与流量标记 了解压测工具的选型与使用 掌握性能瓶颈的分析与优化 什么是全链路压测 传统压测 vs 全链路压测 传统压测：
+针对单个接口或服务进行压测 使用测试环境或预发布环境 数据量小，无法反映真实情况 全链路压测：
+在生产环境进行压测 模拟真实用户的完整业务流程 使用真实的数据量和系统配置 全链路压测的价值 真实性：在生产环境验证，结果最可信 全面性：覆盖所有系统组件和依赖 及时性：提前发现性能瓶颈 指导性：为容量规划提供数据支持 压测场景 1用户访问 → 网关 → 应用服务 → 缓存 → 数据库 2 ↓ 3 消息队列 → 异步服务 4 ↓ 5 第三方服务 架构思考： 全链路压测不仅是技术问题，更是业务问题。需要产品、运营、技术团队共同参与，制定合理的压测目标和验收标准。
+压测方案设计 1. 压测目标设定 性能指标：
+TPS/QPS：每秒事务数/查询数 响应时间：P50、P95、P99 成功率：请求成功的比例 资源使用率：CPU、内存、磁盘、网络 业务指标：
+订单创建成功率 支付成功率 库存扣减准确性 示例目标：
+1大促场景： 2- 峰值 TPS：10000 3- P99 响应时间：&lt; 500ms 4- 成功率：&gt; 99.9% 5- CPU 使用率：&lt; 70% 2. 压测流量模型 流量特征：
+...</p>
+  </div>
+  <footer class="entry-footer"><span title='2025-09-05 00:00:00 +0000 UTC'>September 5, 2025</span>&nbsp;·&nbsp;<span>6 min</span>&nbsp;·&nbsp;<span>1174 words</span>&nbsp;·&nbsp;<span>wawayu</span></footer>
+  <a class="entry-link" aria-label="post link to 全链路压测：如何验证系统的真实承载能力" href="http://localhost:1313/posts/2025/09/%E5%85%A8%E9%93%BE%E8%B7%AF%E5%8E%8B%E6%B5%8B%E5%A6%82%E4%BD%95%E9%AA%8C%E8%AF%81%E7%B3%BB%E7%BB%9F%E7%9A%84%E7%9C%9F%E5%AE%9E%E6%89%BF%E8%BD%BD%E8%83%BD%E5%8A%9B/"></a>
+</article>
+
+<article class="post-entry tag-entry"> 
+  <header class="entry-header">
+    <h2 class="entry-hint-parent">Git 工作流：从分支管理到代码审查的最佳实践
+    </h2>
+  </header>
+  <div class="entry-content">
+    <p>Git 已经成为现代软件开发的标准版本控制工具。然而，仅仅会用 Git 命令是不够的，如何在团队中建立高效的 Git 工作流，才是提升开发效率的关键。
+本文将从实际团队协作出发，深入讲解 Git 工作流的最佳实践，帮助你和团队建立规范、高效的开发流程。
+本文亮点 理解主流 Git 工作流模型 掌握分支管理的最佳实践 学会规范的提交信息编写 了解代码审查的流程与技巧 掌握冲突解决与回滚策略 主流 Git 工作流模型 1. Git Flow 最经典的分支模型，适合版本发布周期较长的项目：
+1master (生产环境) 2 ↓ 3develop (开发环境) 4 ↓ 5feature/* (功能分支) 6release/* (发布分支) 7hotfix/* (热修复分支) 分支说明：
+master：生产环境代码，每个提交都是一个发布版本 develop：开发环境代码，集成所有功能 feature/*：功能开发分支，从 develop 分出，完成后合并回 develop release/*：发布准备分支，从 develop 分出，测试通过后合并到 master 和 develop hotfix/*：紧急修复分支，从 master 分出，修复后合并到 master 和 develop 工作流程：
+1# 1. 创建功能分支 2git checkout -b feature/user-login develop 3 4# 2. 开发功能 5git add . 6git commit -m &#34;feat: 实现用户登录功能&#34; 7 8# 3. 合并到 develop 9git checkout develop 10git merge --no-ff feature/user-login 11git branch -d feature/user-login 12 13# 4. 创建发布分支 14git checkout -b release/1.0.0 develop 15 16# 5. 发布到生产 17git checkout master 18git merge --no-ff release/1.0.0 19git tag -a v1.0.0 -m &#34;Release version 1.0.0&#34; 20 21# 6. 合并回 develop 22git checkout develop 23git merge --no-ff release/1.0.0 24git branch -d release/1.0.0 2. GitHub Flow 简化版工作流，适合持续部署的项目：
+...</p>
+  </div>
+  <footer class="entry-footer"><span title='2025-07-30 00:00:00 +0000 UTC'>July 30, 2025</span>&nbsp;·&nbsp;<span>6 min</span>&nbsp;·&nbsp;<span>1166 words</span>&nbsp;·&nbsp;<span>wawayu</span></footer>
+  <a class="entry-link" aria-label="post link to Git 工作流：从分支管理到代码审查的最佳实践" href="http://localhost:1313/posts/2025/07/git-%E5%B7%A5%E4%BD%9C%E6%B5%81%E4%BB%8E%E5%88%86%E6%94%AF%E7%AE%A1%E7%90%86%E5%88%B0%E4%BB%A3%E7%A0%81%E5%AE%A1%E6%9F%A5%E7%9A%84%E6%9C%80%E4%BD%B3%E5%AE%9E%E8%B7%B5/"></a>
+</article>
+
+<article class="post-entry tag-entry"> 
+  <header class="entry-header">
+    <h2 class="entry-hint-parent">Nginx 反向代理与负载均衡实战：从入门到生产优化
+    </h2>
+  </header>
+  <div class="entry-content">
+    <p>Nginx 作为高性能的 Web 服务器和反向代理服务器，已经成为互联网架构中的标配组件。无论是静态资源服务、反向代理还是负载均衡，Nginx 都能提供出色的性能和稳定性。
+本文将从实际场景出发，深入讲解 Nginx 反向代理和负载均衡的配置与优化，帮助你构建高可用的服务架构。
+本文亮点 理解反向代理与正向代理的区别 掌握 Nginx 负载均衡的多种策略 学会配置健康检查与故障转移 了解会话保持的实现方案 掌握生产环境的性能调优技巧 反向代理基础 正向代理 vs 反向代理 正向代理：客户端知道目标服务器，通过代理服务器访问
+1客户端 → 代理服务器 → 目标服务器 2（客户端配置代理） 反向代理：客户端不知道真实服务器，代理服务器决定转发到哪台服务器
+1客户端 → 反向代理 → 后端服务器集群 2（服务端配置代理） 反向代理的优势 负载均衡：将请求分发到多台服务器 隐藏真实服务器：提高安全性 SSL 卸载：在代理层处理 HTTPS 缓存静态资源：减轻后端压力 统一入口：便于管理和监控 架构思考： 反向代理不仅是流量分发器，更是架构中的关键节点。通过反向代理，可以实现灰度发布、A/B 测试、流量控制等高级功能。
+Nginx 反向代理配置 基础配置 1# /etc/nginx/nginx.conf 2 3user nginx; 4worker_processes auto; # 自动设置为 CPU 核心数 5error_log /var/log/nginx/error.log warn; 6pid /var/run/nginx.pid; 7 8events { 9 worker_connections 1024; # 每个 worker 进程的最大连接数 10 use epoll; # Linux 下使用 epoll 11} 12 13http { 14 include /etc/nginx/mime.types; 15 default_type application/octet-stream; 16 17 # 日志格式 18 log_format main &#39;$remote_addr - $remote_user [$time_local] &#34;$request&#34; &#39; 19 &#39;$status $body_bytes_sent &#34;$http_referer&#34; &#39; 20 &#39;&#34;$http_user_agent&#34; &#34;$http_x_forwarded_for&#34; &#39; 21 &#39;$request_time $upstream_response_time&#39;; 22 23 access_log /var/log/nginx/access.log main; 24 25 sendfile on; 26 tcp_nopush on; 27 tcp_nodelay on; 28 keepalive_timeout 65; 29 types_hash_max_size 2048; 30 31 # 包含其他配置文件 32 include /etc/nginx/conf.d/*.conf; 33} 简单反向代理 1# /etc/nginx/conf.d/api.conf 2 3server { 4 listen 80; 5 server_name api.example.com; 6 7 location / { 8 # 代理到后端服务器 9 proxy_pass http://192.168.1.100:8080; 10 11 # 设置请求头 12 proxy_set_header Host $host; 13 proxy_set_header X-Real-IP $remote_addr; 14 proxy_set_header X-Forwarded-For $proxy_add_x_forwarded_for; 15 proxy_set_header X-Forwarded-Proto $scheme; 16 17 # 超时设置 18 proxy_connect_timeout 60s; 19 proxy_send_timeout 60s; 20 proxy_read_timeout 60s; 21 } 22} 路径重写 1server { 2 listen 80; 3 server_name api.example.com; 4 5 # 将 /api/v1/users 代理到 http://backend/users 6 location /api/v1/ { 7 proxy_pass http://backend/; # 注意末尾的 / 8 proxy_set_header Host $host; 9 } 10 11 # 将 /old-api 重写为 /new-api 12 location /old-api { 13 rewrite ^/old-api/(.*)$ /new-api/$1 break; 14 proxy_pass http://backend; 15 } 16} 负载均衡策略 1. 轮询（Round Robin） 默认策略，按顺序依次分配请求：
+...</p>
+  </div>
+  <footer class="entry-footer"><span title='2025-06-25 00:00:00 +0000 UTC'>June 25, 2025</span>&nbsp;·&nbsp;<span>7 min</span>&nbsp;·&nbsp;<span>1443 words</span>&nbsp;·&nbsp;<span>wawayu</span></footer>
+  <a class="entry-link" aria-label="post link to Nginx 反向代理与负载均衡实战：从入门到生产优化" href="http://localhost:1313/posts/2025/06/nginx-%E5%8F%8D%E5%90%91%E4%BB%A3%E7%90%86%E4%B8%8E%E8%B4%9F%E8%BD%BD%E5%9D%87%E8%A1%A1%E5%AE%9E%E6%88%98%E4%BB%8E%E5%85%A5%E9%97%A8%E5%88%B0%E7%94%9F%E4%BA%A7%E4%BC%98%E5%8C%96/"></a>
+</article>
+
+<article class="post-entry tag-entry"> 
+  <header class="entry-header">
+    <h2 class="entry-hint-parent">EasyExcel 百万级数据导出的内存优化实战
+    </h2>
+  </header>
+  <div class="entry-content">
+    <p>在企业级应用中，大数据量导出是一个常见但棘手的问题。传统的 Apache POI 在处理大文件时容易出现内存溢出，而阿里开源的 EasyExcel 通过优化内存占用，可以轻松处理百万级数据导出。
+本文将从实际问题出发，深入讲解如何使用 EasyExcel 实现高性能的大数据量导出，并分享生产环境中的优化经验。
+本文亮点 理解传统 POI 的内存问题 掌握 EasyExcel 的核心原理 学会百万级数据导出的最佳实践 了解异步导出与进度反馈方案 掌握生产环境的性能调优技巧 传统 POI 的内存问题 问题场景 某电商系统需要导出订单数据，数据量达到 100 万条。使用传统的 Apache POI 实现：
+1// 传统 POI 实现（有问题的代码） 2public void exportOrders() { 3 Workbook workbook = new XSSFWorkbook(); 4 Sheet sheet = workbook.createSheet(&#34;订单数据&#34;); 5 6 // 查询 100 万条数据 7 List&lt;Order&gt; orders = orderMapper.selectAll(); 8 9 // 写入 Excel 10 for (int i = 0; i &lt; orders.size(); i&#43;&#43;) { 11 Row row = sheet.createRow(i); 12 Order order = orders.get(i); 13 row.createCell(0).setCellValue(order.getOrderNo()); 14 row.createCell(1).setCellValue(order.getUserName()); 15 // ... 更多字段 16 } 17 18 // 输出文件 19 FileOutputStream fos = new FileOutputStream(&#34;orders.xlsx&#34;); 20 workbook.write(fos); 21 fos.close(); 22} 内存分析 这段代码存在严重的内存问题：
+...</p>
+  </div>
+  <footer class="entry-footer"><span title='2025-05-22 00:00:00 +0000 UTC'>May 22, 2025</span>&nbsp;·&nbsp;<span>9 min</span>&nbsp;·&nbsp;<span>1819 words</span>&nbsp;·&nbsp;<span>wawayu</span></footer>
+  <a class="entry-link" aria-label="post link to EasyExcel 百万级数据导出的内存优化实战" href="http://localhost:1313/posts/2025/05/easyexcel-%E7%99%BE%E4%B8%87%E7%BA%A7%E6%95%B0%E6%8D%AE%E5%AF%BC%E5%87%BA%E7%9A%84%E5%86%85%E5%AD%98%E4%BC%98%E5%8C%96%E5%AE%9E%E6%88%98/"></a>
+</article>
+
+<article class="post-entry tag-entry"> 
+  <header class="entry-header">
+    <h2 class="entry-hint-parent">Netty &#43; WebSocket 实现实时消息推送：从原理到生产实战
+    </h2>
+  </header>
+  <div class="entry-content">
+    <p>在现代互联网应用中，实时消息推送已成为标配功能。从即时通讯、在线客服到实时监控大屏，都离不开高性能的消息推送能力。传统的 HTTP 轮询方式存在延迟高、资源浪费等问题，而 WebSocket 协议的出现完美解决了这些痛点。
+本文将深入讲解如何使用 Netty 框架实现基于 WebSocket 的实时消息推送系统，从协议原理到生产实战，帮助你构建一个高性能、高可用的推送服务。
+本文亮点 掌握 WebSocket 协议原理与握手流程 学会使用 Netty 构建 WebSocket 服务器 理解心跳机制与连接管理策略 掌握集群部署与消息路由方案 了解生产环境的性能优化技巧 为什么选择 Netty &#43; WebSocket WebSocket 协议优势 相比传统的 HTTP 轮询，WebSocket 具有以下优势：
+特性 HTTP 轮询 WebSocket 通信方式 半双工 全双工 连接开销 每次请求都需要建立连接 一次握手，持久连接 实时性 取决于轮询间隔（秒级） 毫秒级 服务器压力 高（频繁的 HTTP 请求） 低（长连接） 带宽消耗 高（每次都有 HTTP 头） 低（只传输数据帧） Netty 框架优势 Netty 是一个高性能的异步事件驱动网络框架，具有以下特点：
+高性能：基于 NIO，支持百万级并发连接 易用性：提供了丰富的编解码器和处理器 稳定性：经过大量生产环境验证 扩展性：灵活的 Pipeline 机制 架构思考： 选择技术方案时，不仅要看技术本身的优势，更要考虑团队的技术栈、运维成本和社区生态。Netty 在 Java 生态中已经成为事实标准，Dubbo、RocketMQ、Elasticsearch 等知名项目都在使用。
+...</p>
+  </div>
+  <footer class="entry-footer"><span title='2025-04-18 00:00:00 +0000 UTC'>April 18, 2025</span>&nbsp;·&nbsp;<span>11 min</span>&nbsp;·&nbsp;<span>2175 words</span>&nbsp;·&nbsp;<span>wawayu</span></footer>
+  <a class="entry-link" aria-label="post link to Netty &#43; WebSocket 实现实时消息推送：从原理到生产实战" href="http://localhost:1313/posts/2025/04/netty--websocket-%E5%AE%9E%E7%8E%B0%E5%AE%9E%E6%97%B6%E6%B6%88%E6%81%AF%E6%8E%A8%E9%80%81%E4%BB%8E%E5%8E%9F%E7%90%86%E5%88%B0%E7%94%9F%E4%BA%A7%E5%AE%9E%E6%88%98/"></a>
+</article>
+
+<article class="post-entry tag-entry"> 
+  <header class="entry-header">
+    <h2 class="entry-hint-parent">Redis 缓存架构：从穿透到雪崩的全链路防护
+    </h2>
+  </header>
+  <div class="entry-content">
+    <p>在高并发系统中，缓存是提升性能的关键。但缓存使用不当会引发穿透、击穿、雪崩等问题，导致数据库崩溃。本文将深入分析这些问题的原理，并提供完整的解决方案。
+本文亮点 理解缓存穿透、击穿、雪崩的本质区别 掌握布隆过滤器、互斥锁等防护手段 学会设计高可用的缓存架构 了解缓存预热、降级等最佳实践 缓存的三大问题 问题对比 问题 原因 影响 解决方案 缓存穿透 查询不存在的数据 大量请求打到DB 布隆过滤器、空值缓存 缓存击穿 热点key过期 瞬间大量请求打到DB 互斥锁、永不过期 缓存雪崩 大量key同时过期 DB压力骤增 过期时间随机化、多级缓存 缓存穿透：查询不存在的数据 问题场景 1// 恶意攻击：查询不存在的用户ID 2for (int i = -1000000; i &lt; 0; i--) { 3 User user = getUser(i); // 缓存和DB都没有，每次都查DB 4} 流程：
+1请求 → 查缓存（未命中）→ 查数据库（未命中）→ 返回null 每次请求都会穿透缓存，直接打到数据库。
+解决方案1：布隆过滤器 原理： 用位数组判断元素是否存在，存在一定的误判率。
+1@Configuration 2public class BloomFilterConfig { 3 4 @Bean 5 public BloomFilter&lt;Long&gt; userBloomFilter() { 6 // 预期元素数量：1000万，误判率：0.01% 7 BloomFilter&lt;Long&gt; bloomFilter = BloomFilter.create( 8 Funnels.longFunnel(), 9 10000000, 10 0.0001 11 ); 12 13 // 初始化：将所有用户ID加入布隆过滤器 14 List&lt;Long&gt; userIds = userMapper.selectAllIds(); 15 userIds.forEach(bloomFilter::put); 16 17 return bloomFilter; 18 } 19} 1@Service 2public class UserService { 3 4 @Autowired 5 private BloomFilter&lt;Long&gt; userBloomFilter; 6 7 @Autowired 8 private RedisTemplate&lt;String, User&gt; redisTemplate; 9 10 @Autowired 11 private UserMapper userMapper; 12 13 public User getUser(Long userId) { 14 // 1. 布隆过滤器判断 15 if (!userBloomFilter.mightContain(userId)) { 16 return null; // 一定不存在，直接返回 17 } 18 19 // 2. 查缓存 20 String key = &#34;user:&#34; &#43; userId; 21 User user = redisTemplate.opsForValue().get(key); 22 if (user != null) { 23 return user; 24 } 25 26 // 3. 查数据库 27 user = userMapper.selectById(userId); 28 if (user != null) { 29 redisTemplate.opsForValue().set(key, user, 1, TimeUnit.HOURS); 30 } 31 32 return user; 33 } 34} 优点：
+...</p>
+  </div>
+  <footer class="entry-footer"><span title='2025-03-20 00:00:00 +0000 UTC'>March 20, 2025</span>&nbsp;·&nbsp;<span>8 min</span>&nbsp;·&nbsp;<span>1679 words</span>&nbsp;·&nbsp;<span>wawayu</span></footer>
+  <a class="entry-link" aria-label="post link to Redis 缓存架构：从穿透到雪崩的全链路防护" href="http://localhost:1313/posts/2025/03/redis-%E7%BC%93%E5%AD%98%E6%9E%B6%E6%9E%84%E4%BB%8E%E7%A9%BF%E9%80%8F%E5%88%B0%E9%9B%AA%E5%B4%A9%E7%9A%84%E5%85%A8%E9%93%BE%E8%B7%AF%E9%98%B2%E6%8A%A4/"></a>
+</article>
+
+<article class="post-entry tag-entry"> 
+  <header class="entry-header">
+    <h2 class="entry-hint-parent">ShardingSphere 分库分表的生产实战
+    </h2>
+  </header>
+  <div class="entry-content">
+    <p>当单表数据量达到千万级别时，查询性能会急剧下降。分库分表是解决大数据量问题的有效方案。本文将深入讲解如何使用 ShardingSphere 实现分库分表，并分享生产环境的实战经验。
+本文亮点 理解分库分表的核心概念和应用场景 掌握 ShardingSphere 的配置和使用方法 学会选择合适的分片策略 了解分库分表的最佳实践和常见问题 为什么需要分库分表？ 场景：订单表数据爆炸
+电商系统的订单表，每天新增10万条数据，一年就是3600万条。随着数据量增长：
+查询变慢：单表查询从毫秒级变成秒级 索引失效：B&#43;树层级增加，索引效率下降 锁竞争：大表的锁粒度大，并发性能差 备份困难：单表备份时间过长 传统优化方案的局限
+1-- 优化索引 2CREATE INDEX idx_user_id_create_time ON orders(user_id, create_time); 3 4-- 分区表 5ALTER TABLE orders PARTITION BY RANGE (YEAR(create_time)) ( 6 PARTITION p2023 VALUES LESS THAN (2024), 7 PARTITION p2024 VALUES LESS THAN (2025) 8); 这些方案只能缓解问题，无法根本解决。当数据量达到亿级时，分库分表是必然选择。
+分库分表核心概念 垂直拆分 vs 水平拆分 垂直拆分：按业务模块拆分
+1原始数据库 2├── 用户表 3├── 订单表 4├── 商品表 5└── 支付表 6 7拆分后 8├── 用户库 9│ └── 用户表 10├── 订单库 11│ └── 订单表 12├── 商品库 13│ └── 商品表 14└── 支付库 15 └── 支付表 水平拆分：按数据行拆分
+...</p>
+  </div>
+  <footer class="entry-footer"><span title='2025-02-15 00:00:00 +0000 UTC'>February 15, 2025</span>&nbsp;·&nbsp;<span>6 min</span>&nbsp;·&nbsp;<span>1274 words</span>&nbsp;·&nbsp;<span>wawayu</span></footer>
+  <a class="entry-link" aria-label="post link to ShardingSphere 分库分表的生产实战" href="http://localhost:1313/posts/2025/02/shardingsphere-%E5%88%86%E5%BA%93%E5%88%86%E8%A1%A8%E7%9A%84%E7%94%9F%E4%BA%A7%E5%AE%9E%E6%88%98/"></a>
+</article>
+<footer class="page-footer">
+  <nav class="pagination">
+    <a class="next" href="http://localhost:1313/tags/%E6%9C%80%E4%BD%B3%E5%AE%9E%E8%B7%B5/page/2/">Next&nbsp;&nbsp;»
+    </a>
+  </nav>
+</footer>
+    </main>
+    
+<footer class="footer">
+        <span>&copy; 2026 <a href="http://localhost:1313/">博客喵</a></span> · 
+
+    <span>
+        Powered by
+        <a href="https://gohugo.io/" rel="noopener noreferrer" target="_blank">Hugo</a> &
+        <a href="https://github.com/adityatelange/hugo-PaperMod/" rel="noopener" target="_blank">PaperMod</a>
+    </span>
+</footer>
+<a href="#top" aria-label="go to top" title="Go to Top (Alt + G)" class="top-link" id="top-link" accesskey="g">
+    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 12 6" fill="currentColor">
+        <path d="M12 6H0l6-6z" />
+    </svg>
+</a>
+
+<script>
+    let menu = document.getElementById('menu');
+    if (menu) {
+        
+        const scrollPosition = localStorage.getItem("menu-scroll-position");
+        if (scrollPosition) {
+            menu.scrollLeft = parseInt(scrollPosition, 10);
+        }
+        
+        menu.onscroll = function () {
+            localStorage.setItem("menu-scroll-position", menu.scrollLeft);
+        }
+    }
+
+    document.querySelectorAll('a[href^="#"]').forEach(anchor => {
+        anchor.addEventListener("click", function (e) {
+            e.preventDefault();
+            var id = this.getAttribute("href").substr(1);
+            if (!window.matchMedia('(prefers-reduced-motion: reduce)').matches) {
+                document.querySelector(`[id='${decodeURIComponent(id)}']`).scrollIntoView({
+                    behavior: "smooth"
+                });
+            } else {
+                document.querySelector(`[id='${decodeURIComponent(id)}']`).scrollIntoView();
+            }
+            if (id === "top") {
+                history.replaceState(null, null, " ");
+            } else {
+                history.pushState(null, null, `#${id}`);
+            }
+        });
+    });
+
+</script>
+<script>
+    var mybutton = document.getElementById("top-link");
+    window.onscroll = function () {
+        if (document.body.scrollTop > 800 || document.documentElement.scrollTop > 800) {
+            mybutton.style.visibility = "visible";
+            mybutton.style.opacity = "1";
+        } else {
+            mybutton.style.visibility = "hidden";
+            mybutton.style.opacity = "0";
+        }
+    };
+
+</script>
+<script>
+    document.getElementById("theme-toggle").addEventListener("click", () => {
+        const html = document.querySelector("html");
+        if (html.dataset.theme === "dark") {
+            html.dataset.theme = 'light';
+            localStorage.setItem("pref-theme", 'light');
+        } else {
+            html.dataset.theme = 'dark';
+            localStorage.setItem("pref-theme", 'dark');
+        }
+    })
+
+</script>
+</body>
+
+</html>

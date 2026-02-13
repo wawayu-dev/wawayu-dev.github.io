@@ -1,0 +1,1166 @@
+<!DOCTYPE html>
+<html lang="en" dir="auto" data-theme="auto">
+
+<head><script src="/livereload.js?mindelay=10&amp;v=2&amp;port=1313&amp;path=livereload" data-no-instant defer></script><meta charset="utf-8">
+<meta http-equiv="X-UA-Compatible" content="IE=edge">
+<meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
+<meta name="robots" content="index, follow">
+<title>如何阅读开源项目源码：以 Spring Boot 为例 | 博客喵</title>
+<meta name="keywords" content="Spring Boot, 源码分析, 学习方法">
+<meta name="description" content="系统讲解如何高效阅读开源项目源码，以Spring Boot为例，从入门到精通的完整学习路径">
+<meta name="author" content="wawayu">
+<link rel="canonical" href="http://localhost:1313/posts/2026/02/%E5%A6%82%E4%BD%95%E9%98%85%E8%AF%BB%E5%BC%80%E6%BA%90%E9%A1%B9%E7%9B%AE%E6%BA%90%E7%A0%81%E4%BB%A5-spring-boot-%E4%B8%BA%E4%BE%8B/">
+<link crossorigin="anonymous" href="/assets/css/stylesheet.a29c24210eb31d9ce56f669c66a35c9c51b17376b7764e336a49af7dec914cf0.css" integrity="sha256-opwkIQ6zHZzlb2acZqNcnFGxc3a3dk4zakmvfeyRTPA=" rel="preload stylesheet" as="style">
+<link rel="icon" href="http://localhost:1313/favicon.ico">
+<link rel="icon" type="image/png" sizes="16x16" href="http://localhost:1313/favicon-16x16.png">
+<link rel="icon" type="image/png" sizes="32x32" href="http://localhost:1313/favicon-32x32.png">
+<link rel="apple-touch-icon" href="http://localhost:1313/apple-touch-icon.png">
+<link rel="mask-icon" href="http://localhost:1313/safari-pinned-tab.svg">
+<meta name="theme-color" content="#2e2e33">
+<meta name="msapplication-TileColor" content="#2e2e33">
+<link rel="alternate" hreflang="en" href="http://localhost:1313/posts/2026/02/%E5%A6%82%E4%BD%95%E9%98%85%E8%AF%BB%E5%BC%80%E6%BA%90%E9%A1%B9%E7%9B%AE%E6%BA%90%E7%A0%81%E4%BB%A5-spring-boot-%E4%B8%BA%E4%BE%8B/">
+<noscript>
+    <style>
+        #theme-toggle,
+        .top-link {
+            display: none;
+        }
+
+    </style>
+    <style>
+        @media (prefers-color-scheme: dark) {
+            :root {
+                --theme: rgb(29, 30, 32);
+                --entry: rgb(46, 46, 51);
+                --primary: rgb(218, 218, 219);
+                --secondary: rgb(155, 156, 157);
+                --tertiary: rgb(65, 66, 68);
+                --content: rgb(196, 196, 197);
+                --code-block-bg: rgb(46, 46, 51);
+                --code-bg: rgb(55, 56, 62);
+                --border: rgb(51, 51, 51);
+                color-scheme: dark;
+            }
+
+            .list {
+                background: var(--theme);
+            }
+
+            .toc {
+                background: var(--entry);
+            }
+        }
+
+        @media (prefers-color-scheme: light) {
+            .list::-webkit-scrollbar-thumb {
+                border-color: var(--code-bg);
+            }
+        }
+
+    </style>
+</noscript>
+<script>
+    if (localStorage.getItem("pref-theme") === "dark") {
+        document.querySelector("html").dataset.theme = 'dark';
+    } else if (localStorage.getItem("pref-theme") === "light") {
+       document.querySelector("html").dataset.theme = 'light';
+    } else if (window.matchMedia('(prefers-color-scheme: dark)').matches) {
+        document.querySelector("html").dataset.theme = 'dark';
+    } else {
+        document.querySelector("html").dataset.theme = 'light';
+    }
+
+</script><meta property="og:url" content="http://localhost:1313/posts/2026/02/%E5%A6%82%E4%BD%95%E9%98%85%E8%AF%BB%E5%BC%80%E6%BA%90%E9%A1%B9%E7%9B%AE%E6%BA%90%E7%A0%81%E4%BB%A5-spring-boot-%E4%B8%BA%E4%BE%8B/">
+  <meta property="og:site_name" content="博客喵">
+  <meta property="og:title" content="如何阅读开源项目源码：以 Spring Boot 为例">
+  <meta property="og:description" content="系统讲解如何高效阅读开源项目源码，以Spring Boot为例，从入门到精通的完整学习路径">
+  <meta property="og:locale" content="zh-cn">
+  <meta property="og:type" content="article">
+    <meta property="article:section" content="posts">
+    <meta property="article:published_time" content="2026-02-12T00:00:00+00:00">
+    <meta property="article:modified_time" content="2026-02-12T00:00:00+00:00">
+    <meta property="article:tag" content="Spring Boot">
+    <meta property="article:tag" content="源码分析">
+    <meta property="article:tag" content="学习方法">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:title" content="如何阅读开源项目源码：以 Spring Boot 为例">
+<meta name="twitter:description" content="系统讲解如何高效阅读开源项目源码，以Spring Boot为例，从入门到精通的完整学习路径">
+
+
+<script type="application/ld+json">
+{
+  "@context": "https://schema.org",
+  "@type": "BreadcrumbList",
+  "itemListElement": [
+    {
+      "@type": "ListItem",
+      "position":  1 ,
+      "name": "Posts",
+      "item": "http://localhost:1313/posts/"
+    }, 
+    {
+      "@type": "ListItem",
+      "position":  2 ,
+      "name": "如何阅读开源项目源码：以 Spring Boot 为例",
+      "item": "http://localhost:1313/posts/2026/02/%E5%A6%82%E4%BD%95%E9%98%85%E8%AF%BB%E5%BC%80%E6%BA%90%E9%A1%B9%E7%9B%AE%E6%BA%90%E7%A0%81%E4%BB%A5-spring-boot-%E4%B8%BA%E4%BE%8B/"
+    }
+  ]
+}
+</script>
+<script type="application/ld+json">
+{
+  "@context": "https://schema.org",
+  "@type": "BlogPosting",
+  "headline": "如何阅读开源项目源码：以 Spring Boot 为例",
+  "name": "如何阅读开源项目源码：以 Spring Boot 为例",
+  "description": "系统讲解如何高效阅读开源项目源码，以Spring Boot为例，从入门到精通的完整学习路径",
+  "keywords": [
+    "Spring Boot", "源码分析", "学习方法"
+  ],
+  "articleBody": "阅读优秀的开源项目源码是提升技术能力的最佳途径之一。然而，面对动辄几十万行的代码，很多人不知道从何下手。本文将以Spring Boot为例，系统讲解如何高效地阅读和学习开源项目源码。\n本文亮点 掌握源码阅读的系统方法论 学会使用工具辅助源码阅读 理解Spring Boot的核心设计思想 掌握从宏观到微观的阅读策略 建立源码学习的长效机制 为什么要读源码 源码阅读的价值 深入理解原理：知其然，更知其所以然 学习设计模式：看大师如何设计架构 提升编码能力：学习优秀的代码风格 解决疑难问题：遇到问题能快速定位 参与开源贡献：为开源社区做贡献 常见误区 ❌ 从第一行开始读：容易迷失在细节中 ❌ 追求完全理解：试图理解每一行代码 ❌ 没有目标：漫无目的地浏览代码 ❌ 只看不练：只看不写，无法真正掌握\n✅ 带着问题读：围绕具体问题展开 ✅ 抓住主线：理解核心流程和设计思想 ✅ 循序渐进：从简单到复杂，逐步深入 ✅ 边读边写：通过实践加深理解\n架构思考： 阅读源码不是为了记住每一行代码，而是理解设计思想和架构模式。要学会从宏观到微观，从整体到细节的阅读方法。\n源码阅读方法论 1. 准备阶段 选择合适的版本：\n选择稳定版本（如Spring Boot 2.7.x） 避免选择最新的开发版本 查看版本的Release Notes 搭建调试环境：\n1# 1. 克隆源码 2git clone https://github.com/spring-projects/spring-boot.git 3cd spring-boot 4 5# 2. 切换到稳定版本 6git checkout v2.7.18 7 8# 3. 导入IDE（IDEA） 9# File -\u003e Open -\u003e 选择spring-boot目录 准备示例项目：\n1 2 3 org.springframework.boot 4 spring-boot-starter-parent 5 2.7.18 6 7 8 9 10 org.springframework.boot 11 spring-boot-starter-web 12 13 2. 宏观阶段 了解项目结构：\n1spring-boot/ 2├── spring-boot-project/ 3│ ├── spring-boot/ # 核心模块 4│ ├── spring-boot-autoconfigure/ # 自动配置 5│ ├── spring-boot-starters/ # Starter依赖 6│ ├── spring-boot-actuator/ # 监控端点 7│ └── spring-boot-test/ # 测试支持 8├── spring-boot-samples/ # 示例项目 9└── spring-boot-tests/ # 集成测试 阅读官方文档：\nSpring Boot Reference Documentation 了解核心特性和使用方式 理解设计理念和架构思想 绘制架构图：\n1应用启动 2 ↓ 3@SpringBootApplication 4 ↓ 5SpringApplication.run() 6 ↓ 7创建ApplicationContext 8 ↓ 9自动配置（AutoConfiguration） 10 ↓ 11启动内嵌Web服务器 12 ↓ 13应用就绪 3. 微观阶段 选择切入点：\n从最常用的功能开始（如启动流程） 从遇到的问题开始（如自动配置原理） 从感兴趣的特性开始（如条件注解） 使用调试工具：\n断点调试：观察执行流程 调用栈：理解方法调用关系 变量监视：查看对象状态 Spring Boot 启动流程分析 入口：@SpringBootApplication 1@SpringBootApplication 2public class DemoApplication { 3 public static void main(String[] args) { 4 SpringApplication.run(DemoApplication.class, args); 5 } 6} @SpringBootApplication 注解：\n1@Target(ElementType.TYPE) 2@Retention(RetentionPolicy.RUNTIME) 3@Documented 4@Inherited 5@SpringBootConfiguration // 1. 配置类 6@EnableAutoConfiguration // 2. 自动配置 7@ComponentScan // 3. 组件扫描 8public @interface SpringBootApplication { 9 // ... 10} 三个核心注解：\n@SpringBootConfiguration：标记为配置类 @EnableAutoConfiguration：启用自动配置 @ComponentScan：扫描组件 SpringApplication.run() 流程 1public class SpringApplication { 2 3 public static ConfigurableApplicationContext run(Class\u003c?\u003e primarySource, String... args) { 4 return run(new Class\u003c?\u003e[] { primarySource }, args); 5 } 6 7 public static ConfigurableApplicationContext run(Class\u003c?\u003e[] primarySources, String[] args) { 8 // 创建SpringApplication实例并运行 9 return new SpringApplication(primarySources).run(args); 10 } 11 12 public ConfigurableApplicationContext run(String... args) { 13 // 1. 创建StopWatch，记录启动时间 14 StopWatch stopWatch = new StopWatch(); 15 stopWatch.start(); 16 17 // 2. 创建Bootstrap上下文 18 DefaultBootstrapContext bootstrapContext = createBootstrapContext(); 19 ConfigurableApplicationContext context = null; 20 21 // 3. 配置Headless属性 22 configureHeadlessProperty(); 23 24 // 4. 获取SpringApplicationRunListeners 25 SpringApplicationRunListeners listeners = getRunListeners(args); 26 listeners.starting(bootstrapContext, this.mainApplicationClass); 27 28 try { 29 // 5. 准备环境 30 ApplicationArguments applicationArguments = new DefaultApplicationArguments(args); 31 ConfigurableEnvironment environment = prepareEnvironment(listeners, bootstrapContext, applicationArguments); 32 33 // 6. 打印Banner 34 Banner printedBanner = printBanner(environment); 35 36 // 7. 创建ApplicationContext 37 context = createApplicationContext(); 38 context.setApplicationStartup(this.applicationStartup); 39 40 // 8. 准备Context 41 prepareContext(bootstrapContext, context, environment, listeners, applicationArguments, printedBanner); 42 43 // 9. 刷新Context（核心） 44 refreshContext(context); 45 46 // 10. 刷新后处理 47 afterRefresh(context, applicationArguments); 48 49 stopWatch.stop(); 50 51 // 11. 发布启动完成事件 52 listeners.started(context); 53 54 // 12. 调用Runners 55 callRunners(context, applicationArguments); 56 } 57 catch (Throwable ex) { 58 handleRunFailure(context, ex, listeners); 59 throw new IllegalStateException(ex); 60 } 61 62 try { 63 listeners.running(context); 64 } 65 catch (Throwable ex) { 66 handleRunFailure(context, ex, null); 67 throw new IllegalStateException(ex); 68 } 69 70 return context; 71 } 72} 启动流程图：\n11. 创建StopWatch 2 ↓ 32. 创建Bootstrap上下文 4 ↓ 53. 获取RunListeners 6 ↓ 74. 准备Environment 8 ↓ 95. 打印Banner 10 ↓ 116. 创建ApplicationContext 12 ↓ 137. 准备Context 14 ↓ 158. 刷新Context（加载Bean） 16 ↓ 179. 调用Runners 18 ↓ 1910. 发布启动完成事件 自动配置原理 @EnableAutoConfiguration 1@Target(ElementType.TYPE) 2@Retention(RetentionPolicy.RUNTIME) 3@Documented 4@Inherited 5@AutoConfigurationPackage 6@Import(AutoConfigurationImportSelector.class) // 核心 7public @interface EnableAutoConfiguration { 8 // ... 9} AutoConfigurationImportSelector 1public class AutoConfigurationImportSelector implements DeferredImportSelector { 2 3 @Override 4 public String[] selectImports(AnnotationMetadata annotationMetadata) { 5 if (!isEnabled(annotationMetadata)) { 6 return NO_IMPORTS; 7 } 8 9 // 1. 获取自动配置类 10 AutoConfigurationEntry autoConfigurationEntry = getAutoConfigurationEntry(annotationMetadata); 11 return StringUtils.toStringArray(autoConfigurationEntry.getConfigurations()); 12 } 13 14 protected AutoConfigurationEntry getAutoConfigurationEntry(AnnotationMetadata annotationMetadata) { 15 if (!isEnabled(annotationMetadata)) { 16 return EMPTY_ENTRY; 17 } 18 19 AnnotationAttributes attributes = getAttributes(annotationMetadata); 20 21 // 2. 加载候选配置类 22 List\u003cString\u003e configurations = getCandidateConfigurations(annotationMetadata, attributes); 23 24 // 3. 去重 25 configurations = removeDuplicates(configurations); 26 27 // 4. 排除指定的配置类 28 Set\u003cString\u003e exclusions = getExclusions(annotationMetadata, attributes); 29 checkExcludedClasses(configurations, exclusions); 30 configurations.removeAll(exclusions); 31 32 // 5. 过滤（根据条件注解） 33 configurations = getConfigurationClassFilter().filter(configurations); 34 35 // 6. 触发自动配置导入事件 36 fireAutoConfigurationImportEvents(configurations, exclusions); 37 38 return new AutoConfigurationEntry(configurations, exclusions); 39 } 40 41 protected List\u003cString\u003e getCandidateConfigurations(AnnotationMetadata metadata, AnnotationAttributes attributes) { 42 // 从META-INF/spring.factories加载配置类 43 List\u003cString\u003e configurations = SpringFactoriesLoader.loadFactoryNames( 44 getSpringFactoriesLoaderFactoryClass(), 45 getBeanClassLoader() 46 ); 47 return configurations; 48 } 49} spring.factories 1# spring-boot-autoconfigure/META-INF/spring.factories 2 3org.springframework.boot.autoconfigure.EnableAutoConfiguration=\\ 4org.springframework.boot.autoconfigure.admin.SpringApplicationAdminJmxAutoConfiguration,\\ 5org.springframework.boot.autoconfigure.aop.AopAutoConfiguration,\\ 6org.springframework.boot.autoconfigure.amqp.RabbitAutoConfiguration,\\ 7org.springframework.boot.autoconfigure.jdbc.DataSourceAutoConfiguration,\\ 8org.springframework.boot.autoconfigure.web.servlet.WebMvcAutoConfiguration,\\ 9... 自动配置示例 1@Configuration(proxyBeanMethods = false) 2@ConditionalOnClass({ DataSource.class, EmbeddedDatabaseType.class }) 3@ConditionalOnMissingBean(type = \"io.r2dbc.spi.ConnectionFactory\") 4@EnableConfigurationProperties(DataSourceProperties.class) 5@Import({ DataSourcePoolMetadataProvidersConfiguration.class }) 6public class DataSourceAutoConfiguration { 7 8 @Configuration(proxyBeanMethods = false) 9 @Conditional(EmbeddedDatabaseCondition.class) 10 @ConditionalOnMissingBean({ DataSource.class, XADataSource.class }) 11 @Import(EmbeddedDataSourceConfiguration.class) 12 protected static class EmbeddedDatabaseConfiguration { 13 } 14 15 @Configuration(proxyBeanMethods = false) 16 @Conditional(PooledDataSourceCondition.class) 17 @ConditionalOnMissingBean({ DataSource.class, XADataSource.class }) 18 @Import({ DataSourceConfiguration.Hikari.class, DataSourceConfiguration.Tomcat.class, 19 DataSourceConfiguration.Dbcp2.class, DataSourceConfiguration.OracleUcp.class, 20 DataSourceConfiguration.Generic.class, DataSourceJmxConfiguration.class }) 21 protected static class PooledDataSourceConfiguration { 22 } 23} 条件注解：\n@ConditionalOnClass：类路径存在指定类 @ConditionalOnMissingBean：容器中不存在指定Bean @ConditionalOnProperty：配置文件存在指定属性 条件注解原理 @Conditional 1@Target({ ElementType.TYPE, ElementType.METHOD }) 2@Retention(RetentionPolicy.RUNTIME) 3@Documented 4public @interface Conditional { 5 Class\u003c? extends Condition\u003e[] value(); 6} Condition接口 1@FunctionalInterface 2public interface Condition { 3 boolean matches(ConditionContext context, AnnotatedTypeMetadata metadata); 4} OnClassCondition实现 1@Order(Ordered.HIGHEST_PRECEDENCE) 2class OnClassCondition extends FilteringSpringBootCondition { 3 4 @Override 5 public ConditionOutcome getMatchOutcome(ConditionContext context, AnnotatedTypeMetadata metadata) { 6 ClassLoader classLoader = context.getClassLoader(); 7 ConditionMessage matchMessage = ConditionMessage.empty(); 8 9 // 获取@ConditionalOnClass注解的value 10 List\u003cString\u003e onClasses = getCandidates(metadata, ConditionalOnClass.class); 11 if (onClasses != null) { 12 // 检查类是否存在 13 List\u003cString\u003e missing = filter(onClasses, ClassNameFilter.MISSING, classLoader); 14 if (!missing.isEmpty()) { 15 return ConditionOutcome.noMatch( 16 ConditionMessage.forCondition(ConditionalOnClass.class) 17 .didNotFind(\"required class\", \"required classes\") 18 .items(Style.QUOTE, missing) 19 ); 20 } 21 matchMessage = matchMessage.andCondition(ConditionalOnClass.class) 22 .found(\"required class\", \"required classes\") 23 .items(Style.QUOTE, filter(onClasses, ClassNameFilter.PRESENT, classLoader)); 24 } 25 26 // 获取@ConditionalOnMissingClass注解的value 27 List\u003cString\u003e onMissingClasses = getCandidates(metadata, ConditionalOnMissingClass.class); 28 if (onMissingClasses != null) { 29 // 检查类是否不存在 30 List\u003cString\u003e present = filter(onMissingClasses, ClassNameFilter.PRESENT, classLoader); 31 if (!present.isEmpty()) { 32 return ConditionOutcome.noMatch( 33 ConditionMessage.forCondition(ConditionalOnMissingClass.class) 34 .found(\"unwanted class\", \"unwanted classes\") 35 .items(Style.QUOTE, present) 36 ); 37 } 38 matchMessage = matchMessage.andCondition(ConditionalOnMissingClass.class) 39 .didNotFind(\"unwanted class\", \"unwanted classes\") 40 .items(Style.QUOTE, filter(onMissingClasses, ClassNameFilter.MISSING, classLoader)); 41 } 42 43 return ConditionOutcome.match(matchMessage); 44 } 45} 源码阅读技巧 1. 使用IDEA调试 设置断点：\n1// 在关键方法设置断点 2public ConfigurableApplicationContext run(String... args) { 3 // 断点1：启动入口 4 StopWatch stopWatch = new StopWatch(); 5 stopWatch.start(); 6 7 // 断点2：创建Context 8 context = createApplicationContext(); 9 10 // 断点3：刷新Context 11 refreshContext(context); 12 13 return context; 14} 查看调用栈：\n使用Ctrl+Alt+H查看方法调用层次 使用Alt+F7查找方法使用位置 条件断点：\n1// 只在特定条件下触发断点 2if (beanName.equals(\"dataSource\")) { 3 // 断点：只在创建dataSource时触发 4} 2. 绘制流程图 使用工具绘制关键流程：\nDraw.io PlantUML Mermaid 1sequenceDiagram 2 participant Main 3 participant SpringApplication 4 participant Context 5 participant AutoConfig 6 7 Main-\u003e\u003eSpringApplication: run() 8 SpringApplication-\u003e\u003eContext: createApplicationContext() 9 SpringApplication-\u003e\u003eAutoConfig: loadAutoConfiguration() 10 AutoConfig-\u003e\u003eContext: registerBeans() 11 SpringApplication-\u003e\u003eContext: refresh() 12 Context--\u003e\u003eMain: ApplicationContext 3. 做笔记 记录关键点：\n核心类和接口 设计模式的应用 巧妙的实现技巧 疑问和待研究的问题 示例笔记：\n1## SpringApplication启动流程 2 3### 核心方法 4- `run(String... args)`: 启动入口 5- `prepareEnvironment()`: 准备环境 6- `createApplicationContext()`: 创建上下文 7- `refreshContext()`: 刷新上下文 8 9### 设计模式 10- 模板方法：run()方法定义流程，子类可扩展 11- 策略模式：ApplicationContextFactory创建不同类型的Context 12- 观察者模式：SpringApplicationRunListeners监听启动事件 13 14### 疑问 15- [ ] Environment是如何加载配置文件的？ 16- [ ] Bean的循环依赖是如何解决的？ 4. 写测试代码 验证理解：\n1@Test 2public void testAutoConfiguration() { 3 // 1. 创建AnnotationConfigApplicationContext 4 AnnotationConfigApplicationContext context = 5 new AnnotationConfigApplicationContext(); 6 7 // 2. 注册配置类 8 context.register(DataSourceAutoConfiguration.class); 9 10 // 3. 刷新容器 11 context.refresh(); 12 13 // 4. 验证Bean是否创建 14 DataSource dataSource = context.getBean(DataSource.class); 15 assertNotNull(dataSource); 16} 模仿实现：\n1// 模仿Spring Boot的条件注解 2@Target({ ElementType.TYPE, ElementType.METHOD }) 3@Retention(RetentionPolicy.RUNTIME) 4@Conditional(OnMyClassCondition.class) 5public @interface ConditionalOnMyClass { 6 String value(); 7} 8 9public class OnMyClassCondition implements Condition { 10 @Override 11 public boolean matches(ConditionContext context, AnnotatedTypeMetadata metadata) { 12 Map\u003cString, Object\u003e attributes = metadata.getAnnotationAttributes( 13 ConditionalOnMyClass.class.getName() 14 ); 15 String className = (String) attributes.get(\"value\"); 16 17 try { 18 Class.forName(className); 19 return true; 20 } catch (ClassNotFoundException e) { 21 return false; 22 } 23 } 24} 学习路径建议 初级阶段（1-2周） 目标：理解Spring Boot的基本使用和核心概念\n阅读官方文档 运行示例项目 理解@SpringBootApplication注解 了解自动配置的基本原理 推荐阅读：\nSpringApplication.java @SpringBootApplication相关注解 简单的AutoConfiguration类 中级阶段（2-4周） 目标：深入理解启动流程和自动配置机制\n调试启动流程 分析AutoConfigurationImportSelector 研究条件注解的实现 学习常用的AutoConfiguration 推荐阅读：\nSpringApplication.run()完整流程 AutoConfigurationImportSelector.java OnClassCondition.java DataSourceAutoConfiguration.java WebMvcAutoConfiguration.java 高级阶段（1-2个月） 目标：掌握Spring Boot的设计思想和扩展机制\n研究SPI机制（SpringFactoriesLoader） 分析ApplicationContext的创建和刷新 学习Actuator的实现 研究Spring Boot的测试支持 推荐阅读：\nSpringFactoriesLoader.java ConfigurableApplicationContext相关类 spring-boot-actuator模块 spring-boot-test模块 专家阶段（持续学习） 目标：参与开源贡献，深度定制Spring Boot\n阅读Issue和PR 参与社区讨论 提交Bug修复或新特性 开发自定义Starter 实战：开发自定义Starter 1. 创建Starter项目 1 2 3 4 org.springframework.boot 5 spring-boot-autoconfigure 6 7 8 org.springframework.boot 9 spring-boot-configuration-processor 10 true 11 12 2. 定义配置属性 1@ConfigurationProperties(prefix = \"my.service\") 2public class MyServiceProperties { 3 4 private String name = \"default\"; 5 private int timeout = 3000; 6 7 // getters and setters 8} 3. 创建自动配置类 1@Configuration 2@ConditionalOnClass(MyService.class) 3@EnableConfigurationProperties(MyServiceProperties.class) 4public class MyServiceAutoConfiguration { 5 6 @Bean 7 @ConditionalOnMissingBean 8 public MyService myService(MyServiceProperties properties) { 9 return new MyService(properties.getName(), properties.getTimeout()); 10 } 11} 4. 注册自动配置 1# META-INF/spring.factories 2org.springframework.boot.autoconfigure.EnableAutoConfiguration=\\ 3com.example.MyServiceAutoConfiguration 5. 使用Starter 1 2 3 com.example 4 my-spring-boot-starter 5 1.0.0 6 1# application.yml 2my: 3 service: 4 name: my-service 5 timeout: 5000 1@SpringBootApplication 2public class Application { 3 4 @Autowired 5 private MyService myService; // 自动注入 6 7 public static void main(String[] args) { 8 SpringApplication.run(Application.class, args); 9 } 10} 总结与思考 本文系统讲解了如何阅读开源项目源码，以Spring Boot为例：\n方法论：从宏观到微观，带着问题读源码 启动流程：理解SpringApplication.run()的完整流程 自动配置：掌握@EnableAutoConfiguration的实现原理 条件注解：学习@Conditional的设计和实现 学习路径：从初级到专家的进阶路线 实战练习：开发自定义Starter巩固理解 阅读源码的核心要点：\n目标明确：带着问题和目标去读 循序渐进：从简单到复杂，逐步深入 动手实践：通过调试和编码加深理解 持续学习：源码阅读是一个长期过程 推荐的学习资源：\nSpring Boot官方文档 Spring Boot源码 Spring Framework源码 下次当你想深入学习一个开源项目时，不妨按照本文的方法，系统性地阅读和学习。记住，源码阅读不是目的，理解设计思想和提升编码能力才是最终目标。\n",
+  "wordCount" : "1409",
+  "inLanguage": "en",
+  "datePublished": "2026-02-12T00:00:00Z",
+  "dateModified": "2026-02-12T00:00:00Z",
+  "author":{
+    "@type": "Person",
+    "name": "wawayu"
+  },
+  "mainEntityOfPage": {
+    "@type": "WebPage",
+    "@id": "http://localhost:1313/posts/2026/02/%E5%A6%82%E4%BD%95%E9%98%85%E8%AF%BB%E5%BC%80%E6%BA%90%E9%A1%B9%E7%9B%AE%E6%BA%90%E7%A0%81%E4%BB%A5-spring-boot-%E4%B8%BA%E4%BE%8B/"
+  },
+  "publisher": {
+    "@type": "Organization",
+    "name": "博客喵",
+    "logo": {
+      "@type": "ImageObject",
+      "url": "http://localhost:1313/favicon.ico"
+    }
+  }
+}
+</script>
+</head>
+<body id="top">
+    <header class="header">
+    <nav class="nav">
+        <div class="logo">
+            <a href="http://localhost:1313/" accesskey="h" title="博客喵 (Alt + H)">博客喵</a>
+            <div class="logo-switches">
+                <button id="theme-toggle" accesskey="t" title="(Alt + T)" aria-label="Toggle theme">
+                    <svg id="moon" xmlns="http://www.w3.org/2000/svg" width="24" height="18" viewBox="0 0 24 24"
+                        fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"
+                        stroke-linejoin="round">
+                        <path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"></path>
+                    </svg>
+                    <svg id="sun" xmlns="http://www.w3.org/2000/svg" width="24" height="18" viewBox="0 0 24 24"
+                        fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"
+                        stroke-linejoin="round">
+                        <circle cx="12" cy="12" r="5"></circle>
+                        <line x1="12" y1="1" x2="12" y2="3"></line>
+                        <line x1="12" y1="21" x2="12" y2="23"></line>
+                        <line x1="4.22" y1="4.22" x2="5.64" y2="5.64"></line>
+                        <line x1="18.36" y1="18.36" x2="19.78" y2="19.78"></line>
+                        <line x1="1" y1="12" x2="3" y2="12"></line>
+                        <line x1="21" y1="12" x2="23" y2="12"></line>
+                        <line x1="4.22" y1="19.78" x2="5.64" y2="18.36"></line>
+                        <line x1="18.36" y1="5.64" x2="19.78" y2="4.22"></line>
+                    </svg>
+                </button>
+            </div>
+        </div>
+        <ul id="menu">
+            <li>
+                <a href="http://localhost:1313/posts/" title="📝 文章">
+                    <span>📝 文章</span>
+                </a>
+            </li>
+            <li>
+                <a href="http://localhost:1313/tags/" title="🏷️ 标签">
+                    <span>🏷️ 标签</span>
+                </a>
+            </li>
+            <li>
+                <a href="http://localhost:1313/categories/" title="📂 分类">
+                    <span>📂 分类</span>
+                </a>
+            </li>
+            <li>
+                <a href="http://localhost:1313/skills/" title="💻 技能">
+                    <span>💻 技能</span>
+                </a>
+            </li>
+            <li>
+                <a href="http://localhost:1313/about/" title="👤 关于">
+                    <span>👤 关于</span>
+                </a>
+            </li>
+            <li>
+                <a href="http://localhost:1313/search/" title="🔍 搜索 (Alt &#43; /)" accesskey=/>
+                    <span>🔍 搜索</span>
+                </a>
+            </li>
+        </ul>
+    </nav>
+</header>
+<main class="main">
+
+<article class="post-single">
+  <header class="post-header">
+    <div class="breadcrumbs"><a href="http://localhost:1313/">Home</a>&nbsp;»&nbsp;<a href="http://localhost:1313/posts/">Posts</a></div>
+    <h1 class="post-title entry-hint-parent">
+      如何阅读开源项目源码：以 Spring Boot 为例
+    </h1>
+    <div class="post-description">
+      系统讲解如何高效阅读开源项目源码，以Spring Boot为例，从入门到精通的完整学习路径
+    </div>
+    <div class="post-meta"><span title='2026-02-12 00:00:00 +0000 UTC'>February 12, 2026</span>&nbsp;·&nbsp;<span>7 min</span>&nbsp;·&nbsp;<span>1409 words</span>&nbsp;·&nbsp;<span>wawayu</span>&nbsp;|&nbsp;<span>
+    <a href="https://github.com/wawayu-dev/wawayu-dev.github.io/tree/main/content/posts/how-to-read-spring-boot-source-code.md" rel="noopener noreferrer edit" target="_blank">建议修改</a>
+</span>
+
+</div>
+  </header> <div class="toc">
+    <details  open>
+        <summary accesskey="c" title="(Alt + C)">
+            <span class="details">Table of Contents</span>
+        </summary>
+
+        <div class="inner"><nav id="TableOfContents">
+  <ul>
+    <li>
+      <ul>
+        <li><a href="#本文亮点">本文亮点</a></li>
+      </ul>
+    </li>
+    <li><a href="#为什么要读源码">为什么要读源码</a>
+      <ul>
+        <li><a href="#源码阅读的价值">源码阅读的价值</a></li>
+        <li><a href="#常见误区">常见误区</a></li>
+      </ul>
+    </li>
+    <li><a href="#源码阅读方法论">源码阅读方法论</a>
+      <ul>
+        <li><a href="#1-准备阶段">1. 准备阶段</a></li>
+        <li><a href="#2-宏观阶段">2. 宏观阶段</a></li>
+        <li><a href="#3-微观阶段">3. 微观阶段</a></li>
+      </ul>
+    </li>
+    <li><a href="#spring-boot-启动流程分析">Spring Boot 启动流程分析</a>
+      <ul>
+        <li><a href="#入口springbootapplication">入口：@SpringBootApplication</a></li>
+        <li><a href="#springapplicationrun-流程">SpringApplication.run() 流程</a></li>
+      </ul>
+    </li>
+    <li><a href="#自动配置原理">自动配置原理</a>
+      <ul>
+        <li><a href="#enableautoconfiguration">@EnableAutoConfiguration</a></li>
+        <li><a href="#autoconfigurationimportselector">AutoConfigurationImportSelector</a></li>
+        <li><a href="#springfactories">spring.factories</a></li>
+        <li><a href="#自动配置示例">自动配置示例</a></li>
+      </ul>
+    </li>
+    <li><a href="#条件注解原理">条件注解原理</a>
+      <ul>
+        <li><a href="#conditional">@Conditional</a></li>
+        <li><a href="#condition接口">Condition接口</a></li>
+        <li><a href="#onclasscondition实现">OnClassCondition实现</a></li>
+      </ul>
+    </li>
+    <li><a href="#源码阅读技巧">源码阅读技巧</a>
+      <ul>
+        <li><a href="#1-使用idea调试">1. 使用IDEA调试</a></li>
+        <li><a href="#2-绘制流程图">2. 绘制流程图</a></li>
+        <li><a href="#3-做笔记">3. 做笔记</a></li>
+        <li><a href="#4-写测试代码">4. 写测试代码</a></li>
+      </ul>
+    </li>
+    <li><a href="#学习路径建议">学习路径建议</a>
+      <ul>
+        <li><a href="#初级阶段1-2周">初级阶段（1-2周）</a></li>
+        <li><a href="#中级阶段2-4周">中级阶段（2-4周）</a></li>
+        <li><a href="#高级阶段1-2个月">高级阶段（1-2个月）</a></li>
+        <li><a href="#专家阶段持续学习">专家阶段（持续学习）</a></li>
+      </ul>
+    </li>
+    <li><a href="#实战开发自定义starter">实战：开发自定义Starter</a>
+      <ul>
+        <li><a href="#1-创建starter项目">1. 创建Starter项目</a></li>
+        <li><a href="#2-定义配置属性">2. 定义配置属性</a></li>
+        <li><a href="#3-创建自动配置类">3. 创建自动配置类</a></li>
+        <li><a href="#4-注册自动配置">4. 注册自动配置</a></li>
+        <li><a href="#5-使用starter">5. 使用Starter</a></li>
+      </ul>
+    </li>
+    <li><a href="#总结与思考">总结与思考</a></li>
+  </ul>
+</nav>
+        </div>
+    </details>
+</div>
+
+  <div class="post-content"><p>阅读优秀的开源项目源码是提升技术能力的最佳途径之一。然而，面对动辄几十万行的代码，很多人不知道从何下手。本文将以Spring Boot为例，系统讲解如何高效地阅读和学习开源项目源码。</p>
+<h3 id="本文亮点">本文亮点<a hidden class="anchor" aria-hidden="true" href="#本文亮点">#</a></h3>
+<ul>
+<li><input checked="" disabled="" type="checkbox"> 掌握源码阅读的系统方法论</li>
+<li><input checked="" disabled="" type="checkbox"> 学会使用工具辅助源码阅读</li>
+<li><input checked="" disabled="" type="checkbox"> 理解Spring Boot的核心设计思想</li>
+<li><input checked="" disabled="" type="checkbox"> 掌握从宏观到微观的阅读策略</li>
+<li><input checked="" disabled="" type="checkbox"> 建立源码学习的长效机制</li>
+</ul>
+<hr>
+<h2 id="为什么要读源码">为什么要读源码<a hidden class="anchor" aria-hidden="true" href="#为什么要读源码">#</a></h2>
+<h3 id="源码阅读的价值">源码阅读的价值<a hidden class="anchor" aria-hidden="true" href="#源码阅读的价值">#</a></h3>
+<ol>
+<li><strong>深入理解原理</strong>：知其然，更知其所以然</li>
+<li><strong>学习设计模式</strong>：看大师如何设计架构</li>
+<li><strong>提升编码能力</strong>：学习优秀的代码风格</li>
+<li><strong>解决疑难问题</strong>：遇到问题能快速定位</li>
+<li><strong>参与开源贡献</strong>：为开源社区做贡献</li>
+</ol>
+<h3 id="常见误区">常见误区<a hidden class="anchor" aria-hidden="true" href="#常见误区">#</a></h3>
+<p>❌ <strong>从第一行开始读</strong>：容易迷失在细节中
+❌ <strong>追求完全理解</strong>：试图理解每一行代码
+❌ <strong>没有目标</strong>：漫无目的地浏览代码
+❌ <strong>只看不练</strong>：只看不写，无法真正掌握</p>
+<p>✅ <strong>带着问题读</strong>：围绕具体问题展开
+✅ <strong>抓住主线</strong>：理解核心流程和设计思想
+✅ <strong>循序渐进</strong>：从简单到复杂，逐步深入
+✅ <strong>边读边写</strong>：通过实践加深理解</p>
+<blockquote>
+<p><strong>架构思考：</strong> 阅读源码不是为了记住每一行代码，而是理解设计思想和架构模式。要学会从宏观到微观，从整体到细节的阅读方法。</p>
+</blockquote>
+<hr>
+<h2 id="源码阅读方法论">源码阅读方法论<a hidden class="anchor" aria-hidden="true" href="#源码阅读方法论">#</a></h2>
+<h3 id="1-准备阶段">1. 准备阶段<a hidden class="anchor" aria-hidden="true" href="#1-准备阶段">#</a></h3>
+<p><strong>选择合适的版本</strong>：</p>
+<ul>
+<li>选择稳定版本（如Spring Boot 2.7.x）</li>
+<li>避免选择最新的开发版本</li>
+<li>查看版本的Release Notes</li>
+</ul>
+<p><strong>搭建调试环境</strong>：</p>
+<div class="highlight"><pre tabindex="0" class="chroma"><code class="language-bash" data-lang="bash"><span class="line"><span class="ln">1</span><span class="cl"><span class="c1"># 1. 克隆源码</span>
+</span></span><span class="line"><span class="ln">2</span><span class="cl">git clone https://github.com/spring-projects/spring-boot.git
+</span></span><span class="line"><span class="ln">3</span><span class="cl"><span class="nb">cd</span> spring-boot
+</span></span><span class="line"><span class="ln">4</span><span class="cl">
+</span></span><span class="line"><span class="ln">5</span><span class="cl"><span class="c1"># 2. 切换到稳定版本</span>
+</span></span><span class="line"><span class="ln">6</span><span class="cl">git checkout v2.7.18
+</span></span><span class="line"><span class="ln">7</span><span class="cl">
+</span></span><span class="line"><span class="ln">8</span><span class="cl"><span class="c1"># 3. 导入IDE（IDEA）</span>
+</span></span><span class="line"><span class="ln">9</span><span class="cl"><span class="c1"># File -&gt; Open -&gt; 选择spring-boot目录</span>
+</span></span></code></pre></div><p><strong>准备示例项目</strong>：</p>
+<div class="highlight"><pre tabindex="0" class="chroma"><code class="language-xml" data-lang="xml"><span class="line"><span class="ln"> 1</span><span class="cl"><span class="c">&lt;!-- pom.xml --&gt;</span>
+</span></span><span class="line"><span class="ln"> 2</span><span class="cl"><span class="nt">&lt;parent&gt;</span>
+</span></span><span class="line"><span class="ln"> 3</span><span class="cl">    <span class="nt">&lt;groupId&gt;</span>org.springframework.boot<span class="nt">&lt;/groupId&gt;</span>
+</span></span><span class="line"><span class="ln"> 4</span><span class="cl">    <span class="nt">&lt;artifactId&gt;</span>spring-boot-starter-parent<span class="nt">&lt;/artifactId&gt;</span>
+</span></span><span class="line"><span class="ln"> 5</span><span class="cl">    <span class="nt">&lt;version&gt;</span>2.7.18<span class="nt">&lt;/version&gt;</span>
+</span></span><span class="line"><span class="ln"> 6</span><span class="cl"><span class="nt">&lt;/parent&gt;</span>
+</span></span><span class="line"><span class="ln"> 7</span><span class="cl">
+</span></span><span class="line"><span class="ln"> 8</span><span class="cl"><span class="nt">&lt;dependencies&gt;</span>
+</span></span><span class="line"><span class="ln"> 9</span><span class="cl">    <span class="nt">&lt;dependency&gt;</span>
+</span></span><span class="line"><span class="ln">10</span><span class="cl">        <span class="nt">&lt;groupId&gt;</span>org.springframework.boot<span class="nt">&lt;/groupId&gt;</span>
+</span></span><span class="line"><span class="ln">11</span><span class="cl">        <span class="nt">&lt;artifactId&gt;</span>spring-boot-starter-web<span class="nt">&lt;/artifactId&gt;</span>
+</span></span><span class="line"><span class="ln">12</span><span class="cl">    <span class="nt">&lt;/dependency&gt;</span>
+</span></span><span class="line"><span class="ln">13</span><span class="cl"><span class="nt">&lt;/dependencies&gt;</span>
+</span></span></code></pre></div><h3 id="2-宏观阶段">2. 宏观阶段<a hidden class="anchor" aria-hidden="true" href="#2-宏观阶段">#</a></h3>
+<p><strong>了解项目结构</strong>：</p>
+<div class="highlight"><pre tabindex="0" class="chroma"><code class="language-fallback" data-lang="fallback"><span class="line"><span class="ln">1</span><span class="cl">spring-boot/
+</span></span><span class="line"><span class="ln">2</span><span class="cl">├── spring-boot-project/
+</span></span><span class="line"><span class="ln">3</span><span class="cl">│   ├── spring-boot/              # 核心模块
+</span></span><span class="line"><span class="ln">4</span><span class="cl">│   ├── spring-boot-autoconfigure/ # 自动配置
+</span></span><span class="line"><span class="ln">5</span><span class="cl">│   ├── spring-boot-starters/     # Starter依赖
+</span></span><span class="line"><span class="ln">6</span><span class="cl">│   ├── spring-boot-actuator/     # 监控端点
+</span></span><span class="line"><span class="ln">7</span><span class="cl">│   └── spring-boot-test/         # 测试支持
+</span></span><span class="line"><span class="ln">8</span><span class="cl">├── spring-boot-samples/          # 示例项目
+</span></span><span class="line"><span class="ln">9</span><span class="cl">└── spring-boot-tests/            # 集成测试
+</span></span></code></pre></div><p><strong>阅读官方文档</strong>：</p>
+<ul>
+<li><a href="https://docs.spring.io/spring-boot/docs/current/reference/html/">Spring Boot Reference Documentation</a></li>
+<li>了解核心特性和使用方式</li>
+<li>理解设计理念和架构思想</li>
+</ul>
+<p><strong>绘制架构图</strong>：</p>
+<div class="highlight"><pre tabindex="0" class="chroma"><code class="language-fallback" data-lang="fallback"><span class="line"><span class="ln"> 1</span><span class="cl">应用启动
+</span></span><span class="line"><span class="ln"> 2</span><span class="cl">  ↓
+</span></span><span class="line"><span class="ln"> 3</span><span class="cl">@SpringBootApplication
+</span></span><span class="line"><span class="ln"> 4</span><span class="cl">  ↓
+</span></span><span class="line"><span class="ln"> 5</span><span class="cl">SpringApplication.run()
+</span></span><span class="line"><span class="ln"> 6</span><span class="cl">  ↓
+</span></span><span class="line"><span class="ln"> 7</span><span class="cl">创建ApplicationContext
+</span></span><span class="line"><span class="ln"> 8</span><span class="cl">  ↓
+</span></span><span class="line"><span class="ln"> 9</span><span class="cl">自动配置（AutoConfiguration）
+</span></span><span class="line"><span class="ln">10</span><span class="cl">  ↓
+</span></span><span class="line"><span class="ln">11</span><span class="cl">启动内嵌Web服务器
+</span></span><span class="line"><span class="ln">12</span><span class="cl">  ↓
+</span></span><span class="line"><span class="ln">13</span><span class="cl">应用就绪
+</span></span></code></pre></div><h3 id="3-微观阶段">3. 微观阶段<a hidden class="anchor" aria-hidden="true" href="#3-微观阶段">#</a></h3>
+<p><strong>选择切入点</strong>：</p>
+<ul>
+<li>从最常用的功能开始（如启动流程）</li>
+<li>从遇到的问题开始（如自动配置原理）</li>
+<li>从感兴趣的特性开始（如条件注解）</li>
+</ul>
+<p><strong>使用调试工具</strong>：</p>
+<ul>
+<li>断点调试：观察执行流程</li>
+<li>调用栈：理解方法调用关系</li>
+<li>变量监视：查看对象状态</li>
+</ul>
+<hr>
+<h2 id="spring-boot-启动流程分析">Spring Boot 启动流程分析<a hidden class="anchor" aria-hidden="true" href="#spring-boot-启动流程分析">#</a></h2>
+<h3 id="入口springbootapplication">入口：@SpringBootApplication<a hidden class="anchor" aria-hidden="true" href="#入口springbootapplication">#</a></h3>
+<div class="highlight"><pre tabindex="0" class="chroma"><code class="language-java" data-lang="java"><span class="line"><span class="ln">1</span><span class="cl"><span class="nd">@SpringBootApplication</span><span class="w">
+</span></span></span><span class="line"><span class="ln">2</span><span class="cl"><span class="kd">public</span><span class="w"> </span><span class="kd">class</span> <span class="nc">DemoApplication</span><span class="w"> </span><span class="p">{</span><span class="w">
+</span></span></span><span class="line"><span class="ln">3</span><span class="cl"><span class="w">    </span><span class="kd">public</span><span class="w"> </span><span class="kd">static</span><span class="w"> </span><span class="kt">void</span><span class="w"> </span><span class="nf">main</span><span class="p">(</span><span class="n">String</span><span class="o">[]</span><span class="w"> </span><span class="n">args</span><span class="p">)</span><span class="w"> </span><span class="p">{</span><span class="w">
+</span></span></span><span class="line"><span class="ln">4</span><span class="cl"><span class="w">        </span><span class="n">SpringApplication</span><span class="p">.</span><span class="na">run</span><span class="p">(</span><span class="n">DemoApplication</span><span class="p">.</span><span class="na">class</span><span class="p">,</span><span class="w"> </span><span class="n">args</span><span class="p">);</span><span class="w">
+</span></span></span><span class="line"><span class="ln">5</span><span class="cl"><span class="w">    </span><span class="p">}</span><span class="w">
+</span></span></span><span class="line"><span class="ln">6</span><span class="cl"><span class="p">}</span><span class="w">
+</span></span></span></code></pre></div><p><strong>@SpringBootApplication 注解</strong>：</p>
+<div class="highlight"><pre tabindex="0" class="chroma"><code class="language-java" data-lang="java"><span class="line"><span class="ln"> 1</span><span class="cl"><span class="nd">@Target</span><span class="p">(</span><span class="n">ElementType</span><span class="p">.</span><span class="na">TYPE</span><span class="p">)</span><span class="w">
+</span></span></span><span class="line"><span class="ln"> 2</span><span class="cl"><span class="nd">@Retention</span><span class="p">(</span><span class="n">RetentionPolicy</span><span class="p">.</span><span class="na">RUNTIME</span><span class="p">)</span><span class="w">
+</span></span></span><span class="line"><span class="ln"> 3</span><span class="cl"><span class="nd">@Documented</span><span class="w">
+</span></span></span><span class="line"><span class="ln"> 4</span><span class="cl"><span class="nd">@Inherited</span><span class="w">
+</span></span></span><span class="line"><span class="ln"> 5</span><span class="cl"><span class="nd">@SpringBootConfiguration</span><span class="w">  </span><span class="c1">// 1. 配置类</span><span class="w">
+</span></span></span><span class="line"><span class="ln"> 6</span><span class="cl"><span class="nd">@EnableAutoConfiguration</span><span class="w">  </span><span class="c1">// 2. 自动配置</span><span class="w">
+</span></span></span><span class="line"><span class="ln"> 7</span><span class="cl"><span class="nd">@ComponentScan</span><span class="w">           </span><span class="c1">// 3. 组件扫描</span><span class="w">
+</span></span></span><span class="line"><span class="ln"> 8</span><span class="cl"><span class="kd">public</span><span class="w"> </span><span class="nd">@interface</span><span class="w"> </span><span class="n">SpringBootApplication</span><span class="w"> </span><span class="p">{</span><span class="w">
+</span></span></span><span class="line"><span class="ln"> 9</span><span class="cl"><span class="w">    </span><span class="c1">// ...</span><span class="w">
+</span></span></span><span class="line"><span class="ln">10</span><span class="cl"><span class="p">}</span><span class="w">
+</span></span></span></code></pre></div><p><strong>三个核心注解</strong>：</p>
+<ol>
+<li><code>@SpringBootConfiguration</code>：标记为配置类</li>
+<li><code>@EnableAutoConfiguration</code>：启用自动配置</li>
+<li><code>@ComponentScan</code>：扫描组件</li>
+</ol>
+<h3 id="springapplicationrun-流程">SpringApplication.run() 流程<a hidden class="anchor" aria-hidden="true" href="#springapplicationrun-流程">#</a></h3>
+<div class="highlight"><pre tabindex="0" class="chroma"><code class="language-java" data-lang="java"><span class="line"><span class="ln"> 1</span><span class="cl"><span class="kd">public</span><span class="w"> </span><span class="kd">class</span> <span class="nc">SpringApplication</span><span class="w"> </span><span class="p">{</span><span class="w">
+</span></span></span><span class="line"><span class="ln"> 2</span><span class="cl"><span class="w">    
+</span></span></span><span class="line"><span class="ln"> 3</span><span class="cl"><span class="w">    </span><span class="kd">public</span><span class="w"> </span><span class="kd">static</span><span class="w"> </span><span class="n">ConfigurableApplicationContext</span><span class="w"> </span><span class="nf">run</span><span class="p">(</span><span class="n">Class</span><span class="o">&lt;?&gt;</span><span class="w"> </span><span class="n">primarySource</span><span class="p">,</span><span class="w"> </span><span class="n">String</span><span class="p">...</span><span class="w"> </span><span class="n">args</span><span class="p">)</span><span class="w"> </span><span class="p">{</span><span class="w">
+</span></span></span><span class="line"><span class="ln"> 4</span><span class="cl"><span class="w">        </span><span class="k">return</span><span class="w"> </span><span class="n">run</span><span class="p">(</span><span class="k">new</span><span class="w"> </span><span class="n">Class</span><span class="o">&lt;?&gt;[]</span><span class="w"> </span><span class="p">{</span><span class="w"> </span><span class="n">primarySource</span><span class="w"> </span><span class="p">},</span><span class="w"> </span><span class="n">args</span><span class="p">);</span><span class="w">
+</span></span></span><span class="line"><span class="ln"> 5</span><span class="cl"><span class="w">    </span><span class="p">}</span><span class="w">
+</span></span></span><span class="line"><span class="ln"> 6</span><span class="cl"><span class="w">    
+</span></span></span><span class="line"><span class="ln"> 7</span><span class="cl"><span class="w">    </span><span class="kd">public</span><span class="w"> </span><span class="kd">static</span><span class="w"> </span><span class="n">ConfigurableApplicationContext</span><span class="w"> </span><span class="nf">run</span><span class="p">(</span><span class="n">Class</span><span class="o">&lt;?&gt;[]</span><span class="w"> </span><span class="n">primarySources</span><span class="p">,</span><span class="w"> </span><span class="n">String</span><span class="o">[]</span><span class="w"> </span><span class="n">args</span><span class="p">)</span><span class="w"> </span><span class="p">{</span><span class="w">
+</span></span></span><span class="line"><span class="ln"> 8</span><span class="cl"><span class="w">        </span><span class="c1">// 创建SpringApplication实例并运行</span><span class="w">
+</span></span></span><span class="line"><span class="ln"> 9</span><span class="cl"><span class="w">        </span><span class="k">return</span><span class="w"> </span><span class="k">new</span><span class="w"> </span><span class="n">SpringApplication</span><span class="p">(</span><span class="n">primarySources</span><span class="p">).</span><span class="na">run</span><span class="p">(</span><span class="n">args</span><span class="p">);</span><span class="w">
+</span></span></span><span class="line"><span class="ln">10</span><span class="cl"><span class="w">    </span><span class="p">}</span><span class="w">
+</span></span></span><span class="line"><span class="ln">11</span><span class="cl"><span class="w">    
+</span></span></span><span class="line"><span class="ln">12</span><span class="cl"><span class="w">    </span><span class="kd">public</span><span class="w"> </span><span class="n">ConfigurableApplicationContext</span><span class="w"> </span><span class="nf">run</span><span class="p">(</span><span class="n">String</span><span class="p">...</span><span class="w"> </span><span class="n">args</span><span class="p">)</span><span class="w"> </span><span class="p">{</span><span class="w">
+</span></span></span><span class="line"><span class="ln">13</span><span class="cl"><span class="w">        </span><span class="c1">// 1. 创建StopWatch，记录启动时间</span><span class="w">
+</span></span></span><span class="line"><span class="ln">14</span><span class="cl"><span class="w">        </span><span class="n">StopWatch</span><span class="w"> </span><span class="n">stopWatch</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="k">new</span><span class="w"> </span><span class="n">StopWatch</span><span class="p">();</span><span class="w">
+</span></span></span><span class="line"><span class="ln">15</span><span class="cl"><span class="w">        </span><span class="n">stopWatch</span><span class="p">.</span><span class="na">start</span><span class="p">();</span><span class="w">
+</span></span></span><span class="line"><span class="ln">16</span><span class="cl"><span class="w">        
+</span></span></span><span class="line"><span class="ln">17</span><span class="cl"><span class="w">        </span><span class="c1">// 2. 创建Bootstrap上下文</span><span class="w">
+</span></span></span><span class="line"><span class="ln">18</span><span class="cl"><span class="w">        </span><span class="n">DefaultBootstrapContext</span><span class="w"> </span><span class="n">bootstrapContext</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">createBootstrapContext</span><span class="p">();</span><span class="w">
+</span></span></span><span class="line"><span class="ln">19</span><span class="cl"><span class="w">        </span><span class="n">ConfigurableApplicationContext</span><span class="w"> </span><span class="n">context</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="kc">null</span><span class="p">;</span><span class="w">
+</span></span></span><span class="line"><span class="ln">20</span><span class="cl"><span class="w">        
+</span></span></span><span class="line"><span class="ln">21</span><span class="cl"><span class="w">        </span><span class="c1">// 3. 配置Headless属性</span><span class="w">
+</span></span></span><span class="line"><span class="ln">22</span><span class="cl"><span class="w">        </span><span class="n">configureHeadlessProperty</span><span class="p">();</span><span class="w">
+</span></span></span><span class="line"><span class="ln">23</span><span class="cl"><span class="w">        
+</span></span></span><span class="line"><span class="ln">24</span><span class="cl"><span class="w">        </span><span class="c1">// 4. 获取SpringApplicationRunListeners</span><span class="w">
+</span></span></span><span class="line"><span class="ln">25</span><span class="cl"><span class="w">        </span><span class="n">SpringApplicationRunListeners</span><span class="w"> </span><span class="n">listeners</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">getRunListeners</span><span class="p">(</span><span class="n">args</span><span class="p">);</span><span class="w">
+</span></span></span><span class="line"><span class="ln">26</span><span class="cl"><span class="w">        </span><span class="n">listeners</span><span class="p">.</span><span class="na">starting</span><span class="p">(</span><span class="n">bootstrapContext</span><span class="p">,</span><span class="w"> </span><span class="k">this</span><span class="p">.</span><span class="na">mainApplicationClass</span><span class="p">);</span><span class="w">
+</span></span></span><span class="line"><span class="ln">27</span><span class="cl"><span class="w">        
+</span></span></span><span class="line"><span class="ln">28</span><span class="cl"><span class="w">        </span><span class="k">try</span><span class="w"> </span><span class="p">{</span><span class="w">
+</span></span></span><span class="line"><span class="ln">29</span><span class="cl"><span class="w">            </span><span class="c1">// 5. 准备环境</span><span class="w">
+</span></span></span><span class="line"><span class="ln">30</span><span class="cl"><span class="w">            </span><span class="n">ApplicationArguments</span><span class="w"> </span><span class="n">applicationArguments</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="k">new</span><span class="w"> </span><span class="n">DefaultApplicationArguments</span><span class="p">(</span><span class="n">args</span><span class="p">);</span><span class="w">
+</span></span></span><span class="line"><span class="ln">31</span><span class="cl"><span class="w">            </span><span class="n">ConfigurableEnvironment</span><span class="w"> </span><span class="n">environment</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">prepareEnvironment</span><span class="p">(</span><span class="n">listeners</span><span class="p">,</span><span class="w"> </span><span class="n">bootstrapContext</span><span class="p">,</span><span class="w"> </span><span class="n">applicationArguments</span><span class="p">);</span><span class="w">
+</span></span></span><span class="line"><span class="ln">32</span><span class="cl"><span class="w">            
+</span></span></span><span class="line"><span class="ln">33</span><span class="cl"><span class="w">            </span><span class="c1">// 6. 打印Banner</span><span class="w">
+</span></span></span><span class="line"><span class="ln">34</span><span class="cl"><span class="w">            </span><span class="n">Banner</span><span class="w"> </span><span class="n">printedBanner</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">printBanner</span><span class="p">(</span><span class="n">environment</span><span class="p">);</span><span class="w">
+</span></span></span><span class="line"><span class="ln">35</span><span class="cl"><span class="w">            
+</span></span></span><span class="line"><span class="ln">36</span><span class="cl"><span class="w">            </span><span class="c1">// 7. 创建ApplicationContext</span><span class="w">
+</span></span></span><span class="line"><span class="ln">37</span><span class="cl"><span class="w">            </span><span class="n">context</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">createApplicationContext</span><span class="p">();</span><span class="w">
+</span></span></span><span class="line"><span class="ln">38</span><span class="cl"><span class="w">            </span><span class="n">context</span><span class="p">.</span><span class="na">setApplicationStartup</span><span class="p">(</span><span class="k">this</span><span class="p">.</span><span class="na">applicationStartup</span><span class="p">);</span><span class="w">
+</span></span></span><span class="line"><span class="ln">39</span><span class="cl"><span class="w">            
+</span></span></span><span class="line"><span class="ln">40</span><span class="cl"><span class="w">            </span><span class="c1">// 8. 准备Context</span><span class="w">
+</span></span></span><span class="line"><span class="ln">41</span><span class="cl"><span class="w">            </span><span class="n">prepareContext</span><span class="p">(</span><span class="n">bootstrapContext</span><span class="p">,</span><span class="w"> </span><span class="n">context</span><span class="p">,</span><span class="w"> </span><span class="n">environment</span><span class="p">,</span><span class="w"> </span><span class="n">listeners</span><span class="p">,</span><span class="w"> </span><span class="n">applicationArguments</span><span class="p">,</span><span class="w"> </span><span class="n">printedBanner</span><span class="p">);</span><span class="w">
+</span></span></span><span class="line"><span class="ln">42</span><span class="cl"><span class="w">            
+</span></span></span><span class="line"><span class="ln">43</span><span class="cl"><span class="w">            </span><span class="c1">// 9. 刷新Context（核心）</span><span class="w">
+</span></span></span><span class="line"><span class="ln">44</span><span class="cl"><span class="w">            </span><span class="n">refreshContext</span><span class="p">(</span><span class="n">context</span><span class="p">);</span><span class="w">
+</span></span></span><span class="line"><span class="ln">45</span><span class="cl"><span class="w">            
+</span></span></span><span class="line"><span class="ln">46</span><span class="cl"><span class="w">            </span><span class="c1">// 10. 刷新后处理</span><span class="w">
+</span></span></span><span class="line"><span class="ln">47</span><span class="cl"><span class="w">            </span><span class="n">afterRefresh</span><span class="p">(</span><span class="n">context</span><span class="p">,</span><span class="w"> </span><span class="n">applicationArguments</span><span class="p">);</span><span class="w">
+</span></span></span><span class="line"><span class="ln">48</span><span class="cl"><span class="w">            
+</span></span></span><span class="line"><span class="ln">49</span><span class="cl"><span class="w">            </span><span class="n">stopWatch</span><span class="p">.</span><span class="na">stop</span><span class="p">();</span><span class="w">
+</span></span></span><span class="line"><span class="ln">50</span><span class="cl"><span class="w">            
+</span></span></span><span class="line"><span class="ln">51</span><span class="cl"><span class="w">            </span><span class="c1">// 11. 发布启动完成事件</span><span class="w">
+</span></span></span><span class="line"><span class="ln">52</span><span class="cl"><span class="w">            </span><span class="n">listeners</span><span class="p">.</span><span class="na">started</span><span class="p">(</span><span class="n">context</span><span class="p">);</span><span class="w">
+</span></span></span><span class="line"><span class="ln">53</span><span class="cl"><span class="w">            
+</span></span></span><span class="line"><span class="ln">54</span><span class="cl"><span class="w">            </span><span class="c1">// 12. 调用Runners</span><span class="w">
+</span></span></span><span class="line"><span class="ln">55</span><span class="cl"><span class="w">            </span><span class="n">callRunners</span><span class="p">(</span><span class="n">context</span><span class="p">,</span><span class="w"> </span><span class="n">applicationArguments</span><span class="p">);</span><span class="w">
+</span></span></span><span class="line"><span class="ln">56</span><span class="cl"><span class="w">        </span><span class="p">}</span><span class="w">
+</span></span></span><span class="line"><span class="ln">57</span><span class="cl"><span class="w">        </span><span class="k">catch</span><span class="w"> </span><span class="p">(</span><span class="n">Throwable</span><span class="w"> </span><span class="n">ex</span><span class="p">)</span><span class="w"> </span><span class="p">{</span><span class="w">
+</span></span></span><span class="line"><span class="ln">58</span><span class="cl"><span class="w">            </span><span class="n">handleRunFailure</span><span class="p">(</span><span class="n">context</span><span class="p">,</span><span class="w"> </span><span class="n">ex</span><span class="p">,</span><span class="w"> </span><span class="n">listeners</span><span class="p">);</span><span class="w">
+</span></span></span><span class="line"><span class="ln">59</span><span class="cl"><span class="w">            </span><span class="k">throw</span><span class="w"> </span><span class="k">new</span><span class="w"> </span><span class="n">IllegalStateException</span><span class="p">(</span><span class="n">ex</span><span class="p">);</span><span class="w">
+</span></span></span><span class="line"><span class="ln">60</span><span class="cl"><span class="w">        </span><span class="p">}</span><span class="w">
+</span></span></span><span class="line"><span class="ln">61</span><span class="cl"><span class="w">        
+</span></span></span><span class="line"><span class="ln">62</span><span class="cl"><span class="w">        </span><span class="k">try</span><span class="w"> </span><span class="p">{</span><span class="w">
+</span></span></span><span class="line"><span class="ln">63</span><span class="cl"><span class="w">            </span><span class="n">listeners</span><span class="p">.</span><span class="na">running</span><span class="p">(</span><span class="n">context</span><span class="p">);</span><span class="w">
+</span></span></span><span class="line"><span class="ln">64</span><span class="cl"><span class="w">        </span><span class="p">}</span><span class="w">
+</span></span></span><span class="line"><span class="ln">65</span><span class="cl"><span class="w">        </span><span class="k">catch</span><span class="w"> </span><span class="p">(</span><span class="n">Throwable</span><span class="w"> </span><span class="n">ex</span><span class="p">)</span><span class="w"> </span><span class="p">{</span><span class="w">
+</span></span></span><span class="line"><span class="ln">66</span><span class="cl"><span class="w">            </span><span class="n">handleRunFailure</span><span class="p">(</span><span class="n">context</span><span class="p">,</span><span class="w"> </span><span class="n">ex</span><span class="p">,</span><span class="w"> </span><span class="kc">null</span><span class="p">);</span><span class="w">
+</span></span></span><span class="line"><span class="ln">67</span><span class="cl"><span class="w">            </span><span class="k">throw</span><span class="w"> </span><span class="k">new</span><span class="w"> </span><span class="n">IllegalStateException</span><span class="p">(</span><span class="n">ex</span><span class="p">);</span><span class="w">
+</span></span></span><span class="line"><span class="ln">68</span><span class="cl"><span class="w">        </span><span class="p">}</span><span class="w">
+</span></span></span><span class="line"><span class="ln">69</span><span class="cl"><span class="w">        
+</span></span></span><span class="line"><span class="ln">70</span><span class="cl"><span class="w">        </span><span class="k">return</span><span class="w"> </span><span class="n">context</span><span class="p">;</span><span class="w">
+</span></span></span><span class="line"><span class="ln">71</span><span class="cl"><span class="w">    </span><span class="p">}</span><span class="w">
+</span></span></span><span class="line"><span class="ln">72</span><span class="cl"><span class="p">}</span><span class="w">
+</span></span></span></code></pre></div><p><strong>启动流程图</strong>：</p>
+<div class="highlight"><pre tabindex="0" class="chroma"><code class="language-fallback" data-lang="fallback"><span class="line"><span class="ln"> 1</span><span class="cl">1. 创建StopWatch
+</span></span><span class="line"><span class="ln"> 2</span><span class="cl">   ↓
+</span></span><span class="line"><span class="ln"> 3</span><span class="cl">2. 创建Bootstrap上下文
+</span></span><span class="line"><span class="ln"> 4</span><span class="cl">   ↓
+</span></span><span class="line"><span class="ln"> 5</span><span class="cl">3. 获取RunListeners
+</span></span><span class="line"><span class="ln"> 6</span><span class="cl">   ↓
+</span></span><span class="line"><span class="ln"> 7</span><span class="cl">4. 准备Environment
+</span></span><span class="line"><span class="ln"> 8</span><span class="cl">   ↓
+</span></span><span class="line"><span class="ln"> 9</span><span class="cl">5. 打印Banner
+</span></span><span class="line"><span class="ln">10</span><span class="cl">   ↓
+</span></span><span class="line"><span class="ln">11</span><span class="cl">6. 创建ApplicationContext
+</span></span><span class="line"><span class="ln">12</span><span class="cl">   ↓
+</span></span><span class="line"><span class="ln">13</span><span class="cl">7. 准备Context
+</span></span><span class="line"><span class="ln">14</span><span class="cl">   ↓
+</span></span><span class="line"><span class="ln">15</span><span class="cl">8. 刷新Context（加载Bean）
+</span></span><span class="line"><span class="ln">16</span><span class="cl">   ↓
+</span></span><span class="line"><span class="ln">17</span><span class="cl">9. 调用Runners
+</span></span><span class="line"><span class="ln">18</span><span class="cl">   ↓
+</span></span><span class="line"><span class="ln">19</span><span class="cl">10. 发布启动完成事件
+</span></span></code></pre></div><hr>
+<h2 id="自动配置原理">自动配置原理<a hidden class="anchor" aria-hidden="true" href="#自动配置原理">#</a></h2>
+<h3 id="enableautoconfiguration">@EnableAutoConfiguration<a hidden class="anchor" aria-hidden="true" href="#enableautoconfiguration">#</a></h3>
+<div class="highlight"><pre tabindex="0" class="chroma"><code class="language-java" data-lang="java"><span class="line"><span class="ln">1</span><span class="cl"><span class="nd">@Target</span><span class="p">(</span><span class="n">ElementType</span><span class="p">.</span><span class="na">TYPE</span><span class="p">)</span><span class="w">
+</span></span></span><span class="line"><span class="ln">2</span><span class="cl"><span class="nd">@Retention</span><span class="p">(</span><span class="n">RetentionPolicy</span><span class="p">.</span><span class="na">RUNTIME</span><span class="p">)</span><span class="w">
+</span></span></span><span class="line"><span class="ln">3</span><span class="cl"><span class="nd">@Documented</span><span class="w">
+</span></span></span><span class="line"><span class="ln">4</span><span class="cl"><span class="nd">@Inherited</span><span class="w">
+</span></span></span><span class="line"><span class="ln">5</span><span class="cl"><span class="nd">@AutoConfigurationPackage</span><span class="w">
+</span></span></span><span class="line"><span class="ln">6</span><span class="cl"><span class="nd">@Import</span><span class="p">(</span><span class="n">AutoConfigurationImportSelector</span><span class="p">.</span><span class="na">class</span><span class="p">)</span><span class="w">  </span><span class="c1">// 核心</span><span class="w">
+</span></span></span><span class="line"><span class="ln">7</span><span class="cl"><span class="kd">public</span><span class="w"> </span><span class="nd">@interface</span><span class="w"> </span><span class="n">EnableAutoConfiguration</span><span class="w"> </span><span class="p">{</span><span class="w">
+</span></span></span><span class="line"><span class="ln">8</span><span class="cl"><span class="w">    </span><span class="c1">// ...</span><span class="w">
+</span></span></span><span class="line"><span class="ln">9</span><span class="cl"><span class="p">}</span><span class="w">
+</span></span></span></code></pre></div><h3 id="autoconfigurationimportselector">AutoConfigurationImportSelector<a hidden class="anchor" aria-hidden="true" href="#autoconfigurationimportselector">#</a></h3>
+<div class="highlight"><pre tabindex="0" class="chroma"><code class="language-java" data-lang="java"><span class="line"><span class="ln"> 1</span><span class="cl"><span class="kd">public</span><span class="w"> </span><span class="kd">class</span> <span class="nc">AutoConfigurationImportSelector</span><span class="w"> </span><span class="kd">implements</span><span class="w"> </span><span class="n">DeferredImportSelector</span><span class="w"> </span><span class="p">{</span><span class="w">
+</span></span></span><span class="line"><span class="ln"> 2</span><span class="cl"><span class="w">    
+</span></span></span><span class="line"><span class="ln"> 3</span><span class="cl"><span class="w">    </span><span class="nd">@Override</span><span class="w">
+</span></span></span><span class="line"><span class="ln"> 4</span><span class="cl"><span class="w">    </span><span class="kd">public</span><span class="w"> </span><span class="n">String</span><span class="o">[]</span><span class="w"> </span><span class="nf">selectImports</span><span class="p">(</span><span class="n">AnnotationMetadata</span><span class="w"> </span><span class="n">annotationMetadata</span><span class="p">)</span><span class="w"> </span><span class="p">{</span><span class="w">
+</span></span></span><span class="line"><span class="ln"> 5</span><span class="cl"><span class="w">        </span><span class="k">if</span><span class="w"> </span><span class="p">(</span><span class="o">!</span><span class="n">isEnabled</span><span class="p">(</span><span class="n">annotationMetadata</span><span class="p">))</span><span class="w"> </span><span class="p">{</span><span class="w">
+</span></span></span><span class="line"><span class="ln"> 6</span><span class="cl"><span class="w">            </span><span class="k">return</span><span class="w"> </span><span class="n">NO_IMPORTS</span><span class="p">;</span><span class="w">
+</span></span></span><span class="line"><span class="ln"> 7</span><span class="cl"><span class="w">        </span><span class="p">}</span><span class="w">
+</span></span></span><span class="line"><span class="ln"> 8</span><span class="cl"><span class="w">        
+</span></span></span><span class="line"><span class="ln"> 9</span><span class="cl"><span class="w">        </span><span class="c1">// 1. 获取自动配置类</span><span class="w">
+</span></span></span><span class="line"><span class="ln">10</span><span class="cl"><span class="w">        </span><span class="n">AutoConfigurationEntry</span><span class="w"> </span><span class="n">autoConfigurationEntry</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">getAutoConfigurationEntry</span><span class="p">(</span><span class="n">annotationMetadata</span><span class="p">);</span><span class="w">
+</span></span></span><span class="line"><span class="ln">11</span><span class="cl"><span class="w">        </span><span class="k">return</span><span class="w"> </span><span class="n">StringUtils</span><span class="p">.</span><span class="na">toStringArray</span><span class="p">(</span><span class="n">autoConfigurationEntry</span><span class="p">.</span><span class="na">getConfigurations</span><span class="p">());</span><span class="w">
+</span></span></span><span class="line"><span class="ln">12</span><span class="cl"><span class="w">    </span><span class="p">}</span><span class="w">
+</span></span></span><span class="line"><span class="ln">13</span><span class="cl"><span class="w">    
+</span></span></span><span class="line"><span class="ln">14</span><span class="cl"><span class="w">    </span><span class="kd">protected</span><span class="w"> </span><span class="n">AutoConfigurationEntry</span><span class="w"> </span><span class="nf">getAutoConfigurationEntry</span><span class="p">(</span><span class="n">AnnotationMetadata</span><span class="w"> </span><span class="n">annotationMetadata</span><span class="p">)</span><span class="w"> </span><span class="p">{</span><span class="w">
+</span></span></span><span class="line"><span class="ln">15</span><span class="cl"><span class="w">        </span><span class="k">if</span><span class="w"> </span><span class="p">(</span><span class="o">!</span><span class="n">isEnabled</span><span class="p">(</span><span class="n">annotationMetadata</span><span class="p">))</span><span class="w"> </span><span class="p">{</span><span class="w">
+</span></span></span><span class="line"><span class="ln">16</span><span class="cl"><span class="w">            </span><span class="k">return</span><span class="w"> </span><span class="n">EMPTY_ENTRY</span><span class="p">;</span><span class="w">
+</span></span></span><span class="line"><span class="ln">17</span><span class="cl"><span class="w">        </span><span class="p">}</span><span class="w">
+</span></span></span><span class="line"><span class="ln">18</span><span class="cl"><span class="w">        
+</span></span></span><span class="line"><span class="ln">19</span><span class="cl"><span class="w">        </span><span class="n">AnnotationAttributes</span><span class="w"> </span><span class="n">attributes</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">getAttributes</span><span class="p">(</span><span class="n">annotationMetadata</span><span class="p">);</span><span class="w">
+</span></span></span><span class="line"><span class="ln">20</span><span class="cl"><span class="w">        
+</span></span></span><span class="line"><span class="ln">21</span><span class="cl"><span class="w">        </span><span class="c1">// 2. 加载候选配置类</span><span class="w">
+</span></span></span><span class="line"><span class="ln">22</span><span class="cl"><span class="w">        </span><span class="n">List</span><span class="o">&lt;</span><span class="n">String</span><span class="o">&gt;</span><span class="w"> </span><span class="n">configurations</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">getCandidateConfigurations</span><span class="p">(</span><span class="n">annotationMetadata</span><span class="p">,</span><span class="w"> </span><span class="n">attributes</span><span class="p">);</span><span class="w">
+</span></span></span><span class="line"><span class="ln">23</span><span class="cl"><span class="w">        
+</span></span></span><span class="line"><span class="ln">24</span><span class="cl"><span class="w">        </span><span class="c1">// 3. 去重</span><span class="w">
+</span></span></span><span class="line"><span class="ln">25</span><span class="cl"><span class="w">        </span><span class="n">configurations</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">removeDuplicates</span><span class="p">(</span><span class="n">configurations</span><span class="p">);</span><span class="w">
+</span></span></span><span class="line"><span class="ln">26</span><span class="cl"><span class="w">        
+</span></span></span><span class="line"><span class="ln">27</span><span class="cl"><span class="w">        </span><span class="c1">// 4. 排除指定的配置类</span><span class="w">
+</span></span></span><span class="line"><span class="ln">28</span><span class="cl"><span class="w">        </span><span class="n">Set</span><span class="o">&lt;</span><span class="n">String</span><span class="o">&gt;</span><span class="w"> </span><span class="n">exclusions</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">getExclusions</span><span class="p">(</span><span class="n">annotationMetadata</span><span class="p">,</span><span class="w"> </span><span class="n">attributes</span><span class="p">);</span><span class="w">
+</span></span></span><span class="line"><span class="ln">29</span><span class="cl"><span class="w">        </span><span class="n">checkExcludedClasses</span><span class="p">(</span><span class="n">configurations</span><span class="p">,</span><span class="w"> </span><span class="n">exclusions</span><span class="p">);</span><span class="w">
+</span></span></span><span class="line"><span class="ln">30</span><span class="cl"><span class="w">        </span><span class="n">configurations</span><span class="p">.</span><span class="na">removeAll</span><span class="p">(</span><span class="n">exclusions</span><span class="p">);</span><span class="w">
+</span></span></span><span class="line"><span class="ln">31</span><span class="cl"><span class="w">        
+</span></span></span><span class="line"><span class="ln">32</span><span class="cl"><span class="w">        </span><span class="c1">// 5. 过滤（根据条件注解）</span><span class="w">
+</span></span></span><span class="line"><span class="ln">33</span><span class="cl"><span class="w">        </span><span class="n">configurations</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">getConfigurationClassFilter</span><span class="p">().</span><span class="na">filter</span><span class="p">(</span><span class="n">configurations</span><span class="p">);</span><span class="w">
+</span></span></span><span class="line"><span class="ln">34</span><span class="cl"><span class="w">        
+</span></span></span><span class="line"><span class="ln">35</span><span class="cl"><span class="w">        </span><span class="c1">// 6. 触发自动配置导入事件</span><span class="w">
+</span></span></span><span class="line"><span class="ln">36</span><span class="cl"><span class="w">        </span><span class="n">fireAutoConfigurationImportEvents</span><span class="p">(</span><span class="n">configurations</span><span class="p">,</span><span class="w"> </span><span class="n">exclusions</span><span class="p">);</span><span class="w">
+</span></span></span><span class="line"><span class="ln">37</span><span class="cl"><span class="w">        
+</span></span></span><span class="line"><span class="ln">38</span><span class="cl"><span class="w">        </span><span class="k">return</span><span class="w"> </span><span class="k">new</span><span class="w"> </span><span class="n">AutoConfigurationEntry</span><span class="p">(</span><span class="n">configurations</span><span class="p">,</span><span class="w"> </span><span class="n">exclusions</span><span class="p">);</span><span class="w">
+</span></span></span><span class="line"><span class="ln">39</span><span class="cl"><span class="w">    </span><span class="p">}</span><span class="w">
+</span></span></span><span class="line"><span class="ln">40</span><span class="cl"><span class="w">    
+</span></span></span><span class="line"><span class="ln">41</span><span class="cl"><span class="w">    </span><span class="kd">protected</span><span class="w"> </span><span class="n">List</span><span class="o">&lt;</span><span class="n">String</span><span class="o">&gt;</span><span class="w"> </span><span class="nf">getCandidateConfigurations</span><span class="p">(</span><span class="n">AnnotationMetadata</span><span class="w"> </span><span class="n">metadata</span><span class="p">,</span><span class="w"> </span><span class="n">AnnotationAttributes</span><span class="w"> </span><span class="n">attributes</span><span class="p">)</span><span class="w"> </span><span class="p">{</span><span class="w">
+</span></span></span><span class="line"><span class="ln">42</span><span class="cl"><span class="w">        </span><span class="c1">// 从META-INF/spring.factories加载配置类</span><span class="w">
+</span></span></span><span class="line"><span class="ln">43</span><span class="cl"><span class="w">        </span><span class="n">List</span><span class="o">&lt;</span><span class="n">String</span><span class="o">&gt;</span><span class="w"> </span><span class="n">configurations</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">SpringFactoriesLoader</span><span class="p">.</span><span class="na">loadFactoryNames</span><span class="p">(</span><span class="w">
+</span></span></span><span class="line"><span class="ln">44</span><span class="cl"><span class="w">            </span><span class="n">getSpringFactoriesLoaderFactoryClass</span><span class="p">(),</span><span class="w">
+</span></span></span><span class="line"><span class="ln">45</span><span class="cl"><span class="w">            </span><span class="n">getBeanClassLoader</span><span class="p">()</span><span class="w">
+</span></span></span><span class="line"><span class="ln">46</span><span class="cl"><span class="w">        </span><span class="p">);</span><span class="w">
+</span></span></span><span class="line"><span class="ln">47</span><span class="cl"><span class="w">        </span><span class="k">return</span><span class="w"> </span><span class="n">configurations</span><span class="p">;</span><span class="w">
+</span></span></span><span class="line"><span class="ln">48</span><span class="cl"><span class="w">    </span><span class="p">}</span><span class="w">
+</span></span></span><span class="line"><span class="ln">49</span><span class="cl"><span class="p">}</span><span class="w">
+</span></span></span></code></pre></div><h3 id="springfactories">spring.factories<a hidden class="anchor" aria-hidden="true" href="#springfactories">#</a></h3>
+<div class="highlight"><pre tabindex="0" class="chroma"><code class="language-properties" data-lang="properties"><span class="line"><span class="ln">1</span><span class="cl"><span class="c1"># spring-boot-autoconfigure/META-INF/spring.factories</span>
+</span></span><span class="line"><span class="ln">2</span><span class="cl">
+</span></span><span class="line"><span class="ln">3</span><span class="cl"><span class="na">org.springframework.boot.autoconfigure.EnableAutoConfiguration</span><span class="o">=</span><span class="s">\
+</span></span></span><span class="line"><span class="ln">4</span><span class="cl"><span class="s">org.springframework.boot.autoconfigure.admin.SpringApplicationAdminJmxAutoConfiguration,\
+</span></span></span><span class="line"><span class="ln">5</span><span class="cl"><span class="s">org.springframework.boot.autoconfigure.aop.AopAutoConfiguration,\
+</span></span></span><span class="line"><span class="ln">6</span><span class="cl"><span class="s">org.springframework.boot.autoconfigure.amqp.RabbitAutoConfiguration,\
+</span></span></span><span class="line"><span class="ln">7</span><span class="cl"><span class="s">org.springframework.boot.autoconfigure.jdbc.DataSourceAutoConfiguration,\
+</span></span></span><span class="line"><span class="ln">8</span><span class="cl"><span class="s">org.springframework.boot.autoconfigure.web.servlet.WebMvcAutoConfiguration,\
+</span></span></span><span class="line"><span class="ln">9</span><span class="cl"><span class="s">...</span>
+</span></span></code></pre></div><h3 id="自动配置示例">自动配置示例<a hidden class="anchor" aria-hidden="true" href="#自动配置示例">#</a></h3>
+<div class="highlight"><pre tabindex="0" class="chroma"><code class="language-java" data-lang="java"><span class="line"><span class="ln"> 1</span><span class="cl"><span class="nd">@Configuration</span><span class="p">(</span><span class="n">proxyBeanMethods</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="kc">false</span><span class="p">)</span><span class="w">
+</span></span></span><span class="line"><span class="ln"> 2</span><span class="cl"><span class="nd">@ConditionalOnClass</span><span class="p">({</span><span class="w"> </span><span class="n">DataSource</span><span class="p">.</span><span class="na">class</span><span class="p">,</span><span class="w"> </span><span class="n">EmbeddedDatabaseType</span><span class="p">.</span><span class="na">class</span><span class="w"> </span><span class="p">})</span><span class="w">
+</span></span></span><span class="line"><span class="ln"> 3</span><span class="cl"><span class="nd">@ConditionalOnMissingBean</span><span class="p">(</span><span class="n">type</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="s">&#34;io.r2dbc.spi.ConnectionFactory&#34;</span><span class="p">)</span><span class="w">
+</span></span></span><span class="line"><span class="ln"> 4</span><span class="cl"><span class="nd">@EnableConfigurationProperties</span><span class="p">(</span><span class="n">DataSourceProperties</span><span class="p">.</span><span class="na">class</span><span class="p">)</span><span class="w">
+</span></span></span><span class="line"><span class="ln"> 5</span><span class="cl"><span class="nd">@Import</span><span class="p">({</span><span class="w"> </span><span class="n">DataSourcePoolMetadataProvidersConfiguration</span><span class="p">.</span><span class="na">class</span><span class="w"> </span><span class="p">})</span><span class="w">
+</span></span></span><span class="line"><span class="ln"> 6</span><span class="cl"><span class="kd">public</span><span class="w"> </span><span class="kd">class</span> <span class="nc">DataSourceAutoConfiguration</span><span class="w"> </span><span class="p">{</span><span class="w">
+</span></span></span><span class="line"><span class="ln"> 7</span><span class="cl"><span class="w">    
+</span></span></span><span class="line"><span class="ln"> 8</span><span class="cl"><span class="w">    </span><span class="nd">@Configuration</span><span class="p">(</span><span class="n">proxyBeanMethods</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="kc">false</span><span class="p">)</span><span class="w">
+</span></span></span><span class="line"><span class="ln"> 9</span><span class="cl"><span class="w">    </span><span class="nd">@Conditional</span><span class="p">(</span><span class="n">EmbeddedDatabaseCondition</span><span class="p">.</span><span class="na">class</span><span class="p">)</span><span class="w">
+</span></span></span><span class="line"><span class="ln">10</span><span class="cl"><span class="w">    </span><span class="nd">@ConditionalOnMissingBean</span><span class="p">({</span><span class="w"> </span><span class="n">DataSource</span><span class="p">.</span><span class="na">class</span><span class="p">,</span><span class="w"> </span><span class="n">XADataSource</span><span class="p">.</span><span class="na">class</span><span class="w"> </span><span class="p">})</span><span class="w">
+</span></span></span><span class="line"><span class="ln">11</span><span class="cl"><span class="w">    </span><span class="nd">@Import</span><span class="p">(</span><span class="n">EmbeddedDataSourceConfiguration</span><span class="p">.</span><span class="na">class</span><span class="p">)</span><span class="w">
+</span></span></span><span class="line"><span class="ln">12</span><span class="cl"><span class="w">    </span><span class="kd">protected</span><span class="w"> </span><span class="kd">static</span><span class="w"> </span><span class="kd">class</span> <span class="nc">EmbeddedDatabaseConfiguration</span><span class="w"> </span><span class="p">{</span><span class="w">
+</span></span></span><span class="line"><span class="ln">13</span><span class="cl"><span class="w">    </span><span class="p">}</span><span class="w">
+</span></span></span><span class="line"><span class="ln">14</span><span class="cl"><span class="w">    
+</span></span></span><span class="line"><span class="ln">15</span><span class="cl"><span class="w">    </span><span class="nd">@Configuration</span><span class="p">(</span><span class="n">proxyBeanMethods</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="kc">false</span><span class="p">)</span><span class="w">
+</span></span></span><span class="line"><span class="ln">16</span><span class="cl"><span class="w">    </span><span class="nd">@Conditional</span><span class="p">(</span><span class="n">PooledDataSourceCondition</span><span class="p">.</span><span class="na">class</span><span class="p">)</span><span class="w">
+</span></span></span><span class="line"><span class="ln">17</span><span class="cl"><span class="w">    </span><span class="nd">@ConditionalOnMissingBean</span><span class="p">({</span><span class="w"> </span><span class="n">DataSource</span><span class="p">.</span><span class="na">class</span><span class="p">,</span><span class="w"> </span><span class="n">XADataSource</span><span class="p">.</span><span class="na">class</span><span class="w"> </span><span class="p">})</span><span class="w">
+</span></span></span><span class="line"><span class="ln">18</span><span class="cl"><span class="w">    </span><span class="nd">@Import</span><span class="p">({</span><span class="w"> </span><span class="n">DataSourceConfiguration</span><span class="p">.</span><span class="na">Hikari</span><span class="p">.</span><span class="na">class</span><span class="p">,</span><span class="w"> </span><span class="n">DataSourceConfiguration</span><span class="p">.</span><span class="na">Tomcat</span><span class="p">.</span><span class="na">class</span><span class="p">,</span><span class="w">
+</span></span></span><span class="line"><span class="ln">19</span><span class="cl"><span class="w">            </span><span class="n">DataSourceConfiguration</span><span class="p">.</span><span class="na">Dbcp2</span><span class="p">.</span><span class="na">class</span><span class="p">,</span><span class="w"> </span><span class="n">DataSourceConfiguration</span><span class="p">.</span><span class="na">OracleUcp</span><span class="p">.</span><span class="na">class</span><span class="p">,</span><span class="w">
+</span></span></span><span class="line"><span class="ln">20</span><span class="cl"><span class="w">            </span><span class="n">DataSourceConfiguration</span><span class="p">.</span><span class="na">Generic</span><span class="p">.</span><span class="na">class</span><span class="p">,</span><span class="w"> </span><span class="n">DataSourceJmxConfiguration</span><span class="p">.</span><span class="na">class</span><span class="w"> </span><span class="p">})</span><span class="w">
+</span></span></span><span class="line"><span class="ln">21</span><span class="cl"><span class="w">    </span><span class="kd">protected</span><span class="w"> </span><span class="kd">static</span><span class="w"> </span><span class="kd">class</span> <span class="nc">PooledDataSourceConfiguration</span><span class="w"> </span><span class="p">{</span><span class="w">
+</span></span></span><span class="line"><span class="ln">22</span><span class="cl"><span class="w">    </span><span class="p">}</span><span class="w">
+</span></span></span><span class="line"><span class="ln">23</span><span class="cl"><span class="p">}</span><span class="w">
+</span></span></span></code></pre></div><p><strong>条件注解</strong>：</p>
+<ul>
+<li><code>@ConditionalOnClass</code>：类路径存在指定类</li>
+<li><code>@ConditionalOnMissingBean</code>：容器中不存在指定Bean</li>
+<li><code>@ConditionalOnProperty</code>：配置文件存在指定属性</li>
+</ul>
+<hr>
+<h2 id="条件注解原理">条件注解原理<a hidden class="anchor" aria-hidden="true" href="#条件注解原理">#</a></h2>
+<h3 id="conditional">@Conditional<a hidden class="anchor" aria-hidden="true" href="#conditional">#</a></h3>
+<div class="highlight"><pre tabindex="0" class="chroma"><code class="language-java" data-lang="java"><span class="line"><span class="ln">1</span><span class="cl"><span class="nd">@Target</span><span class="p">({</span><span class="w"> </span><span class="n">ElementType</span><span class="p">.</span><span class="na">TYPE</span><span class="p">,</span><span class="w"> </span><span class="n">ElementType</span><span class="p">.</span><span class="na">METHOD</span><span class="w"> </span><span class="p">})</span><span class="w">
+</span></span></span><span class="line"><span class="ln">2</span><span class="cl"><span class="nd">@Retention</span><span class="p">(</span><span class="n">RetentionPolicy</span><span class="p">.</span><span class="na">RUNTIME</span><span class="p">)</span><span class="w">
+</span></span></span><span class="line"><span class="ln">3</span><span class="cl"><span class="nd">@Documented</span><span class="w">
+</span></span></span><span class="line"><span class="ln">4</span><span class="cl"><span class="kd">public</span><span class="w"> </span><span class="nd">@interface</span><span class="w"> </span><span class="n">Conditional</span><span class="w"> </span><span class="p">{</span><span class="w">
+</span></span></span><span class="line"><span class="ln">5</span><span class="cl"><span class="w">    </span><span class="n">Class</span><span class="o">&lt;?</span><span class="w"> </span><span class="kd">extends</span><span class="w"> </span><span class="n">Condition</span><span class="o">&gt;[]</span><span class="w"> </span><span class="nf">value</span><span class="p">();</span><span class="w">
+</span></span></span><span class="line"><span class="ln">6</span><span class="cl"><span class="p">}</span><span class="w">
+</span></span></span></code></pre></div><h3 id="condition接口">Condition接口<a hidden class="anchor" aria-hidden="true" href="#condition接口">#</a></h3>
+<div class="highlight"><pre tabindex="0" class="chroma"><code class="language-java" data-lang="java"><span class="line"><span class="ln">1</span><span class="cl"><span class="nd">@FunctionalInterface</span><span class="w">
+</span></span></span><span class="line"><span class="ln">2</span><span class="cl"><span class="kd">public</span><span class="w"> </span><span class="kd">interface</span> <span class="nc">Condition</span><span class="w"> </span><span class="p">{</span><span class="w">
+</span></span></span><span class="line"><span class="ln">3</span><span class="cl"><span class="w">    </span><span class="kt">boolean</span><span class="w"> </span><span class="nf">matches</span><span class="p">(</span><span class="n">ConditionContext</span><span class="w"> </span><span class="n">context</span><span class="p">,</span><span class="w"> </span><span class="n">AnnotatedTypeMetadata</span><span class="w"> </span><span class="n">metadata</span><span class="p">);</span><span class="w">
+</span></span></span><span class="line"><span class="ln">4</span><span class="cl"><span class="p">}</span><span class="w">
+</span></span></span></code></pre></div><h3 id="onclasscondition实现">OnClassCondition实现<a hidden class="anchor" aria-hidden="true" href="#onclasscondition实现">#</a></h3>
+<div class="highlight"><pre tabindex="0" class="chroma"><code class="language-java" data-lang="java"><span class="line"><span class="ln"> 1</span><span class="cl"><span class="nd">@Order</span><span class="p">(</span><span class="n">Ordered</span><span class="p">.</span><span class="na">HIGHEST_PRECEDENCE</span><span class="p">)</span><span class="w">
+</span></span></span><span class="line"><span class="ln"> 2</span><span class="cl"><span class="kd">class</span> <span class="nc">OnClassCondition</span><span class="w"> </span><span class="kd">extends</span><span class="w"> </span><span class="n">FilteringSpringBootCondition</span><span class="w"> </span><span class="p">{</span><span class="w">
+</span></span></span><span class="line"><span class="ln"> 3</span><span class="cl"><span class="w">    
+</span></span></span><span class="line"><span class="ln"> 4</span><span class="cl"><span class="w">    </span><span class="nd">@Override</span><span class="w">
+</span></span></span><span class="line"><span class="ln"> 5</span><span class="cl"><span class="w">    </span><span class="kd">public</span><span class="w"> </span><span class="n">ConditionOutcome</span><span class="w"> </span><span class="nf">getMatchOutcome</span><span class="p">(</span><span class="n">ConditionContext</span><span class="w"> </span><span class="n">context</span><span class="p">,</span><span class="w"> </span><span class="n">AnnotatedTypeMetadata</span><span class="w"> </span><span class="n">metadata</span><span class="p">)</span><span class="w"> </span><span class="p">{</span><span class="w">
+</span></span></span><span class="line"><span class="ln"> 6</span><span class="cl"><span class="w">        </span><span class="n">ClassLoader</span><span class="w"> </span><span class="n">classLoader</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">context</span><span class="p">.</span><span class="na">getClassLoader</span><span class="p">();</span><span class="w">
+</span></span></span><span class="line"><span class="ln"> 7</span><span class="cl"><span class="w">        </span><span class="n">ConditionMessage</span><span class="w"> </span><span class="n">matchMessage</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">ConditionMessage</span><span class="p">.</span><span class="na">empty</span><span class="p">();</span><span class="w">
+</span></span></span><span class="line"><span class="ln"> 8</span><span class="cl"><span class="w">        
+</span></span></span><span class="line"><span class="ln"> 9</span><span class="cl"><span class="w">        </span><span class="c1">// 获取@ConditionalOnClass注解的value</span><span class="w">
+</span></span></span><span class="line"><span class="ln">10</span><span class="cl"><span class="w">        </span><span class="n">List</span><span class="o">&lt;</span><span class="n">String</span><span class="o">&gt;</span><span class="w"> </span><span class="n">onClasses</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">getCandidates</span><span class="p">(</span><span class="n">metadata</span><span class="p">,</span><span class="w"> </span><span class="n">ConditionalOnClass</span><span class="p">.</span><span class="na">class</span><span class="p">);</span><span class="w">
+</span></span></span><span class="line"><span class="ln">11</span><span class="cl"><span class="w">        </span><span class="k">if</span><span class="w"> </span><span class="p">(</span><span class="n">onClasses</span><span class="w"> </span><span class="o">!=</span><span class="w"> </span><span class="kc">null</span><span class="p">)</span><span class="w"> </span><span class="p">{</span><span class="w">
+</span></span></span><span class="line"><span class="ln">12</span><span class="cl"><span class="w">            </span><span class="c1">// 检查类是否存在</span><span class="w">
+</span></span></span><span class="line"><span class="ln">13</span><span class="cl"><span class="w">            </span><span class="n">List</span><span class="o">&lt;</span><span class="n">String</span><span class="o">&gt;</span><span class="w"> </span><span class="n">missing</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">filter</span><span class="p">(</span><span class="n">onClasses</span><span class="p">,</span><span class="w"> </span><span class="n">ClassNameFilter</span><span class="p">.</span><span class="na">MISSING</span><span class="p">,</span><span class="w"> </span><span class="n">classLoader</span><span class="p">);</span><span class="w">
+</span></span></span><span class="line"><span class="ln">14</span><span class="cl"><span class="w">            </span><span class="k">if</span><span class="w"> </span><span class="p">(</span><span class="o">!</span><span class="n">missing</span><span class="p">.</span><span class="na">isEmpty</span><span class="p">())</span><span class="w"> </span><span class="p">{</span><span class="w">
+</span></span></span><span class="line"><span class="ln">15</span><span class="cl"><span class="w">                </span><span class="k">return</span><span class="w"> </span><span class="n">ConditionOutcome</span><span class="p">.</span><span class="na">noMatch</span><span class="p">(</span><span class="w">
+</span></span></span><span class="line"><span class="ln">16</span><span class="cl"><span class="w">                    </span><span class="n">ConditionMessage</span><span class="p">.</span><span class="na">forCondition</span><span class="p">(</span><span class="n">ConditionalOnClass</span><span class="p">.</span><span class="na">class</span><span class="p">)</span><span class="w">
+</span></span></span><span class="line"><span class="ln">17</span><span class="cl"><span class="w">                        </span><span class="p">.</span><span class="na">didNotFind</span><span class="p">(</span><span class="s">&#34;required class&#34;</span><span class="p">,</span><span class="w"> </span><span class="s">&#34;required classes&#34;</span><span class="p">)</span><span class="w">
+</span></span></span><span class="line"><span class="ln">18</span><span class="cl"><span class="w">                        </span><span class="p">.</span><span class="na">items</span><span class="p">(</span><span class="n">Style</span><span class="p">.</span><span class="na">QUOTE</span><span class="p">,</span><span class="w"> </span><span class="n">missing</span><span class="p">)</span><span class="w">
+</span></span></span><span class="line"><span class="ln">19</span><span class="cl"><span class="w">                </span><span class="p">);</span><span class="w">
+</span></span></span><span class="line"><span class="ln">20</span><span class="cl"><span class="w">            </span><span class="p">}</span><span class="w">
+</span></span></span><span class="line"><span class="ln">21</span><span class="cl"><span class="w">            </span><span class="n">matchMessage</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">matchMessage</span><span class="p">.</span><span class="na">andCondition</span><span class="p">(</span><span class="n">ConditionalOnClass</span><span class="p">.</span><span class="na">class</span><span class="p">)</span><span class="w">
+</span></span></span><span class="line"><span class="ln">22</span><span class="cl"><span class="w">                </span><span class="p">.</span><span class="na">found</span><span class="p">(</span><span class="s">&#34;required class&#34;</span><span class="p">,</span><span class="w"> </span><span class="s">&#34;required classes&#34;</span><span class="p">)</span><span class="w">
+</span></span></span><span class="line"><span class="ln">23</span><span class="cl"><span class="w">                </span><span class="p">.</span><span class="na">items</span><span class="p">(</span><span class="n">Style</span><span class="p">.</span><span class="na">QUOTE</span><span class="p">,</span><span class="w"> </span><span class="n">filter</span><span class="p">(</span><span class="n">onClasses</span><span class="p">,</span><span class="w"> </span><span class="n">ClassNameFilter</span><span class="p">.</span><span class="na">PRESENT</span><span class="p">,</span><span class="w"> </span><span class="n">classLoader</span><span class="p">));</span><span class="w">
+</span></span></span><span class="line"><span class="ln">24</span><span class="cl"><span class="w">        </span><span class="p">}</span><span class="w">
+</span></span></span><span class="line"><span class="ln">25</span><span class="cl"><span class="w">        
+</span></span></span><span class="line"><span class="ln">26</span><span class="cl"><span class="w">        </span><span class="c1">// 获取@ConditionalOnMissingClass注解的value</span><span class="w">
+</span></span></span><span class="line"><span class="ln">27</span><span class="cl"><span class="w">        </span><span class="n">List</span><span class="o">&lt;</span><span class="n">String</span><span class="o">&gt;</span><span class="w"> </span><span class="n">onMissingClasses</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">getCandidates</span><span class="p">(</span><span class="n">metadata</span><span class="p">,</span><span class="w"> </span><span class="n">ConditionalOnMissingClass</span><span class="p">.</span><span class="na">class</span><span class="p">);</span><span class="w">
+</span></span></span><span class="line"><span class="ln">28</span><span class="cl"><span class="w">        </span><span class="k">if</span><span class="w"> </span><span class="p">(</span><span class="n">onMissingClasses</span><span class="w"> </span><span class="o">!=</span><span class="w"> </span><span class="kc">null</span><span class="p">)</span><span class="w"> </span><span class="p">{</span><span class="w">
+</span></span></span><span class="line"><span class="ln">29</span><span class="cl"><span class="w">            </span><span class="c1">// 检查类是否不存在</span><span class="w">
+</span></span></span><span class="line"><span class="ln">30</span><span class="cl"><span class="w">            </span><span class="n">List</span><span class="o">&lt;</span><span class="n">String</span><span class="o">&gt;</span><span class="w"> </span><span class="n">present</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">filter</span><span class="p">(</span><span class="n">onMissingClasses</span><span class="p">,</span><span class="w"> </span><span class="n">ClassNameFilter</span><span class="p">.</span><span class="na">PRESENT</span><span class="p">,</span><span class="w"> </span><span class="n">classLoader</span><span class="p">);</span><span class="w">
+</span></span></span><span class="line"><span class="ln">31</span><span class="cl"><span class="w">            </span><span class="k">if</span><span class="w"> </span><span class="p">(</span><span class="o">!</span><span class="n">present</span><span class="p">.</span><span class="na">isEmpty</span><span class="p">())</span><span class="w"> </span><span class="p">{</span><span class="w">
+</span></span></span><span class="line"><span class="ln">32</span><span class="cl"><span class="w">                </span><span class="k">return</span><span class="w"> </span><span class="n">ConditionOutcome</span><span class="p">.</span><span class="na">noMatch</span><span class="p">(</span><span class="w">
+</span></span></span><span class="line"><span class="ln">33</span><span class="cl"><span class="w">                    </span><span class="n">ConditionMessage</span><span class="p">.</span><span class="na">forCondition</span><span class="p">(</span><span class="n">ConditionalOnMissingClass</span><span class="p">.</span><span class="na">class</span><span class="p">)</span><span class="w">
+</span></span></span><span class="line"><span class="ln">34</span><span class="cl"><span class="w">                        </span><span class="p">.</span><span class="na">found</span><span class="p">(</span><span class="s">&#34;unwanted class&#34;</span><span class="p">,</span><span class="w"> </span><span class="s">&#34;unwanted classes&#34;</span><span class="p">)</span><span class="w">
+</span></span></span><span class="line"><span class="ln">35</span><span class="cl"><span class="w">                        </span><span class="p">.</span><span class="na">items</span><span class="p">(</span><span class="n">Style</span><span class="p">.</span><span class="na">QUOTE</span><span class="p">,</span><span class="w"> </span><span class="n">present</span><span class="p">)</span><span class="w">
+</span></span></span><span class="line"><span class="ln">36</span><span class="cl"><span class="w">                </span><span class="p">);</span><span class="w">
+</span></span></span><span class="line"><span class="ln">37</span><span class="cl"><span class="w">            </span><span class="p">}</span><span class="w">
+</span></span></span><span class="line"><span class="ln">38</span><span class="cl"><span class="w">            </span><span class="n">matchMessage</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">matchMessage</span><span class="p">.</span><span class="na">andCondition</span><span class="p">(</span><span class="n">ConditionalOnMissingClass</span><span class="p">.</span><span class="na">class</span><span class="p">)</span><span class="w">
+</span></span></span><span class="line"><span class="ln">39</span><span class="cl"><span class="w">                </span><span class="p">.</span><span class="na">didNotFind</span><span class="p">(</span><span class="s">&#34;unwanted class&#34;</span><span class="p">,</span><span class="w"> </span><span class="s">&#34;unwanted classes&#34;</span><span class="p">)</span><span class="w">
+</span></span></span><span class="line"><span class="ln">40</span><span class="cl"><span class="w">                </span><span class="p">.</span><span class="na">items</span><span class="p">(</span><span class="n">Style</span><span class="p">.</span><span class="na">QUOTE</span><span class="p">,</span><span class="w"> </span><span class="n">filter</span><span class="p">(</span><span class="n">onMissingClasses</span><span class="p">,</span><span class="w"> </span><span class="n">ClassNameFilter</span><span class="p">.</span><span class="na">MISSING</span><span class="p">,</span><span class="w"> </span><span class="n">classLoader</span><span class="p">));</span><span class="w">
+</span></span></span><span class="line"><span class="ln">41</span><span class="cl"><span class="w">        </span><span class="p">}</span><span class="w">
+</span></span></span><span class="line"><span class="ln">42</span><span class="cl"><span class="w">        
+</span></span></span><span class="line"><span class="ln">43</span><span class="cl"><span class="w">        </span><span class="k">return</span><span class="w"> </span><span class="n">ConditionOutcome</span><span class="p">.</span><span class="na">match</span><span class="p">(</span><span class="n">matchMessage</span><span class="p">);</span><span class="w">
+</span></span></span><span class="line"><span class="ln">44</span><span class="cl"><span class="w">    </span><span class="p">}</span><span class="w">
+</span></span></span><span class="line"><span class="ln">45</span><span class="cl"><span class="p">}</span><span class="w">
+</span></span></span></code></pre></div><hr>
+<h2 id="源码阅读技巧">源码阅读技巧<a hidden class="anchor" aria-hidden="true" href="#源码阅读技巧">#</a></h2>
+<h3 id="1-使用idea调试">1. 使用IDEA调试<a hidden class="anchor" aria-hidden="true" href="#1-使用idea调试">#</a></h3>
+<p><strong>设置断点</strong>：</p>
+<div class="highlight"><pre tabindex="0" class="chroma"><code class="language-java" data-lang="java"><span class="line"><span class="ln"> 1</span><span class="cl"><span class="c1">// 在关键方法设置断点</span><span class="w">
+</span></span></span><span class="line"><span class="ln"> 2</span><span class="cl"><span class="kd">public</span><span class="w"> </span><span class="n">ConfigurableApplicationContext</span><span class="w"> </span><span class="nf">run</span><span class="p">(</span><span class="n">String</span><span class="p">...</span><span class="w"> </span><span class="n">args</span><span class="p">)</span><span class="w"> </span><span class="p">{</span><span class="w">
+</span></span></span><span class="line"><span class="ln"> 3</span><span class="cl"><span class="w">    </span><span class="c1">// 断点1：启动入口</span><span class="w">
+</span></span></span><span class="line"><span class="ln"> 4</span><span class="cl"><span class="w">    </span><span class="n">StopWatch</span><span class="w"> </span><span class="n">stopWatch</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="k">new</span><span class="w"> </span><span class="n">StopWatch</span><span class="p">();</span><span class="w">
+</span></span></span><span class="line"><span class="ln"> 5</span><span class="cl"><span class="w">    </span><span class="n">stopWatch</span><span class="p">.</span><span class="na">start</span><span class="p">();</span><span class="w">
+</span></span></span><span class="line"><span class="ln"> 6</span><span class="cl"><span class="w">    
+</span></span></span><span class="line"><span class="ln"> 7</span><span class="cl"><span class="w">    </span><span class="c1">// 断点2：创建Context</span><span class="w">
+</span></span></span><span class="line"><span class="ln"> 8</span><span class="cl"><span class="w">    </span><span class="n">context</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">createApplicationContext</span><span class="p">();</span><span class="w">
+</span></span></span><span class="line"><span class="ln"> 9</span><span class="cl"><span class="w">    
+</span></span></span><span class="line"><span class="ln">10</span><span class="cl"><span class="w">    </span><span class="c1">// 断点3：刷新Context</span><span class="w">
+</span></span></span><span class="line"><span class="ln">11</span><span class="cl"><span class="w">    </span><span class="n">refreshContext</span><span class="p">(</span><span class="n">context</span><span class="p">);</span><span class="w">
+</span></span></span><span class="line"><span class="ln">12</span><span class="cl"><span class="w">    
+</span></span></span><span class="line"><span class="ln">13</span><span class="cl"><span class="w">    </span><span class="k">return</span><span class="w"> </span><span class="n">context</span><span class="p">;</span><span class="w">
+</span></span></span><span class="line"><span class="ln">14</span><span class="cl"><span class="p">}</span><span class="w">
+</span></span></span></code></pre></div><p><strong>查看调用栈</strong>：</p>
+<ul>
+<li>使用<code>Ctrl+Alt+H</code>查看方法调用层次</li>
+<li>使用<code>Alt+F7</code>查找方法使用位置</li>
+</ul>
+<p><strong>条件断点</strong>：</p>
+<div class="highlight"><pre tabindex="0" class="chroma"><code class="language-java" data-lang="java"><span class="line"><span class="ln">1</span><span class="cl"><span class="c1">// 只在特定条件下触发断点</span><span class="w">
+</span></span></span><span class="line"><span class="ln">2</span><span class="cl"><span class="k">if</span><span class="w"> </span><span class="p">(</span><span class="n">beanName</span><span class="p">.</span><span class="na">equals</span><span class="p">(</span><span class="s">&#34;dataSource&#34;</span><span class="p">))</span><span class="w"> </span><span class="p">{</span><span class="w">
+</span></span></span><span class="line"><span class="ln">3</span><span class="cl"><span class="w">    </span><span class="c1">// 断点：只在创建dataSource时触发</span><span class="w">
+</span></span></span><span class="line"><span class="ln">4</span><span class="cl"><span class="p">}</span><span class="w">
+</span></span></span></code></pre></div><h3 id="2-绘制流程图">2. 绘制流程图<a hidden class="anchor" aria-hidden="true" href="#2-绘制流程图">#</a></h3>
+<p>使用工具绘制关键流程：</p>
+<ul>
+<li>Draw.io</li>
+<li>PlantUML</li>
+<li>Mermaid</li>
+</ul>
+<div class="highlight"><pre tabindex="0" class="chroma"><code class="language-gdscript3" data-lang="gdscript3"><span class="line"><span class="ln"> 1</span><span class="cl"><span class="n">sequenceDiagram</span>
+</span></span><span class="line"><span class="ln"> 2</span><span class="cl">    <span class="n">participant</span> <span class="n">Main</span>
+</span></span><span class="line"><span class="ln"> 3</span><span class="cl">    <span class="n">participant</span> <span class="n">SpringApplication</span>
+</span></span><span class="line"><span class="ln"> 4</span><span class="cl">    <span class="n">participant</span> <span class="n">Context</span>
+</span></span><span class="line"><span class="ln"> 5</span><span class="cl">    <span class="n">participant</span> <span class="n">AutoConfig</span>
+</span></span><span class="line"><span class="ln"> 6</span><span class="cl">    
+</span></span><span class="line"><span class="ln"> 7</span><span class="cl">    <span class="n">Main</span><span class="o">-&gt;&gt;</span><span class="n">SpringApplication</span><span class="p">:</span> <span class="n">run</span><span class="p">()</span>
+</span></span><span class="line"><span class="ln"> 8</span><span class="cl">    <span class="n">SpringApplication</span><span class="o">-&gt;&gt;</span><span class="n">Context</span><span class="p">:</span> <span class="n">createApplicationContext</span><span class="p">()</span>
+</span></span><span class="line"><span class="ln"> 9</span><span class="cl">    <span class="n">SpringApplication</span><span class="o">-&gt;&gt;</span><span class="n">AutoConfig</span><span class="p">:</span> <span class="n">loadAutoConfiguration</span><span class="p">()</span>
+</span></span><span class="line"><span class="ln">10</span><span class="cl">    <span class="n">AutoConfig</span><span class="o">-&gt;&gt;</span><span class="n">Context</span><span class="p">:</span> <span class="n">registerBeans</span><span class="p">()</span>
+</span></span><span class="line"><span class="ln">11</span><span class="cl">    <span class="n">SpringApplication</span><span class="o">-&gt;&gt;</span><span class="n">Context</span><span class="p">:</span> <span class="n">refresh</span><span class="p">()</span>
+</span></span><span class="line"><span class="ln">12</span><span class="cl">    <span class="n">Context</span><span class="o">--&gt;&gt;</span><span class="n">Main</span><span class="p">:</span> <span class="n">ApplicationContext</span>
+</span></span></code></pre></div><h3 id="3-做笔记">3. 做笔记<a hidden class="anchor" aria-hidden="true" href="#3-做笔记">#</a></h3>
+<p><strong>记录关键点</strong>：</p>
+<ul>
+<li>核心类和接口</li>
+<li>设计模式的应用</li>
+<li>巧妙的实现技巧</li>
+<li>疑问和待研究的问题</li>
+</ul>
+<p><strong>示例笔记</strong>：</p>
+<div class="highlight"><pre tabindex="0" class="chroma"><code class="language-markdown" data-lang="markdown"><span class="line"><span class="ln"> 1</span><span class="cl"><span class="gu">## SpringApplication启动流程
+</span></span></span><span class="line"><span class="ln"> 2</span><span class="cl">
+</span></span><span class="line"><span class="ln"> 3</span><span class="cl"><span class="gu">### 核心方法
+</span></span></span><span class="line"><span class="ln"> 4</span><span class="cl"><span class="k">-</span> <span class="sb">`run(String... args)`</span>: 启动入口
+</span></span><span class="line"><span class="ln"> 5</span><span class="cl"><span class="k">-</span> <span class="sb">`prepareEnvironment()`</span>: 准备环境
+</span></span><span class="line"><span class="ln"> 6</span><span class="cl"><span class="k">-</span> <span class="sb">`createApplicationContext()`</span>: 创建上下文
+</span></span><span class="line"><span class="ln"> 7</span><span class="cl"><span class="k">-</span> <span class="sb">`refreshContext()`</span>: 刷新上下文
+</span></span><span class="line"><span class="ln"> 8</span><span class="cl">
+</span></span><span class="line"><span class="ln"> 9</span><span class="cl"><span class="gu">### 设计模式
+</span></span></span><span class="line"><span class="ln">10</span><span class="cl"><span class="k">-</span> 模板方法：run()方法定义流程，子类可扩展
+</span></span><span class="line"><span class="ln">11</span><span class="cl"><span class="k">-</span> 策略模式：ApplicationContextFactory创建不同类型的Context
+</span></span><span class="line"><span class="ln">12</span><span class="cl"><span class="k">-</span> 观察者模式：SpringApplicationRunListeners监听启动事件
+</span></span><span class="line"><span class="ln">13</span><span class="cl">
+</span></span><span class="line"><span class="ln">14</span><span class="cl"><span class="gu">### 疑问
+</span></span></span><span class="line"><span class="ln">15</span><span class="cl"><span class="k">- [ ]</span> Environment是如何加载配置文件的？
+</span></span><span class="line"><span class="ln">16</span><span class="cl"><span class="k">- [ ]</span> Bean的循环依赖是如何解决的？
+</span></span></code></pre></div><h3 id="4-写测试代码">4. 写测试代码<a hidden class="anchor" aria-hidden="true" href="#4-写测试代码">#</a></h3>
+<p><strong>验证理解</strong>：</p>
+<div class="highlight"><pre tabindex="0" class="chroma"><code class="language-java" data-lang="java"><span class="line"><span class="ln"> 1</span><span class="cl"><span class="nd">@Test</span><span class="w">
+</span></span></span><span class="line"><span class="ln"> 2</span><span class="cl"><span class="kd">public</span><span class="w"> </span><span class="kt">void</span><span class="w"> </span><span class="nf">testAutoConfiguration</span><span class="p">()</span><span class="w"> </span><span class="p">{</span><span class="w">
+</span></span></span><span class="line"><span class="ln"> 3</span><span class="cl"><span class="w">    </span><span class="c1">// 1. 创建AnnotationConfigApplicationContext</span><span class="w">
+</span></span></span><span class="line"><span class="ln"> 4</span><span class="cl"><span class="w">    </span><span class="n">AnnotationConfigApplicationContext</span><span class="w"> </span><span class="n">context</span><span class="w"> </span><span class="o">=</span><span class="w"> 
+</span></span></span><span class="line"><span class="ln"> 5</span><span class="cl"><span class="w">        </span><span class="k">new</span><span class="w"> </span><span class="n">AnnotationConfigApplicationContext</span><span class="p">();</span><span class="w">
+</span></span></span><span class="line"><span class="ln"> 6</span><span class="cl"><span class="w">    
+</span></span></span><span class="line"><span class="ln"> 7</span><span class="cl"><span class="w">    </span><span class="c1">// 2. 注册配置类</span><span class="w">
+</span></span></span><span class="line"><span class="ln"> 8</span><span class="cl"><span class="w">    </span><span class="n">context</span><span class="p">.</span><span class="na">register</span><span class="p">(</span><span class="n">DataSourceAutoConfiguration</span><span class="p">.</span><span class="na">class</span><span class="p">);</span><span class="w">
+</span></span></span><span class="line"><span class="ln"> 9</span><span class="cl"><span class="w">    
+</span></span></span><span class="line"><span class="ln">10</span><span class="cl"><span class="w">    </span><span class="c1">// 3. 刷新容器</span><span class="w">
+</span></span></span><span class="line"><span class="ln">11</span><span class="cl"><span class="w">    </span><span class="n">context</span><span class="p">.</span><span class="na">refresh</span><span class="p">();</span><span class="w">
+</span></span></span><span class="line"><span class="ln">12</span><span class="cl"><span class="w">    
+</span></span></span><span class="line"><span class="ln">13</span><span class="cl"><span class="w">    </span><span class="c1">// 4. 验证Bean是否创建</span><span class="w">
+</span></span></span><span class="line"><span class="ln">14</span><span class="cl"><span class="w">    </span><span class="n">DataSource</span><span class="w"> </span><span class="n">dataSource</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">context</span><span class="p">.</span><span class="na">getBean</span><span class="p">(</span><span class="n">DataSource</span><span class="p">.</span><span class="na">class</span><span class="p">);</span><span class="w">
+</span></span></span><span class="line"><span class="ln">15</span><span class="cl"><span class="w">    </span><span class="n">assertNotNull</span><span class="p">(</span><span class="n">dataSource</span><span class="p">);</span><span class="w">
+</span></span></span><span class="line"><span class="ln">16</span><span class="cl"><span class="p">}</span><span class="w">
+</span></span></span></code></pre></div><p><strong>模仿实现</strong>：</p>
+<div class="highlight"><pre tabindex="0" class="chroma"><code class="language-java" data-lang="java"><span class="line"><span class="ln"> 1</span><span class="cl"><span class="c1">// 模仿Spring Boot的条件注解</span><span class="w">
+</span></span></span><span class="line"><span class="ln"> 2</span><span class="cl"><span class="nd">@Target</span><span class="p">({</span><span class="w"> </span><span class="n">ElementType</span><span class="p">.</span><span class="na">TYPE</span><span class="p">,</span><span class="w"> </span><span class="n">ElementType</span><span class="p">.</span><span class="na">METHOD</span><span class="w"> </span><span class="p">})</span><span class="w">
+</span></span></span><span class="line"><span class="ln"> 3</span><span class="cl"><span class="nd">@Retention</span><span class="p">(</span><span class="n">RetentionPolicy</span><span class="p">.</span><span class="na">RUNTIME</span><span class="p">)</span><span class="w">
+</span></span></span><span class="line"><span class="ln"> 4</span><span class="cl"><span class="nd">@Conditional</span><span class="p">(</span><span class="n">OnMyClassCondition</span><span class="p">.</span><span class="na">class</span><span class="p">)</span><span class="w">
+</span></span></span><span class="line"><span class="ln"> 5</span><span class="cl"><span class="kd">public</span><span class="w"> </span><span class="nd">@interface</span><span class="w"> </span><span class="n">ConditionalOnMyClass</span><span class="w"> </span><span class="p">{</span><span class="w">
+</span></span></span><span class="line"><span class="ln"> 6</span><span class="cl"><span class="w">    </span><span class="n">String</span><span class="w"> </span><span class="nf">value</span><span class="p">();</span><span class="w">
+</span></span></span><span class="line"><span class="ln"> 7</span><span class="cl"><span class="p">}</span><span class="w">
+</span></span></span><span class="line"><span class="ln"> 8</span><span class="cl"><span class="w">
+</span></span></span><span class="line"><span class="ln"> 9</span><span class="cl"><span class="kd">public</span><span class="w"> </span><span class="kd">class</span> <span class="nc">OnMyClassCondition</span><span class="w"> </span><span class="kd">implements</span><span class="w"> </span><span class="n">Condition</span><span class="w"> </span><span class="p">{</span><span class="w">
+</span></span></span><span class="line"><span class="ln">10</span><span class="cl"><span class="w">    </span><span class="nd">@Override</span><span class="w">
+</span></span></span><span class="line"><span class="ln">11</span><span class="cl"><span class="w">    </span><span class="kd">public</span><span class="w"> </span><span class="kt">boolean</span><span class="w"> </span><span class="nf">matches</span><span class="p">(</span><span class="n">ConditionContext</span><span class="w"> </span><span class="n">context</span><span class="p">,</span><span class="w"> </span><span class="n">AnnotatedTypeMetadata</span><span class="w"> </span><span class="n">metadata</span><span class="p">)</span><span class="w"> </span><span class="p">{</span><span class="w">
+</span></span></span><span class="line"><span class="ln">12</span><span class="cl"><span class="w">        </span><span class="n">Map</span><span class="o">&lt;</span><span class="n">String</span><span class="p">,</span><span class="w"> </span><span class="n">Object</span><span class="o">&gt;</span><span class="w"> </span><span class="n">attributes</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">metadata</span><span class="p">.</span><span class="na">getAnnotationAttributes</span><span class="p">(</span><span class="w">
+</span></span></span><span class="line"><span class="ln">13</span><span class="cl"><span class="w">            </span><span class="n">ConditionalOnMyClass</span><span class="p">.</span><span class="na">class</span><span class="p">.</span><span class="na">getName</span><span class="p">()</span><span class="w">
+</span></span></span><span class="line"><span class="ln">14</span><span class="cl"><span class="w">        </span><span class="p">);</span><span class="w">
+</span></span></span><span class="line"><span class="ln">15</span><span class="cl"><span class="w">        </span><span class="n">String</span><span class="w"> </span><span class="n">className</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="p">(</span><span class="n">String</span><span class="p">)</span><span class="w"> </span><span class="n">attributes</span><span class="p">.</span><span class="na">get</span><span class="p">(</span><span class="s">&#34;value&#34;</span><span class="p">);</span><span class="w">
+</span></span></span><span class="line"><span class="ln">16</span><span class="cl"><span class="w">        
+</span></span></span><span class="line"><span class="ln">17</span><span class="cl"><span class="w">        </span><span class="k">try</span><span class="w"> </span><span class="p">{</span><span class="w">
+</span></span></span><span class="line"><span class="ln">18</span><span class="cl"><span class="w">            </span><span class="n">Class</span><span class="p">.</span><span class="na">forName</span><span class="p">(</span><span class="n">className</span><span class="p">);</span><span class="w">
+</span></span></span><span class="line"><span class="ln">19</span><span class="cl"><span class="w">            </span><span class="k">return</span><span class="w"> </span><span class="kc">true</span><span class="p">;</span><span class="w">
+</span></span></span><span class="line"><span class="ln">20</span><span class="cl"><span class="w">        </span><span class="p">}</span><span class="w"> </span><span class="k">catch</span><span class="w"> </span><span class="p">(</span><span class="n">ClassNotFoundException</span><span class="w"> </span><span class="n">e</span><span class="p">)</span><span class="w"> </span><span class="p">{</span><span class="w">
+</span></span></span><span class="line"><span class="ln">21</span><span class="cl"><span class="w">            </span><span class="k">return</span><span class="w"> </span><span class="kc">false</span><span class="p">;</span><span class="w">
+</span></span></span><span class="line"><span class="ln">22</span><span class="cl"><span class="w">        </span><span class="p">}</span><span class="w">
+</span></span></span><span class="line"><span class="ln">23</span><span class="cl"><span class="w">    </span><span class="p">}</span><span class="w">
+</span></span></span><span class="line"><span class="ln">24</span><span class="cl"><span class="p">}</span><span class="w">
+</span></span></span></code></pre></div><hr>
+<h2 id="学习路径建议">学习路径建议<a hidden class="anchor" aria-hidden="true" href="#学习路径建议">#</a></h2>
+<h3 id="初级阶段1-2周">初级阶段（1-2周）<a hidden class="anchor" aria-hidden="true" href="#初级阶段1-2周">#</a></h3>
+<p><strong>目标</strong>：理解Spring Boot的基本使用和核心概念</p>
+<ol>
+<li>阅读官方文档</li>
+<li>运行示例项目</li>
+<li>理解@SpringBootApplication注解</li>
+<li>了解自动配置的基本原理</li>
+</ol>
+<p><strong>推荐阅读</strong>：</p>
+<ul>
+<li><code>SpringApplication.java</code></li>
+<li><code>@SpringBootApplication</code>相关注解</li>
+<li>简单的AutoConfiguration类</li>
+</ul>
+<h3 id="中级阶段2-4周">中级阶段（2-4周）<a hidden class="anchor" aria-hidden="true" href="#中级阶段2-4周">#</a></h3>
+<p><strong>目标</strong>：深入理解启动流程和自动配置机制</p>
+<ol>
+<li>调试启动流程</li>
+<li>分析AutoConfigurationImportSelector</li>
+<li>研究条件注解的实现</li>
+<li>学习常用的AutoConfiguration</li>
+</ol>
+<p><strong>推荐阅读</strong>：</p>
+<ul>
+<li><code>SpringApplication.run()</code>完整流程</li>
+<li><code>AutoConfigurationImportSelector.java</code></li>
+<li><code>OnClassCondition.java</code></li>
+<li><code>DataSourceAutoConfiguration.java</code></li>
+<li><code>WebMvcAutoConfiguration.java</code></li>
+</ul>
+<h3 id="高级阶段1-2个月">高级阶段（1-2个月）<a hidden class="anchor" aria-hidden="true" href="#高级阶段1-2个月">#</a></h3>
+<p><strong>目标</strong>：掌握Spring Boot的设计思想和扩展机制</p>
+<ol>
+<li>研究SPI机制（SpringFactoriesLoader）</li>
+<li>分析ApplicationContext的创建和刷新</li>
+<li>学习Actuator的实现</li>
+<li>研究Spring Boot的测试支持</li>
+</ol>
+<p><strong>推荐阅读</strong>：</p>
+<ul>
+<li><code>SpringFactoriesLoader.java</code></li>
+<li><code>ConfigurableApplicationContext</code>相关类</li>
+<li><code>spring-boot-actuator</code>模块</li>
+<li><code>spring-boot-test</code>模块</li>
+</ul>
+<h3 id="专家阶段持续学习">专家阶段（持续学习）<a hidden class="anchor" aria-hidden="true" href="#专家阶段持续学习">#</a></h3>
+<p><strong>目标</strong>：参与开源贡献，深度定制Spring Boot</p>
+<ol>
+<li>阅读Issue和PR</li>
+<li>参与社区讨论</li>
+<li>提交Bug修复或新特性</li>
+<li>开发自定义Starter</li>
+</ol>
+<hr>
+<h2 id="实战开发自定义starter">实战：开发自定义Starter<a hidden class="anchor" aria-hidden="true" href="#实战开发自定义starter">#</a></h2>
+<h3 id="1-创建starter项目">1. 创建Starter项目<a hidden class="anchor" aria-hidden="true" href="#1-创建starter项目">#</a></h3>
+<div class="highlight"><pre tabindex="0" class="chroma"><code class="language-xml" data-lang="xml"><span class="line"><span class="ln"> 1</span><span class="cl"><span class="c">&lt;!-- my-spring-boot-starter/pom.xml --&gt;</span>
+</span></span><span class="line"><span class="ln"> 2</span><span class="cl"><span class="nt">&lt;dependencies&gt;</span>
+</span></span><span class="line"><span class="ln"> 3</span><span class="cl">    <span class="nt">&lt;dependency&gt;</span>
+</span></span><span class="line"><span class="ln"> 4</span><span class="cl">        <span class="nt">&lt;groupId&gt;</span>org.springframework.boot<span class="nt">&lt;/groupId&gt;</span>
+</span></span><span class="line"><span class="ln"> 5</span><span class="cl">        <span class="nt">&lt;artifactId&gt;</span>spring-boot-autoconfigure<span class="nt">&lt;/artifactId&gt;</span>
+</span></span><span class="line"><span class="ln"> 6</span><span class="cl">    <span class="nt">&lt;/dependency&gt;</span>
+</span></span><span class="line"><span class="ln"> 7</span><span class="cl">    <span class="nt">&lt;dependency&gt;</span>
+</span></span><span class="line"><span class="ln"> 8</span><span class="cl">        <span class="nt">&lt;groupId&gt;</span>org.springframework.boot<span class="nt">&lt;/groupId&gt;</span>
+</span></span><span class="line"><span class="ln"> 9</span><span class="cl">        <span class="nt">&lt;artifactId&gt;</span>spring-boot-configuration-processor<span class="nt">&lt;/artifactId&gt;</span>
+</span></span><span class="line"><span class="ln">10</span><span class="cl">        <span class="nt">&lt;optional&gt;</span>true<span class="nt">&lt;/optional&gt;</span>
+</span></span><span class="line"><span class="ln">11</span><span class="cl">    <span class="nt">&lt;/dependency&gt;</span>
+</span></span><span class="line"><span class="ln">12</span><span class="cl"><span class="nt">&lt;/dependencies&gt;</span>
+</span></span></code></pre></div><h3 id="2-定义配置属性">2. 定义配置属性<a hidden class="anchor" aria-hidden="true" href="#2-定义配置属性">#</a></h3>
+<div class="highlight"><pre tabindex="0" class="chroma"><code class="language-java" data-lang="java"><span class="line"><span class="ln">1</span><span class="cl"><span class="nd">@ConfigurationProperties</span><span class="p">(</span><span class="n">prefix</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="s">&#34;my.service&#34;</span><span class="p">)</span><span class="w">
+</span></span></span><span class="line"><span class="ln">2</span><span class="cl"><span class="kd">public</span><span class="w"> </span><span class="kd">class</span> <span class="nc">MyServiceProperties</span><span class="w"> </span><span class="p">{</span><span class="w">
+</span></span></span><span class="line"><span class="ln">3</span><span class="cl"><span class="w">    
+</span></span></span><span class="line"><span class="ln">4</span><span class="cl"><span class="w">    </span><span class="kd">private</span><span class="w"> </span><span class="n">String</span><span class="w"> </span><span class="n">name</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="s">&#34;default&#34;</span><span class="p">;</span><span class="w">
+</span></span></span><span class="line"><span class="ln">5</span><span class="cl"><span class="w">    </span><span class="kd">private</span><span class="w"> </span><span class="kt">int</span><span class="w"> </span><span class="n">timeout</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">3000</span><span class="p">;</span><span class="w">
+</span></span></span><span class="line"><span class="ln">6</span><span class="cl"><span class="w">    
+</span></span></span><span class="line"><span class="ln">7</span><span class="cl"><span class="w">    </span><span class="c1">// getters and setters</span><span class="w">
+</span></span></span><span class="line"><span class="ln">8</span><span class="cl"><span class="p">}</span><span class="w">
+</span></span></span></code></pre></div><h3 id="3-创建自动配置类">3. 创建自动配置类<a hidden class="anchor" aria-hidden="true" href="#3-创建自动配置类">#</a></h3>
+<div class="highlight"><pre tabindex="0" class="chroma"><code class="language-java" data-lang="java"><span class="line"><span class="ln"> 1</span><span class="cl"><span class="nd">@Configuration</span><span class="w">
+</span></span></span><span class="line"><span class="ln"> 2</span><span class="cl"><span class="nd">@ConditionalOnClass</span><span class="p">(</span><span class="n">MyService</span><span class="p">.</span><span class="na">class</span><span class="p">)</span><span class="w">
+</span></span></span><span class="line"><span class="ln"> 3</span><span class="cl"><span class="nd">@EnableConfigurationProperties</span><span class="p">(</span><span class="n">MyServiceProperties</span><span class="p">.</span><span class="na">class</span><span class="p">)</span><span class="w">
+</span></span></span><span class="line"><span class="ln"> 4</span><span class="cl"><span class="kd">public</span><span class="w"> </span><span class="kd">class</span> <span class="nc">MyServiceAutoConfiguration</span><span class="w"> </span><span class="p">{</span><span class="w">
+</span></span></span><span class="line"><span class="ln"> 5</span><span class="cl"><span class="w">    
+</span></span></span><span class="line"><span class="ln"> 6</span><span class="cl"><span class="w">    </span><span class="nd">@Bean</span><span class="w">
+</span></span></span><span class="line"><span class="ln"> 7</span><span class="cl"><span class="w">    </span><span class="nd">@ConditionalOnMissingBean</span><span class="w">
+</span></span></span><span class="line"><span class="ln"> 8</span><span class="cl"><span class="w">    </span><span class="kd">public</span><span class="w"> </span><span class="n">MyService</span><span class="w"> </span><span class="nf">myService</span><span class="p">(</span><span class="n">MyServiceProperties</span><span class="w"> </span><span class="n">properties</span><span class="p">)</span><span class="w"> </span><span class="p">{</span><span class="w">
+</span></span></span><span class="line"><span class="ln"> 9</span><span class="cl"><span class="w">        </span><span class="k">return</span><span class="w"> </span><span class="k">new</span><span class="w"> </span><span class="n">MyService</span><span class="p">(</span><span class="n">properties</span><span class="p">.</span><span class="na">getName</span><span class="p">(),</span><span class="w"> </span><span class="n">properties</span><span class="p">.</span><span class="na">getTimeout</span><span class="p">());</span><span class="w">
+</span></span></span><span class="line"><span class="ln">10</span><span class="cl"><span class="w">    </span><span class="p">}</span><span class="w">
+</span></span></span><span class="line"><span class="ln">11</span><span class="cl"><span class="p">}</span><span class="w">
+</span></span></span></code></pre></div><h3 id="4-注册自动配置">4. 注册自动配置<a hidden class="anchor" aria-hidden="true" href="#4-注册自动配置">#</a></h3>
+<div class="highlight"><pre tabindex="0" class="chroma"><code class="language-properties" data-lang="properties"><span class="line"><span class="ln">1</span><span class="cl"><span class="c1"># META-INF/spring.factories</span>
+</span></span><span class="line"><span class="ln">2</span><span class="cl"><span class="na">org.springframework.boot.autoconfigure.EnableAutoConfiguration</span><span class="o">=</span><span class="s">\
+</span></span></span><span class="line"><span class="ln">3</span><span class="cl"><span class="s">com.example.MyServiceAutoConfiguration</span>
+</span></span></code></pre></div><h3 id="5-使用starter">5. 使用Starter<a hidden class="anchor" aria-hidden="true" href="#5-使用starter">#</a></h3>
+<div class="highlight"><pre tabindex="0" class="chroma"><code class="language-xml" data-lang="xml"><span class="line"><span class="ln">1</span><span class="cl"><span class="c">&lt;!-- 应用项目的pom.xml --&gt;</span>
+</span></span><span class="line"><span class="ln">2</span><span class="cl"><span class="nt">&lt;dependency&gt;</span>
+</span></span><span class="line"><span class="ln">3</span><span class="cl">    <span class="nt">&lt;groupId&gt;</span>com.example<span class="nt">&lt;/groupId&gt;</span>
+</span></span><span class="line"><span class="ln">4</span><span class="cl">    <span class="nt">&lt;artifactId&gt;</span>my-spring-boot-starter<span class="nt">&lt;/artifactId&gt;</span>
+</span></span><span class="line"><span class="ln">5</span><span class="cl">    <span class="nt">&lt;version&gt;</span>1.0.0<span class="nt">&lt;/version&gt;</span>
+</span></span><span class="line"><span class="ln">6</span><span class="cl"><span class="nt">&lt;/dependency&gt;</span>
+</span></span></code></pre></div><div class="highlight"><pre tabindex="0" class="chroma"><code class="language-yaml" data-lang="yaml"><span class="line"><span class="ln">1</span><span class="cl"><span class="c"># application.yml</span><span class="w">
+</span></span></span><span class="line"><span class="ln">2</span><span class="cl"><span class="nt">my</span><span class="p">:</span><span class="w">
+</span></span></span><span class="line"><span class="ln">3</span><span class="cl"><span class="w">  </span><span class="nt">service</span><span class="p">:</span><span class="w">
+</span></span></span><span class="line"><span class="ln">4</span><span class="cl"><span class="w">    </span><span class="nt">name</span><span class="p">:</span><span class="w"> </span><span class="l">my-service</span><span class="w">
+</span></span></span><span class="line"><span class="ln">5</span><span class="cl"><span class="w">    </span><span class="nt">timeout</span><span class="p">:</span><span class="w"> </span><span class="m">5000</span><span class="w">
+</span></span></span></code></pre></div><div class="highlight"><pre tabindex="0" class="chroma"><code class="language-java" data-lang="java"><span class="line"><span class="ln"> 1</span><span class="cl"><span class="nd">@SpringBootApplication</span><span class="w">
+</span></span></span><span class="line"><span class="ln"> 2</span><span class="cl"><span class="kd">public</span><span class="w"> </span><span class="kd">class</span> <span class="nc">Application</span><span class="w"> </span><span class="p">{</span><span class="w">
+</span></span></span><span class="line"><span class="ln"> 3</span><span class="cl"><span class="w">    
+</span></span></span><span class="line"><span class="ln"> 4</span><span class="cl"><span class="w">    </span><span class="nd">@Autowired</span><span class="w">
+</span></span></span><span class="line"><span class="ln"> 5</span><span class="cl"><span class="w">    </span><span class="kd">private</span><span class="w"> </span><span class="n">MyService</span><span class="w"> </span><span class="n">myService</span><span class="p">;</span><span class="w">  </span><span class="c1">// 自动注入</span><span class="w">
+</span></span></span><span class="line"><span class="ln"> 6</span><span class="cl"><span class="w">    
+</span></span></span><span class="line"><span class="ln"> 7</span><span class="cl"><span class="w">    </span><span class="kd">public</span><span class="w"> </span><span class="kd">static</span><span class="w"> </span><span class="kt">void</span><span class="w"> </span><span class="nf">main</span><span class="p">(</span><span class="n">String</span><span class="o">[]</span><span class="w"> </span><span class="n">args</span><span class="p">)</span><span class="w"> </span><span class="p">{</span><span class="w">
+</span></span></span><span class="line"><span class="ln"> 8</span><span class="cl"><span class="w">        </span><span class="n">SpringApplication</span><span class="p">.</span><span class="na">run</span><span class="p">(</span><span class="n">Application</span><span class="p">.</span><span class="na">class</span><span class="p">,</span><span class="w"> </span><span class="n">args</span><span class="p">);</span><span class="w">
+</span></span></span><span class="line"><span class="ln"> 9</span><span class="cl"><span class="w">    </span><span class="p">}</span><span class="w">
+</span></span></span><span class="line"><span class="ln">10</span><span class="cl"><span class="p">}</span><span class="w">
+</span></span></span></code></pre></div><hr>
+<h2 id="总结与思考">总结与思考<a hidden class="anchor" aria-hidden="true" href="#总结与思考">#</a></h2>
+<p>本文系统讲解了如何阅读开源项目源码，以Spring Boot为例：</p>
+<ul>
+<li><strong>方法论</strong>：从宏观到微观，带着问题读源码</li>
+<li><strong>启动流程</strong>：理解SpringApplication.run()的完整流程</li>
+<li><strong>自动配置</strong>：掌握@EnableAutoConfiguration的实现原理</li>
+<li><strong>条件注解</strong>：学习@Conditional的设计和实现</li>
+<li><strong>学习路径</strong>：从初级到专家的进阶路线</li>
+<li><strong>实战练习</strong>：开发自定义Starter巩固理解</li>
+</ul>
+<p>阅读源码的核心要点：</p>
+<ol>
+<li><strong>目标明确</strong>：带着问题和目标去读</li>
+<li><strong>循序渐进</strong>：从简单到复杂，逐步深入</li>
+<li><strong>动手实践</strong>：通过调试和编码加深理解</li>
+<li><strong>持续学习</strong>：源码阅读是一个长期过程</li>
+</ol>
+<p>推荐的学习资源：</p>
+<ul>
+<li><a href="https://docs.spring.io/spring-boot/docs/current/reference/html/">Spring Boot官方文档</a></li>
+<li><a href="https://github.com/spring-projects/spring-boot">Spring Boot源码</a></li>
+<li><a href="https://github.com/spring-projects/spring-framework">Spring Framework源码</a></li>
+</ul>
+<p>下次当你想深入学习一个开源项目时，不妨按照本文的方法，系统性地阅读和学习。记住，源码阅读不是目的，理解设计思想和提升编码能力才是最终目标。</p>
+
+
+  </div>
+
+  <footer class="post-footer">
+    <ul class="post-tags">
+      <li><a href="http://localhost:1313/tags/spring-boot/">Spring Boot</a></li>
+      <li><a href="http://localhost:1313/tags/%E6%BA%90%E7%A0%81%E5%88%86%E6%9E%90/">源码分析</a></li>
+      <li><a href="http://localhost:1313/tags/%E5%AD%A6%E4%B9%A0%E6%96%B9%E6%B3%95/">学习方法</a></li>
+    </ul>
+<nav class="paginav">
+  <a class="prev" href="http://localhost:1313/posts/2026/02/%E5%85%A8%E9%93%BE%E8%B7%AF%E5%8E%8B%E6%B5%8B%E5%A6%82%E4%BD%95%E9%AA%8C%E8%AF%81%E7%B3%BB%E7%BB%9F%E7%9A%84%E7%9C%9F%E5%AE%9E%E6%89%BF%E8%BD%BD%E8%83%BD%E5%8A%9B/">
+    <span class="title">« Prev</span>
+    <br>
+    <span>全链路压测：如何验证系统的真实承载能力</span>
+  </a>
+  <a class="next" href="http://localhost:1313/posts/2026/02/%E6%8E%A5%E5%8F%A3%E5%93%8D%E5%BA%94%E6%85%A2%E4%B8%80%E6%AC%A1%E5%AE%8C%E6%95%B4%E7%9A%84%E6%80%A7%E8%83%BD%E4%BC%98%E5%8C%96%E4%B9%8B%E6%97%85/">
+    <span class="title">Next »</span>
+    <br>
+    <span>接口响应慢？一次完整的性能优化之旅</span>
+  </a>
+</nav>
+
+
+<ul class="share-buttons">
+    <li>
+        <a target="_blank" rel="noopener noreferrer" aria-label="share 如何阅读开源项目源码：以 Spring Boot 为例 on x"
+            href="https://x.com/intent/tweet/?text=%e5%a6%82%e4%bd%95%e9%98%85%e8%af%bb%e5%bc%80%e6%ba%90%e9%a1%b9%e7%9b%ae%e6%ba%90%e7%a0%81%ef%bc%9a%e4%bb%a5%20Spring%20Boot%20%e4%b8%ba%e4%be%8b&amp;url=http%3a%2f%2flocalhost%3a1313%2fposts%2f2026%2f02%2f%25E5%25A6%2582%25E4%25BD%2595%25E9%2598%2585%25E8%25AF%25BB%25E5%25BC%2580%25E6%25BA%2590%25E9%25A1%25B9%25E7%259B%25AE%25E6%25BA%2590%25E7%25A0%2581%25E4%25BB%25A5-spring-boot-%25E4%25B8%25BA%25E4%25BE%258B%2f&amp;hashtags=SpringBoot%2c%e6%ba%90%e7%a0%81%e5%88%86%e6%9e%90%2c%e5%ad%a6%e4%b9%a0%e6%96%b9%e6%b3%95">
+            <svg version="1.1" viewBox="0 0 512 512" xml:space="preserve" height="30px" width="30px" fill="currentColor">
+                <path
+                    d="M512 62.554 L 512 449.446 C 512 483.97 483.97 512 449.446 512 L 62.554 512 C 28.03 512 0 483.97 0 449.446 L 0 62.554 C 0 28.03 28.029 0 62.554 0 L 449.446 0 C 483.971 0 512 28.03 512 62.554 Z M 269.951 190.75 L 182.567 75.216 L 56 75.216 L 207.216 272.95 L 63.9 436.783 L 125.266 436.783 L 235.9 310.383 L 332.567 436.783 L 456 436.783 L 298.367 228.367 L 432.367 75.216 L 371.033 75.216 Z M 127.633 110 L 164.101 110 L 383.481 400.065 L 349.5 400.065 Z" />
+            </svg>
+        </a>
+    </li>
+    <li>
+        <a target="_blank" rel="noopener noreferrer" aria-label="share 如何阅读开源项目源码：以 Spring Boot 为例 on linkedin"
+            href="https://www.linkedin.com/shareArticle?mini=true&amp;url=http%3a%2f%2flocalhost%3a1313%2fposts%2f2026%2f02%2f%25E5%25A6%2582%25E4%25BD%2595%25E9%2598%2585%25E8%25AF%25BB%25E5%25BC%2580%25E6%25BA%2590%25E9%25A1%25B9%25E7%259B%25AE%25E6%25BA%2590%25E7%25A0%2581%25E4%25BB%25A5-spring-boot-%25E4%25B8%25BA%25E4%25BE%258B%2f&amp;title=%e5%a6%82%e4%bd%95%e9%98%85%e8%af%bb%e5%bc%80%e6%ba%90%e9%a1%b9%e7%9b%ae%e6%ba%90%e7%a0%81%ef%bc%9a%e4%bb%a5%20Spring%20Boot%20%e4%b8%ba%e4%be%8b&amp;summary=%e5%a6%82%e4%bd%95%e9%98%85%e8%af%bb%e5%bc%80%e6%ba%90%e9%a1%b9%e7%9b%ae%e6%ba%90%e7%a0%81%ef%bc%9a%e4%bb%a5%20Spring%20Boot%20%e4%b8%ba%e4%be%8b&amp;source=http%3a%2f%2flocalhost%3a1313%2fposts%2f2026%2f02%2f%25E5%25A6%2582%25E4%25BD%2595%25E9%2598%2585%25E8%25AF%25BB%25E5%25BC%2580%25E6%25BA%2590%25E9%25A1%25B9%25E7%259B%25AE%25E6%25BA%2590%25E7%25A0%2581%25E4%25BB%25A5-spring-boot-%25E4%25B8%25BA%25E4%25BE%258B%2f">
+            <svg version="1.1" viewBox="0 0 512 512" xml:space="preserve" height="30px" width="30px" fill="currentColor">
+                <path
+                    d="M449.446,0c34.525,0 62.554,28.03 62.554,62.554l0,386.892c0,34.524 -28.03,62.554 -62.554,62.554l-386.892,0c-34.524,0 -62.554,-28.03 -62.554,-62.554l0,-386.892c0,-34.524 28.029,-62.554 62.554,-62.554l386.892,0Zm-288.985,423.278l0,-225.717l-75.04,0l0,225.717l75.04,0Zm270.539,0l0,-129.439c0,-69.333 -37.018,-101.586 -86.381,-101.586c-39.804,0 -57.634,21.891 -67.617,37.266l0,-31.958l-75.021,0c0.995,21.181 0,225.717 0,225.717l75.02,0l0,-126.056c0,-6.748 0.486,-13.492 2.474,-18.315c5.414,-13.475 17.767,-27.434 38.494,-27.434c27.135,0 38.007,20.707 38.007,51.037l0,120.768l75.024,0Zm-307.552,-334.556c-25.674,0 -42.448,16.879 -42.448,39.002c0,21.658 16.264,39.002 41.455,39.002l0.484,0c26.165,0 42.452,-17.344 42.452,-39.002c-0.485,-22.092 -16.241,-38.954 -41.943,-39.002Z" />
+            </svg>
+        </a>
+    </li>
+    <li>
+        <a target="_blank" rel="noopener noreferrer" aria-label="share 如何阅读开源项目源码：以 Spring Boot 为例 on reddit"
+            href="https://reddit.com/submit?url=http%3a%2f%2flocalhost%3a1313%2fposts%2f2026%2f02%2f%25E5%25A6%2582%25E4%25BD%2595%25E9%2598%2585%25E8%25AF%25BB%25E5%25BC%2580%25E6%25BA%2590%25E9%25A1%25B9%25E7%259B%25AE%25E6%25BA%2590%25E7%25A0%2581%25E4%25BB%25A5-spring-boot-%25E4%25B8%25BA%25E4%25BE%258B%2f&title=%e5%a6%82%e4%bd%95%e9%98%85%e8%af%bb%e5%bc%80%e6%ba%90%e9%a1%b9%e7%9b%ae%e6%ba%90%e7%a0%81%ef%bc%9a%e4%bb%a5%20Spring%20Boot%20%e4%b8%ba%e4%be%8b">
+            <svg version="1.1" viewBox="0 0 512 512" xml:space="preserve" height="30px" width="30px" fill="currentColor">
+                <path
+                    d="M449.446,0c34.525,0 62.554,28.03 62.554,62.554l0,386.892c0,34.524 -28.03,62.554 -62.554,62.554l-386.892,0c-34.524,0 -62.554,-28.03 -62.554,-62.554l0,-386.892c0,-34.524 28.029,-62.554 62.554,-62.554l386.892,0Zm-3.446,265.638c0,-22.964 -18.616,-41.58 -41.58,-41.58c-11.211,0 -21.361,4.457 -28.841,11.666c-28.424,-20.508 -67.586,-33.757 -111.204,-35.278l18.941,-89.121l61.884,13.157c0.756,15.734 13.642,28.29 29.56,28.29c16.407,0 29.706,-13.299 29.706,-29.701c0,-16.403 -13.299,-29.702 -29.706,-29.702c-11.666,0 -21.657,6.792 -26.515,16.578l-69.105,-14.69c-1.922,-0.418 -3.939,-0.042 -5.585,1.036c-1.658,1.073 -2.811,2.761 -3.224,4.686l-21.152,99.438c-44.258,1.228 -84.046,14.494 -112.837,35.232c-7.468,-7.164 -17.589,-11.591 -28.757,-11.591c-22.965,0 -41.585,18.616 -41.585,41.58c0,16.896 10.095,31.41 24.568,37.918c-0.639,4.135 -0.99,8.328 -0.99,12.576c0,63.977 74.469,115.836 166.33,115.836c91.861,0 166.334,-51.859 166.334,-115.836c0,-4.218 -0.347,-8.387 -0.977,-12.493c14.564,-6.47 24.735,-21.034 24.735,-38.001Zm-119.474,108.193c-20.27,20.241 -59.115,21.816 -70.534,21.816c-11.428,0 -50.277,-1.575 -70.522,-21.82c-3.007,-3.008 -3.007,-7.882 0,-10.889c3.003,-2.999 7.882,-3.003 10.885,0c12.777,12.781 40.11,17.317 59.637,17.317c19.522,0 46.86,-4.536 59.657,-17.321c3.016,-2.999 7.886,-2.995 10.885,0.008c3.008,3.011 3.003,7.882 -0.008,10.889Zm-5.23,-48.781c-16.373,0 -29.701,-13.324 -29.701,-29.698c0,-16.381 13.328,-29.714 29.701,-29.714c16.378,0 29.706,13.333 29.706,29.714c0,16.374 -13.328,29.698 -29.706,29.698Zm-160.386,-29.702c0,-16.381 13.328,-29.71 29.714,-29.71c16.369,0 29.689,13.329 29.689,29.71c0,16.373 -13.32,29.693 -29.689,29.693c-16.386,0 -29.714,-13.32 -29.714,-29.693Z" />
+            </svg>
+        </a>
+    </li>
+    <li>
+        <a target="_blank" rel="noopener noreferrer" aria-label="share 如何阅读开源项目源码：以 Spring Boot 为例 on facebook"
+            href="https://facebook.com/sharer/sharer.php?u=http%3a%2f%2flocalhost%3a1313%2fposts%2f2026%2f02%2f%25E5%25A6%2582%25E4%25BD%2595%25E9%2598%2585%25E8%25AF%25BB%25E5%25BC%2580%25E6%25BA%2590%25E9%25A1%25B9%25E7%259B%25AE%25E6%25BA%2590%25E7%25A0%2581%25E4%25BB%25A5-spring-boot-%25E4%25B8%25BA%25E4%25BE%258B%2f">
+            <svg version="1.1" viewBox="0 0 512 512" xml:space="preserve" height="30px" width="30px" fill="currentColor">
+                <path
+                    d="M449.446,0c34.525,0 62.554,28.03 62.554,62.554l0,386.892c0,34.524 -28.03,62.554 -62.554,62.554l-106.468,0l0,-192.915l66.6,0l12.672,-82.621l-79.272,0l0,-53.617c0,-22.603 11.073,-44.636 46.58,-44.636l36.042,0l0,-70.34c0,0 -32.71,-5.582 -63.982,-5.582c-65.288,0 -107.96,39.569 -107.96,111.204l0,62.971l-72.573,0l0,82.621l72.573,0l0,192.915l-191.104,0c-34.524,0 -62.554,-28.03 -62.554,-62.554l0,-386.892c0,-34.524 28.029,-62.554 62.554,-62.554l386.892,0Z" />
+            </svg>
+        </a>
+    </li>
+    <li>
+        <a target="_blank" rel="noopener noreferrer" aria-label="share 如何阅读开源项目源码：以 Spring Boot 为例 on whatsapp"
+            href="https://api.whatsapp.com/send?text=%e5%a6%82%e4%bd%95%e9%98%85%e8%af%bb%e5%bc%80%e6%ba%90%e9%a1%b9%e7%9b%ae%e6%ba%90%e7%a0%81%ef%bc%9a%e4%bb%a5%20Spring%20Boot%20%e4%b8%ba%e4%be%8b%20-%20http%3a%2f%2flocalhost%3a1313%2fposts%2f2026%2f02%2f%25E5%25A6%2582%25E4%25BD%2595%25E9%2598%2585%25E8%25AF%25BB%25E5%25BC%2580%25E6%25BA%2590%25E9%25A1%25B9%25E7%259B%25AE%25E6%25BA%2590%25E7%25A0%2581%25E4%25BB%25A5-spring-boot-%25E4%25B8%25BA%25E4%25BE%258B%2f">
+            <svg version="1.1" viewBox="0 0 512 512" xml:space="preserve" height="30px" width="30px" fill="currentColor">
+                <path
+                    d="M449.446,0c34.525,0 62.554,28.03 62.554,62.554l0,386.892c0,34.524 -28.03,62.554 -62.554,62.554l-386.892,0c-34.524,0 -62.554,-28.03 -62.554,-62.554l0,-386.892c0,-34.524 28.029,-62.554 62.554,-62.554l386.892,0Zm-58.673,127.703c-33.842,-33.881 -78.847,-52.548 -126.798,-52.568c-98.799,0 -179.21,80.405 -179.249,179.234c-0.013,31.593 8.241,62.428 23.927,89.612l-25.429,92.884l95.021,-24.925c26.181,14.28 55.659,21.807 85.658,21.816l0.074,0c98.789,0 179.206,-80.413 179.247,-179.243c0.018,-47.895 -18.61,-92.93 -52.451,-126.81Zm-126.797,275.782l-0.06,0c-26.734,-0.01 -52.954,-7.193 -75.828,-20.767l-5.441,-3.229l-56.386,14.792l15.05,-54.977l-3.542,-5.637c-14.913,-23.72 -22.791,-51.136 -22.779,-79.287c0.033,-82.142 66.867,-148.971 149.046,-148.971c39.793,0.014 77.199,15.531 105.329,43.692c28.128,28.16 43.609,65.592 43.594,105.4c-0.034,82.149 -66.866,148.983 -148.983,148.984Zm81.721,-111.581c-4.479,-2.242 -26.499,-13.075 -30.604,-14.571c-4.105,-1.495 -7.091,-2.241 -10.077,2.241c-2.986,4.483 -11.569,14.572 -14.182,17.562c-2.612,2.988 -5.225,3.364 -9.703,1.12c-4.479,-2.241 -18.91,-6.97 -36.017,-22.23c-13.314,-11.876 -22.304,-26.542 -24.916,-31.026c-2.612,-4.484 -0.279,-6.908 1.963,-9.14c2.016,-2.007 4.48,-5.232 6.719,-7.847c2.24,-2.615 2.986,-4.484 4.479,-7.472c1.493,-2.99 0.747,-5.604 -0.374,-7.846c-1.119,-2.241 -10.077,-24.288 -13.809,-33.256c-3.635,-8.733 -7.327,-7.55 -10.077,-7.688c-2.609,-0.13 -5.598,-0.158 -8.583,-0.158c-2.986,0 -7.839,1.121 -11.944,5.604c-4.105,4.484 -15.675,15.32 -15.675,37.364c0,22.046 16.048,43.342 18.287,46.332c2.24,2.99 31.582,48.227 76.511,67.627c10.685,4.615 19.028,7.371 25.533,9.434c10.728,3.41 20.492,2.929 28.209,1.775c8.605,-1.285 26.499,-10.833 30.231,-21.295c3.732,-10.464 3.732,-19.431 2.612,-21.298c-1.119,-1.869 -4.105,-2.99 -8.583,-5.232Z" />
+            </svg>
+        </a>
+    </li>
+    <li>
+        <a target="_blank" rel="noopener noreferrer" aria-label="share 如何阅读开源项目源码：以 Spring Boot 为例 on telegram"
+            href="https://telegram.me/share/url?text=%e5%a6%82%e4%bd%95%e9%98%85%e8%af%bb%e5%bc%80%e6%ba%90%e9%a1%b9%e7%9b%ae%e6%ba%90%e7%a0%81%ef%bc%9a%e4%bb%a5%20Spring%20Boot%20%e4%b8%ba%e4%be%8b&amp;url=http%3a%2f%2flocalhost%3a1313%2fposts%2f2026%2f02%2f%25E5%25A6%2582%25E4%25BD%2595%25E9%2598%2585%25E8%25AF%25BB%25E5%25BC%2580%25E6%25BA%2590%25E9%25A1%25B9%25E7%259B%25AE%25E6%25BA%2590%25E7%25A0%2581%25E4%25BB%25A5-spring-boot-%25E4%25B8%25BA%25E4%25BE%258B%2f">
+            <svg version="1.1" xml:space="preserve" viewBox="2 2 28 28" height="30px" width="30px" fill="currentColor">
+                <path
+                    d="M26.49,29.86H5.5a3.37,3.37,0,0,1-2.47-1,3.35,3.35,0,0,1-1-2.47V5.48A3.36,3.36,0,0,1,3,3,3.37,3.37,0,0,1,5.5,2h21A3.38,3.38,0,0,1,29,3a3.36,3.36,0,0,1,1,2.46V26.37a3.35,3.35,0,0,1-1,2.47A3.38,3.38,0,0,1,26.49,29.86Zm-5.38-6.71a.79.79,0,0,0,.85-.66L24.73,9.24a.55.55,0,0,0-.18-.46.62.62,0,0,0-.41-.17q-.08,0-16.53,6.11a.59.59,0,0,0-.41.59.57.57,0,0,0,.43.52l4,1.24,1.61,4.83a.62.62,0,0,0,.63.43.56.56,0,0,0,.4-.17L16.54,20l4.09,3A.9.9,0,0,0,21.11,23.15ZM13.8,20.71l-1.21-4q8.72-5.55,8.78-5.55c.15,0,.23,0,.23.16a.18.18,0,0,1,0,.06s-2.51,2.3-7.52,6.8Z" />
+            </svg>
+        </a>
+    </li>
+    <li>
+        <a target="_blank" rel="noopener noreferrer" aria-label="share 如何阅读开源项目源码：以 Spring Boot 为例 on ycombinator"
+            href="https://news.ycombinator.com/submitlink?t=%e5%a6%82%e4%bd%95%e9%98%85%e8%af%bb%e5%bc%80%e6%ba%90%e9%a1%b9%e7%9b%ae%e6%ba%90%e7%a0%81%ef%bc%9a%e4%bb%a5%20Spring%20Boot%20%e4%b8%ba%e4%be%8b&u=http%3a%2f%2flocalhost%3a1313%2fposts%2f2026%2f02%2f%25E5%25A6%2582%25E4%25BD%2595%25E9%2598%2585%25E8%25AF%25BB%25E5%25BC%2580%25E6%25BA%2590%25E9%25A1%25B9%25E7%259B%25AE%25E6%25BA%2590%25E7%25A0%2581%25E4%25BB%25A5-spring-boot-%25E4%25B8%25BA%25E4%25BE%258B%2f">
+            <svg version="1.1" xml:space="preserve" width="30px" height="30px" viewBox="0 0 512 512" fill="currentColor"
+                xmlns:inkscape="http://www.inkscape.org/namespaces/inkscape">
+                <path
+                    d="M449.446 0C483.971 0 512 28.03 512 62.554L512 449.446C512 483.97 483.97 512 449.446 512L62.554 512C28.03 512 0 483.97 0 449.446L0 62.554C0 28.03 28.029 0 62.554 0L449.446 0ZM183.8767 87.9921H121.8427L230.6673 292.4508V424.0079H281.3328V292.4508L390.1575 87.9921H328.1233L256 238.2489z" />
+            </svg>
+        </a>
+    </li>
+</ul>
+
+  </footer>
+</article>
+    </main>
+    
+<footer class="footer">
+        <span>&copy; 2026 <a href="http://localhost:1313/">博客喵</a></span> · 
+
+    <span>
+        Powered by
+        <a href="https://gohugo.io/" rel="noopener noreferrer" target="_blank">Hugo</a> &
+        <a href="https://github.com/adityatelange/hugo-PaperMod/" rel="noopener" target="_blank">PaperMod</a>
+    </span>
+</footer>
+<a href="#top" aria-label="go to top" title="Go to Top (Alt + G)" class="top-link" id="top-link" accesskey="g">
+    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 12 6" fill="currentColor">
+        <path d="M12 6H0l6-6z" />
+    </svg>
+</a>
+
+<script>
+    let menu = document.getElementById('menu');
+    if (menu) {
+        
+        const scrollPosition = localStorage.getItem("menu-scroll-position");
+        if (scrollPosition) {
+            menu.scrollLeft = parseInt(scrollPosition, 10);
+        }
+        
+        menu.onscroll = function () {
+            localStorage.setItem("menu-scroll-position", menu.scrollLeft);
+        }
+    }
+
+    document.querySelectorAll('a[href^="#"]').forEach(anchor => {
+        anchor.addEventListener("click", function (e) {
+            e.preventDefault();
+            var id = this.getAttribute("href").substr(1);
+            if (!window.matchMedia('(prefers-reduced-motion: reduce)').matches) {
+                document.querySelector(`[id='${decodeURIComponent(id)}']`).scrollIntoView({
+                    behavior: "smooth"
+                });
+            } else {
+                document.querySelector(`[id='${decodeURIComponent(id)}']`).scrollIntoView();
+            }
+            if (id === "top") {
+                history.replaceState(null, null, " ");
+            } else {
+                history.pushState(null, null, `#${id}`);
+            }
+        });
+    });
+
+</script>
+<script>
+    var mybutton = document.getElementById("top-link");
+    window.onscroll = function () {
+        if (document.body.scrollTop > 800 || document.documentElement.scrollTop > 800) {
+            mybutton.style.visibility = "visible";
+            mybutton.style.opacity = "1";
+        } else {
+            mybutton.style.visibility = "hidden";
+            mybutton.style.opacity = "0";
+        }
+    };
+
+</script>
+<script>
+    document.getElementById("theme-toggle").addEventListener("click", () => {
+        const html = document.querySelector("html");
+        if (html.dataset.theme === "dark") {
+            html.dataset.theme = 'light';
+            localStorage.setItem("pref-theme", 'light');
+        } else {
+            html.dataset.theme = 'dark';
+            localStorage.setItem("pref-theme", 'dark');
+        }
+    })
+
+</script>
+<script>
+    document.querySelectorAll('pre > code').forEach((codeblock) => {
+        const container = codeblock.parentNode.parentNode;
+
+        const copybutton = document.createElement('button');
+        copybutton.classList.add('copy-code');
+        copybutton.innerHTML = 'copy';
+
+        function copyingDone() {
+            copybutton.innerHTML = 'copied!';
+            setTimeout(() => {
+                copybutton.innerHTML = 'copy';
+            }, 2000);
+        }
+
+        copybutton.addEventListener('click', (cb) => {
+            if ('clipboard' in navigator) {
+                navigator.clipboard.writeText(codeblock.textContent);
+                copyingDone();
+                return;
+            }
+
+            const range = document.createRange();
+            range.selectNodeContents(codeblock);
+            const selection = window.getSelection();
+            selection.removeAllRanges();
+            selection.addRange(range);
+            try {
+                document.execCommand('copy');
+                copyingDone();
+            } catch (e) { };
+            selection.removeRange(range);
+        });
+
+        if (container.classList.contains("highlight")) {
+            container.appendChild(copybutton);
+        } else if (container.parentNode.firstChild == container) {
+            
+        } else if (codeblock.parentNode.parentNode.parentNode.parentNode.parentNode.nodeName == "TABLE") {
+            
+            codeblock.parentNode.parentNode.parentNode.parentNode.parentNode.appendChild(copybutton);
+        } else {
+            
+            codeblock.parentNode.appendChild(copybutton);
+        }
+    });
+</script>
+</body>
+
+</html>

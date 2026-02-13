@@ -1,0 +1,19 @@
+<?xml version="1.0" encoding="utf-8" standalone="yes"?>
+<rss version="2.0" xmlns:atom="http://www.w3.org/2005/Atom" xmlns:content="http://purl.org/rss/1.0/modules/content/">
+  <channel>
+    <title>Vue on 我的技术博客</title>
+    <link>http://localhost:1313/tags/vue/</link>
+    <description>Recent content in Vue on 我的技术博客</description>
+    <generator>Hugo -- 0.155.3</generator>
+    <language>zh-cn</language>
+    <lastBuildDate>Thu, 15 Jan 2026 00:00:00 +0000</lastBuildDate>
+    <atom:link href="http://localhost:1313/tags/vue/index.xml" rel="self" type="application/rss+xml" />
+    <item>
+      <title>电商后台管理系统</title>
+      <link>http://localhost:1313/projects/example-project/</link>
+      <pubDate>Thu, 15 Jan 2026 00:00:00 +0000</pubDate>
+      <guid>http://localhost:1313/projects/example-project/</guid>
+      <description>基于微服务架构的电商后台管理系统，支持高并发订单处理</description>
+    </item>
+  </channel>
+</rss>

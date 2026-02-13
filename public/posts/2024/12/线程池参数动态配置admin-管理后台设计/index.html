@@ -1,0 +1,1185 @@
+<!DOCTYPE html>
+<html lang="en" dir="auto" data-theme="auto">
+
+<head><script src="/livereload.js?mindelay=10&amp;v=2&amp;port=54359&amp;path=livereload" data-no-instant defer></script><meta charset="utf-8">
+<meta http-equiv="X-UA-Compatible" content="IE=edge">
+<meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
+<meta name="robots" content="index, follow">
+<title>线程池参数动态配置：Admin 管理后台设计 | 博客喵</title>
+<meta name="keywords" content="Java, 线程池, 最佳实践, 性能优化">
+<meta name="description" content="从生产问题出发，设计一套完整的线程池动态配置方案，支持实时调整参数、监控告警、配置回滚，让线程池管理更加灵活可控。">
+<meta name="author" content="wawayu">
+<link rel="canonical" href="http://localhost:54359/posts/2024/12/%E7%BA%BF%E7%A8%8B%E6%B1%A0%E5%8F%82%E6%95%B0%E5%8A%A8%E6%80%81%E9%85%8D%E7%BD%AEadmin-%E7%AE%A1%E7%90%86%E5%90%8E%E5%8F%B0%E8%AE%BE%E8%AE%A1/">
+<link crossorigin="anonymous" href="/assets/css/stylesheet.a29c24210eb31d9ce56f669c66a35c9c51b17376b7764e336a49af7dec914cf0.css" integrity="sha256-opwkIQ6zHZzlb2acZqNcnFGxc3a3dk4zakmvfeyRTPA=" rel="preload stylesheet" as="style">
+<link rel="icon" href="http://localhost:54359/favicon.ico">
+<link rel="icon" type="image/png" sizes="16x16" href="http://localhost:54359/favicon-16x16.png">
+<link rel="icon" type="image/png" sizes="32x32" href="http://localhost:54359/favicon-32x32.png">
+<link rel="apple-touch-icon" href="http://localhost:54359/apple-touch-icon.png">
+<link rel="mask-icon" href="http://localhost:54359/safari-pinned-tab.svg">
+<meta name="theme-color" content="#2e2e33">
+<meta name="msapplication-TileColor" content="#2e2e33">
+<link rel="alternate" hreflang="en" href="http://localhost:54359/posts/2024/12/%E7%BA%BF%E7%A8%8B%E6%B1%A0%E5%8F%82%E6%95%B0%E5%8A%A8%E6%80%81%E9%85%8D%E7%BD%AEadmin-%E7%AE%A1%E7%90%86%E5%90%8E%E5%8F%B0%E8%AE%BE%E8%AE%A1/">
+<noscript>
+    <style>
+        #theme-toggle,
+        .top-link {
+            display: none;
+        }
+
+    </style>
+    <style>
+        @media (prefers-color-scheme: dark) {
+            :root {
+                --theme: rgb(29, 30, 32);
+                --entry: rgb(46, 46, 51);
+                --primary: rgb(218, 218, 219);
+                --secondary: rgb(155, 156, 157);
+                --tertiary: rgb(65, 66, 68);
+                --content: rgb(196, 196, 197);
+                --code-block-bg: rgb(46, 46, 51);
+                --code-bg: rgb(55, 56, 62);
+                --border: rgb(51, 51, 51);
+                color-scheme: dark;
+            }
+
+            .list {
+                background: var(--theme);
+            }
+
+            .toc {
+                background: var(--entry);
+            }
+        }
+
+        @media (prefers-color-scheme: light) {
+            .list::-webkit-scrollbar-thumb {
+                border-color: var(--code-bg);
+            }
+        }
+
+    </style>
+</noscript>
+<script>
+    if (localStorage.getItem("pref-theme") === "dark") {
+        document.querySelector("html").dataset.theme = 'dark';
+    } else if (localStorage.getItem("pref-theme") === "light") {
+       document.querySelector("html").dataset.theme = 'light';
+    } else if (window.matchMedia('(prefers-color-scheme: dark)').matches) {
+        document.querySelector("html").dataset.theme = 'dark';
+    } else {
+        document.querySelector("html").dataset.theme = 'light';
+    }
+
+</script><meta property="og:url" content="http://localhost:54359/posts/2024/12/%E7%BA%BF%E7%A8%8B%E6%B1%A0%E5%8F%82%E6%95%B0%E5%8A%A8%E6%80%81%E9%85%8D%E7%BD%AEadmin-%E7%AE%A1%E7%90%86%E5%90%8E%E5%8F%B0%E8%AE%BE%E8%AE%A1/">
+  <meta property="og:site_name" content="博客喵">
+  <meta property="og:title" content="线程池参数动态配置：Admin 管理后台设计">
+  <meta property="og:description" content="从生产问题出发，设计一套完整的线程池动态配置方案，支持实时调整参数、监控告警、配置回滚，让线程池管理更加灵活可控。">
+  <meta property="og:locale" content="zh-cn">
+  <meta property="og:type" content="article">
+    <meta property="article:section" content="posts">
+    <meta property="article:published_time" content="2024-12-16T00:00:00+00:00">
+    <meta property="article:modified_time" content="2024-12-16T00:00:00+00:00">
+    <meta property="article:tag" content="Java">
+    <meta property="article:tag" content="线程池">
+    <meta property="article:tag" content="最佳实践">
+    <meta property="article:tag" content="性能优化">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:title" content="线程池参数动态配置：Admin 管理后台设计">
+<meta name="twitter:description" content="从生产问题出发，设计一套完整的线程池动态配置方案，支持实时调整参数、监控告警、配置回滚，让线程池管理更加灵活可控。">
+
+
+<script type="application/ld+json">
+{
+  "@context": "https://schema.org",
+  "@type": "BreadcrumbList",
+  "itemListElement": [
+    {
+      "@type": "ListItem",
+      "position":  1 ,
+      "name": "Posts",
+      "item": "http://localhost:54359/posts/"
+    }, 
+    {
+      "@type": "ListItem",
+      "position":  2 ,
+      "name": "线程池参数动态配置：Admin 管理后台设计",
+      "item": "http://localhost:54359/posts/2024/12/%E7%BA%BF%E7%A8%8B%E6%B1%A0%E5%8F%82%E6%95%B0%E5%8A%A8%E6%80%81%E9%85%8D%E7%BD%AEadmin-%E7%AE%A1%E7%90%86%E5%90%8E%E5%8F%B0%E8%AE%BE%E8%AE%A1/"
+    }
+  ]
+}
+</script>
+<script type="application/ld+json">
+{
+  "@context": "https://schema.org",
+  "@type": "BlogPosting",
+  "headline": "线程池参数动态配置：Admin 管理后台设计",
+  "name": "线程池参数动态配置：Admin 管理后台设计",
+  "description": "从生产问题出发，设计一套完整的线程池动态配置方案，支持实时调整参数、监控告警、配置回滚，让线程池管理更加灵活可控。",
+  "keywords": [
+    "Java", "线程池", "最佳实践", "性能优化"
+  ],
+  "articleBody": "在生产环境中，你是否遇到过这样的场景：业务高峰期线程池队列堆积，想调大核心线程数却需要重启应用？或者线程池配置不合理导致 OOM，但修改配置需要走漫长的发布流程？\n传统的线程池配置都是硬编码或写在配置文件中，一旦需要调整就必须重启应用。这在高并发场景下是不可接受的。本文将从实际生产问题出发，设计一套完整的线程池动态配置方案。\n本文亮点 理解线程池动态配置的核心原理 掌握 Admin 管理后台的架构设计 学会实现配置实时生效机制 了解监控告警与配置回滚方案 为什么需要动态配置 传统方式的痛点 硬编码配置\n1@Configuration 2public class ThreadPoolConfig { 3 @Bean 4 public ThreadPoolExecutor businessThreadPool() { 5 return new ThreadPoolExecutor( 6 10, // 核心线程数 7 20, // 最大线程数 8 60L, TimeUnit.SECONDS, 9 new LinkedBlockingQueue\u003c\u003e(100) 10 ); 11 } 12} 这种方式的问题：\n参数调整需要修改代码、重新编译、发布 无法根据实际负载动态调整 出现问题时响应速度慢 配置文件方式\n1thread-pool: 2 core-size: 10 3 max-size: 20 4 queue-capacity: 100 虽然比硬编码好一些，但仍然需要重启应用才能生效。\n生产场景需求 业务高峰期：需要临时增加线程数应对流量 资源紧张时：需要降低线程数释放资源 配置错误时：需要快速回滚到上一个稳定配置 监控告警：需要实时监控线程池状态 核心设计思路 整体架构 1┌─────────────────┐ 2│ Admin 管理后台 │ 3│ (配置界面) │ 4└────────┬────────┘ 5 │ HTTP API 6 ↓ 7┌─────────────────┐ 8│ 配置中心 │ 9│ (Nacos/Apollo) │ 10└────────┬────────┘ 11 │ 配置推送 12 ↓ 13┌─────────────────┐ 14│ 应用实例 │ 15│ (监听配置变化) │ 16└─────────────────┘ 核心组件 配置管理模块：负责配置的增删改查 配置推送模块：将配置实时推送到应用实例 监控模块：收集线程池运行指标 告警模块：异常情况及时通知 实现方案 1. 线程池注册与管理 首先，我们需要一个统一的线程池管理器：\n1@Component 2public class DynamicThreadPoolManager { 3 4 // 存储所有线程池实例 5 private final Map\u003cString, ThreadPoolExecutor\u003e threadPools = new ConcurrentHashMap\u003c\u003e(); 6 7 // 存储线程池配置 8 private final Map\u003cString, ThreadPoolConfig\u003e configs = new ConcurrentHashMap\u003c\u003e(); 9 10 /** 11 * 注册线程池 12 */ 13 public void registerThreadPool(String poolName, ThreadPoolExecutor executor, 14 ThreadPoolConfig config) { 15 threadPools.put(poolName, executor); 16 configs.put(poolName, config); 17 18 // 启动监控 19 startMonitoring(poolName, executor); 20 } 21 22 /** 23 * 动态调整线程池参数 24 */ 25 public void updateThreadPool(String poolName, ThreadPoolConfig newConfig) { 26 ThreadPoolExecutor executor = threadPools.get(poolName); 27 if (executor == null) { 28 throw new IllegalArgumentException(\"线程池不存在: \" + poolName); 29 } 30 31 // 保存旧配置用于回滚 32 ThreadPoolConfig oldConfig = configs.get(poolName); 33 saveConfigHistory(poolName, oldConfig); 34 35 // 应用新配置 36 applyConfig(executor, newConfig); 37 configs.put(poolName, newConfig); 38 39 log.info(\"线程池 {} 配置已更新: {}\", poolName, newConfig); 40 } 41 42 /** 43 * 应用配置到线程池 44 */ 45 private void applyConfig(ThreadPoolExecutor executor, ThreadPoolConfig config) { 46 // 核心线程数 47 executor.setCorePoolSize(config.getCoreSize()); 48 49 // 最大线程数（必须大于等于核心线程数） 50 if (config.getMaxSize() \u003e= config.getCoreSize()) { 51 executor.setMaximumPoolSize(config.getMaxSize()); 52 } 53 54 // 线程存活时间 55 executor.setKeepAliveTime(config.getKeepAliveTime(), TimeUnit.SECONDS); 56 57 // 拒绝策略 58 executor.setRejectedExecutionHandler( 59 getRejectedExecutionHandler(config.getRejectedPolicy()) 60 ); 61 } 62 63 /** 64 * 获取拒绝策略 65 */ 66 private RejectedExecutionHandler getRejectedExecutionHandler(String policy) { 67 switch (policy) { 68 case \"AbortPolicy\": 69 return new ThreadPoolExecutor.AbortPolicy(); 70 case \"CallerRunsPolicy\": 71 return new ThreadPoolExecutor.CallerRunsPolicy(); 72 case \"DiscardPolicy\": 73 return new ThreadPoolExecutor.DiscardPolicy(); 74 case \"DiscardOldestPolicy\": 75 return new ThreadPoolExecutor.DiscardOldestPolicy(); 76 default: 77 return new ThreadPoolExecutor.AbortPolicy(); 78 } 79 } 80 81 /** 82 * 获取线程池状态 83 */ 84 public ThreadPoolStats getThreadPoolStats(String poolName) { 85 ThreadPoolExecutor executor = threadPools.get(poolName); 86 if (executor == null) { 87 return null; 88 } 89 90 return ThreadPoolStats.builder() 91 .poolName(poolName) 92 .coreSize(executor.getCorePoolSize()) 93 .maxSize(executor.getMaximumPoolSize()) 94 .activeCount(executor.getActiveCount()) 95 .poolSize(executor.getPoolSize()) 96 .queueSize(executor.getQueue().size()) 97 .queueCapacity(getQueueCapacity(executor.getQueue())) 98 .completedTaskCount(executor.getCompletedTaskCount()) 99 .taskCount(executor.getTaskCount()) 100 .build(); 101 } 102 103 private int getQueueCapacity(BlockingQueue\u003cRunnable\u003e queue) { 104 return queue.size() + queue.remainingCapacity(); 105 } 106} 2. 配置数据模型 1@Data 2@Builder 3public class ThreadPoolConfig { 4 5 /** 线程池名称 */ 6 private String poolName; 7 8 /** 核心线程数 */ 9 private Integer coreSize; 10 11 /** 最大线程数 */ 12 private Integer maxSize; 13 14 /** 线程存活时间（秒） */ 15 private Long keepAliveTime; 16 17 /** 队列容量 */ 18 private Integer queueCapacity; 19 20 /** 拒绝策略 */ 21 private String rejectedPolicy; 22 23 /** 配置版本 */ 24 private Integer version; 25 26 /** 更新时间 */ 27 private LocalDateTime updateTime; 28 29 /** 操作人 */ 30 private String operator; 31 32 /** 33 * 参数校验 34 */ 35 public void validate() { 36 if (coreSize \u003c= 0) { 37 throw new IllegalArgumentException(\"核心线程数必须大于0\"); 38 } 39 if (maxSize \u003c coreSize) { 40 throw new IllegalArgumentException(\"最大线程数不能小于核心线程数\"); 41 } 42 if (queueCapacity \u003c 0) { 43 throw new IllegalArgumentException(\"队列容量不能为负数\"); 44 } 45 } 46} 3. 配置监听器（基于 Nacos） 1@Component 2public class ThreadPoolConfigListener { 3 4 @Autowired 5 private DynamicThreadPoolManager threadPoolManager; 6 7 @Autowired 8 private ConfigService configService; 9 10 private static final String DATA_ID = \"thread-pool-config\"; 11 private static final String GROUP = \"DEFAULT_GROUP\"; 12 13 @PostConstruct 14 public void init() throws NacosException { 15 // 监听配置变化 16 configService.addListener(DATA_ID, GROUP, new Listener() { 17 @Override 18 public void receiveConfigInfo(String configInfo) { 19 handleConfigChange(configInfo); 20 } 21 22 @Override 23 public Executor getExecutor() { 24 return null; 25 } 26 }); 27 } 28 29 /** 30 * 处理配置变化 31 */ 32 private void handleConfigChange(String configInfo) { 33 try { 34 // 解析配置 35 List\u003cThreadPoolConfig\u003e configs = parseConfig(configInfo); 36 37 // 应用配置 38 for (ThreadPoolConfig config : configs) { 39 config.validate(); 40 threadPoolManager.updateThreadPool(config.getPoolName(), config); 41 } 42 43 log.info(\"线程池配置已更新，共 {} 个线程池\", configs.size()); 44 45 } catch (Exception e) { 46 log.error(\"处理配置变化失败\", e); 47 // 发送告警 48 sendAlert(\"线程池配置更新失败: \" + e.getMessage()); 49 } 50 } 51 52 private List\u003cThreadPoolConfig\u003e parseConfig(String configInfo) { 53 // 使用 JSON 解析配置 54 return JSON.parseArray(configInfo, ThreadPoolConfig.class); 55 } 56} 4. 监控与告警 1@Component 2public class ThreadPoolMonitor { 3 4 @Autowired 5 private DynamicThreadPoolManager threadPoolManager; 6 7 @Autowired 8 private AlertService alertService; 9 10 /** 11 * 定时监控线程池状态 12 */ 13 @Scheduled(fixedRate = 10000) // 每10秒执行一次 14 public void monitorThreadPools() { 15 threadPoolManager.getAllPoolNames().forEach(poolName -\u003e { 16 ThreadPoolStats stats = threadPoolManager.getThreadPoolStats(poolName); 17 18 // 检查队列堆积 19 checkQueueSize(stats); 20 21 // 检查活跃线程数 22 checkActiveThreads(stats); 23 24 // 检查拒绝任务数 25 checkRejectedTasks(stats); 26 27 // 上报监控指标 28 reportMetrics(stats); 29 }); 30 } 31 32 /** 33 * 检查队列堆积 34 */ 35 private void checkQueueSize(ThreadPoolStats stats) { 36 double queueUsage = (double) stats.getQueueSize() / stats.getQueueCapacity(); 37 38 if (queueUsage \u003e 0.8) { 39 alertService.sendAlert( 40 \"线程池队列告警\", 41 String.format(\"线程池 %s 队列使用率 %.2f%%，当前队列大小 %d/%d\", 42 stats.getPoolName(), 43 queueUsage * 100, 44 stats.getQueueSize(), 45 stats.getQueueCapacity()) 46 ); 47 } 48 } 49 50 /** 51 * 检查活跃线程数 52 */ 53 private void checkActiveThreads(ThreadPoolStats stats) { 54 double threadUsage = (double) stats.getActiveCount() / stats.getMaxSize(); 55 56 if (threadUsage \u003e 0.9) { 57 alertService.sendAlert( 58 \"线程池线程告警\", 59 String.format(\"线程池 %s 线程使用率 %.2f%%，活跃线程 %d/%d\", 60 stats.getPoolName(), 61 threadUsage * 100, 62 stats.getActiveCount(), 63 stats.getMaxSize()) 64 ); 65 } 66 } 67 68 /** 69 * 上报监控指标到 Prometheus 70 */ 71 private void reportMetrics(ThreadPoolStats stats) { 72 // 使用 Micrometer 上报指标 73 Metrics.gauge(\"threadpool.core.size\", 74 Tags.of(\"pool\", stats.getPoolName()), 75 stats.getCoreSize()); 76 77 Metrics.gauge(\"threadpool.active.count\", 78 Tags.of(\"pool\", stats.getPoolName()), 79 stats.getActiveCount()); 80 81 Metrics.gauge(\"threadpool.queue.size\", 82 Tags.of(\"pool\", stats.getPoolName()), 83 stats.getQueueSize()); 84 } 85} 5. Admin 管理后台 API 1@RestController 2@RequestMapping(\"/api/threadpool\") 3public class ThreadPoolAdminController { 4 5 @Autowired 6 private DynamicThreadPoolManager threadPoolManager; 7 8 @Autowired 9 private ConfigService configService; 10 11 /** 12 * 获取所有线程池列表 13 */ 14 @GetMapping(\"/list\") 15 public Result\u003cList\u003cThreadPoolStats\u003e\u003e listThreadPools() { 16 List\u003cThreadPoolStats\u003e statsList = threadPoolManager.getAllPoolNames() 17 .stream() 18 .map(threadPoolManager::getThreadPoolStats) 19 .collect(Collectors.toList()); 20 21 return Result.success(statsList); 22 } 23 24 /** 25 * 获取线程池详情 26 */ 27 @GetMapping(\"/{poolName}\") 28 public Result\u003cThreadPoolStats\u003e getThreadPoolDetail(@PathVariable String poolName) { 29 ThreadPoolStats stats = threadPoolManager.getThreadPoolStats(poolName); 30 if (stats == null) { 31 return Result.error(\"线程池不存在\"); 32 } 33 return Result.success(stats); 34 } 35 36 /** 37 * 更新线程池配置 38 */ 39 @PostMapping(\"/update\") 40 public Result\u003cVoid\u003e updateThreadPool(@RequestBody ThreadPoolConfig config) { 41 try { 42 // 参数校验 43 config.validate(); 44 45 // 更新配置到 Nacos 46 publishConfig(config); 47 48 return Result.success(); 49 } catch (Exception e) { 50 log.error(\"更新线程池配置失败\", e); 51 return Result.error(e.getMessage()); 52 } 53 } 54 55 /** 56 * 配置回滚 57 */ 58 @PostMapping(\"/rollback/{poolName}\") 59 public Result\u003cVoid\u003e rollbackConfig(@PathVariable String poolName) { 60 try { 61 ThreadPoolConfig lastConfig = threadPoolManager.getLastConfig(poolName); 62 if (lastConfig == null) { 63 return Result.error(\"没有可回滚的配置\"); 64 } 65 66 publishConfig(lastConfig); 67 return Result.success(); 68 } catch (Exception e) { 69 log.error(\"配置回滚失败\", e); 70 return Result.error(e.getMessage()); 71 } 72 } 73 74 /** 75 * 获取配置历史 76 */ 77 @GetMapping(\"/history/{poolName}\") 78 public Result\u003cList\u003cThreadPoolConfig\u003e\u003e getConfigHistory(@PathVariable String poolName) { 79 List\u003cThreadPoolConfig\u003e history = threadPoolManager.getConfigHistory(poolName); 80 return Result.success(history); 81 } 82 83 /** 84 * 发布配置到 Nacos 85 */ 86 private void publishConfig(ThreadPoolConfig config) throws NacosException { 87 String configInfo = JSON.toJSONString(Collections.singletonList(config)); 88 configService.publishConfig(\"thread-pool-config\", \"DEFAULT_GROUP\", configInfo); 89 } 90} 前端管理界面设计 线程池列表页面 1\u003ctemplate\u003e 2 \u003cdiv class=\"threadpool-list\"\u003e 3 \u003cel-table :data=\"threadPools\" style=\"width: 100%\"\u003e 4 \u003cel-table-column prop=\"poolName\" label=\"线程池名称\" width=\"180\" /\u003e 5 \u003cel-table-column label=\"核心/最大线程数\" width=\"150\"\u003e 6 \u003ctemplate #default=\"scope\"\u003e 7 {{ scope.row.coreSize }} / {{ scope.row.maxSize }} 8 \u003c/template\u003e 9 \u003c/el-table-column\u003e 10 \u003cel-table-column label=\"活跃/总线程数\" width=\"150\"\u003e 11 \u003ctemplate #default=\"scope\"\u003e 12 {{ scope.row.activeCount }} / {{ scope.row.poolSize }} 13 \u003c/template\u003e 14 \u003c/el-table-column\u003e 15 \u003cel-table-column label=\"队列使用情况\" width=\"200\"\u003e 16 \u003ctemplate #default=\"scope\"\u003e 17 \u003cel-progress 18 :percentage=\"getQueueUsage(scope.row)\" 19 :status=\"getQueueStatus(scope.row)\" 20 /\u003e 21 \u003cspan\u003e{{ scope.row.queueSize }} / {{ scope.row.queueCapacity }}\u003c/span\u003e 22 \u003c/template\u003e 23 \u003c/el-table-column\u003e 24 \u003cel-table-column label=\"已完成任务数\" prop=\"completedTaskCount\" /\u003e 25 \u003cel-table-column label=\"操作\" width=\"200\"\u003e 26 \u003ctemplate #default=\"scope\"\u003e 27 \u003cel-button size=\"small\" @click=\"handleEdit(scope.row)\"\u003e 28 编辑配置 29 \u003c/el-button\u003e 30 \u003cel-button size=\"small\" @click=\"handleViewHistory(scope.row)\"\u003e 31 历史记录 32 \u003c/el-button\u003e 33 \u003c/template\u003e 34 \u003c/el-table-column\u003e 35 \u003c/el-table\u003e 36 \u003c/div\u003e 37\u003c/template\u003e 38 39\u003cscript setup\u003e 40import { ref, onMounted } from 'vue'; 41import { getThreadPoolList } from '@/api/threadpool'; 42 43const threadPools = ref([]); 44 45onMounted(async () =\u003e { 46 const { data } = await getThreadPoolList(); 47 threadPools.value = data; 48}); 49 50const getQueueUsage = (row) =\u003e { 51 return (row.queueSize / row.queueCapacity * 100).toFixed(2); 52}; 53 54const getQueueStatus = (row) =\u003e { 55 const usage = row.queueSize / row.queueCapacity; 56 if (usage \u003e 0.8) return 'exception'; 57 if (usage \u003e 0.5) return 'warning'; 58 return 'success'; 59}; 60\u003c/script\u003e 配置编辑对话框 1\u003ctemplate\u003e 2 \u003cel-dialog v-model=\"visible\" title=\"编辑线程池配置\" width=\"600px\"\u003e 3 \u003cel-form :model=\"form\" :rules=\"rules\" ref=\"formRef\" label-width=\"120px\"\u003e 4 \u003cel-form-item label=\"线程池名称\"\u003e 5 \u003cel-input v-model=\"form.poolName\" disabled /\u003e 6 \u003c/el-form-item\u003e 7 8 \u003cel-form-item label=\"核心线程数\" prop=\"coreSize\"\u003e 9 \u003cel-input-number v-model=\"form.coreSize\" :min=\"1\" :max=\"1000\" /\u003e 10 \u003cspan class=\"tip\"\u003e建议值：CPU 核心数 * 2\u003c/span\u003e 11 \u003c/el-form-item\u003e 12 13 \u003cel-form-item label=\"最大线程数\" prop=\"maxSize\"\u003e 14 \u003cel-input-number v-model=\"form.maxSize\" :min=\"1\" :max=\"1000\" /\u003e 15 \u003cspan class=\"tip\"\u003e必须 \u003e= 核心线程数\u003c/span\u003e 16 \u003c/el-form-item\u003e 17 18 \u003cel-form-item label=\"队列容量\" prop=\"queueCapacity\"\u003e 19 \u003cel-input-number v-model=\"form.queueCapacity\" :min=\"0\" :max=\"10000\" /\u003e 20 \u003c/el-form-item\u003e 21 22 \u003cel-form-item label=\"线程存活时间\" prop=\"keepAliveTime\"\u003e 23 \u003cel-input-number v-model=\"form.keepAliveTime\" :min=\"0\" :max=\"3600\" /\u003e 24 \u003cspan class=\"tip\"\u003e单位：秒\u003c/span\u003e 25 \u003c/el-form-item\u003e 26 27 \u003cel-form-item label=\"拒绝策略\" prop=\"rejectedPolicy\"\u003e 28 \u003cel-select v-model=\"form.rejectedPolicy\"\u003e 29 \u003cel-option label=\"AbortPolicy（抛异常）\" value=\"AbortPolicy\" /\u003e 30 \u003cel-option label=\"CallerRunsPolicy（调用者执行）\" value=\"CallerRunsPolicy\" /\u003e 31 \u003cel-option label=\"DiscardPolicy（丢弃）\" value=\"DiscardPolicy\" /\u003e 32 \u003cel-option label=\"DiscardOldestPolicy（丢弃最老）\" value=\"DiscardOldestPolicy\" /\u003e 33 \u003c/el-select\u003e 34 \u003c/el-form-item\u003e 35 \u003c/el-form\u003e 36 37 \u003ctemplate #footer\u003e 38 \u003cel-button @click=\"visible = false\"\u003e取消\u003c/el-button\u003e 39 \u003cel-button type=\"primary\" @click=\"handleSubmit\"\u003e确定\u003c/el-button\u003e 40 \u003c/template\u003e 41 \u003c/el-dialog\u003e 42\u003c/template\u003e 最佳实践 1. 参数调整建议 核心线程数设置\nCPU 密集型：CPU 核心数 + 1 IO 密集型：CPU 核心数 * 2 混合型：根据实际压测结果调整 队列容量设置\n不要设置过大，避免任务堆积 建议：核心线程数 * 10 配合监控告警，及时发现问题 拒绝策略选择\n重要任务：CallerRunsPolicy（降级到调用者线程执行） 可丢弃任务：DiscardPolicy 需要感知失败：AbortPolicy 2. 配置变更流程 11. 在测试环境验证配置 2 ↓ 32. 灰度发布（先更新部分实例） 4 ↓ 53. 观察监控指标 6 ↓ 74. 全量发布或回滚 3. 监控指标关注点 指标 正常范围 告警阈值 队列使用率 \u003c 50% \u003e 80% 线程使用率 \u003c 70% \u003e 90% 任务等待时间 \u003c 100ms \u003e 1s 拒绝任务数 0 \u003e 0 架构思考： 动态配置的核心是\"可观测性\"和\"可控性\"。通过监控了解系统状态，通过配置调整系统行为，两者缺一不可。\n4. 安全性考虑 1@Component 2public class ThreadPoolConfigValidator { 3 4 /** 5 * 配置变更前置校验 6 */ 7 public void validateBeforeUpdate(ThreadPoolConfig newConfig, 8 ThreadPoolConfig oldConfig) { 9 // 1. 防止参数突变 10 if (newConfig.getCoreSize() \u003e oldConfig.getCoreSize() * 2) { 11 throw new IllegalArgumentException( 12 \"核心线程数增长不能超过 100%，请分批调整\" 13 ); 14 } 15 16 // 2. 防止资源耗尽 17 int totalThreads = calculateTotalThreads(); 18 if (totalThreads \u003e 1000) { 19 throw new IllegalArgumentException( 20 \"系统总线程数不能超过 1000\" 21 ); 22 } 23 24 // 3. 权限校验 25 if (!hasPermission(getCurrentUser(), newConfig.getPoolName())) { 26 throw new SecurityException(\"无权限修改此线程池配置\"); 27 } 28 } 29} 避坑提示：\n不要在高峰期大幅调整参数，建议分批次小幅调整 每次调整后观察 5-10 分钟，确认无异常再继续 保留配置历史，方便快速回滚 配置变更要有审批流程，避免误操作 总结与思考 本文介绍了一套完整的线程池动态配置方案，核心要点：\n动态配置：基于配置中心实现参数实时调整，无需重启应用 监控告警：实时监控线程池状态，异常情况及时通知 配置管理：支持配置历史记录、版本回滚、权限控制 管理后台：提供可视化界面，降低运维成本 思考与展望：\n线程池动态配置只是系统可观测性的一个切面。在微服务架构下，我们还可以扩展到：\n数据库连接池动态配置 HTTP 客户端超时时间动态调整 限流阈值动态配置 下次当你的系统需要更灵活的配置管理时，不妨参考本文的设计思路，让系统更加\"可控\"。\n",
+  "wordCount" : "1768",
+  "inLanguage": "en",
+  "datePublished": "2024-12-16T00:00:00Z",
+  "dateModified": "2024-12-16T00:00:00Z",
+  "author":{
+    "@type": "Person",
+    "name": "wawayu"
+  },
+  "mainEntityOfPage": {
+    "@type": "WebPage",
+    "@id": "http://localhost:54359/posts/2024/12/%E7%BA%BF%E7%A8%8B%E6%B1%A0%E5%8F%82%E6%95%B0%E5%8A%A8%E6%80%81%E9%85%8D%E7%BD%AEadmin-%E7%AE%A1%E7%90%86%E5%90%8E%E5%8F%B0%E8%AE%BE%E8%AE%A1/"
+  },
+  "publisher": {
+    "@type": "Organization",
+    "name": "博客喵",
+    "logo": {
+      "@type": "ImageObject",
+      "url": "http://localhost:54359/favicon.ico"
+    }
+  }
+}
+</script>
+</head>
+<body id="top">
+    <header class="header">
+    <nav class="nav">
+        <div class="logo">
+            <a href="http://localhost:54359/" accesskey="h" title="博客喵 (Alt + H)">博客喵</a>
+            <div class="logo-switches">
+                <button id="theme-toggle" accesskey="t" title="(Alt + T)" aria-label="Toggle theme">
+                    <svg id="moon" xmlns="http://www.w3.org/2000/svg" width="24" height="18" viewBox="0 0 24 24"
+                        fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"
+                        stroke-linejoin="round">
+                        <path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"></path>
+                    </svg>
+                    <svg id="sun" xmlns="http://www.w3.org/2000/svg" width="24" height="18" viewBox="0 0 24 24"
+                        fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"
+                        stroke-linejoin="round">
+                        <circle cx="12" cy="12" r="5"></circle>
+                        <line x1="12" y1="1" x2="12" y2="3"></line>
+                        <line x1="12" y1="21" x2="12" y2="23"></line>
+                        <line x1="4.22" y1="4.22" x2="5.64" y2="5.64"></line>
+                        <line x1="18.36" y1="18.36" x2="19.78" y2="19.78"></line>
+                        <line x1="1" y1="12" x2="3" y2="12"></line>
+                        <line x1="21" y1="12" x2="23" y2="12"></line>
+                        <line x1="4.22" y1="19.78" x2="5.64" y2="18.36"></line>
+                        <line x1="18.36" y1="5.64" x2="19.78" y2="4.22"></line>
+                    </svg>
+                </button>
+            </div>
+        </div>
+        <ul id="menu">
+            <li>
+                <a href="http://localhost:54359/posts/" title="📝 文章">
+                    <span>📝 文章</span>
+                </a>
+            </li>
+            <li>
+                <a href="http://localhost:54359/tags/" title="🏷️ 标签">
+                    <span>🏷️ 标签</span>
+                </a>
+            </li>
+            <li>
+                <a href="http://localhost:54359/categories/" title="📂 分类">
+                    <span>📂 分类</span>
+                </a>
+            </li>
+            <li>
+                <a href="http://localhost:54359/skills/" title="💻 技能">
+                    <span>💻 技能</span>
+                </a>
+            </li>
+            <li>
+                <a href="http://localhost:54359/about/" title="👤 关于">
+                    <span>👤 关于</span>
+                </a>
+            </li>
+            <li>
+                <a href="http://localhost:54359/search/" title="🔍 搜索 (Alt &#43; /)" accesskey=/>
+                    <span>🔍 搜索</span>
+                </a>
+            </li>
+        </ul>
+    </nav>
+</header>
+<main class="main">
+
+<article class="post-single">
+  <header class="post-header">
+    <div class="breadcrumbs"><a href="http://localhost:54359/">Home</a>&nbsp;»&nbsp;<a href="http://localhost:54359/posts/">Posts</a></div>
+    <h1 class="post-title entry-hint-parent">
+      线程池参数动态配置：Admin 管理后台设计
+    </h1>
+    <div class="post-description">
+      从生产问题出发，设计一套完整的线程池动态配置方案，支持实时调整参数、监控告警、配置回滚，让线程池管理更加灵活可控。
+    </div>
+    <div class="post-meta"><span title='2024-12-16 00:00:00 +0000 UTC'>December 16, 2024</span>&nbsp;·&nbsp;<span>9 min</span>&nbsp;·&nbsp;<span>1768 words</span>&nbsp;·&nbsp;<span>wawayu</span>&nbsp;|&nbsp;<span>
+    <a href="https://github.com/wawayu-dev/wawayu-dev.github.io/tree/main/content/posts/threadpool-dynamic-config-admin.md" rel="noopener noreferrer edit" target="_blank">建议修改</a>
+</span>
+
+</div>
+  </header> <div class="toc">
+    <details  open>
+        <summary accesskey="c" title="(Alt + C)">
+            <span class="details">Table of Contents</span>
+        </summary>
+
+        <div class="inner"><nav id="TableOfContents">
+  <ul>
+    <li>
+      <ul>
+        <li><a href="#本文亮点">本文亮点</a></li>
+      </ul>
+    </li>
+    <li><a href="#为什么需要动态配置">为什么需要动态配置</a>
+      <ul>
+        <li><a href="#传统方式的痛点">传统方式的痛点</a></li>
+        <li><a href="#生产场景需求">生产场景需求</a></li>
+      </ul>
+    </li>
+    <li><a href="#核心设计思路">核心设计思路</a>
+      <ul>
+        <li><a href="#整体架构">整体架构</a></li>
+        <li><a href="#核心组件">核心组件</a></li>
+      </ul>
+    </li>
+    <li><a href="#实现方案">实现方案</a>
+      <ul>
+        <li><a href="#1-线程池注册与管理">1. 线程池注册与管理</a></li>
+        <li><a href="#2-配置数据模型">2. 配置数据模型</a></li>
+        <li><a href="#3-配置监听器基于-nacos">3. 配置监听器（基于 Nacos）</a></li>
+        <li><a href="#4-监控与告警">4. 监控与告警</a></li>
+        <li><a href="#5-admin-管理后台-api">5. Admin 管理后台 API</a></li>
+      </ul>
+    </li>
+    <li><a href="#前端管理界面设计">前端管理界面设计</a>
+      <ul>
+        <li><a href="#线程池列表页面">线程池列表页面</a></li>
+        <li><a href="#配置编辑对话框">配置编辑对话框</a></li>
+      </ul>
+    </li>
+    <li><a href="#最佳实践">最佳实践</a>
+      <ul>
+        <li><a href="#1-参数调整建议">1. 参数调整建议</a></li>
+        <li><a href="#2-配置变更流程">2. 配置变更流程</a></li>
+        <li><a href="#3-监控指标关注点">3. 监控指标关注点</a></li>
+        <li><a href="#4-安全性考虑">4. 安全性考虑</a></li>
+      </ul>
+    </li>
+    <li><a href="#总结与思考">总结与思考</a></li>
+  </ul>
+</nav>
+        </div>
+    </details>
+</div>
+
+  <div class="post-content"><p>在生产环境中，你是否遇到过这样的场景：业务高峰期线程池队列堆积，想调大核心线程数却需要重启应用？或者线程池配置不合理导致 OOM，但修改配置需要走漫长的发布流程？</p>
+<p>传统的线程池配置都是硬编码或写在配置文件中，一旦需要调整就必须重启应用。这在高并发场景下是不可接受的。本文将从实际生产问题出发，设计一套完整的线程池动态配置方案。</p>
+<h3 id="本文亮点">本文亮点<a hidden class="anchor" aria-hidden="true" href="#本文亮点">#</a></h3>
+<ul>
+<li><input checked="" disabled="" type="checkbox"> 理解线程池动态配置的核心原理</li>
+<li><input checked="" disabled="" type="checkbox"> 掌握 Admin 管理后台的架构设计</li>
+<li><input checked="" disabled="" type="checkbox"> 学会实现配置实时生效机制</li>
+<li><input checked="" disabled="" type="checkbox"> 了解监控告警与配置回滚方案</li>
+</ul>
+<hr>
+<h2 id="为什么需要动态配置">为什么需要动态配置<a hidden class="anchor" aria-hidden="true" href="#为什么需要动态配置">#</a></h2>
+<h3 id="传统方式的痛点">传统方式的痛点<a hidden class="anchor" aria-hidden="true" href="#传统方式的痛点">#</a></h3>
+<p><strong>硬编码配置</strong></p>
+<div class="highlight"><pre tabindex="0" class="chroma"><code class="language-java" data-lang="java"><span class="line"><span class="ln"> 1</span><span class="cl"><span class="nd">@Configuration</span><span class="w">
+</span></span></span><span class="line"><span class="ln"> 2</span><span class="cl"><span class="kd">public</span><span class="w"> </span><span class="kd">class</span> <span class="nc">ThreadPoolConfig</span><span class="w"> </span><span class="p">{</span><span class="w">
+</span></span></span><span class="line"><span class="ln"> 3</span><span class="cl"><span class="w">    </span><span class="nd">@Bean</span><span class="w">
+</span></span></span><span class="line"><span class="ln"> 4</span><span class="cl"><span class="w">    </span><span class="kd">public</span><span class="w"> </span><span class="n">ThreadPoolExecutor</span><span class="w"> </span><span class="nf">businessThreadPool</span><span class="p">()</span><span class="w"> </span><span class="p">{</span><span class="w">
+</span></span></span><span class="line"><span class="ln"> 5</span><span class="cl"><span class="w">        </span><span class="k">return</span><span class="w"> </span><span class="k">new</span><span class="w"> </span><span class="n">ThreadPoolExecutor</span><span class="p">(</span><span class="w">
+</span></span></span><span class="line"><span class="ln"> 6</span><span class="cl"><span class="w">            </span><span class="n">10</span><span class="p">,</span><span class="w">  </span><span class="c1">// 核心线程数</span><span class="w">
+</span></span></span><span class="line"><span class="ln"> 7</span><span class="cl"><span class="w">            </span><span class="n">20</span><span class="p">,</span><span class="w">  </span><span class="c1">// 最大线程数</span><span class="w">
+</span></span></span><span class="line"><span class="ln"> 8</span><span class="cl"><span class="w">            </span><span class="n">60L</span><span class="p">,</span><span class="w"> </span><span class="n">TimeUnit</span><span class="p">.</span><span class="na">SECONDS</span><span class="p">,</span><span class="w">
+</span></span></span><span class="line"><span class="ln"> 9</span><span class="cl"><span class="w">            </span><span class="k">new</span><span class="w"> </span><span class="n">LinkedBlockingQueue</span><span class="o">&lt;&gt;</span><span class="p">(</span><span class="n">100</span><span class="p">)</span><span class="w">
+</span></span></span><span class="line"><span class="ln">10</span><span class="cl"><span class="w">        </span><span class="p">);</span><span class="w">
+</span></span></span><span class="line"><span class="ln">11</span><span class="cl"><span class="w">    </span><span class="p">}</span><span class="w">
+</span></span></span><span class="line"><span class="ln">12</span><span class="cl"><span class="p">}</span><span class="w">
+</span></span></span></code></pre></div><p>这种方式的问题：</p>
+<ul>
+<li>参数调整需要修改代码、重新编译、发布</li>
+<li>无法根据实际负载动态调整</li>
+<li>出现问题时响应速度慢</li>
+</ul>
+<p><strong>配置文件方式</strong></p>
+<div class="highlight"><pre tabindex="0" class="chroma"><code class="language-yaml" data-lang="yaml"><span class="line"><span class="ln">1</span><span class="cl"><span class="nt">thread-pool</span><span class="p">:</span><span class="w">
+</span></span></span><span class="line"><span class="ln">2</span><span class="cl"><span class="w">  </span><span class="nt">core-size</span><span class="p">:</span><span class="w"> </span><span class="m">10</span><span class="w">
+</span></span></span><span class="line"><span class="ln">3</span><span class="cl"><span class="w">  </span><span class="nt">max-size</span><span class="p">:</span><span class="w"> </span><span class="m">20</span><span class="w">
+</span></span></span><span class="line"><span class="ln">4</span><span class="cl"><span class="w">  </span><span class="nt">queue-capacity</span><span class="p">:</span><span class="w"> </span><span class="m">100</span><span class="w">
+</span></span></span></code></pre></div><p>虽然比硬编码好一些，但仍然需要重启应用才能生效。</p>
+<h3 id="生产场景需求">生产场景需求<a hidden class="anchor" aria-hidden="true" href="#生产场景需求">#</a></h3>
+<ol>
+<li><strong>业务高峰期</strong>：需要临时增加线程数应对流量</li>
+<li><strong>资源紧张时</strong>：需要降低线程数释放资源</li>
+<li><strong>配置错误时</strong>：需要快速回滚到上一个稳定配置</li>
+<li><strong>监控告警</strong>：需要实时监控线程池状态</li>
+</ol>
+<hr>
+<h2 id="核心设计思路">核心设计思路<a hidden class="anchor" aria-hidden="true" href="#核心设计思路">#</a></h2>
+<h3 id="整体架构">整体架构<a hidden class="anchor" aria-hidden="true" href="#整体架构">#</a></h3>
+<div class="highlight"><pre tabindex="0" class="chroma"><code class="language-fallback" data-lang="fallback"><span class="line"><span class="ln"> 1</span><span class="cl">┌─────────────────┐
+</span></span><span class="line"><span class="ln"> 2</span><span class="cl">│  Admin 管理后台  │
+</span></span><span class="line"><span class="ln"> 3</span><span class="cl">│  (配置界面)      │
+</span></span><span class="line"><span class="ln"> 4</span><span class="cl">└────────┬────────┘
+</span></span><span class="line"><span class="ln"> 5</span><span class="cl">         │ HTTP API
+</span></span><span class="line"><span class="ln"> 6</span><span class="cl">         ↓
+</span></span><span class="line"><span class="ln"> 7</span><span class="cl">┌─────────────────┐
+</span></span><span class="line"><span class="ln"> 8</span><span class="cl">│  配置中心        │
+</span></span><span class="line"><span class="ln"> 9</span><span class="cl">│  (Nacos/Apollo) │
+</span></span><span class="line"><span class="ln">10</span><span class="cl">└────────┬────────┘
+</span></span><span class="line"><span class="ln">11</span><span class="cl">         │ 配置推送
+</span></span><span class="line"><span class="ln">12</span><span class="cl">         ↓
+</span></span><span class="line"><span class="ln">13</span><span class="cl">┌─────────────────┐
+</span></span><span class="line"><span class="ln">14</span><span class="cl">│  应用实例        │
+</span></span><span class="line"><span class="ln">15</span><span class="cl">│  (监听配置变化)  │
+</span></span><span class="line"><span class="ln">16</span><span class="cl">└─────────────────┘
+</span></span></code></pre></div><h3 id="核心组件">核心组件<a hidden class="anchor" aria-hidden="true" href="#核心组件">#</a></h3>
+<ol>
+<li><strong>配置管理模块</strong>：负责配置的增删改查</li>
+<li><strong>配置推送模块</strong>：将配置实时推送到应用实例</li>
+<li><strong>监控模块</strong>：收集线程池运行指标</li>
+<li><strong>告警模块</strong>：异常情况及时通知</li>
+</ol>
+<hr>
+<h2 id="实现方案">实现方案<a hidden class="anchor" aria-hidden="true" href="#实现方案">#</a></h2>
+<h3 id="1-线程池注册与管理">1. 线程池注册与管理<a hidden class="anchor" aria-hidden="true" href="#1-线程池注册与管理">#</a></h3>
+<p>首先，我们需要一个统一的线程池管理器：</p>
+<div class="highlight"><pre tabindex="0" class="chroma"><code class="language-java" data-lang="java"><span class="line"><span class="ln">  1</span><span class="cl"><span class="nd">@Component</span><span class="w">
+</span></span></span><span class="line"><span class="ln">  2</span><span class="cl"><span class="kd">public</span><span class="w"> </span><span class="kd">class</span> <span class="nc">DynamicThreadPoolManager</span><span class="w"> </span><span class="p">{</span><span class="w">
+</span></span></span><span class="line"><span class="ln">  3</span><span class="cl"><span class="w">    
+</span></span></span><span class="line"><span class="ln">  4</span><span class="cl"><span class="w">    </span><span class="c1">// 存储所有线程池实例</span><span class="w">
+</span></span></span><span class="line"><span class="ln">  5</span><span class="cl"><span class="w">    </span><span class="kd">private</span><span class="w"> </span><span class="kd">final</span><span class="w"> </span><span class="n">Map</span><span class="o">&lt;</span><span class="n">String</span><span class="p">,</span><span class="w"> </span><span class="n">ThreadPoolExecutor</span><span class="o">&gt;</span><span class="w"> </span><span class="n">threadPools</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="k">new</span><span class="w"> </span><span class="n">ConcurrentHashMap</span><span class="o">&lt;&gt;</span><span class="p">();</span><span class="w">
+</span></span></span><span class="line"><span class="ln">  6</span><span class="cl"><span class="w">    
+</span></span></span><span class="line"><span class="ln">  7</span><span class="cl"><span class="w">    </span><span class="c1">// 存储线程池配置</span><span class="w">
+</span></span></span><span class="line"><span class="ln">  8</span><span class="cl"><span class="w">    </span><span class="kd">private</span><span class="w"> </span><span class="kd">final</span><span class="w"> </span><span class="n">Map</span><span class="o">&lt;</span><span class="n">String</span><span class="p">,</span><span class="w"> </span><span class="n">ThreadPoolConfig</span><span class="o">&gt;</span><span class="w"> </span><span class="n">configs</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="k">new</span><span class="w"> </span><span class="n">ConcurrentHashMap</span><span class="o">&lt;&gt;</span><span class="p">();</span><span class="w">
+</span></span></span><span class="line"><span class="ln">  9</span><span class="cl"><span class="w">    
+</span></span></span><span class="line"><span class="ln"> 10</span><span class="cl"><span class="w">    </span><span class="cm">/**
+</span></span></span><span class="line"><span class="ln"> 11</span><span class="cl"><span class="cm">     * 注册线程池
+</span></span></span><span class="line"><span class="ln"> 12</span><span class="cl"><span class="cm">     */</span><span class="w">
+</span></span></span><span class="line"><span class="ln"> 13</span><span class="cl"><span class="w">    </span><span class="kd">public</span><span class="w"> </span><span class="kt">void</span><span class="w"> </span><span class="nf">registerThreadPool</span><span class="p">(</span><span class="n">String</span><span class="w"> </span><span class="n">poolName</span><span class="p">,</span><span class="w"> </span><span class="n">ThreadPoolExecutor</span><span class="w"> </span><span class="n">executor</span><span class="p">,</span><span class="w"> 
+</span></span></span><span class="line"><span class="ln"> 14</span><span class="cl"><span class="w">                                   </span><span class="n">ThreadPoolConfig</span><span class="w"> </span><span class="n">config</span><span class="p">)</span><span class="w"> </span><span class="p">{</span><span class="w">
+</span></span></span><span class="line"><span class="ln"> 15</span><span class="cl"><span class="w">        </span><span class="n">threadPools</span><span class="p">.</span><span class="na">put</span><span class="p">(</span><span class="n">poolName</span><span class="p">,</span><span class="w"> </span><span class="n">executor</span><span class="p">);</span><span class="w">
+</span></span></span><span class="line"><span class="ln"> 16</span><span class="cl"><span class="w">        </span><span class="n">configs</span><span class="p">.</span><span class="na">put</span><span class="p">(</span><span class="n">poolName</span><span class="p">,</span><span class="w"> </span><span class="n">config</span><span class="p">);</span><span class="w">
+</span></span></span><span class="line"><span class="ln"> 17</span><span class="cl"><span class="w">        
+</span></span></span><span class="line"><span class="ln"> 18</span><span class="cl"><span class="w">        </span><span class="c1">// 启动监控</span><span class="w">
+</span></span></span><span class="line"><span class="ln"> 19</span><span class="cl"><span class="w">        </span><span class="n">startMonitoring</span><span class="p">(</span><span class="n">poolName</span><span class="p">,</span><span class="w"> </span><span class="n">executor</span><span class="p">);</span><span class="w">
+</span></span></span><span class="line"><span class="ln"> 20</span><span class="cl"><span class="w">    </span><span class="p">}</span><span class="w">
+</span></span></span><span class="line"><span class="ln"> 21</span><span class="cl"><span class="w">    
+</span></span></span><span class="line"><span class="ln"> 22</span><span class="cl"><span class="w">    </span><span class="cm">/**
+</span></span></span><span class="line"><span class="ln"> 23</span><span class="cl"><span class="cm">     * 动态调整线程池参数
+</span></span></span><span class="line"><span class="ln"> 24</span><span class="cl"><span class="cm">     */</span><span class="w">
+</span></span></span><span class="line"><span class="ln"> 25</span><span class="cl"><span class="w">    </span><span class="kd">public</span><span class="w"> </span><span class="kt">void</span><span class="w"> </span><span class="nf">updateThreadPool</span><span class="p">(</span><span class="n">String</span><span class="w"> </span><span class="n">poolName</span><span class="p">,</span><span class="w"> </span><span class="n">ThreadPoolConfig</span><span class="w"> </span><span class="n">newConfig</span><span class="p">)</span><span class="w"> </span><span class="p">{</span><span class="w">
+</span></span></span><span class="line"><span class="ln"> 26</span><span class="cl"><span class="w">        </span><span class="n">ThreadPoolExecutor</span><span class="w"> </span><span class="n">executor</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">threadPools</span><span class="p">.</span><span class="na">get</span><span class="p">(</span><span class="n">poolName</span><span class="p">);</span><span class="w">
+</span></span></span><span class="line"><span class="ln"> 27</span><span class="cl"><span class="w">        </span><span class="k">if</span><span class="w"> </span><span class="p">(</span><span class="n">executor</span><span class="w"> </span><span class="o">==</span><span class="w"> </span><span class="kc">null</span><span class="p">)</span><span class="w"> </span><span class="p">{</span><span class="w">
+</span></span></span><span class="line"><span class="ln"> 28</span><span class="cl"><span class="w">            </span><span class="k">throw</span><span class="w"> </span><span class="k">new</span><span class="w"> </span><span class="n">IllegalArgumentException</span><span class="p">(</span><span class="s">&#34;线程池不存在: &#34;</span><span class="w"> </span><span class="o">+</span><span class="w"> </span><span class="n">poolName</span><span class="p">);</span><span class="w">
+</span></span></span><span class="line"><span class="ln"> 29</span><span class="cl"><span class="w">        </span><span class="p">}</span><span class="w">
+</span></span></span><span class="line"><span class="ln"> 30</span><span class="cl"><span class="w">        
+</span></span></span><span class="line"><span class="ln"> 31</span><span class="cl"><span class="w">        </span><span class="c1">// 保存旧配置用于回滚</span><span class="w">
+</span></span></span><span class="line"><span class="ln"> 32</span><span class="cl"><span class="w">        </span><span class="n">ThreadPoolConfig</span><span class="w"> </span><span class="n">oldConfig</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">configs</span><span class="p">.</span><span class="na">get</span><span class="p">(</span><span class="n">poolName</span><span class="p">);</span><span class="w">
+</span></span></span><span class="line"><span class="ln"> 33</span><span class="cl"><span class="w">        </span><span class="n">saveConfigHistory</span><span class="p">(</span><span class="n">poolName</span><span class="p">,</span><span class="w"> </span><span class="n">oldConfig</span><span class="p">);</span><span class="w">
+</span></span></span><span class="line"><span class="ln"> 34</span><span class="cl"><span class="w">        
+</span></span></span><span class="line"><span class="ln"> 35</span><span class="cl"><span class="w">        </span><span class="c1">// 应用新配置</span><span class="w">
+</span></span></span><span class="line"><span class="ln"> 36</span><span class="cl"><span class="w">        </span><span class="n">applyConfig</span><span class="p">(</span><span class="n">executor</span><span class="p">,</span><span class="w"> </span><span class="n">newConfig</span><span class="p">);</span><span class="w">
+</span></span></span><span class="line"><span class="ln"> 37</span><span class="cl"><span class="w">        </span><span class="n">configs</span><span class="p">.</span><span class="na">put</span><span class="p">(</span><span class="n">poolName</span><span class="p">,</span><span class="w"> </span><span class="n">newConfig</span><span class="p">);</span><span class="w">
+</span></span></span><span class="line"><span class="ln"> 38</span><span class="cl"><span class="w">        
+</span></span></span><span class="line"><span class="ln"> 39</span><span class="cl"><span class="w">        </span><span class="n">log</span><span class="p">.</span><span class="na">info</span><span class="p">(</span><span class="s">&#34;线程池 {} 配置已更新: {}&#34;</span><span class="p">,</span><span class="w"> </span><span class="n">poolName</span><span class="p">,</span><span class="w"> </span><span class="n">newConfig</span><span class="p">);</span><span class="w">
+</span></span></span><span class="line"><span class="ln"> 40</span><span class="cl"><span class="w">    </span><span class="p">}</span><span class="w">
+</span></span></span><span class="line"><span class="ln"> 41</span><span class="cl"><span class="w">    
+</span></span></span><span class="line"><span class="ln"> 42</span><span class="cl"><span class="w">    </span><span class="cm">/**
+</span></span></span><span class="line"><span class="ln"> 43</span><span class="cl"><span class="cm">     * 应用配置到线程池
+</span></span></span><span class="line"><span class="ln"> 44</span><span class="cl"><span class="cm">     */</span><span class="w">
+</span></span></span><span class="line"><span class="ln"> 45</span><span class="cl"><span class="w">    </span><span class="kd">private</span><span class="w"> </span><span class="kt">void</span><span class="w"> </span><span class="nf">applyConfig</span><span class="p">(</span><span class="n">ThreadPoolExecutor</span><span class="w"> </span><span class="n">executor</span><span class="p">,</span><span class="w"> </span><span class="n">ThreadPoolConfig</span><span class="w"> </span><span class="n">config</span><span class="p">)</span><span class="w"> </span><span class="p">{</span><span class="w">
+</span></span></span><span class="line"><span class="ln"> 46</span><span class="cl"><span class="w">        </span><span class="c1">// 核心线程数</span><span class="w">
+</span></span></span><span class="line"><span class="ln"> 47</span><span class="cl"><span class="w">        </span><span class="n">executor</span><span class="p">.</span><span class="na">setCorePoolSize</span><span class="p">(</span><span class="n">config</span><span class="p">.</span><span class="na">getCoreSize</span><span class="p">());</span><span class="w">
+</span></span></span><span class="line"><span class="ln"> 48</span><span class="cl"><span class="w">        
+</span></span></span><span class="line"><span class="ln"> 49</span><span class="cl"><span class="w">        </span><span class="c1">// 最大线程数（必须大于等于核心线程数）</span><span class="w">
+</span></span></span><span class="line"><span class="ln"> 50</span><span class="cl"><span class="w">        </span><span class="k">if</span><span class="w"> </span><span class="p">(</span><span class="n">config</span><span class="p">.</span><span class="na">getMaxSize</span><span class="p">()</span><span class="w"> </span><span class="o">&gt;=</span><span class="w"> </span><span class="n">config</span><span class="p">.</span><span class="na">getCoreSize</span><span class="p">())</span><span class="w"> </span><span class="p">{</span><span class="w">
+</span></span></span><span class="line"><span class="ln"> 51</span><span class="cl"><span class="w">            </span><span class="n">executor</span><span class="p">.</span><span class="na">setMaximumPoolSize</span><span class="p">(</span><span class="n">config</span><span class="p">.</span><span class="na">getMaxSize</span><span class="p">());</span><span class="w">
+</span></span></span><span class="line"><span class="ln"> 52</span><span class="cl"><span class="w">        </span><span class="p">}</span><span class="w">
+</span></span></span><span class="line"><span class="ln"> 53</span><span class="cl"><span class="w">        
+</span></span></span><span class="line"><span class="ln"> 54</span><span class="cl"><span class="w">        </span><span class="c1">// 线程存活时间</span><span class="w">
+</span></span></span><span class="line"><span class="ln"> 55</span><span class="cl"><span class="w">        </span><span class="n">executor</span><span class="p">.</span><span class="na">setKeepAliveTime</span><span class="p">(</span><span class="n">config</span><span class="p">.</span><span class="na">getKeepAliveTime</span><span class="p">(),</span><span class="w"> </span><span class="n">TimeUnit</span><span class="p">.</span><span class="na">SECONDS</span><span class="p">);</span><span class="w">
+</span></span></span><span class="line"><span class="ln"> 56</span><span class="cl"><span class="w">        
+</span></span></span><span class="line"><span class="ln"> 57</span><span class="cl"><span class="w">        </span><span class="c1">// 拒绝策略</span><span class="w">
+</span></span></span><span class="line"><span class="ln"> 58</span><span class="cl"><span class="w">        </span><span class="n">executor</span><span class="p">.</span><span class="na">setRejectedExecutionHandler</span><span class="p">(</span><span class="w">
+</span></span></span><span class="line"><span class="ln"> 59</span><span class="cl"><span class="w">            </span><span class="n">getRejectedExecutionHandler</span><span class="p">(</span><span class="n">config</span><span class="p">.</span><span class="na">getRejectedPolicy</span><span class="p">())</span><span class="w">
+</span></span></span><span class="line"><span class="ln"> 60</span><span class="cl"><span class="w">        </span><span class="p">);</span><span class="w">
+</span></span></span><span class="line"><span class="ln"> 61</span><span class="cl"><span class="w">    </span><span class="p">}</span><span class="w">
+</span></span></span><span class="line"><span class="ln"> 62</span><span class="cl"><span class="w">    
+</span></span></span><span class="line"><span class="ln"> 63</span><span class="cl"><span class="w">    </span><span class="cm">/**
+</span></span></span><span class="line"><span class="ln"> 64</span><span class="cl"><span class="cm">     * 获取拒绝策略
+</span></span></span><span class="line"><span class="ln"> 65</span><span class="cl"><span class="cm">     */</span><span class="w">
+</span></span></span><span class="line"><span class="ln"> 66</span><span class="cl"><span class="w">    </span><span class="kd">private</span><span class="w"> </span><span class="n">RejectedExecutionHandler</span><span class="w"> </span><span class="nf">getRejectedExecutionHandler</span><span class="p">(</span><span class="n">String</span><span class="w"> </span><span class="n">policy</span><span class="p">)</span><span class="w"> </span><span class="p">{</span><span class="w">
+</span></span></span><span class="line"><span class="ln"> 67</span><span class="cl"><span class="w">        </span><span class="k">switch</span><span class="w"> </span><span class="p">(</span><span class="n">policy</span><span class="p">)</span><span class="w"> </span><span class="p">{</span><span class="w">
+</span></span></span><span class="line"><span class="ln"> 68</span><span class="cl"><span class="w">            </span><span class="k">case</span><span class="w"> </span><span class="s">&#34;AbortPolicy&#34;</span><span class="p">:</span><span class="w">
+</span></span></span><span class="line"><span class="ln"> 69</span><span class="cl"><span class="w">                </span><span class="k">return</span><span class="w"> </span><span class="k">new</span><span class="w"> </span><span class="n">ThreadPoolExecutor</span><span class="p">.</span><span class="na">AbortPolicy</span><span class="p">();</span><span class="w">
+</span></span></span><span class="line"><span class="ln"> 70</span><span class="cl"><span class="w">            </span><span class="k">case</span><span class="w"> </span><span class="s">&#34;CallerRunsPolicy&#34;</span><span class="p">:</span><span class="w">
+</span></span></span><span class="line"><span class="ln"> 71</span><span class="cl"><span class="w">                </span><span class="k">return</span><span class="w"> </span><span class="k">new</span><span class="w"> </span><span class="n">ThreadPoolExecutor</span><span class="p">.</span><span class="na">CallerRunsPolicy</span><span class="p">();</span><span class="w">
+</span></span></span><span class="line"><span class="ln"> 72</span><span class="cl"><span class="w">            </span><span class="k">case</span><span class="w"> </span><span class="s">&#34;DiscardPolicy&#34;</span><span class="p">:</span><span class="w">
+</span></span></span><span class="line"><span class="ln"> 73</span><span class="cl"><span class="w">                </span><span class="k">return</span><span class="w"> </span><span class="k">new</span><span class="w"> </span><span class="n">ThreadPoolExecutor</span><span class="p">.</span><span class="na">DiscardPolicy</span><span class="p">();</span><span class="w">
+</span></span></span><span class="line"><span class="ln"> 74</span><span class="cl"><span class="w">            </span><span class="k">case</span><span class="w"> </span><span class="s">&#34;DiscardOldestPolicy&#34;</span><span class="p">:</span><span class="w">
+</span></span></span><span class="line"><span class="ln"> 75</span><span class="cl"><span class="w">                </span><span class="k">return</span><span class="w"> </span><span class="k">new</span><span class="w"> </span><span class="n">ThreadPoolExecutor</span><span class="p">.</span><span class="na">DiscardOldestPolicy</span><span class="p">();</span><span class="w">
+</span></span></span><span class="line"><span class="ln"> 76</span><span class="cl"><span class="w">            </span><span class="k">default</span><span class="p">:</span><span class="w">
+</span></span></span><span class="line"><span class="ln"> 77</span><span class="cl"><span class="w">                </span><span class="k">return</span><span class="w"> </span><span class="k">new</span><span class="w"> </span><span class="n">ThreadPoolExecutor</span><span class="p">.</span><span class="na">AbortPolicy</span><span class="p">();</span><span class="w">
+</span></span></span><span class="line"><span class="ln"> 78</span><span class="cl"><span class="w">        </span><span class="p">}</span><span class="w">
+</span></span></span><span class="line"><span class="ln"> 79</span><span class="cl"><span class="w">    </span><span class="p">}</span><span class="w">
+</span></span></span><span class="line"><span class="ln"> 80</span><span class="cl"><span class="w">    
+</span></span></span><span class="line"><span class="ln"> 81</span><span class="cl"><span class="w">    </span><span class="cm">/**
+</span></span></span><span class="line"><span class="ln"> 82</span><span class="cl"><span class="cm">     * 获取线程池状态
+</span></span></span><span class="line"><span class="ln"> 83</span><span class="cl"><span class="cm">     */</span><span class="w">
+</span></span></span><span class="line"><span class="ln"> 84</span><span class="cl"><span class="w">    </span><span class="kd">public</span><span class="w"> </span><span class="n">ThreadPoolStats</span><span class="w"> </span><span class="nf">getThreadPoolStats</span><span class="p">(</span><span class="n">String</span><span class="w"> </span><span class="n">poolName</span><span class="p">)</span><span class="w"> </span><span class="p">{</span><span class="w">
+</span></span></span><span class="line"><span class="ln"> 85</span><span class="cl"><span class="w">        </span><span class="n">ThreadPoolExecutor</span><span class="w"> </span><span class="n">executor</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">threadPools</span><span class="p">.</span><span class="na">get</span><span class="p">(</span><span class="n">poolName</span><span class="p">);</span><span class="w">
+</span></span></span><span class="line"><span class="ln"> 86</span><span class="cl"><span class="w">        </span><span class="k">if</span><span class="w"> </span><span class="p">(</span><span class="n">executor</span><span class="w"> </span><span class="o">==</span><span class="w"> </span><span class="kc">null</span><span class="p">)</span><span class="w"> </span><span class="p">{</span><span class="w">
+</span></span></span><span class="line"><span class="ln"> 87</span><span class="cl"><span class="w">            </span><span class="k">return</span><span class="w"> </span><span class="kc">null</span><span class="p">;</span><span class="w">
+</span></span></span><span class="line"><span class="ln"> 88</span><span class="cl"><span class="w">        </span><span class="p">}</span><span class="w">
+</span></span></span><span class="line"><span class="ln"> 89</span><span class="cl"><span class="w">        
+</span></span></span><span class="line"><span class="ln"> 90</span><span class="cl"><span class="w">        </span><span class="k">return</span><span class="w"> </span><span class="n">ThreadPoolStats</span><span class="p">.</span><span class="na">builder</span><span class="p">()</span><span class="w">
+</span></span></span><span class="line"><span class="ln"> 91</span><span class="cl"><span class="w">            </span><span class="p">.</span><span class="na">poolName</span><span class="p">(</span><span class="n">poolName</span><span class="p">)</span><span class="w">
+</span></span></span><span class="line"><span class="ln"> 92</span><span class="cl"><span class="w">            </span><span class="p">.</span><span class="na">coreSize</span><span class="p">(</span><span class="n">executor</span><span class="p">.</span><span class="na">getCorePoolSize</span><span class="p">())</span><span class="w">
+</span></span></span><span class="line"><span class="ln"> 93</span><span class="cl"><span class="w">            </span><span class="p">.</span><span class="na">maxSize</span><span class="p">(</span><span class="n">executor</span><span class="p">.</span><span class="na">getMaximumPoolSize</span><span class="p">())</span><span class="w">
+</span></span></span><span class="line"><span class="ln"> 94</span><span class="cl"><span class="w">            </span><span class="p">.</span><span class="na">activeCount</span><span class="p">(</span><span class="n">executor</span><span class="p">.</span><span class="na">getActiveCount</span><span class="p">())</span><span class="w">
+</span></span></span><span class="line"><span class="ln"> 95</span><span class="cl"><span class="w">            </span><span class="p">.</span><span class="na">poolSize</span><span class="p">(</span><span class="n">executor</span><span class="p">.</span><span class="na">getPoolSize</span><span class="p">())</span><span class="w">
+</span></span></span><span class="line"><span class="ln"> 96</span><span class="cl"><span class="w">            </span><span class="p">.</span><span class="na">queueSize</span><span class="p">(</span><span class="n">executor</span><span class="p">.</span><span class="na">getQueue</span><span class="p">().</span><span class="na">size</span><span class="p">())</span><span class="w">
+</span></span></span><span class="line"><span class="ln"> 97</span><span class="cl"><span class="w">            </span><span class="p">.</span><span class="na">queueCapacity</span><span class="p">(</span><span class="n">getQueueCapacity</span><span class="p">(</span><span class="n">executor</span><span class="p">.</span><span class="na">getQueue</span><span class="p">()))</span><span class="w">
+</span></span></span><span class="line"><span class="ln"> 98</span><span class="cl"><span class="w">            </span><span class="p">.</span><span class="na">completedTaskCount</span><span class="p">(</span><span class="n">executor</span><span class="p">.</span><span class="na">getCompletedTaskCount</span><span class="p">())</span><span class="w">
+</span></span></span><span class="line"><span class="ln"> 99</span><span class="cl"><span class="w">            </span><span class="p">.</span><span class="na">taskCount</span><span class="p">(</span><span class="n">executor</span><span class="p">.</span><span class="na">getTaskCount</span><span class="p">())</span><span class="w">
+</span></span></span><span class="line"><span class="ln">100</span><span class="cl"><span class="w">            </span><span class="p">.</span><span class="na">build</span><span class="p">();</span><span class="w">
+</span></span></span><span class="line"><span class="ln">101</span><span class="cl"><span class="w">    </span><span class="p">}</span><span class="w">
+</span></span></span><span class="line"><span class="ln">102</span><span class="cl"><span class="w">    
+</span></span></span><span class="line"><span class="ln">103</span><span class="cl"><span class="w">    </span><span class="kd">private</span><span class="w"> </span><span class="kt">int</span><span class="w"> </span><span class="nf">getQueueCapacity</span><span class="p">(</span><span class="n">BlockingQueue</span><span class="o">&lt;</span><span class="n">Runnable</span><span class="o">&gt;</span><span class="w"> </span><span class="n">queue</span><span class="p">)</span><span class="w"> </span><span class="p">{</span><span class="w">
+</span></span></span><span class="line"><span class="ln">104</span><span class="cl"><span class="w">        </span><span class="k">return</span><span class="w"> </span><span class="n">queue</span><span class="p">.</span><span class="na">size</span><span class="p">()</span><span class="w"> </span><span class="o">+</span><span class="w"> </span><span class="n">queue</span><span class="p">.</span><span class="na">remainingCapacity</span><span class="p">();</span><span class="w">
+</span></span></span><span class="line"><span class="ln">105</span><span class="cl"><span class="w">    </span><span class="p">}</span><span class="w">
+</span></span></span><span class="line"><span class="ln">106</span><span class="cl"><span class="p">}</span><span class="w">
+</span></span></span></code></pre></div><h3 id="2-配置数据模型">2. 配置数据模型<a hidden class="anchor" aria-hidden="true" href="#2-配置数据模型">#</a></h3>
+<div class="highlight"><pre tabindex="0" class="chroma"><code class="language-java" data-lang="java"><span class="line"><span class="ln"> 1</span><span class="cl"><span class="nd">@Data</span><span class="w">
+</span></span></span><span class="line"><span class="ln"> 2</span><span class="cl"><span class="nd">@Builder</span><span class="w">
+</span></span></span><span class="line"><span class="ln"> 3</span><span class="cl"><span class="kd">public</span><span class="w"> </span><span class="kd">class</span> <span class="nc">ThreadPoolConfig</span><span class="w"> </span><span class="p">{</span><span class="w">
+</span></span></span><span class="line"><span class="ln"> 4</span><span class="cl"><span class="w">    
+</span></span></span><span class="line"><span class="ln"> 5</span><span class="cl"><span class="w">    </span><span class="cm">/** 线程池名称 */</span><span class="w">
+</span></span></span><span class="line"><span class="ln"> 6</span><span class="cl"><span class="w">    </span><span class="kd">private</span><span class="w"> </span><span class="n">String</span><span class="w"> </span><span class="n">poolName</span><span class="p">;</span><span class="w">
+</span></span></span><span class="line"><span class="ln"> 7</span><span class="cl"><span class="w">    
+</span></span></span><span class="line"><span class="ln"> 8</span><span class="cl"><span class="w">    </span><span class="cm">/** 核心线程数 */</span><span class="w">
+</span></span></span><span class="line"><span class="ln"> 9</span><span class="cl"><span class="w">    </span><span class="kd">private</span><span class="w"> </span><span class="n">Integer</span><span class="w"> </span><span class="n">coreSize</span><span class="p">;</span><span class="w">
+</span></span></span><span class="line"><span class="ln">10</span><span class="cl"><span class="w">    
+</span></span></span><span class="line"><span class="ln">11</span><span class="cl"><span class="w">    </span><span class="cm">/** 最大线程数 */</span><span class="w">
+</span></span></span><span class="line"><span class="ln">12</span><span class="cl"><span class="w">    </span><span class="kd">private</span><span class="w"> </span><span class="n">Integer</span><span class="w"> </span><span class="n">maxSize</span><span class="p">;</span><span class="w">
+</span></span></span><span class="line"><span class="ln">13</span><span class="cl"><span class="w">    
+</span></span></span><span class="line"><span class="ln">14</span><span class="cl"><span class="w">    </span><span class="cm">/** 线程存活时间（秒） */</span><span class="w">
+</span></span></span><span class="line"><span class="ln">15</span><span class="cl"><span class="w">    </span><span class="kd">private</span><span class="w"> </span><span class="n">Long</span><span class="w"> </span><span class="n">keepAliveTime</span><span class="p">;</span><span class="w">
+</span></span></span><span class="line"><span class="ln">16</span><span class="cl"><span class="w">    
+</span></span></span><span class="line"><span class="ln">17</span><span class="cl"><span class="w">    </span><span class="cm">/** 队列容量 */</span><span class="w">
+</span></span></span><span class="line"><span class="ln">18</span><span class="cl"><span class="w">    </span><span class="kd">private</span><span class="w"> </span><span class="n">Integer</span><span class="w"> </span><span class="n">queueCapacity</span><span class="p">;</span><span class="w">
+</span></span></span><span class="line"><span class="ln">19</span><span class="cl"><span class="w">    
+</span></span></span><span class="line"><span class="ln">20</span><span class="cl"><span class="w">    </span><span class="cm">/** 拒绝策略 */</span><span class="w">
+</span></span></span><span class="line"><span class="ln">21</span><span class="cl"><span class="w">    </span><span class="kd">private</span><span class="w"> </span><span class="n">String</span><span class="w"> </span><span class="n">rejectedPolicy</span><span class="p">;</span><span class="w">
+</span></span></span><span class="line"><span class="ln">22</span><span class="cl"><span class="w">    
+</span></span></span><span class="line"><span class="ln">23</span><span class="cl"><span class="w">    </span><span class="cm">/** 配置版本 */</span><span class="w">
+</span></span></span><span class="line"><span class="ln">24</span><span class="cl"><span class="w">    </span><span class="kd">private</span><span class="w"> </span><span class="n">Integer</span><span class="w"> </span><span class="n">version</span><span class="p">;</span><span class="w">
+</span></span></span><span class="line"><span class="ln">25</span><span class="cl"><span class="w">    
+</span></span></span><span class="line"><span class="ln">26</span><span class="cl"><span class="w">    </span><span class="cm">/** 更新时间 */</span><span class="w">
+</span></span></span><span class="line"><span class="ln">27</span><span class="cl"><span class="w">    </span><span class="kd">private</span><span class="w"> </span><span class="n">LocalDateTime</span><span class="w"> </span><span class="n">updateTime</span><span class="p">;</span><span class="w">
+</span></span></span><span class="line"><span class="ln">28</span><span class="cl"><span class="w">    
+</span></span></span><span class="line"><span class="ln">29</span><span class="cl"><span class="w">    </span><span class="cm">/** 操作人 */</span><span class="w">
+</span></span></span><span class="line"><span class="ln">30</span><span class="cl"><span class="w">    </span><span class="kd">private</span><span class="w"> </span><span class="n">String</span><span class="w"> </span><span class="n">operator</span><span class="p">;</span><span class="w">
+</span></span></span><span class="line"><span class="ln">31</span><span class="cl"><span class="w">    
+</span></span></span><span class="line"><span class="ln">32</span><span class="cl"><span class="w">    </span><span class="cm">/**
+</span></span></span><span class="line"><span class="ln">33</span><span class="cl"><span class="cm">     * 参数校验
+</span></span></span><span class="line"><span class="ln">34</span><span class="cl"><span class="cm">     */</span><span class="w">
+</span></span></span><span class="line"><span class="ln">35</span><span class="cl"><span class="w">    </span><span class="kd">public</span><span class="w"> </span><span class="kt">void</span><span class="w"> </span><span class="nf">validate</span><span class="p">()</span><span class="w"> </span><span class="p">{</span><span class="w">
+</span></span></span><span class="line"><span class="ln">36</span><span class="cl"><span class="w">        </span><span class="k">if</span><span class="w"> </span><span class="p">(</span><span class="n">coreSize</span><span class="w"> </span><span class="o">&lt;=</span><span class="w"> </span><span class="n">0</span><span class="p">)</span><span class="w"> </span><span class="p">{</span><span class="w">
+</span></span></span><span class="line"><span class="ln">37</span><span class="cl"><span class="w">            </span><span class="k">throw</span><span class="w"> </span><span class="k">new</span><span class="w"> </span><span class="n">IllegalArgumentException</span><span class="p">(</span><span class="s">&#34;核心线程数必须大于0&#34;</span><span class="p">);</span><span class="w">
+</span></span></span><span class="line"><span class="ln">38</span><span class="cl"><span class="w">        </span><span class="p">}</span><span class="w">
+</span></span></span><span class="line"><span class="ln">39</span><span class="cl"><span class="w">        </span><span class="k">if</span><span class="w"> </span><span class="p">(</span><span class="n">maxSize</span><span class="w"> </span><span class="o">&lt;</span><span class="w"> </span><span class="n">coreSize</span><span class="p">)</span><span class="w"> </span><span class="p">{</span><span class="w">
+</span></span></span><span class="line"><span class="ln">40</span><span class="cl"><span class="w">            </span><span class="k">throw</span><span class="w"> </span><span class="k">new</span><span class="w"> </span><span class="n">IllegalArgumentException</span><span class="p">(</span><span class="s">&#34;最大线程数不能小于核心线程数&#34;</span><span class="p">);</span><span class="w">
+</span></span></span><span class="line"><span class="ln">41</span><span class="cl"><span class="w">        </span><span class="p">}</span><span class="w">
+</span></span></span><span class="line"><span class="ln">42</span><span class="cl"><span class="w">        </span><span class="k">if</span><span class="w"> </span><span class="p">(</span><span class="n">queueCapacity</span><span class="w"> </span><span class="o">&lt;</span><span class="w"> </span><span class="n">0</span><span class="p">)</span><span class="w"> </span><span class="p">{</span><span class="w">
+</span></span></span><span class="line"><span class="ln">43</span><span class="cl"><span class="w">            </span><span class="k">throw</span><span class="w"> </span><span class="k">new</span><span class="w"> </span><span class="n">IllegalArgumentException</span><span class="p">(</span><span class="s">&#34;队列容量不能为负数&#34;</span><span class="p">);</span><span class="w">
+</span></span></span><span class="line"><span class="ln">44</span><span class="cl"><span class="w">        </span><span class="p">}</span><span class="w">
+</span></span></span><span class="line"><span class="ln">45</span><span class="cl"><span class="w">    </span><span class="p">}</span><span class="w">
+</span></span></span><span class="line"><span class="ln">46</span><span class="cl"><span class="p">}</span><span class="w">
+</span></span></span></code></pre></div><h3 id="3-配置监听器基于-nacos">3. 配置监听器（基于 Nacos）<a hidden class="anchor" aria-hidden="true" href="#3-配置监听器基于-nacos">#</a></h3>
+<div class="highlight"><pre tabindex="0" class="chroma"><code class="language-java" data-lang="java"><span class="line"><span class="ln"> 1</span><span class="cl"><span class="nd">@Component</span><span class="w">
+</span></span></span><span class="line"><span class="ln"> 2</span><span class="cl"><span class="kd">public</span><span class="w"> </span><span class="kd">class</span> <span class="nc">ThreadPoolConfigListener</span><span class="w"> </span><span class="p">{</span><span class="w">
+</span></span></span><span class="line"><span class="ln"> 3</span><span class="cl"><span class="w">    
+</span></span></span><span class="line"><span class="ln"> 4</span><span class="cl"><span class="w">    </span><span class="nd">@Autowired</span><span class="w">
+</span></span></span><span class="line"><span class="ln"> 5</span><span class="cl"><span class="w">    </span><span class="kd">private</span><span class="w"> </span><span class="n">DynamicThreadPoolManager</span><span class="w"> </span><span class="n">threadPoolManager</span><span class="p">;</span><span class="w">
+</span></span></span><span class="line"><span class="ln"> 6</span><span class="cl"><span class="w">    
+</span></span></span><span class="line"><span class="ln"> 7</span><span class="cl"><span class="w">    </span><span class="nd">@Autowired</span><span class="w">
+</span></span></span><span class="line"><span class="ln"> 8</span><span class="cl"><span class="w">    </span><span class="kd">private</span><span class="w"> </span><span class="n">ConfigService</span><span class="w"> </span><span class="n">configService</span><span class="p">;</span><span class="w">
+</span></span></span><span class="line"><span class="ln"> 9</span><span class="cl"><span class="w">    
+</span></span></span><span class="line"><span class="ln">10</span><span class="cl"><span class="w">    </span><span class="kd">private</span><span class="w"> </span><span class="kd">static</span><span class="w"> </span><span class="kd">final</span><span class="w"> </span><span class="n">String</span><span class="w"> </span><span class="n">DATA_ID</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="s">&#34;thread-pool-config&#34;</span><span class="p">;</span><span class="w">
+</span></span></span><span class="line"><span class="ln">11</span><span class="cl"><span class="w">    </span><span class="kd">private</span><span class="w"> </span><span class="kd">static</span><span class="w"> </span><span class="kd">final</span><span class="w"> </span><span class="n">String</span><span class="w"> </span><span class="n">GROUP</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="s">&#34;DEFAULT_GROUP&#34;</span><span class="p">;</span><span class="w">
+</span></span></span><span class="line"><span class="ln">12</span><span class="cl"><span class="w">    
+</span></span></span><span class="line"><span class="ln">13</span><span class="cl"><span class="w">    </span><span class="nd">@PostConstruct</span><span class="w">
+</span></span></span><span class="line"><span class="ln">14</span><span class="cl"><span class="w">    </span><span class="kd">public</span><span class="w"> </span><span class="kt">void</span><span class="w"> </span><span class="nf">init</span><span class="p">()</span><span class="w"> </span><span class="kd">throws</span><span class="w"> </span><span class="n">NacosException</span><span class="w"> </span><span class="p">{</span><span class="w">
+</span></span></span><span class="line"><span class="ln">15</span><span class="cl"><span class="w">        </span><span class="c1">// 监听配置变化</span><span class="w">
+</span></span></span><span class="line"><span class="ln">16</span><span class="cl"><span class="w">        </span><span class="n">configService</span><span class="p">.</span><span class="na">addListener</span><span class="p">(</span><span class="n">DATA_ID</span><span class="p">,</span><span class="w"> </span><span class="n">GROUP</span><span class="p">,</span><span class="w"> </span><span class="k">new</span><span class="w"> </span><span class="n">Listener</span><span class="p">()</span><span class="w"> </span><span class="p">{</span><span class="w">
+</span></span></span><span class="line"><span class="ln">17</span><span class="cl"><span class="w">            </span><span class="nd">@Override</span><span class="w">
+</span></span></span><span class="line"><span class="ln">18</span><span class="cl"><span class="w">            </span><span class="kd">public</span><span class="w"> </span><span class="kt">void</span><span class="w"> </span><span class="nf">receiveConfigInfo</span><span class="p">(</span><span class="n">String</span><span class="w"> </span><span class="n">configInfo</span><span class="p">)</span><span class="w"> </span><span class="p">{</span><span class="w">
+</span></span></span><span class="line"><span class="ln">19</span><span class="cl"><span class="w">                </span><span class="n">handleConfigChange</span><span class="p">(</span><span class="n">configInfo</span><span class="p">);</span><span class="w">
+</span></span></span><span class="line"><span class="ln">20</span><span class="cl"><span class="w">            </span><span class="p">}</span><span class="w">
+</span></span></span><span class="line"><span class="ln">21</span><span class="cl"><span class="w">            
+</span></span></span><span class="line"><span class="ln">22</span><span class="cl"><span class="w">            </span><span class="nd">@Override</span><span class="w">
+</span></span></span><span class="line"><span class="ln">23</span><span class="cl"><span class="w">            </span><span class="kd">public</span><span class="w"> </span><span class="n">Executor</span><span class="w"> </span><span class="nf">getExecutor</span><span class="p">()</span><span class="w"> </span><span class="p">{</span><span class="w">
+</span></span></span><span class="line"><span class="ln">24</span><span class="cl"><span class="w">                </span><span class="k">return</span><span class="w"> </span><span class="kc">null</span><span class="p">;</span><span class="w">
+</span></span></span><span class="line"><span class="ln">25</span><span class="cl"><span class="w">            </span><span class="p">}</span><span class="w">
+</span></span></span><span class="line"><span class="ln">26</span><span class="cl"><span class="w">        </span><span class="p">});</span><span class="w">
+</span></span></span><span class="line"><span class="ln">27</span><span class="cl"><span class="w">    </span><span class="p">}</span><span class="w">
+</span></span></span><span class="line"><span class="ln">28</span><span class="cl"><span class="w">    
+</span></span></span><span class="line"><span class="ln">29</span><span class="cl"><span class="w">    </span><span class="cm">/**
+</span></span></span><span class="line"><span class="ln">30</span><span class="cl"><span class="cm">     * 处理配置变化
+</span></span></span><span class="line"><span class="ln">31</span><span class="cl"><span class="cm">     */</span><span class="w">
+</span></span></span><span class="line"><span class="ln">32</span><span class="cl"><span class="w">    </span><span class="kd">private</span><span class="w"> </span><span class="kt">void</span><span class="w"> </span><span class="nf">handleConfigChange</span><span class="p">(</span><span class="n">String</span><span class="w"> </span><span class="n">configInfo</span><span class="p">)</span><span class="w"> </span><span class="p">{</span><span class="w">
+</span></span></span><span class="line"><span class="ln">33</span><span class="cl"><span class="w">        </span><span class="k">try</span><span class="w"> </span><span class="p">{</span><span class="w">
+</span></span></span><span class="line"><span class="ln">34</span><span class="cl"><span class="w">            </span><span class="c1">// 解析配置</span><span class="w">
+</span></span></span><span class="line"><span class="ln">35</span><span class="cl"><span class="w">            </span><span class="n">List</span><span class="o">&lt;</span><span class="n">ThreadPoolConfig</span><span class="o">&gt;</span><span class="w"> </span><span class="n">configs</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">parseConfig</span><span class="p">(</span><span class="n">configInfo</span><span class="p">);</span><span class="w">
+</span></span></span><span class="line"><span class="ln">36</span><span class="cl"><span class="w">            
+</span></span></span><span class="line"><span class="ln">37</span><span class="cl"><span class="w">            </span><span class="c1">// 应用配置</span><span class="w">
+</span></span></span><span class="line"><span class="ln">38</span><span class="cl"><span class="w">            </span><span class="k">for</span><span class="w"> </span><span class="p">(</span><span class="n">ThreadPoolConfig</span><span class="w"> </span><span class="n">config</span><span class="w"> </span><span class="p">:</span><span class="w"> </span><span class="n">configs</span><span class="p">)</span><span class="w"> </span><span class="p">{</span><span class="w">
+</span></span></span><span class="line"><span class="ln">39</span><span class="cl"><span class="w">                </span><span class="n">config</span><span class="p">.</span><span class="na">validate</span><span class="p">();</span><span class="w">
+</span></span></span><span class="line"><span class="ln">40</span><span class="cl"><span class="w">                </span><span class="n">threadPoolManager</span><span class="p">.</span><span class="na">updateThreadPool</span><span class="p">(</span><span class="n">config</span><span class="p">.</span><span class="na">getPoolName</span><span class="p">(),</span><span class="w"> </span><span class="n">config</span><span class="p">);</span><span class="w">
+</span></span></span><span class="line"><span class="ln">41</span><span class="cl"><span class="w">            </span><span class="p">}</span><span class="w">
+</span></span></span><span class="line"><span class="ln">42</span><span class="cl"><span class="w">            
+</span></span></span><span class="line"><span class="ln">43</span><span class="cl"><span class="w">            </span><span class="n">log</span><span class="p">.</span><span class="na">info</span><span class="p">(</span><span class="s">&#34;线程池配置已更新，共 {} 个线程池&#34;</span><span class="p">,</span><span class="w"> </span><span class="n">configs</span><span class="p">.</span><span class="na">size</span><span class="p">());</span><span class="w">
+</span></span></span><span class="line"><span class="ln">44</span><span class="cl"><span class="w">            
+</span></span></span><span class="line"><span class="ln">45</span><span class="cl"><span class="w">        </span><span class="p">}</span><span class="w"> </span><span class="k">catch</span><span class="w"> </span><span class="p">(</span><span class="n">Exception</span><span class="w"> </span><span class="n">e</span><span class="p">)</span><span class="w"> </span><span class="p">{</span><span class="w">
+</span></span></span><span class="line"><span class="ln">46</span><span class="cl"><span class="w">            </span><span class="n">log</span><span class="p">.</span><span class="na">error</span><span class="p">(</span><span class="s">&#34;处理配置变化失败&#34;</span><span class="p">,</span><span class="w"> </span><span class="n">e</span><span class="p">);</span><span class="w">
+</span></span></span><span class="line"><span class="ln">47</span><span class="cl"><span class="w">            </span><span class="c1">// 发送告警</span><span class="w">
+</span></span></span><span class="line"><span class="ln">48</span><span class="cl"><span class="w">            </span><span class="n">sendAlert</span><span class="p">(</span><span class="s">&#34;线程池配置更新失败: &#34;</span><span class="w"> </span><span class="o">+</span><span class="w"> </span><span class="n">e</span><span class="p">.</span><span class="na">getMessage</span><span class="p">());</span><span class="w">
+</span></span></span><span class="line"><span class="ln">49</span><span class="cl"><span class="w">        </span><span class="p">}</span><span class="w">
+</span></span></span><span class="line"><span class="ln">50</span><span class="cl"><span class="w">    </span><span class="p">}</span><span class="w">
+</span></span></span><span class="line"><span class="ln">51</span><span class="cl"><span class="w">    
+</span></span></span><span class="line"><span class="ln">52</span><span class="cl"><span class="w">    </span><span class="kd">private</span><span class="w"> </span><span class="n">List</span><span class="o">&lt;</span><span class="n">ThreadPoolConfig</span><span class="o">&gt;</span><span class="w"> </span><span class="nf">parseConfig</span><span class="p">(</span><span class="n">String</span><span class="w"> </span><span class="n">configInfo</span><span class="p">)</span><span class="w"> </span><span class="p">{</span><span class="w">
+</span></span></span><span class="line"><span class="ln">53</span><span class="cl"><span class="w">        </span><span class="c1">// 使用 JSON 解析配置</span><span class="w">
+</span></span></span><span class="line"><span class="ln">54</span><span class="cl"><span class="w">        </span><span class="k">return</span><span class="w"> </span><span class="n">JSON</span><span class="p">.</span><span class="na">parseArray</span><span class="p">(</span><span class="n">configInfo</span><span class="p">,</span><span class="w"> </span><span class="n">ThreadPoolConfig</span><span class="p">.</span><span class="na">class</span><span class="p">);</span><span class="w">
+</span></span></span><span class="line"><span class="ln">55</span><span class="cl"><span class="w">    </span><span class="p">}</span><span class="w">
+</span></span></span><span class="line"><span class="ln">56</span><span class="cl"><span class="p">}</span><span class="w">
+</span></span></span></code></pre></div><h3 id="4-监控与告警">4. 监控与告警<a hidden class="anchor" aria-hidden="true" href="#4-监控与告警">#</a></h3>
+<div class="highlight"><pre tabindex="0" class="chroma"><code class="language-java" data-lang="java"><span class="line"><span class="ln"> 1</span><span class="cl"><span class="nd">@Component</span><span class="w">
+</span></span></span><span class="line"><span class="ln"> 2</span><span class="cl"><span class="kd">public</span><span class="w"> </span><span class="kd">class</span> <span class="nc">ThreadPoolMonitor</span><span class="w"> </span><span class="p">{</span><span class="w">
+</span></span></span><span class="line"><span class="ln"> 3</span><span class="cl"><span class="w">    
+</span></span></span><span class="line"><span class="ln"> 4</span><span class="cl"><span class="w">    </span><span class="nd">@Autowired</span><span class="w">
+</span></span></span><span class="line"><span class="ln"> 5</span><span class="cl"><span class="w">    </span><span class="kd">private</span><span class="w"> </span><span class="n">DynamicThreadPoolManager</span><span class="w"> </span><span class="n">threadPoolManager</span><span class="p">;</span><span class="w">
+</span></span></span><span class="line"><span class="ln"> 6</span><span class="cl"><span class="w">    
+</span></span></span><span class="line"><span class="ln"> 7</span><span class="cl"><span class="w">    </span><span class="nd">@Autowired</span><span class="w">
+</span></span></span><span class="line"><span class="ln"> 8</span><span class="cl"><span class="w">    </span><span class="kd">private</span><span class="w"> </span><span class="n">AlertService</span><span class="w"> </span><span class="n">alertService</span><span class="p">;</span><span class="w">
+</span></span></span><span class="line"><span class="ln"> 9</span><span class="cl"><span class="w">    
+</span></span></span><span class="line"><span class="ln">10</span><span class="cl"><span class="w">    </span><span class="cm">/**
+</span></span></span><span class="line"><span class="ln">11</span><span class="cl"><span class="cm">     * 定时监控线程池状态
+</span></span></span><span class="line"><span class="ln">12</span><span class="cl"><span class="cm">     */</span><span class="w">
+</span></span></span><span class="line"><span class="ln">13</span><span class="cl"><span class="w">    </span><span class="nd">@Scheduled</span><span class="p">(</span><span class="n">fixedRate</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">10000</span><span class="p">)</span><span class="w"> </span><span class="c1">// 每10秒执行一次</span><span class="w">
+</span></span></span><span class="line"><span class="ln">14</span><span class="cl"><span class="w">    </span><span class="kd">public</span><span class="w"> </span><span class="kt">void</span><span class="w"> </span><span class="nf">monitorThreadPools</span><span class="p">()</span><span class="w"> </span><span class="p">{</span><span class="w">
+</span></span></span><span class="line"><span class="ln">15</span><span class="cl"><span class="w">        </span><span class="n">threadPoolManager</span><span class="p">.</span><span class="na">getAllPoolNames</span><span class="p">().</span><span class="na">forEach</span><span class="p">(</span><span class="n">poolName</span><span class="w"> </span><span class="o">-&gt;</span><span class="w"> </span><span class="p">{</span><span class="w">
+</span></span></span><span class="line"><span class="ln">16</span><span class="cl"><span class="w">            </span><span class="n">ThreadPoolStats</span><span class="w"> </span><span class="n">stats</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">threadPoolManager</span><span class="p">.</span><span class="na">getThreadPoolStats</span><span class="p">(</span><span class="n">poolName</span><span class="p">);</span><span class="w">
+</span></span></span><span class="line"><span class="ln">17</span><span class="cl"><span class="w">            
+</span></span></span><span class="line"><span class="ln">18</span><span class="cl"><span class="w">            </span><span class="c1">// 检查队列堆积</span><span class="w">
+</span></span></span><span class="line"><span class="ln">19</span><span class="cl"><span class="w">            </span><span class="n">checkQueueSize</span><span class="p">(</span><span class="n">stats</span><span class="p">);</span><span class="w">
+</span></span></span><span class="line"><span class="ln">20</span><span class="cl"><span class="w">            
+</span></span></span><span class="line"><span class="ln">21</span><span class="cl"><span class="w">            </span><span class="c1">// 检查活跃线程数</span><span class="w">
+</span></span></span><span class="line"><span class="ln">22</span><span class="cl"><span class="w">            </span><span class="n">checkActiveThreads</span><span class="p">(</span><span class="n">stats</span><span class="p">);</span><span class="w">
+</span></span></span><span class="line"><span class="ln">23</span><span class="cl"><span class="w">            
+</span></span></span><span class="line"><span class="ln">24</span><span class="cl"><span class="w">            </span><span class="c1">// 检查拒绝任务数</span><span class="w">
+</span></span></span><span class="line"><span class="ln">25</span><span class="cl"><span class="w">            </span><span class="n">checkRejectedTasks</span><span class="p">(</span><span class="n">stats</span><span class="p">);</span><span class="w">
+</span></span></span><span class="line"><span class="ln">26</span><span class="cl"><span class="w">            
+</span></span></span><span class="line"><span class="ln">27</span><span class="cl"><span class="w">            </span><span class="c1">// 上报监控指标</span><span class="w">
+</span></span></span><span class="line"><span class="ln">28</span><span class="cl"><span class="w">            </span><span class="n">reportMetrics</span><span class="p">(</span><span class="n">stats</span><span class="p">);</span><span class="w">
+</span></span></span><span class="line"><span class="ln">29</span><span class="cl"><span class="w">        </span><span class="p">});</span><span class="w">
+</span></span></span><span class="line"><span class="ln">30</span><span class="cl"><span class="w">    </span><span class="p">}</span><span class="w">
+</span></span></span><span class="line"><span class="ln">31</span><span class="cl"><span class="w">    
+</span></span></span><span class="line"><span class="ln">32</span><span class="cl"><span class="w">    </span><span class="cm">/**
+</span></span></span><span class="line"><span class="ln">33</span><span class="cl"><span class="cm">     * 检查队列堆积
+</span></span></span><span class="line"><span class="ln">34</span><span class="cl"><span class="cm">     */</span><span class="w">
+</span></span></span><span class="line"><span class="ln">35</span><span class="cl"><span class="w">    </span><span class="kd">private</span><span class="w"> </span><span class="kt">void</span><span class="w"> </span><span class="nf">checkQueueSize</span><span class="p">(</span><span class="n">ThreadPoolStats</span><span class="w"> </span><span class="n">stats</span><span class="p">)</span><span class="w"> </span><span class="p">{</span><span class="w">
+</span></span></span><span class="line"><span class="ln">36</span><span class="cl"><span class="w">        </span><span class="kt">double</span><span class="w"> </span><span class="n">queueUsage</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="p">(</span><span class="kt">double</span><span class="p">)</span><span class="w"> </span><span class="n">stats</span><span class="p">.</span><span class="na">getQueueSize</span><span class="p">()</span><span class="w"> </span><span class="o">/</span><span class="w"> </span><span class="n">stats</span><span class="p">.</span><span class="na">getQueueCapacity</span><span class="p">();</span><span class="w">
+</span></span></span><span class="line"><span class="ln">37</span><span class="cl"><span class="w">        
+</span></span></span><span class="line"><span class="ln">38</span><span class="cl"><span class="w">        </span><span class="k">if</span><span class="w"> </span><span class="p">(</span><span class="n">queueUsage</span><span class="w"> </span><span class="o">&gt;</span><span class="w"> </span><span class="n">0</span><span class="p">.</span><span class="na">8</span><span class="p">)</span><span class="w"> </span><span class="p">{</span><span class="w">
+</span></span></span><span class="line"><span class="ln">39</span><span class="cl"><span class="w">            </span><span class="n">alertService</span><span class="p">.</span><span class="na">sendAlert</span><span class="p">(</span><span class="w">
+</span></span></span><span class="line"><span class="ln">40</span><span class="cl"><span class="w">                </span><span class="s">&#34;线程池队列告警&#34;</span><span class="p">,</span><span class="w">
+</span></span></span><span class="line"><span class="ln">41</span><span class="cl"><span class="w">                </span><span class="n">String</span><span class="p">.</span><span class="na">format</span><span class="p">(</span><span class="s">&#34;线程池 %s 队列使用率 %.2f%%，当前队列大小 %d/%d&#34;</span><span class="p">,</span><span class="w">
+</span></span></span><span class="line"><span class="ln">42</span><span class="cl"><span class="w">                    </span><span class="n">stats</span><span class="p">.</span><span class="na">getPoolName</span><span class="p">(),</span><span class="w">
+</span></span></span><span class="line"><span class="ln">43</span><span class="cl"><span class="w">                    </span><span class="n">queueUsage</span><span class="w"> </span><span class="o">*</span><span class="w"> </span><span class="n">100</span><span class="p">,</span><span class="w">
+</span></span></span><span class="line"><span class="ln">44</span><span class="cl"><span class="w">                    </span><span class="n">stats</span><span class="p">.</span><span class="na">getQueueSize</span><span class="p">(),</span><span class="w">
+</span></span></span><span class="line"><span class="ln">45</span><span class="cl"><span class="w">                    </span><span class="n">stats</span><span class="p">.</span><span class="na">getQueueCapacity</span><span class="p">())</span><span class="w">
+</span></span></span><span class="line"><span class="ln">46</span><span class="cl"><span class="w">            </span><span class="p">);</span><span class="w">
+</span></span></span><span class="line"><span class="ln">47</span><span class="cl"><span class="w">        </span><span class="p">}</span><span class="w">
+</span></span></span><span class="line"><span class="ln">48</span><span class="cl"><span class="w">    </span><span class="p">}</span><span class="w">
+</span></span></span><span class="line"><span class="ln">49</span><span class="cl"><span class="w">    
+</span></span></span><span class="line"><span class="ln">50</span><span class="cl"><span class="w">    </span><span class="cm">/**
+</span></span></span><span class="line"><span class="ln">51</span><span class="cl"><span class="cm">     * 检查活跃线程数
+</span></span></span><span class="line"><span class="ln">52</span><span class="cl"><span class="cm">     */</span><span class="w">
+</span></span></span><span class="line"><span class="ln">53</span><span class="cl"><span class="w">    </span><span class="kd">private</span><span class="w"> </span><span class="kt">void</span><span class="w"> </span><span class="nf">checkActiveThreads</span><span class="p">(</span><span class="n">ThreadPoolStats</span><span class="w"> </span><span class="n">stats</span><span class="p">)</span><span class="w"> </span><span class="p">{</span><span class="w">
+</span></span></span><span class="line"><span class="ln">54</span><span class="cl"><span class="w">        </span><span class="kt">double</span><span class="w"> </span><span class="n">threadUsage</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="p">(</span><span class="kt">double</span><span class="p">)</span><span class="w"> </span><span class="n">stats</span><span class="p">.</span><span class="na">getActiveCount</span><span class="p">()</span><span class="w"> </span><span class="o">/</span><span class="w"> </span><span class="n">stats</span><span class="p">.</span><span class="na">getMaxSize</span><span class="p">();</span><span class="w">
+</span></span></span><span class="line"><span class="ln">55</span><span class="cl"><span class="w">        
+</span></span></span><span class="line"><span class="ln">56</span><span class="cl"><span class="w">        </span><span class="k">if</span><span class="w"> </span><span class="p">(</span><span class="n">threadUsage</span><span class="w"> </span><span class="o">&gt;</span><span class="w"> </span><span class="n">0</span><span class="p">.</span><span class="na">9</span><span class="p">)</span><span class="w"> </span><span class="p">{</span><span class="w">
+</span></span></span><span class="line"><span class="ln">57</span><span class="cl"><span class="w">            </span><span class="n">alertService</span><span class="p">.</span><span class="na">sendAlert</span><span class="p">(</span><span class="w">
+</span></span></span><span class="line"><span class="ln">58</span><span class="cl"><span class="w">                </span><span class="s">&#34;线程池线程告警&#34;</span><span class="p">,</span><span class="w">
+</span></span></span><span class="line"><span class="ln">59</span><span class="cl"><span class="w">                </span><span class="n">String</span><span class="p">.</span><span class="na">format</span><span class="p">(</span><span class="s">&#34;线程池 %s 线程使用率 %.2f%%，活跃线程 %d/%d&#34;</span><span class="p">,</span><span class="w">
+</span></span></span><span class="line"><span class="ln">60</span><span class="cl"><span class="w">                    </span><span class="n">stats</span><span class="p">.</span><span class="na">getPoolName</span><span class="p">(),</span><span class="w">
+</span></span></span><span class="line"><span class="ln">61</span><span class="cl"><span class="w">                    </span><span class="n">threadUsage</span><span class="w"> </span><span class="o">*</span><span class="w"> </span><span class="n">100</span><span class="p">,</span><span class="w">
+</span></span></span><span class="line"><span class="ln">62</span><span class="cl"><span class="w">                    </span><span class="n">stats</span><span class="p">.</span><span class="na">getActiveCount</span><span class="p">(),</span><span class="w">
+</span></span></span><span class="line"><span class="ln">63</span><span class="cl"><span class="w">                    </span><span class="n">stats</span><span class="p">.</span><span class="na">getMaxSize</span><span class="p">())</span><span class="w">
+</span></span></span><span class="line"><span class="ln">64</span><span class="cl"><span class="w">            </span><span class="p">);</span><span class="w">
+</span></span></span><span class="line"><span class="ln">65</span><span class="cl"><span class="w">        </span><span class="p">}</span><span class="w">
+</span></span></span><span class="line"><span class="ln">66</span><span class="cl"><span class="w">    </span><span class="p">}</span><span class="w">
+</span></span></span><span class="line"><span class="ln">67</span><span class="cl"><span class="w">    
+</span></span></span><span class="line"><span class="ln">68</span><span class="cl"><span class="w">    </span><span class="cm">/**
+</span></span></span><span class="line"><span class="ln">69</span><span class="cl"><span class="cm">     * 上报监控指标到 Prometheus
+</span></span></span><span class="line"><span class="ln">70</span><span class="cl"><span class="cm">     */</span><span class="w">
+</span></span></span><span class="line"><span class="ln">71</span><span class="cl"><span class="w">    </span><span class="kd">private</span><span class="w"> </span><span class="kt">void</span><span class="w"> </span><span class="nf">reportMetrics</span><span class="p">(</span><span class="n">ThreadPoolStats</span><span class="w"> </span><span class="n">stats</span><span class="p">)</span><span class="w"> </span><span class="p">{</span><span class="w">
+</span></span></span><span class="line"><span class="ln">72</span><span class="cl"><span class="w">        </span><span class="c1">// 使用 Micrometer 上报指标</span><span class="w">
+</span></span></span><span class="line"><span class="ln">73</span><span class="cl"><span class="w">        </span><span class="n">Metrics</span><span class="p">.</span><span class="na">gauge</span><span class="p">(</span><span class="s">&#34;threadpool.core.size&#34;</span><span class="p">,</span><span class="w"> 
+</span></span></span><span class="line"><span class="ln">74</span><span class="cl"><span class="w">            </span><span class="n">Tags</span><span class="p">.</span><span class="na">of</span><span class="p">(</span><span class="s">&#34;pool&#34;</span><span class="p">,</span><span class="w"> </span><span class="n">stats</span><span class="p">.</span><span class="na">getPoolName</span><span class="p">()),</span><span class="w"> 
+</span></span></span><span class="line"><span class="ln">75</span><span class="cl"><span class="w">            </span><span class="n">stats</span><span class="p">.</span><span class="na">getCoreSize</span><span class="p">());</span><span class="w">
+</span></span></span><span class="line"><span class="ln">76</span><span class="cl"><span class="w">        
+</span></span></span><span class="line"><span class="ln">77</span><span class="cl"><span class="w">        </span><span class="n">Metrics</span><span class="p">.</span><span class="na">gauge</span><span class="p">(</span><span class="s">&#34;threadpool.active.count&#34;</span><span class="p">,</span><span class="w"> 
+</span></span></span><span class="line"><span class="ln">78</span><span class="cl"><span class="w">            </span><span class="n">Tags</span><span class="p">.</span><span class="na">of</span><span class="p">(</span><span class="s">&#34;pool&#34;</span><span class="p">,</span><span class="w"> </span><span class="n">stats</span><span class="p">.</span><span class="na">getPoolName</span><span class="p">()),</span><span class="w"> 
+</span></span></span><span class="line"><span class="ln">79</span><span class="cl"><span class="w">            </span><span class="n">stats</span><span class="p">.</span><span class="na">getActiveCount</span><span class="p">());</span><span class="w">
+</span></span></span><span class="line"><span class="ln">80</span><span class="cl"><span class="w">        
+</span></span></span><span class="line"><span class="ln">81</span><span class="cl"><span class="w">        </span><span class="n">Metrics</span><span class="p">.</span><span class="na">gauge</span><span class="p">(</span><span class="s">&#34;threadpool.queue.size&#34;</span><span class="p">,</span><span class="w"> 
+</span></span></span><span class="line"><span class="ln">82</span><span class="cl"><span class="w">            </span><span class="n">Tags</span><span class="p">.</span><span class="na">of</span><span class="p">(</span><span class="s">&#34;pool&#34;</span><span class="p">,</span><span class="w"> </span><span class="n">stats</span><span class="p">.</span><span class="na">getPoolName</span><span class="p">()),</span><span class="w"> 
+</span></span></span><span class="line"><span class="ln">83</span><span class="cl"><span class="w">            </span><span class="n">stats</span><span class="p">.</span><span class="na">getQueueSize</span><span class="p">());</span><span class="w">
+</span></span></span><span class="line"><span class="ln">84</span><span class="cl"><span class="w">    </span><span class="p">}</span><span class="w">
+</span></span></span><span class="line"><span class="ln">85</span><span class="cl"><span class="p">}</span><span class="w">
+</span></span></span></code></pre></div><h3 id="5-admin-管理后台-api">5. Admin 管理后台 API<a hidden class="anchor" aria-hidden="true" href="#5-admin-管理后台-api">#</a></h3>
+<div class="highlight"><pre tabindex="0" class="chroma"><code class="language-java" data-lang="java"><span class="line"><span class="ln"> 1</span><span class="cl"><span class="nd">@RestController</span><span class="w">
+</span></span></span><span class="line"><span class="ln"> 2</span><span class="cl"><span class="nd">@RequestMapping</span><span class="p">(</span><span class="s">&#34;/api/threadpool&#34;</span><span class="p">)</span><span class="w">
+</span></span></span><span class="line"><span class="ln"> 3</span><span class="cl"><span class="kd">public</span><span class="w"> </span><span class="kd">class</span> <span class="nc">ThreadPoolAdminController</span><span class="w"> </span><span class="p">{</span><span class="w">
+</span></span></span><span class="line"><span class="ln"> 4</span><span class="cl"><span class="w">    
+</span></span></span><span class="line"><span class="ln"> 5</span><span class="cl"><span class="w">    </span><span class="nd">@Autowired</span><span class="w">
+</span></span></span><span class="line"><span class="ln"> 6</span><span class="cl"><span class="w">    </span><span class="kd">private</span><span class="w"> </span><span class="n">DynamicThreadPoolManager</span><span class="w"> </span><span class="n">threadPoolManager</span><span class="p">;</span><span class="w">
+</span></span></span><span class="line"><span class="ln"> 7</span><span class="cl"><span class="w">    
+</span></span></span><span class="line"><span class="ln"> 8</span><span class="cl"><span class="w">    </span><span class="nd">@Autowired</span><span class="w">
+</span></span></span><span class="line"><span class="ln"> 9</span><span class="cl"><span class="w">    </span><span class="kd">private</span><span class="w"> </span><span class="n">ConfigService</span><span class="w"> </span><span class="n">configService</span><span class="p">;</span><span class="w">
+</span></span></span><span class="line"><span class="ln">10</span><span class="cl"><span class="w">    
+</span></span></span><span class="line"><span class="ln">11</span><span class="cl"><span class="w">    </span><span class="cm">/**
+</span></span></span><span class="line"><span class="ln">12</span><span class="cl"><span class="cm">     * 获取所有线程池列表
+</span></span></span><span class="line"><span class="ln">13</span><span class="cl"><span class="cm">     */</span><span class="w">
+</span></span></span><span class="line"><span class="ln">14</span><span class="cl"><span class="w">    </span><span class="nd">@GetMapping</span><span class="p">(</span><span class="s">&#34;/list&#34;</span><span class="p">)</span><span class="w">
+</span></span></span><span class="line"><span class="ln">15</span><span class="cl"><span class="w">    </span><span class="kd">public</span><span class="w"> </span><span class="n">Result</span><span class="o">&lt;</span><span class="n">List</span><span class="o">&lt;</span><span class="n">ThreadPoolStats</span><span class="o">&gt;&gt;</span><span class="w"> </span><span class="nf">listThreadPools</span><span class="p">()</span><span class="w"> </span><span class="p">{</span><span class="w">
+</span></span></span><span class="line"><span class="ln">16</span><span class="cl"><span class="w">        </span><span class="n">List</span><span class="o">&lt;</span><span class="n">ThreadPoolStats</span><span class="o">&gt;</span><span class="w"> </span><span class="n">statsList</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">threadPoolManager</span><span class="p">.</span><span class="na">getAllPoolNames</span><span class="p">()</span><span class="w">
+</span></span></span><span class="line"><span class="ln">17</span><span class="cl"><span class="w">            </span><span class="p">.</span><span class="na">stream</span><span class="p">()</span><span class="w">
+</span></span></span><span class="line"><span class="ln">18</span><span class="cl"><span class="w">            </span><span class="p">.</span><span class="na">map</span><span class="p">(</span><span class="n">threadPoolManager</span><span class="p">::</span><span class="n">getThreadPoolStats</span><span class="p">)</span><span class="w">
+</span></span></span><span class="line"><span class="ln">19</span><span class="cl"><span class="w">            </span><span class="p">.</span><span class="na">collect</span><span class="p">(</span><span class="n">Collectors</span><span class="p">.</span><span class="na">toList</span><span class="p">());</span><span class="w">
+</span></span></span><span class="line"><span class="ln">20</span><span class="cl"><span class="w">        
+</span></span></span><span class="line"><span class="ln">21</span><span class="cl"><span class="w">        </span><span class="k">return</span><span class="w"> </span><span class="n">Result</span><span class="p">.</span><span class="na">success</span><span class="p">(</span><span class="n">statsList</span><span class="p">);</span><span class="w">
+</span></span></span><span class="line"><span class="ln">22</span><span class="cl"><span class="w">    </span><span class="p">}</span><span class="w">
+</span></span></span><span class="line"><span class="ln">23</span><span class="cl"><span class="w">    
+</span></span></span><span class="line"><span class="ln">24</span><span class="cl"><span class="w">    </span><span class="cm">/**
+</span></span></span><span class="line"><span class="ln">25</span><span class="cl"><span class="cm">     * 获取线程池详情
+</span></span></span><span class="line"><span class="ln">26</span><span class="cl"><span class="cm">     */</span><span class="w">
+</span></span></span><span class="line"><span class="ln">27</span><span class="cl"><span class="w">    </span><span class="nd">@GetMapping</span><span class="p">(</span><span class="s">&#34;/{poolName}&#34;</span><span class="p">)</span><span class="w">
+</span></span></span><span class="line"><span class="ln">28</span><span class="cl"><span class="w">    </span><span class="kd">public</span><span class="w"> </span><span class="n">Result</span><span class="o">&lt;</span><span class="n">ThreadPoolStats</span><span class="o">&gt;</span><span class="w"> </span><span class="nf">getThreadPoolDetail</span><span class="p">(</span><span class="nd">@PathVariable</span><span class="w"> </span><span class="n">String</span><span class="w"> </span><span class="n">poolName</span><span class="p">)</span><span class="w"> </span><span class="p">{</span><span class="w">
+</span></span></span><span class="line"><span class="ln">29</span><span class="cl"><span class="w">        </span><span class="n">ThreadPoolStats</span><span class="w"> </span><span class="n">stats</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">threadPoolManager</span><span class="p">.</span><span class="na">getThreadPoolStats</span><span class="p">(</span><span class="n">poolName</span><span class="p">);</span><span class="w">
+</span></span></span><span class="line"><span class="ln">30</span><span class="cl"><span class="w">        </span><span class="k">if</span><span class="w"> </span><span class="p">(</span><span class="n">stats</span><span class="w"> </span><span class="o">==</span><span class="w"> </span><span class="kc">null</span><span class="p">)</span><span class="w"> </span><span class="p">{</span><span class="w">
+</span></span></span><span class="line"><span class="ln">31</span><span class="cl"><span class="w">            </span><span class="k">return</span><span class="w"> </span><span class="n">Result</span><span class="p">.</span><span class="na">error</span><span class="p">(</span><span class="s">&#34;线程池不存在&#34;</span><span class="p">);</span><span class="w">
+</span></span></span><span class="line"><span class="ln">32</span><span class="cl"><span class="w">        </span><span class="p">}</span><span class="w">
+</span></span></span><span class="line"><span class="ln">33</span><span class="cl"><span class="w">        </span><span class="k">return</span><span class="w"> </span><span class="n">Result</span><span class="p">.</span><span class="na">success</span><span class="p">(</span><span class="n">stats</span><span class="p">);</span><span class="w">
+</span></span></span><span class="line"><span class="ln">34</span><span class="cl"><span class="w">    </span><span class="p">}</span><span class="w">
+</span></span></span><span class="line"><span class="ln">35</span><span class="cl"><span class="w">    
+</span></span></span><span class="line"><span class="ln">36</span><span class="cl"><span class="w">    </span><span class="cm">/**
+</span></span></span><span class="line"><span class="ln">37</span><span class="cl"><span class="cm">     * 更新线程池配置
+</span></span></span><span class="line"><span class="ln">38</span><span class="cl"><span class="cm">     */</span><span class="w">
+</span></span></span><span class="line"><span class="ln">39</span><span class="cl"><span class="w">    </span><span class="nd">@PostMapping</span><span class="p">(</span><span class="s">&#34;/update&#34;</span><span class="p">)</span><span class="w">
+</span></span></span><span class="line"><span class="ln">40</span><span class="cl"><span class="w">    </span><span class="kd">public</span><span class="w"> </span><span class="n">Result</span><span class="o">&lt;</span><span class="n">Void</span><span class="o">&gt;</span><span class="w"> </span><span class="nf">updateThreadPool</span><span class="p">(</span><span class="nd">@RequestBody</span><span class="w"> </span><span class="n">ThreadPoolConfig</span><span class="w"> </span><span class="n">config</span><span class="p">)</span><span class="w"> </span><span class="p">{</span><span class="w">
+</span></span></span><span class="line"><span class="ln">41</span><span class="cl"><span class="w">        </span><span class="k">try</span><span class="w"> </span><span class="p">{</span><span class="w">
+</span></span></span><span class="line"><span class="ln">42</span><span class="cl"><span class="w">            </span><span class="c1">// 参数校验</span><span class="w">
+</span></span></span><span class="line"><span class="ln">43</span><span class="cl"><span class="w">            </span><span class="n">config</span><span class="p">.</span><span class="na">validate</span><span class="p">();</span><span class="w">
+</span></span></span><span class="line"><span class="ln">44</span><span class="cl"><span class="w">            
+</span></span></span><span class="line"><span class="ln">45</span><span class="cl"><span class="w">            </span><span class="c1">// 更新配置到 Nacos</span><span class="w">
+</span></span></span><span class="line"><span class="ln">46</span><span class="cl"><span class="w">            </span><span class="n">publishConfig</span><span class="p">(</span><span class="n">config</span><span class="p">);</span><span class="w">
+</span></span></span><span class="line"><span class="ln">47</span><span class="cl"><span class="w">            
+</span></span></span><span class="line"><span class="ln">48</span><span class="cl"><span class="w">            </span><span class="k">return</span><span class="w"> </span><span class="n">Result</span><span class="p">.</span><span class="na">success</span><span class="p">();</span><span class="w">
+</span></span></span><span class="line"><span class="ln">49</span><span class="cl"><span class="w">        </span><span class="p">}</span><span class="w"> </span><span class="k">catch</span><span class="w"> </span><span class="p">(</span><span class="n">Exception</span><span class="w"> </span><span class="n">e</span><span class="p">)</span><span class="w"> </span><span class="p">{</span><span class="w">
+</span></span></span><span class="line"><span class="ln">50</span><span class="cl"><span class="w">            </span><span class="n">log</span><span class="p">.</span><span class="na">error</span><span class="p">(</span><span class="s">&#34;更新线程池配置失败&#34;</span><span class="p">,</span><span class="w"> </span><span class="n">e</span><span class="p">);</span><span class="w">
+</span></span></span><span class="line"><span class="ln">51</span><span class="cl"><span class="w">            </span><span class="k">return</span><span class="w"> </span><span class="n">Result</span><span class="p">.</span><span class="na">error</span><span class="p">(</span><span class="n">e</span><span class="p">.</span><span class="na">getMessage</span><span class="p">());</span><span class="w">
+</span></span></span><span class="line"><span class="ln">52</span><span class="cl"><span class="w">        </span><span class="p">}</span><span class="w">
+</span></span></span><span class="line"><span class="ln">53</span><span class="cl"><span class="w">    </span><span class="p">}</span><span class="w">
+</span></span></span><span class="line"><span class="ln">54</span><span class="cl"><span class="w">    
+</span></span></span><span class="line"><span class="ln">55</span><span class="cl"><span class="w">    </span><span class="cm">/**
+</span></span></span><span class="line"><span class="ln">56</span><span class="cl"><span class="cm">     * 配置回滚
+</span></span></span><span class="line"><span class="ln">57</span><span class="cl"><span class="cm">     */</span><span class="w">
+</span></span></span><span class="line"><span class="ln">58</span><span class="cl"><span class="w">    </span><span class="nd">@PostMapping</span><span class="p">(</span><span class="s">&#34;/rollback/{poolName}&#34;</span><span class="p">)</span><span class="w">
+</span></span></span><span class="line"><span class="ln">59</span><span class="cl"><span class="w">    </span><span class="kd">public</span><span class="w"> </span><span class="n">Result</span><span class="o">&lt;</span><span class="n">Void</span><span class="o">&gt;</span><span class="w"> </span><span class="nf">rollbackConfig</span><span class="p">(</span><span class="nd">@PathVariable</span><span class="w"> </span><span class="n">String</span><span class="w"> </span><span class="n">poolName</span><span class="p">)</span><span class="w"> </span><span class="p">{</span><span class="w">
+</span></span></span><span class="line"><span class="ln">60</span><span class="cl"><span class="w">        </span><span class="k">try</span><span class="w"> </span><span class="p">{</span><span class="w">
+</span></span></span><span class="line"><span class="ln">61</span><span class="cl"><span class="w">            </span><span class="n">ThreadPoolConfig</span><span class="w"> </span><span class="n">lastConfig</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">threadPoolManager</span><span class="p">.</span><span class="na">getLastConfig</span><span class="p">(</span><span class="n">poolName</span><span class="p">);</span><span class="w">
+</span></span></span><span class="line"><span class="ln">62</span><span class="cl"><span class="w">            </span><span class="k">if</span><span class="w"> </span><span class="p">(</span><span class="n">lastConfig</span><span class="w"> </span><span class="o">==</span><span class="w"> </span><span class="kc">null</span><span class="p">)</span><span class="w"> </span><span class="p">{</span><span class="w">
+</span></span></span><span class="line"><span class="ln">63</span><span class="cl"><span class="w">                </span><span class="k">return</span><span class="w"> </span><span class="n">Result</span><span class="p">.</span><span class="na">error</span><span class="p">(</span><span class="s">&#34;没有可回滚的配置&#34;</span><span class="p">);</span><span class="w">
+</span></span></span><span class="line"><span class="ln">64</span><span class="cl"><span class="w">            </span><span class="p">}</span><span class="w">
+</span></span></span><span class="line"><span class="ln">65</span><span class="cl"><span class="w">            
+</span></span></span><span class="line"><span class="ln">66</span><span class="cl"><span class="w">            </span><span class="n">publishConfig</span><span class="p">(</span><span class="n">lastConfig</span><span class="p">);</span><span class="w">
+</span></span></span><span class="line"><span class="ln">67</span><span class="cl"><span class="w">            </span><span class="k">return</span><span class="w"> </span><span class="n">Result</span><span class="p">.</span><span class="na">success</span><span class="p">();</span><span class="w">
+</span></span></span><span class="line"><span class="ln">68</span><span class="cl"><span class="w">        </span><span class="p">}</span><span class="w"> </span><span class="k">catch</span><span class="w"> </span><span class="p">(</span><span class="n">Exception</span><span class="w"> </span><span class="n">e</span><span class="p">)</span><span class="w"> </span><span class="p">{</span><span class="w">
+</span></span></span><span class="line"><span class="ln">69</span><span class="cl"><span class="w">            </span><span class="n">log</span><span class="p">.</span><span class="na">error</span><span class="p">(</span><span class="s">&#34;配置回滚失败&#34;</span><span class="p">,</span><span class="w"> </span><span class="n">e</span><span class="p">);</span><span class="w">
+</span></span></span><span class="line"><span class="ln">70</span><span class="cl"><span class="w">            </span><span class="k">return</span><span class="w"> </span><span class="n">Result</span><span class="p">.</span><span class="na">error</span><span class="p">(</span><span class="n">e</span><span class="p">.</span><span class="na">getMessage</span><span class="p">());</span><span class="w">
+</span></span></span><span class="line"><span class="ln">71</span><span class="cl"><span class="w">        </span><span class="p">}</span><span class="w">
+</span></span></span><span class="line"><span class="ln">72</span><span class="cl"><span class="w">    </span><span class="p">}</span><span class="w">
+</span></span></span><span class="line"><span class="ln">73</span><span class="cl"><span class="w">    
+</span></span></span><span class="line"><span class="ln">74</span><span class="cl"><span class="w">    </span><span class="cm">/**
+</span></span></span><span class="line"><span class="ln">75</span><span class="cl"><span class="cm">     * 获取配置历史
+</span></span></span><span class="line"><span class="ln">76</span><span class="cl"><span class="cm">     */</span><span class="w">
+</span></span></span><span class="line"><span class="ln">77</span><span class="cl"><span class="w">    </span><span class="nd">@GetMapping</span><span class="p">(</span><span class="s">&#34;/history/{poolName}&#34;</span><span class="p">)</span><span class="w">
+</span></span></span><span class="line"><span class="ln">78</span><span class="cl"><span class="w">    </span><span class="kd">public</span><span class="w"> </span><span class="n">Result</span><span class="o">&lt;</span><span class="n">List</span><span class="o">&lt;</span><span class="n">ThreadPoolConfig</span><span class="o">&gt;&gt;</span><span class="w"> </span><span class="nf">getConfigHistory</span><span class="p">(</span><span class="nd">@PathVariable</span><span class="w"> </span><span class="n">String</span><span class="w"> </span><span class="n">poolName</span><span class="p">)</span><span class="w"> </span><span class="p">{</span><span class="w">
+</span></span></span><span class="line"><span class="ln">79</span><span class="cl"><span class="w">        </span><span class="n">List</span><span class="o">&lt;</span><span class="n">ThreadPoolConfig</span><span class="o">&gt;</span><span class="w"> </span><span class="n">history</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">threadPoolManager</span><span class="p">.</span><span class="na">getConfigHistory</span><span class="p">(</span><span class="n">poolName</span><span class="p">);</span><span class="w">
+</span></span></span><span class="line"><span class="ln">80</span><span class="cl"><span class="w">        </span><span class="k">return</span><span class="w"> </span><span class="n">Result</span><span class="p">.</span><span class="na">success</span><span class="p">(</span><span class="n">history</span><span class="p">);</span><span class="w">
+</span></span></span><span class="line"><span class="ln">81</span><span class="cl"><span class="w">    </span><span class="p">}</span><span class="w">
+</span></span></span><span class="line"><span class="ln">82</span><span class="cl"><span class="w">    
+</span></span></span><span class="line"><span class="ln">83</span><span class="cl"><span class="w">    </span><span class="cm">/**
+</span></span></span><span class="line"><span class="ln">84</span><span class="cl"><span class="cm">     * 发布配置到 Nacos
+</span></span></span><span class="line"><span class="ln">85</span><span class="cl"><span class="cm">     */</span><span class="w">
+</span></span></span><span class="line"><span class="ln">86</span><span class="cl"><span class="w">    </span><span class="kd">private</span><span class="w"> </span><span class="kt">void</span><span class="w"> </span><span class="nf">publishConfig</span><span class="p">(</span><span class="n">ThreadPoolConfig</span><span class="w"> </span><span class="n">config</span><span class="p">)</span><span class="w"> </span><span class="kd">throws</span><span class="w"> </span><span class="n">NacosException</span><span class="w"> </span><span class="p">{</span><span class="w">
+</span></span></span><span class="line"><span class="ln">87</span><span class="cl"><span class="w">        </span><span class="n">String</span><span class="w"> </span><span class="n">configInfo</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">JSON</span><span class="p">.</span><span class="na">toJSONString</span><span class="p">(</span><span class="n">Collections</span><span class="p">.</span><span class="na">singletonList</span><span class="p">(</span><span class="n">config</span><span class="p">));</span><span class="w">
+</span></span></span><span class="line"><span class="ln">88</span><span class="cl"><span class="w">        </span><span class="n">configService</span><span class="p">.</span><span class="na">publishConfig</span><span class="p">(</span><span class="s">&#34;thread-pool-config&#34;</span><span class="p">,</span><span class="w"> </span><span class="s">&#34;DEFAULT_GROUP&#34;</span><span class="p">,</span><span class="w"> </span><span class="n">configInfo</span><span class="p">);</span><span class="w">
+</span></span></span><span class="line"><span class="ln">89</span><span class="cl"><span class="w">    </span><span class="p">}</span><span class="w">
+</span></span></span><span class="line"><span class="ln">90</span><span class="cl"><span class="p">}</span><span class="w">
+</span></span></span></code></pre></div><hr>
+<h2 id="前端管理界面设计">前端管理界面设计<a hidden class="anchor" aria-hidden="true" href="#前端管理界面设计">#</a></h2>
+<h3 id="线程池列表页面">线程池列表页面<a hidden class="anchor" aria-hidden="true" href="#线程池列表页面">#</a></h3>
+<div class="highlight"><pre tabindex="0" class="chroma"><code class="language-vue" data-lang="vue"><span class="line"><span class="ln"> 1</span><span class="cl"><span class="p">&lt;</span><span class="nt">template</span><span class="p">&gt;</span>
+</span></span><span class="line"><span class="ln"> 2</span><span class="cl">  <span class="p">&lt;</span><span class="nt">div</span> <span class="na">class</span><span class="o">=</span><span class="s">&#34;threadpool-list&#34;</span><span class="p">&gt;</span>
+</span></span><span class="line"><span class="ln"> 3</span><span class="cl">    <span class="p">&lt;</span><span class="nt">el-table</span> <span class="nt">:data</span><span class="o">=</span><span class="s">&#34;threadPools&#34;</span> <span class="na">style</span><span class="o">=</span><span class="s">&#34;width: 100%&#34;</span><span class="p">&gt;</span>
+</span></span><span class="line"><span class="ln"> 4</span><span class="cl">      <span class="p">&lt;</span><span class="nt">el-table-column</span> <span class="na">prop</span><span class="o">=</span><span class="s">&#34;poolName&#34;</span> <span class="na">label</span><span class="o">=</span><span class="s">&#34;线程池名称&#34;</span> <span class="na">width</span><span class="o">=</span><span class="s">&#34;180&#34;</span> <span class="p">/&gt;</span>
+</span></span><span class="line"><span class="ln"> 5</span><span class="cl">      <span class="p">&lt;</span><span class="nt">el-table-column</span> <span class="na">label</span><span class="o">=</span><span class="s">&#34;核心/最大线程数&#34;</span> <span class="na">width</span><span class="o">=</span><span class="s">&#34;150&#34;</span><span class="p">&gt;</span>
+</span></span><span class="line"><span class="ln"> 6</span><span class="cl">        <span class="p">&lt;</span><span class="nt">template</span> <span class="err">#</span><span class="na">default</span><span class="o">=</span><span class="s">&#34;scope&#34;</span><span class="p">&gt;</span>
+</span></span><span class="line"><span class="ln"> 7</span><span class="cl">          <span class="p">{{</span> <span class="nx">scope</span><span class="p">.</span><span class="nx">row</span><span class="p">.</span><span class="nx">coreSize</span> <span class="p">}}</span> <span class="o">/</span> <span class="p">{{</span> <span class="nx">scope</span><span class="p">.</span><span class="nx">row</span><span class="p">.</span><span class="nx">maxSize</span> <span class="p">}}</span>
+</span></span><span class="line"><span class="ln"> 8</span><span class="cl">        <span class="p">&lt;/</span><span class="nt">template</span><span class="p">&gt;</span>
+</span></span><span class="line"><span class="ln"> 9</span><span class="cl">      <span class="p">&lt;/</span><span class="nt">el-table-column</span><span class="p">&gt;</span>
+</span></span><span class="line"><span class="ln">10</span><span class="cl">      <span class="p">&lt;</span><span class="nt">el-table-column</span> <span class="na">label</span><span class="o">=</span><span class="s">&#34;活跃/总线程数&#34;</span> <span class="na">width</span><span class="o">=</span><span class="s">&#34;150&#34;</span><span class="p">&gt;</span>
+</span></span><span class="line"><span class="ln">11</span><span class="cl">        <span class="p">&lt;</span><span class="nt">template</span> <span class="err">#</span><span class="na">default</span><span class="o">=</span><span class="s">&#34;scope&#34;</span><span class="p">&gt;</span>
+</span></span><span class="line"><span class="ln">12</span><span class="cl">          <span class="p">{{</span> <span class="nx">scope</span><span class="p">.</span><span class="nx">row</span><span class="p">.</span><span class="nx">activeCount</span> <span class="p">}}</span> <span class="o">/</span> <span class="p">{{</span> <span class="nx">scope</span><span class="p">.</span><span class="nx">row</span><span class="p">.</span><span class="nx">poolSize</span> <span class="p">}}</span>
+</span></span><span class="line"><span class="ln">13</span><span class="cl">        <span class="p">&lt;/</span><span class="nt">template</span><span class="p">&gt;</span>
+</span></span><span class="line"><span class="ln">14</span><span class="cl">      <span class="p">&lt;/</span><span class="nt">el-table-column</span><span class="p">&gt;</span>
+</span></span><span class="line"><span class="ln">15</span><span class="cl">      <span class="p">&lt;</span><span class="nt">el-table-column</span> <span class="na">label</span><span class="o">=</span><span class="s">&#34;队列使用情况&#34;</span> <span class="na">width</span><span class="o">=</span><span class="s">&#34;200&#34;</span><span class="p">&gt;</span>
+</span></span><span class="line"><span class="ln">16</span><span class="cl">        <span class="p">&lt;</span><span class="nt">template</span> <span class="err">#</span><span class="na">default</span><span class="o">=</span><span class="s">&#34;scope&#34;</span><span class="p">&gt;</span>
+</span></span><span class="line"><span class="ln">17</span><span class="cl">          <span class="p">&lt;</span><span class="nt">el-progress</span> 
+</span></span><span class="line"><span class="ln">18</span><span class="cl">            <span class="nt">:percentage</span><span class="o">=</span><span class="s">&#34;getQueueUsage(scope.row)&#34;</span> 
+</span></span><span class="line"><span class="ln">19</span><span class="cl">            <span class="nt">:status</span><span class="o">=</span><span class="s">&#34;getQueueStatus(scope.row)&#34;</span>
+</span></span><span class="line"><span class="ln">20</span><span class="cl">          <span class="p">/&gt;</span>
+</span></span><span class="line"><span class="ln">21</span><span class="cl">          <span class="p">&lt;</span><span class="nt">span</span><span class="p">&gt;{{</span> <span class="nx">scope</span><span class="p">.</span><span class="nx">row</span><span class="p">.</span><span class="nx">queueSize</span> <span class="p">}}</span> <span class="o">/</span> <span class="p">{{</span> <span class="nx">scope</span><span class="p">.</span><span class="nx">row</span><span class="p">.</span><span class="nx">queueCapacity</span> <span class="p">}}&lt;/</span><span class="nt">span</span><span class="p">&gt;</span>
+</span></span><span class="line"><span class="ln">22</span><span class="cl">        <span class="p">&lt;/</span><span class="nt">template</span><span class="p">&gt;</span>
+</span></span><span class="line"><span class="ln">23</span><span class="cl">      <span class="p">&lt;/</span><span class="nt">el-table-column</span><span class="p">&gt;</span>
+</span></span><span class="line"><span class="ln">24</span><span class="cl">      <span class="p">&lt;</span><span class="nt">el-table-column</span> <span class="na">label</span><span class="o">=</span><span class="s">&#34;已完成任务数&#34;</span> <span class="na">prop</span><span class="o">=</span><span class="s">&#34;completedTaskCount&#34;</span> <span class="p">/&gt;</span>
+</span></span><span class="line"><span class="ln">25</span><span class="cl">      <span class="p">&lt;</span><span class="nt">el-table-column</span> <span class="na">label</span><span class="o">=</span><span class="s">&#34;操作&#34;</span> <span class="na">width</span><span class="o">=</span><span class="s">&#34;200&#34;</span><span class="p">&gt;</span>
+</span></span><span class="line"><span class="ln">26</span><span class="cl">        <span class="p">&lt;</span><span class="nt">template</span> <span class="err">#</span><span class="na">default</span><span class="o">=</span><span class="s">&#34;scope&#34;</span><span class="p">&gt;</span>
+</span></span><span class="line"><span class="ln">27</span><span class="cl">          <span class="p">&lt;</span><span class="nt">el-button</span> <span class="na">size</span><span class="o">=</span><span class="s">&#34;small&#34;</span> <span class="nt">@click</span><span class="s">=&#34;handleEdit(scope.row)&#34;</span><span class="p">&gt;</span>
+</span></span><span class="line"><span class="ln">28</span><span class="cl">            <span class="na">编辑配置</span>
+</span></span><span class="line"><span class="ln">29</span><span class="cl">          <span class="err">&lt;/</span><span class="na">el</span><span class="nt">-button</span><span class="p">&gt;</span>
+</span></span><span class="line"><span class="ln">30</span><span class="cl">          <span class="p">&lt;</span><span class="nt">el-button</span> <span class="na">size</span><span class="o">=</span><span class="s">&#34;small&#34;</span> <span class="nt">@click</span><span class="s">=&#34;handleViewHistory(scope.row)&#34;</span><span class="p">&gt;</span>
+</span></span><span class="line"><span class="ln">31</span><span class="cl">            <span class="na">历史记录</span>
+</span></span><span class="line"><span class="ln">32</span><span class="cl">          <span class="err">&lt;/</span><span class="na">el</span><span class="nt">-button</span><span class="p">&gt;</span>
+</span></span><span class="line"><span class="ln">33</span><span class="cl">        <span class="p">&lt;/</span><span class="nt">template</span><span class="p">&gt;</span>
+</span></span><span class="line"><span class="ln">34</span><span class="cl">      <span class="p">&lt;/</span><span class="nt">el-table-column</span><span class="p">&gt;</span>
+</span></span><span class="line"><span class="ln">35</span><span class="cl">    <span class="p">&lt;/</span><span class="nt">el-table</span><span class="p">&gt;</span>
+</span></span><span class="line"><span class="ln">36</span><span class="cl">  <span class="p">&lt;/</span><span class="nt">div</span><span class="p">&gt;</span>
+</span></span><span class="line"><span class="ln">37</span><span class="cl"><span class="p">&lt;/</span><span class="nt">template</span><span class="p">&gt;</span>
+</span></span><span class="line"><span class="ln">38</span><span class="cl">
+</span></span><span class="line"><span class="ln">39</span><span class="cl"><span class="p">&lt;</span><span class="nt">script</span> <span class="na">setup</span><span class="p">&gt;</span>
+</span></span><span class="line"><span class="ln">40</span><span class="cl"><span class="kr">import</span> <span class="p">{</span> <span class="nx">ref</span><span class="p">,</span> <span class="nx">onMounted</span> <span class="p">}</span> <span class="nx">from</span> <span class="s1">&#39;vue&#39;</span><span class="p">;</span>
+</span></span><span class="line"><span class="ln">41</span><span class="cl"><span class="kr">import</span> <span class="p">{</span> <span class="nx">getThreadPoolList</span> <span class="p">}</span> <span class="nx">from</span> <span class="s1">&#39;@/api/threadpool&#39;</span><span class="p">;</span>
+</span></span><span class="line"><span class="ln">42</span><span class="cl">
+</span></span><span class="line"><span class="ln">43</span><span class="cl"><span class="kr">const</span> <span class="nx">threadPools</span> <span class="o">=</span> <span class="nx">ref</span><span class="p">([]);</span>
+</span></span><span class="line"><span class="ln">44</span><span class="cl">
+</span></span><span class="line"><span class="ln">45</span><span class="cl"><span class="nx">onMounted</span><span class="p">(</span><span class="nx">async</span> <span class="p">()</span> <span class="p">=&gt;</span> <span class="p">{</span>
+</span></span><span class="line"><span class="ln">46</span><span class="cl">  <span class="kr">const</span> <span class="p">{</span> <span class="nx">data</span> <span class="p">}</span> <span class="o">=</span> <span class="nx">await</span> <span class="nx">getThreadPoolList</span><span class="p">();</span>
+</span></span><span class="line"><span class="ln">47</span><span class="cl">  <span class="nx">threadPools</span><span class="p">.</span><span class="nx">value</span> <span class="o">=</span> <span class="nx">data</span><span class="p">;</span>
+</span></span><span class="line"><span class="ln">48</span><span class="cl"><span class="p">});</span>
+</span></span><span class="line"><span class="ln">49</span><span class="cl">
+</span></span><span class="line"><span class="ln">50</span><span class="cl"><span class="kr">const</span> <span class="nx">getQueueUsage</span> <span class="o">=</span> <span class="p">(</span><span class="nx">row</span><span class="p">)</span> <span class="p">=&gt;</span> <span class="p">{</span>
+</span></span><span class="line"><span class="ln">51</span><span class="cl">  <span class="k">return</span> <span class="p">(</span><span class="nx">row</span><span class="p">.</span><span class="nx">queueSize</span> <span class="o">/</span> <span class="nx">row</span><span class="p">.</span><span class="nx">queueCapacity</span> <span class="o">*</span> <span class="mi">100</span><span class="p">).</span><span class="nx">toFixed</span><span class="p">(</span><span class="mi">2</span><span class="p">);</span>
+</span></span><span class="line"><span class="ln">52</span><span class="cl"><span class="p">};</span>
+</span></span><span class="line"><span class="ln">53</span><span class="cl">
+</span></span><span class="line"><span class="ln">54</span><span class="cl"><span class="kr">const</span> <span class="nx">getQueueStatus</span> <span class="o">=</span> <span class="p">(</span><span class="nx">row</span><span class="p">)</span> <span class="p">=&gt;</span> <span class="p">{</span>
+</span></span><span class="line"><span class="ln">55</span><span class="cl">  <span class="kr">const</span> <span class="nx">usage</span> <span class="o">=</span> <span class="nx">row</span><span class="p">.</span><span class="nx">queueSize</span> <span class="o">/</span> <span class="nx">row</span><span class="p">.</span><span class="nx">queueCapacity</span><span class="p">;</span>
+</span></span><span class="line"><span class="ln">56</span><span class="cl">  <span class="k">if</span> <span class="p">(</span><span class="nx">usage</span> <span class="o">&gt;</span> <span class="mf">0.8</span><span class="p">)</span> <span class="k">return</span> <span class="s1">&#39;exception&#39;</span><span class="p">;</span>
+</span></span><span class="line"><span class="ln">57</span><span class="cl">  <span class="k">if</span> <span class="p">(</span><span class="nx">usage</span> <span class="o">&gt;</span> <span class="mf">0.5</span><span class="p">)</span> <span class="k">return</span> <span class="s1">&#39;warning&#39;</span><span class="p">;</span>
+</span></span><span class="line"><span class="ln">58</span><span class="cl">  <span class="k">return</span> <span class="s1">&#39;success&#39;</span><span class="p">;</span>
+</span></span><span class="line"><span class="ln">59</span><span class="cl"><span class="p">};</span>
+</span></span><span class="line"><span class="ln">60</span><span class="cl"><span class="p">&lt;/</span><span class="nt">script</span><span class="p">&gt;</span>
+</span></span></code></pre></div><h3 id="配置编辑对话框">配置编辑对话框<a hidden class="anchor" aria-hidden="true" href="#配置编辑对话框">#</a></h3>
+<div class="highlight"><pre tabindex="0" class="chroma"><code class="language-vue" data-lang="vue"><span class="line"><span class="ln"> 1</span><span class="cl"><span class="p">&lt;</span><span class="nt">template</span><span class="p">&gt;</span>
+</span></span><span class="line"><span class="ln"> 2</span><span class="cl">  <span class="p">&lt;</span><span class="nt">el-dialog</span> <span class="nt">v-model</span><span class="o">=</span><span class="s">&#34;visible&#34; title=&#34;编辑线程池配置&#34; width=&#34;600px&#34;</span><span class="p">&gt;</span>
+</span></span><span class="line"><span class="ln"> 3</span><span class="cl">    <span class="p">&lt;</span><span class="nt">el-form</span> <span class="nt">:model</span><span class="o">=</span><span class="s">&#34;form&#34;</span> <span class="nt">:rules</span><span class="o">=</span><span class="s">&#34;rules&#34;</span> <span class="na">ref</span><span class="o">=</span><span class="s">&#34;formRef&#34;</span> <span class="na">label</span><span class="nt">-width</span><span class="err">=&#34;</span><span class="na">120px</span><span class="err">&#34;</span><span class="p">&gt;</span>
+</span></span><span class="line"><span class="ln"> 4</span><span class="cl">      <span class="p">&lt;</span><span class="nt">el-form-item</span> <span class="na">label</span><span class="o">=</span><span class="s">&#34;线程池名称&#34;</span><span class="p">&gt;</span>
+</span></span><span class="line"><span class="ln"> 5</span><span class="cl">        <span class="p">&lt;</span><span class="nt">el-input</span> <span class="nt">v-model</span><span class="o">=</span><span class="s">&#34;form.poolName&#34;</span><span class="p"> </span><span class="na">disabled</span> <span class="p">/&gt;</span>
+</span></span><span class="line"><span class="ln"> 6</span><span class="cl">      <span class="p">&lt;/</span><span class="nt">el-form-item</span><span class="p">&gt;</span>
+</span></span><span class="line"><span class="ln"> 7</span><span class="cl">      
+</span></span><span class="line"><span class="ln"> 8</span><span class="cl">      <span class="p">&lt;</span><span class="nt">el-form-item</span> <span class="na">label</span><span class="o">=</span><span class="s">&#34;核心线程数&#34;</span> <span class="na">prop</span><span class="o">=</span><span class="s">&#34;coreSize&#34;</span><span class="p">&gt;</span>
+</span></span><span class="line"><span class="ln"> 9</span><span class="cl">        <span class="p">&lt;</span><span class="nt">el-input-number</span> <span class="nt">v-model</span><span class="o">=</span><span class="s">&#34;form.coreSize&#34; :min=&#34;1&#34; :max=&#34;1000&#34;</span><span class="p"> /&gt;</span>
+</span></span><span class="line"><span class="ln">10</span><span class="cl">        <span class="p">&lt;</span><span class="nt">span</span> <span class="na">class</span><span class="o">=</span><span class="s">&#34;tip&#34;</span><span class="p">&gt;</span><span class="nx">建议值</span><span class="err">：</span><span class="nx">CPU</span> <span class="nx">核心数</span> <span class="o">*</span> <span class="mi">2</span><span class="p">&lt;/</span><span class="nt">span</span><span class="p">&gt;</span>
+</span></span><span class="line"><span class="ln">11</span><span class="cl">      <span class="p">&lt;/</span><span class="nt">el-form-item</span><span class="p">&gt;</span>
+</span></span><span class="line"><span class="ln">12</span><span class="cl">      
+</span></span><span class="line"><span class="ln">13</span><span class="cl">      <span class="p">&lt;</span><span class="nt">el-form-item</span> <span class="na">label</span><span class="o">=</span><span class="s">&#34;最大线程数&#34;</span> <span class="na">prop</span><span class="o">=</span><span class="s">&#34;maxSize&#34;</span><span class="p">&gt;</span>
+</span></span><span class="line"><span class="ln">14</span><span class="cl">        <span class="p">&lt;</span><span class="nt">el-input-number</span> <span class="nt">v-model</span><span class="o">=</span><span class="s">&#34;form.maxSize&#34; :min=&#34;1&#34; :max=&#34;1000&#34;</span><span class="p"> /&gt;</span>
+</span></span><span class="line"><span class="ln">15</span><span class="cl">        <span class="p">&lt;</span><span class="nt">span</span> <span class="na">class</span><span class="o">=</span><span class="s">&#34;tip&#34;</span><span class="p">&gt;</span><span class="nx">必须</span> <span class="o">&gt;=</span> <span class="nx">核心线程数</span><span class="p">&lt;/</span><span class="nt">span</span><span class="p">&gt;</span>
+</span></span><span class="line"><span class="ln">16</span><span class="cl">      <span class="p">&lt;/</span><span class="nt">el-form-item</span><span class="p">&gt;</span>
+</span></span><span class="line"><span class="ln">17</span><span class="cl">      
+</span></span><span class="line"><span class="ln">18</span><span class="cl">      <span class="p">&lt;</span><span class="nt">el-form-item</span> <span class="na">label</span><span class="o">=</span><span class="s">&#34;队列容量&#34;</span> <span class="na">prop</span><span class="o">=</span><span class="s">&#34;queueCapacity&#34;</span><span class="p">&gt;</span>
+</span></span><span class="line"><span class="ln">19</span><span class="cl">        <span class="p">&lt;</span><span class="nt">el-input-number</span> <span class="nt">v-model</span><span class="o">=</span><span class="s">&#34;form.queueCapacity&#34; :min=&#34;0&#34; :max=&#34;10000&#34;</span><span class="p"> /&gt;</span>
+</span></span><span class="line"><span class="ln">20</span><span class="cl">      <span class="p">&lt;/</span><span class="nt">el-form-item</span><span class="p">&gt;</span>
+</span></span><span class="line"><span class="ln">21</span><span class="cl">      
+</span></span><span class="line"><span class="ln">22</span><span class="cl">      <span class="p">&lt;</span><span class="nt">el-form-item</span> <span class="na">label</span><span class="o">=</span><span class="s">&#34;线程存活时间&#34;</span> <span class="na">prop</span><span class="o">=</span><span class="s">&#34;keepAliveTime&#34;</span><span class="p">&gt;</span>
+</span></span><span class="line"><span class="ln">23</span><span class="cl">        <span class="p">&lt;</span><span class="nt">el-input-number</span> <span class="nt">v-model</span><span class="o">=</span><span class="s">&#34;form.keepAliveTime&#34; :min=&#34;0&#34; :max=&#34;3600&#34;</span><span class="p"> /&gt;</span>
+</span></span><span class="line"><span class="ln">24</span><span class="cl">        <span class="p">&lt;</span><span class="nt">span</span> <span class="na">class</span><span class="o">=</span><span class="s">&#34;tip&#34;</span><span class="p">&gt;</span><span class="nx">单位</span><span class="err">：</span><span class="nx">秒</span><span class="p">&lt;/</span><span class="nt">span</span><span class="p">&gt;</span>
+</span></span><span class="line"><span class="ln">25</span><span class="cl">      <span class="p">&lt;/</span><span class="nt">el-form-item</span><span class="p">&gt;</span>
+</span></span><span class="line"><span class="ln">26</span><span class="cl">      
+</span></span><span class="line"><span class="ln">27</span><span class="cl">      <span class="p">&lt;</span><span class="nt">el-form-item</span> <span class="na">label</span><span class="o">=</span><span class="s">&#34;拒绝策略&#34;</span> <span class="na">prop</span><span class="o">=</span><span class="s">&#34;rejectedPolicy&#34;</span><span class="p">&gt;</span>
+</span></span><span class="line"><span class="ln">28</span><span class="cl">        <span class="p">&lt;</span><span class="nt">el-select</span> <span class="nt">v-model</span><span class="o">=</span><span class="s">&#34;form.rejectedPolicy&#34;</span><span class="p">&gt;</span>
+</span></span><span class="line"><span class="ln">29</span><span class="cl">          <span class="p">&lt;</span><span class="nt">el-option</span> <span class="na">label</span><span class="o">=</span><span class="s">&#34;AbortPolicy（抛异常）&#34;</span> <span class="na">value</span><span class="o">=</span><span class="s">&#34;AbortPolicy&#34;</span> <span class="p">/&gt;</span>
+</span></span><span class="line"><span class="ln">30</span><span class="cl">          <span class="p">&lt;</span><span class="nt">el-option</span> <span class="na">label</span><span class="o">=</span><span class="s">&#34;CallerRunsPolicy（调用者执行）&#34;</span> <span class="na">value</span><span class="o">=</span><span class="s">&#34;CallerRunsPolicy&#34;</span> <span class="p">/&gt;</span>
+</span></span><span class="line"><span class="ln">31</span><span class="cl">          <span class="p">&lt;</span><span class="nt">el-option</span> <span class="na">label</span><span class="o">=</span><span class="s">&#34;DiscardPolicy（丢弃）&#34;</span> <span class="na">value</span><span class="o">=</span><span class="s">&#34;DiscardPolicy&#34;</span> <span class="p">/&gt;</span>
+</span></span><span class="line"><span class="ln">32</span><span class="cl">          <span class="p">&lt;</span><span class="nt">el-option</span> <span class="na">label</span><span class="o">=</span><span class="s">&#34;DiscardOldestPolicy（丢弃最老）&#34;</span> <span class="na">value</span><span class="o">=</span><span class="s">&#34;DiscardOldestPolicy&#34;</span> <span class="p">/&gt;</span>
+</span></span><span class="line"><span class="ln">33</span><span class="cl">        <span class="p">&lt;/</span><span class="nt">el-select</span><span class="p">&gt;</span>
+</span></span><span class="line"><span class="ln">34</span><span class="cl">      <span class="p">&lt;/</span><span class="nt">el-form-item</span><span class="p">&gt;</span>
+</span></span><span class="line"><span class="ln">35</span><span class="cl">    <span class="p">&lt;/</span><span class="nt">el-form</span><span class="p">&gt;</span>
+</span></span><span class="line"><span class="ln">36</span><span class="cl">    
+</span></span><span class="line"><span class="ln">37</span><span class="cl">    <span class="p">&lt;</span><span class="nt">template</span> <span class="err">#</span><span class="na">footer</span><span class="p">&gt;</span>
+</span></span><span class="line"><span class="ln">38</span><span class="cl">      <span class="p">&lt;</span><span class="nt">el-button</span> <span class="nt">@click</span><span class="s">=&#34;visible = false&#34;</span><span class="p">&gt;</span><span class="na">取消</span><span class="err">&lt;/</span><span class="na">el</span><span class="nt">-button</span><span class="p">&gt;</span>
+</span></span><span class="line"><span class="ln">39</span><span class="cl">      <span class="p">&lt;</span><span class="nt">el-button</span> <span class="na">type</span><span class="o">=</span><span class="s">&#34;primary&#34;</span> <span class="nt">@click</span><span class="s">=&#34;handleSubmit&#34;</span><span class="p">&gt;</span><span class="na">确定</span><span class="err">&lt;/</span><span class="na">el</span><span class="nt">-button</span><span class="p">&gt;</span>
+</span></span><span class="line"><span class="ln">40</span><span class="cl">    <span class="p">&lt;/</span><span class="nt">template</span><span class="p">&gt;</span>
+</span></span><span class="line"><span class="ln">41</span><span class="cl">  <span class="p">&lt;/</span><span class="nt">el-dialog</span><span class="p">&gt;</span>
+</span></span><span class="line"><span class="ln">42</span><span class="cl"><span class="p">&lt;/</span><span class="nt">template</span><span class="p">&gt;</span>
+</span></span></code></pre></div><hr>
+<h2 id="最佳实践">最佳实践<a hidden class="anchor" aria-hidden="true" href="#最佳实践">#</a></h2>
+<h3 id="1-参数调整建议">1. 参数调整建议<a hidden class="anchor" aria-hidden="true" href="#1-参数调整建议">#</a></h3>
+<p><strong>核心线程数设置</strong></p>
+<ul>
+<li>CPU 密集型：CPU 核心数 + 1</li>
+<li>IO 密集型：CPU 核心数 * 2</li>
+<li>混合型：根据实际压测结果调整</li>
+</ul>
+<p><strong>队列容量设置</strong></p>
+<ul>
+<li>不要设置过大，避免任务堆积</li>
+<li>建议：核心线程数 * 10</li>
+<li>配合监控告警，及时发现问题</li>
+</ul>
+<p><strong>拒绝策略选择</strong></p>
+<ul>
+<li>重要任务：CallerRunsPolicy（降级到调用者线程执行）</li>
+<li>可丢弃任务：DiscardPolicy</li>
+<li>需要感知失败：AbortPolicy</li>
+</ul>
+<h3 id="2-配置变更流程">2. 配置变更流程<a hidden class="anchor" aria-hidden="true" href="#2-配置变更流程">#</a></h3>
+<div class="highlight"><pre tabindex="0" class="chroma"><code class="language-fallback" data-lang="fallback"><span class="line"><span class="ln">1</span><span class="cl">1. 在测试环境验证配置
+</span></span><span class="line"><span class="ln">2</span><span class="cl">   ↓
+</span></span><span class="line"><span class="ln">3</span><span class="cl">2. 灰度发布（先更新部分实例）
+</span></span><span class="line"><span class="ln">4</span><span class="cl">   ↓
+</span></span><span class="line"><span class="ln">5</span><span class="cl">3. 观察监控指标
+</span></span><span class="line"><span class="ln">6</span><span class="cl">   ↓
+</span></span><span class="line"><span class="ln">7</span><span class="cl">4. 全量发布或回滚
+</span></span></code></pre></div><h3 id="3-监控指标关注点">3. 监控指标关注点<a hidden class="anchor" aria-hidden="true" href="#3-监控指标关注点">#</a></h3>
+<table>
+  <thead>
+      <tr>
+          <th>指标</th>
+          <th>正常范围</th>
+          <th>告警阈值</th>
+      </tr>
+  </thead>
+  <tbody>
+      <tr>
+          <td>队列使用率</td>
+          <td>&lt; 50%</td>
+          <td>&gt; 80%</td>
+      </tr>
+      <tr>
+          <td>线程使用率</td>
+          <td>&lt; 70%</td>
+          <td>&gt; 90%</td>
+      </tr>
+      <tr>
+          <td>任务等待时间</td>
+          <td>&lt; 100ms</td>
+          <td>&gt; 1s</td>
+      </tr>
+      <tr>
+          <td>拒绝任务数</td>
+          <td>0</td>
+          <td>&gt; 0</td>
+      </tr>
+  </tbody>
+</table>
+<blockquote>
+<p><strong>架构思考：</strong> 动态配置的核心是&quot;可观测性&quot;和&quot;可控性&quot;。通过监控了解系统状态，通过配置调整系统行为，两者缺一不可。</p>
+</blockquote>
+<h3 id="4-安全性考虑">4. 安全性考虑<a hidden class="anchor" aria-hidden="true" href="#4-安全性考虑">#</a></h3>
+<div class="highlight"><pre tabindex="0" class="chroma"><code class="language-java" data-lang="java"><span class="line"><span class="ln"> 1</span><span class="cl"><span class="nd">@Component</span><span class="w">
+</span></span></span><span class="line"><span class="ln"> 2</span><span class="cl"><span class="kd">public</span><span class="w"> </span><span class="kd">class</span> <span class="nc">ThreadPoolConfigValidator</span><span class="w"> </span><span class="p">{</span><span class="w">
+</span></span></span><span class="line"><span class="ln"> 3</span><span class="cl"><span class="w">    
+</span></span></span><span class="line"><span class="ln"> 4</span><span class="cl"><span class="w">    </span><span class="cm">/**
+</span></span></span><span class="line"><span class="ln"> 5</span><span class="cl"><span class="cm">     * 配置变更前置校验
+</span></span></span><span class="line"><span class="ln"> 6</span><span class="cl"><span class="cm">     */</span><span class="w">
+</span></span></span><span class="line"><span class="ln"> 7</span><span class="cl"><span class="w">    </span><span class="kd">public</span><span class="w"> </span><span class="kt">void</span><span class="w"> </span><span class="nf">validateBeforeUpdate</span><span class="p">(</span><span class="n">ThreadPoolConfig</span><span class="w"> </span><span class="n">newConfig</span><span class="p">,</span><span class="w"> 
+</span></span></span><span class="line"><span class="ln"> 8</span><span class="cl"><span class="w">                                     </span><span class="n">ThreadPoolConfig</span><span class="w"> </span><span class="n">oldConfig</span><span class="p">)</span><span class="w"> </span><span class="p">{</span><span class="w">
+</span></span></span><span class="line"><span class="ln"> 9</span><span class="cl"><span class="w">        </span><span class="c1">// 1. 防止参数突变</span><span class="w">
+</span></span></span><span class="line"><span class="ln">10</span><span class="cl"><span class="w">        </span><span class="k">if</span><span class="w"> </span><span class="p">(</span><span class="n">newConfig</span><span class="p">.</span><span class="na">getCoreSize</span><span class="p">()</span><span class="w"> </span><span class="o">&gt;</span><span class="w"> </span><span class="n">oldConfig</span><span class="p">.</span><span class="na">getCoreSize</span><span class="p">()</span><span class="w"> </span><span class="o">*</span><span class="w"> </span><span class="n">2</span><span class="p">)</span><span class="w"> </span><span class="p">{</span><span class="w">
+</span></span></span><span class="line"><span class="ln">11</span><span class="cl"><span class="w">            </span><span class="k">throw</span><span class="w"> </span><span class="k">new</span><span class="w"> </span><span class="n">IllegalArgumentException</span><span class="p">(</span><span class="w">
+</span></span></span><span class="line"><span class="ln">12</span><span class="cl"><span class="w">                </span><span class="s">&#34;核心线程数增长不能超过 100%，请分批调整&#34;</span><span class="w">
+</span></span></span><span class="line"><span class="ln">13</span><span class="cl"><span class="w">            </span><span class="p">);</span><span class="w">
+</span></span></span><span class="line"><span class="ln">14</span><span class="cl"><span class="w">        </span><span class="p">}</span><span class="w">
+</span></span></span><span class="line"><span class="ln">15</span><span class="cl"><span class="w">        
+</span></span></span><span class="line"><span class="ln">16</span><span class="cl"><span class="w">        </span><span class="c1">// 2. 防止资源耗尽</span><span class="w">
+</span></span></span><span class="line"><span class="ln">17</span><span class="cl"><span class="w">        </span><span class="kt">int</span><span class="w"> </span><span class="n">totalThreads</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">calculateTotalThreads</span><span class="p">();</span><span class="w">
+</span></span></span><span class="line"><span class="ln">18</span><span class="cl"><span class="w">        </span><span class="k">if</span><span class="w"> </span><span class="p">(</span><span class="n">totalThreads</span><span class="w"> </span><span class="o">&gt;</span><span class="w"> </span><span class="n">1000</span><span class="p">)</span><span class="w"> </span><span class="p">{</span><span class="w">
+</span></span></span><span class="line"><span class="ln">19</span><span class="cl"><span class="w">            </span><span class="k">throw</span><span class="w"> </span><span class="k">new</span><span class="w"> </span><span class="n">IllegalArgumentException</span><span class="p">(</span><span class="w">
+</span></span></span><span class="line"><span class="ln">20</span><span class="cl"><span class="w">                </span><span class="s">&#34;系统总线程数不能超过 1000&#34;</span><span class="w">
+</span></span></span><span class="line"><span class="ln">21</span><span class="cl"><span class="w">            </span><span class="p">);</span><span class="w">
+</span></span></span><span class="line"><span class="ln">22</span><span class="cl"><span class="w">        </span><span class="p">}</span><span class="w">
+</span></span></span><span class="line"><span class="ln">23</span><span class="cl"><span class="w">        
+</span></span></span><span class="line"><span class="ln">24</span><span class="cl"><span class="w">        </span><span class="c1">// 3. 权限校验</span><span class="w">
+</span></span></span><span class="line"><span class="ln">25</span><span class="cl"><span class="w">        </span><span class="k">if</span><span class="w"> </span><span class="p">(</span><span class="o">!</span><span class="n">hasPermission</span><span class="p">(</span><span class="n">getCurrentUser</span><span class="p">(),</span><span class="w"> </span><span class="n">newConfig</span><span class="p">.</span><span class="na">getPoolName</span><span class="p">()))</span><span class="w"> </span><span class="p">{</span><span class="w">
+</span></span></span><span class="line"><span class="ln">26</span><span class="cl"><span class="w">            </span><span class="k">throw</span><span class="w"> </span><span class="k">new</span><span class="w"> </span><span class="n">SecurityException</span><span class="p">(</span><span class="s">&#34;无权限修改此线程池配置&#34;</span><span class="p">);</span><span class="w">
+</span></span></span><span class="line"><span class="ln">27</span><span class="cl"><span class="w">        </span><span class="p">}</span><span class="w">
+</span></span></span><span class="line"><span class="ln">28</span><span class="cl"><span class="w">    </span><span class="p">}</span><span class="w">
+</span></span></span><span class="line"><span class="ln">29</span><span class="cl"><span class="p">}</span><span class="w">
+</span></span></span></code></pre></div><blockquote>
+<p><strong>避坑提示：</strong></p>
+<ol>
+<li>不要在高峰期大幅调整参数，建议分批次小幅调整</li>
+<li>每次调整后观察 5-10 分钟，确认无异常再继续</li>
+<li>保留配置历史，方便快速回滚</li>
+<li>配置变更要有审批流程，避免误操作</li>
+</ol>
+</blockquote>
+<hr>
+<h2 id="总结与思考">总结与思考<a hidden class="anchor" aria-hidden="true" href="#总结与思考">#</a></h2>
+<p>本文介绍了一套完整的线程池动态配置方案，核心要点：</p>
+<ul>
+<li><strong>动态配置</strong>：基于配置中心实现参数实时调整，无需重启应用</li>
+<li><strong>监控告警</strong>：实时监控线程池状态，异常情况及时通知</li>
+<li><strong>配置管理</strong>：支持配置历史记录、版本回滚、权限控制</li>
+<li><strong>管理后台</strong>：提供可视化界面，降低运维成本</li>
+</ul>
+<p>思考与展望：</p>
+<p>线程池动态配置只是系统可观测性的一个切面。在微服务架构下，我们还可以扩展到：</p>
+<ul>
+<li>数据库连接池动态配置</li>
+<li>HTTP 客户端超时时间动态调整</li>
+<li>限流阈值动态配置</li>
+</ul>
+<p>下次当你的系统需要更灵活的配置管理时，不妨参考本文的设计思路，让系统更加&quot;可控&quot;。</p>
+
+
+  </div>
+
+  <footer class="post-footer">
+    <ul class="post-tags">
+      <li><a href="http://localhost:54359/tags/java/">Java</a></li>
+      <li><a href="http://localhost:54359/tags/%E7%BA%BF%E7%A8%8B%E6%B1%A0/">线程池</a></li>
+      <li><a href="http://localhost:54359/tags/%E6%9C%80%E4%BD%B3%E5%AE%9E%E8%B7%B5/">最佳实践</a></li>
+      <li><a href="http://localhost:54359/tags/%E6%80%A7%E8%83%BD%E4%BC%98%E5%8C%96/">性能优化</a></li>
+    </ul>
+<nav class="paginav">
+  <a class="prev" href="http://localhost:54359/posts/2026/02/%E6%88%91%E7%9A%84%E7%AC%AC%E4%B8%80%E7%AF%87%E5%8D%9A%E5%AE%A2%E6%96%87%E7%AB%A0/">
+    <span class="title">« Prev</span>
+    <br>
+    <span>我的第一篇博客文章</span>
+  </a>
+  <a class="next" href="http://localhost:54359/posts/2024/12/mysql-%E6%85%A2%E6%9F%A5%E8%AF%A2%E4%BC%98%E5%8C%96%E5%AE%9E%E6%88%98%E6%A1%88%E4%BE%8B/">
+    <span class="title">Next »</span>
+    <br>
+    <span>MySQL 慢查询优化实战案例</span>
+  </a>
+</nav>
+
+
+<ul class="share-buttons">
+    <li>
+        <a target="_blank" rel="noopener noreferrer" aria-label="share 线程池参数动态配置：Admin 管理后台设计 on x"
+            href="https://x.com/intent/tweet/?text=%e7%ba%bf%e7%a8%8b%e6%b1%a0%e5%8f%82%e6%95%b0%e5%8a%a8%e6%80%81%e9%85%8d%e7%bd%ae%ef%bc%9aAdmin%20%e7%ae%a1%e7%90%86%e5%90%8e%e5%8f%b0%e8%ae%be%e8%ae%a1&amp;url=http%3a%2f%2flocalhost%3a54359%2fposts%2f2024%2f12%2f%25E7%25BA%25BF%25E7%25A8%258B%25E6%25B1%25A0%25E5%258F%2582%25E6%2595%25B0%25E5%258A%25A8%25E6%2580%2581%25E9%2585%258D%25E7%25BD%25AEadmin-%25E7%25AE%25A1%25E7%2590%2586%25E5%2590%258E%25E5%258F%25B0%25E8%25AE%25BE%25E8%25AE%25A1%2f&amp;hashtags=Java%2c%e7%ba%bf%e7%a8%8b%e6%b1%a0%2c%e6%9c%80%e4%bd%b3%e5%ae%9e%e8%b7%b5%2c%e6%80%a7%e8%83%bd%e4%bc%98%e5%8c%96">
+            <svg version="1.1" viewBox="0 0 512 512" xml:space="preserve" height="30px" width="30px" fill="currentColor">
+                <path
+                    d="M512 62.554 L 512 449.446 C 512 483.97 483.97 512 449.446 512 L 62.554 512 C 28.03 512 0 483.97 0 449.446 L 0 62.554 C 0 28.03 28.029 0 62.554 0 L 449.446 0 C 483.971 0 512 28.03 512 62.554 Z M 269.951 190.75 L 182.567 75.216 L 56 75.216 L 207.216 272.95 L 63.9 436.783 L 125.266 436.783 L 235.9 310.383 L 332.567 436.783 L 456 436.783 L 298.367 228.367 L 432.367 75.216 L 371.033 75.216 Z M 127.633 110 L 164.101 110 L 383.481 400.065 L 349.5 400.065 Z" />
+            </svg>
+        </a>
+    </li>
+    <li>
+        <a target="_blank" rel="noopener noreferrer" aria-label="share 线程池参数动态配置：Admin 管理后台设计 on linkedin"
+            href="https://www.linkedin.com/shareArticle?mini=true&amp;url=http%3a%2f%2flocalhost%3a54359%2fposts%2f2024%2f12%2f%25E7%25BA%25BF%25E7%25A8%258B%25E6%25B1%25A0%25E5%258F%2582%25E6%2595%25B0%25E5%258A%25A8%25E6%2580%2581%25E9%2585%258D%25E7%25BD%25AEadmin-%25E7%25AE%25A1%25E7%2590%2586%25E5%2590%258E%25E5%258F%25B0%25E8%25AE%25BE%25E8%25AE%25A1%2f&amp;title=%e7%ba%bf%e7%a8%8b%e6%b1%a0%e5%8f%82%e6%95%b0%e5%8a%a8%e6%80%81%e9%85%8d%e7%bd%ae%ef%bc%9aAdmin%20%e7%ae%a1%e7%90%86%e5%90%8e%e5%8f%b0%e8%ae%be%e8%ae%a1&amp;summary=%e7%ba%bf%e7%a8%8b%e6%b1%a0%e5%8f%82%e6%95%b0%e5%8a%a8%e6%80%81%e9%85%8d%e7%bd%ae%ef%bc%9aAdmin%20%e7%ae%a1%e7%90%86%e5%90%8e%e5%8f%b0%e8%ae%be%e8%ae%a1&amp;source=http%3a%2f%2flocalhost%3a54359%2fposts%2f2024%2f12%2f%25E7%25BA%25BF%25E7%25A8%258B%25E6%25B1%25A0%25E5%258F%2582%25E6%2595%25B0%25E5%258A%25A8%25E6%2580%2581%25E9%2585%258D%25E7%25BD%25AEadmin-%25E7%25AE%25A1%25E7%2590%2586%25E5%2590%258E%25E5%258F%25B0%25E8%25AE%25BE%25E8%25AE%25A1%2f">
+            <svg version="1.1" viewBox="0 0 512 512" xml:space="preserve" height="30px" width="30px" fill="currentColor">
+                <path
+                    d="M449.446,0c34.525,0 62.554,28.03 62.554,62.554l0,386.892c0,34.524 -28.03,62.554 -62.554,62.554l-386.892,0c-34.524,0 -62.554,-28.03 -62.554,-62.554l0,-386.892c0,-34.524 28.029,-62.554 62.554,-62.554l386.892,0Zm-288.985,423.278l0,-225.717l-75.04,0l0,225.717l75.04,0Zm270.539,0l0,-129.439c0,-69.333 -37.018,-101.586 -86.381,-101.586c-39.804,0 -57.634,21.891 -67.617,37.266l0,-31.958l-75.021,0c0.995,21.181 0,225.717 0,225.717l75.02,0l0,-126.056c0,-6.748 0.486,-13.492 2.474,-18.315c5.414,-13.475 17.767,-27.434 38.494,-27.434c27.135,0 38.007,20.707 38.007,51.037l0,120.768l75.024,0Zm-307.552,-334.556c-25.674,0 -42.448,16.879 -42.448,39.002c0,21.658 16.264,39.002 41.455,39.002l0.484,0c26.165,0 42.452,-17.344 42.452,-39.002c-0.485,-22.092 -16.241,-38.954 -41.943,-39.002Z" />
+            </svg>
+        </a>
+    </li>
+    <li>
+        <a target="_blank" rel="noopener noreferrer" aria-label="share 线程池参数动态配置：Admin 管理后台设计 on reddit"
+            href="https://reddit.com/submit?url=http%3a%2f%2flocalhost%3a54359%2fposts%2f2024%2f12%2f%25E7%25BA%25BF%25E7%25A8%258B%25E6%25B1%25A0%25E5%258F%2582%25E6%2595%25B0%25E5%258A%25A8%25E6%2580%2581%25E9%2585%258D%25E7%25BD%25AEadmin-%25E7%25AE%25A1%25E7%2590%2586%25E5%2590%258E%25E5%258F%25B0%25E8%25AE%25BE%25E8%25AE%25A1%2f&title=%e7%ba%bf%e7%a8%8b%e6%b1%a0%e5%8f%82%e6%95%b0%e5%8a%a8%e6%80%81%e9%85%8d%e7%bd%ae%ef%bc%9aAdmin%20%e7%ae%a1%e7%90%86%e5%90%8e%e5%8f%b0%e8%ae%be%e8%ae%a1">
+            <svg version="1.1" viewBox="0 0 512 512" xml:space="preserve" height="30px" width="30px" fill="currentColor">
+                <path
+                    d="M449.446,0c34.525,0 62.554,28.03 62.554,62.554l0,386.892c0,34.524 -28.03,62.554 -62.554,62.554l-386.892,0c-34.524,0 -62.554,-28.03 -62.554,-62.554l0,-386.892c0,-34.524 28.029,-62.554 62.554,-62.554l386.892,0Zm-3.446,265.638c0,-22.964 -18.616,-41.58 -41.58,-41.58c-11.211,0 -21.361,4.457 -28.841,11.666c-28.424,-20.508 -67.586,-33.757 -111.204,-35.278l18.941,-89.121l61.884,13.157c0.756,15.734 13.642,28.29 29.56,28.29c16.407,0 29.706,-13.299 29.706,-29.701c0,-16.403 -13.299,-29.702 -29.706,-29.702c-11.666,0 -21.657,6.792 -26.515,16.578l-69.105,-14.69c-1.922,-0.418 -3.939,-0.042 -5.585,1.036c-1.658,1.073 -2.811,2.761 -3.224,4.686l-21.152,99.438c-44.258,1.228 -84.046,14.494 -112.837,35.232c-7.468,-7.164 -17.589,-11.591 -28.757,-11.591c-22.965,0 -41.585,18.616 -41.585,41.58c0,16.896 10.095,31.41 24.568,37.918c-0.639,4.135 -0.99,8.328 -0.99,12.576c0,63.977 74.469,115.836 166.33,115.836c91.861,0 166.334,-51.859 166.334,-115.836c0,-4.218 -0.347,-8.387 -0.977,-12.493c14.564,-6.47 24.735,-21.034 24.735,-38.001Zm-119.474,108.193c-20.27,20.241 -59.115,21.816 -70.534,21.816c-11.428,0 -50.277,-1.575 -70.522,-21.82c-3.007,-3.008 -3.007,-7.882 0,-10.889c3.003,-2.999 7.882,-3.003 10.885,0c12.777,12.781 40.11,17.317 59.637,17.317c19.522,0 46.86,-4.536 59.657,-17.321c3.016,-2.999 7.886,-2.995 10.885,0.008c3.008,3.011 3.003,7.882 -0.008,10.889Zm-5.23,-48.781c-16.373,0 -29.701,-13.324 -29.701,-29.698c0,-16.381 13.328,-29.714 29.701,-29.714c16.378,0 29.706,13.333 29.706,29.714c0,16.374 -13.328,29.698 -29.706,29.698Zm-160.386,-29.702c0,-16.381 13.328,-29.71 29.714,-29.71c16.369,0 29.689,13.329 29.689,29.71c0,16.373 -13.32,29.693 -29.689,29.693c-16.386,0 -29.714,-13.32 -29.714,-29.693Z" />
+            </svg>
+        </a>
+    </li>
+    <li>
+        <a target="_blank" rel="noopener noreferrer" aria-label="share 线程池参数动态配置：Admin 管理后台设计 on facebook"
+            href="https://facebook.com/sharer/sharer.php?u=http%3a%2f%2flocalhost%3a54359%2fposts%2f2024%2f12%2f%25E7%25BA%25BF%25E7%25A8%258B%25E6%25B1%25A0%25E5%258F%2582%25E6%2595%25B0%25E5%258A%25A8%25E6%2580%2581%25E9%2585%258D%25E7%25BD%25AEadmin-%25E7%25AE%25A1%25E7%2590%2586%25E5%2590%258E%25E5%258F%25B0%25E8%25AE%25BE%25E8%25AE%25A1%2f">
+            <svg version="1.1" viewBox="0 0 512 512" xml:space="preserve" height="30px" width="30px" fill="currentColor">
+                <path
+                    d="M449.446,0c34.525,0 62.554,28.03 62.554,62.554l0,386.892c0,34.524 -28.03,62.554 -62.554,62.554l-106.468,0l0,-192.915l66.6,0l12.672,-82.621l-79.272,0l0,-53.617c0,-22.603 11.073,-44.636 46.58,-44.636l36.042,0l0,-70.34c0,0 -32.71,-5.582 -63.982,-5.582c-65.288,0 -107.96,39.569 -107.96,111.204l0,62.971l-72.573,0l0,82.621l72.573,0l0,192.915l-191.104,0c-34.524,0 -62.554,-28.03 -62.554,-62.554l0,-386.892c0,-34.524 28.029,-62.554 62.554,-62.554l386.892,0Z" />
+            </svg>
+        </a>
+    </li>
+    <li>
+        <a target="_blank" rel="noopener noreferrer" aria-label="share 线程池参数动态配置：Admin 管理后台设计 on whatsapp"
+            href="https://api.whatsapp.com/send?text=%e7%ba%bf%e7%a8%8b%e6%b1%a0%e5%8f%82%e6%95%b0%e5%8a%a8%e6%80%81%e9%85%8d%e7%bd%ae%ef%bc%9aAdmin%20%e7%ae%a1%e7%90%86%e5%90%8e%e5%8f%b0%e8%ae%be%e8%ae%a1%20-%20http%3a%2f%2flocalhost%3a54359%2fposts%2f2024%2f12%2f%25E7%25BA%25BF%25E7%25A8%258B%25E6%25B1%25A0%25E5%258F%2582%25E6%2595%25B0%25E5%258A%25A8%25E6%2580%2581%25E9%2585%258D%25E7%25BD%25AEadmin-%25E7%25AE%25A1%25E7%2590%2586%25E5%2590%258E%25E5%258F%25B0%25E8%25AE%25BE%25E8%25AE%25A1%2f">
+            <svg version="1.1" viewBox="0 0 512 512" xml:space="preserve" height="30px" width="30px" fill="currentColor">
+                <path
+                    d="M449.446,0c34.525,0 62.554,28.03 62.554,62.554l0,386.892c0,34.524 -28.03,62.554 -62.554,62.554l-386.892,0c-34.524,0 -62.554,-28.03 -62.554,-62.554l0,-386.892c0,-34.524 28.029,-62.554 62.554,-62.554l386.892,0Zm-58.673,127.703c-33.842,-33.881 -78.847,-52.548 -126.798,-52.568c-98.799,0 -179.21,80.405 -179.249,179.234c-0.013,31.593 8.241,62.428 23.927,89.612l-25.429,92.884l95.021,-24.925c26.181,14.28 55.659,21.807 85.658,21.816l0.074,0c98.789,0 179.206,-80.413 179.247,-179.243c0.018,-47.895 -18.61,-92.93 -52.451,-126.81Zm-126.797,275.782l-0.06,0c-26.734,-0.01 -52.954,-7.193 -75.828,-20.767l-5.441,-3.229l-56.386,14.792l15.05,-54.977l-3.542,-5.637c-14.913,-23.72 -22.791,-51.136 -22.779,-79.287c0.033,-82.142 66.867,-148.971 149.046,-148.971c39.793,0.014 77.199,15.531 105.329,43.692c28.128,28.16 43.609,65.592 43.594,105.4c-0.034,82.149 -66.866,148.983 -148.983,148.984Zm81.721,-111.581c-4.479,-2.242 -26.499,-13.075 -30.604,-14.571c-4.105,-1.495 -7.091,-2.241 -10.077,2.241c-2.986,4.483 -11.569,14.572 -14.182,17.562c-2.612,2.988 -5.225,3.364 -9.703,1.12c-4.479,-2.241 -18.91,-6.97 -36.017,-22.23c-13.314,-11.876 -22.304,-26.542 -24.916,-31.026c-2.612,-4.484 -0.279,-6.908 1.963,-9.14c2.016,-2.007 4.48,-5.232 6.719,-7.847c2.24,-2.615 2.986,-4.484 4.479,-7.472c1.493,-2.99 0.747,-5.604 -0.374,-7.846c-1.119,-2.241 -10.077,-24.288 -13.809,-33.256c-3.635,-8.733 -7.327,-7.55 -10.077,-7.688c-2.609,-0.13 -5.598,-0.158 -8.583,-0.158c-2.986,0 -7.839,1.121 -11.944,5.604c-4.105,4.484 -15.675,15.32 -15.675,37.364c0,22.046 16.048,43.342 18.287,46.332c2.24,2.99 31.582,48.227 76.511,67.627c10.685,4.615 19.028,7.371 25.533,9.434c10.728,3.41 20.492,2.929 28.209,1.775c8.605,-1.285 26.499,-10.833 30.231,-21.295c3.732,-10.464 3.732,-19.431 2.612,-21.298c-1.119,-1.869 -4.105,-2.99 -8.583,-5.232Z" />
+            </svg>
+        </a>
+    </li>
+    <li>
+        <a target="_blank" rel="noopener noreferrer" aria-label="share 线程池参数动态配置：Admin 管理后台设计 on telegram"
+            href="https://telegram.me/share/url?text=%e7%ba%bf%e7%a8%8b%e6%b1%a0%e5%8f%82%e6%95%b0%e5%8a%a8%e6%80%81%e9%85%8d%e7%bd%ae%ef%bc%9aAdmin%20%e7%ae%a1%e7%90%86%e5%90%8e%e5%8f%b0%e8%ae%be%e8%ae%a1&amp;url=http%3a%2f%2flocalhost%3a54359%2fposts%2f2024%2f12%2f%25E7%25BA%25BF%25E7%25A8%258B%25E6%25B1%25A0%25E5%258F%2582%25E6%2595%25B0%25E5%258A%25A8%25E6%2580%2581%25E9%2585%258D%25E7%25BD%25AEadmin-%25E7%25AE%25A1%25E7%2590%2586%25E5%2590%258E%25E5%258F%25B0%25E8%25AE%25BE%25E8%25AE%25A1%2f">
+            <svg version="1.1" xml:space="preserve" viewBox="2 2 28 28" height="30px" width="30px" fill="currentColor">
+                <path
+                    d="M26.49,29.86H5.5a3.37,3.37,0,0,1-2.47-1,3.35,3.35,0,0,1-1-2.47V5.48A3.36,3.36,0,0,1,3,3,3.37,3.37,0,0,1,5.5,2h21A3.38,3.38,0,0,1,29,3a3.36,3.36,0,0,1,1,2.46V26.37a3.35,3.35,0,0,1-1,2.47A3.38,3.38,0,0,1,26.49,29.86Zm-5.38-6.71a.79.79,0,0,0,.85-.66L24.73,9.24a.55.55,0,0,0-.18-.46.62.62,0,0,0-.41-.17q-.08,0-16.53,6.11a.59.59,0,0,0-.41.59.57.57,0,0,0,.43.52l4,1.24,1.61,4.83a.62.62,0,0,0,.63.43.56.56,0,0,0,.4-.17L16.54,20l4.09,3A.9.9,0,0,0,21.11,23.15ZM13.8,20.71l-1.21-4q8.72-5.55,8.78-5.55c.15,0,.23,0,.23.16a.18.18,0,0,1,0,.06s-2.51,2.3-7.52,6.8Z" />
+            </svg>
+        </a>
+    </li>
+    <li>
+        <a target="_blank" rel="noopener noreferrer" aria-label="share 线程池参数动态配置：Admin 管理后台设计 on ycombinator"
+            href="https://news.ycombinator.com/submitlink?t=%e7%ba%bf%e7%a8%8b%e6%b1%a0%e5%8f%82%e6%95%b0%e5%8a%a8%e6%80%81%e9%85%8d%e7%bd%ae%ef%bc%9aAdmin%20%e7%ae%a1%e7%90%86%e5%90%8e%e5%8f%b0%e8%ae%be%e8%ae%a1&u=http%3a%2f%2flocalhost%3a54359%2fposts%2f2024%2f12%2f%25E7%25BA%25BF%25E7%25A8%258B%25E6%25B1%25A0%25E5%258F%2582%25E6%2595%25B0%25E5%258A%25A8%25E6%2580%2581%25E9%2585%258D%25E7%25BD%25AEadmin-%25E7%25AE%25A1%25E7%2590%2586%25E5%2590%258E%25E5%258F%25B0%25E8%25AE%25BE%25E8%25AE%25A1%2f">
+            <svg version="1.1" xml:space="preserve" width="30px" height="30px" viewBox="0 0 512 512" fill="currentColor"
+                xmlns:inkscape="http://www.inkscape.org/namespaces/inkscape">
+                <path
+                    d="M449.446 0C483.971 0 512 28.03 512 62.554L512 449.446C512 483.97 483.97 512 449.446 512L62.554 512C28.03 512 0 483.97 0 449.446L0 62.554C0 28.03 28.029 0 62.554 0L449.446 0ZM183.8767 87.9921H121.8427L230.6673 292.4508V424.0079H281.3328V292.4508L390.1575 87.9921H328.1233L256 238.2489z" />
+            </svg>
+        </a>
+    </li>
+</ul>
+
+  </footer>
+</article>
+    </main>
+    
+<footer class="footer">
+        <span>&copy; 2026 <a href="http://localhost:54359/">博客喵</a></span> · 
+
+    <span>
+        Powered by
+        <a href="https://gohugo.io/" rel="noopener noreferrer" target="_blank">Hugo</a> &
+        <a href="https://github.com/adityatelange/hugo-PaperMod/" rel="noopener" target="_blank">PaperMod</a>
+    </span>
+</footer>
+<a href="#top" aria-label="go to top" title="Go to Top (Alt + G)" class="top-link" id="top-link" accesskey="g">
+    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 12 6" fill="currentColor">
+        <path d="M12 6H0l6-6z" />
+    </svg>
+</a>
+
+<script>
+    let menu = document.getElementById('menu');
+    if (menu) {
+        
+        const scrollPosition = localStorage.getItem("menu-scroll-position");
+        if (scrollPosition) {
+            menu.scrollLeft = parseInt(scrollPosition, 10);
+        }
+        
+        menu.onscroll = function () {
+            localStorage.setItem("menu-scroll-position", menu.scrollLeft);
+        }
+    }
+
+    document.querySelectorAll('a[href^="#"]').forEach(anchor => {
+        anchor.addEventListener("click", function (e) {
+            e.preventDefault();
+            var id = this.getAttribute("href").substr(1);
+            if (!window.matchMedia('(prefers-reduced-motion: reduce)').matches) {
+                document.querySelector(`[id='${decodeURIComponent(id)}']`).scrollIntoView({
+                    behavior: "smooth"
+                });
+            } else {
+                document.querySelector(`[id='${decodeURIComponent(id)}']`).scrollIntoView();
+            }
+            if (id === "top") {
+                history.replaceState(null, null, " ");
+            } else {
+                history.pushState(null, null, `#${id}`);
+            }
+        });
+    });
+
+</script>
+<script>
+    var mybutton = document.getElementById("top-link");
+    window.onscroll = function () {
+        if (document.body.scrollTop > 800 || document.documentElement.scrollTop > 800) {
+            mybutton.style.visibility = "visible";
+            mybutton.style.opacity = "1";
+        } else {
+            mybutton.style.visibility = "hidden";
+            mybutton.style.opacity = "0";
+        }
+    };
+
+</script>
+<script>
+    document.getElementById("theme-toggle").addEventListener("click", () => {
+        const html = document.querySelector("html");
+        if (html.dataset.theme === "dark") {
+            html.dataset.theme = 'light';
+            localStorage.setItem("pref-theme", 'light');
+        } else {
+            html.dataset.theme = 'dark';
+            localStorage.setItem("pref-theme", 'dark');
+        }
+    })
+
+</script>
+<script>
+    document.querySelectorAll('pre > code').forEach((codeblock) => {
+        const container = codeblock.parentNode.parentNode;
+
+        const copybutton = document.createElement('button');
+        copybutton.classList.add('copy-code');
+        copybutton.innerHTML = 'copy';
+
+        function copyingDone() {
+            copybutton.innerHTML = 'copied!';
+            setTimeout(() => {
+                copybutton.innerHTML = 'copy';
+            }, 2000);
+        }
+
+        copybutton.addEventListener('click', (cb) => {
+            if ('clipboard' in navigator) {
+                navigator.clipboard.writeText(codeblock.textContent);
+                copyingDone();
+                return;
+            }
+
+            const range = document.createRange();
+            range.selectNodeContents(codeblock);
+            const selection = window.getSelection();
+            selection.removeAllRanges();
+            selection.addRange(range);
+            try {
+                document.execCommand('copy');
+                copyingDone();
+            } catch (e) { };
+            selection.removeRange(range);
+        });
+
+        if (container.classList.contains("highlight")) {
+            container.appendChild(copybutton);
+        } else if (container.parentNode.firstChild == container) {
+            
+        } else if (codeblock.parentNode.parentNode.parentNode.parentNode.parentNode.nodeName == "TABLE") {
+            
+            codeblock.parentNode.parentNode.parentNode.parentNode.parentNode.appendChild(copybutton);
+        } else {
+            
+            codeblock.parentNode.appendChild(copybutton);
+        }
+    });
+</script>
+</body>
+
+</html>

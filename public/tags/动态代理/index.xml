@@ -1,0 +1,19 @@
+<?xml version="1.0" encoding="utf-8" standalone="yes"?>
+<rss version="2.0" xmlns:atom="http://www.w3.org/2005/Atom" xmlns:content="http://purl.org/rss/1.0/modules/content/">
+  <channel>
+    <title>动态代理 on 博客喵</title>
+    <link>http://localhost:1313/tags/%E5%8A%A8%E6%80%81%E4%BB%A3%E7%90%86/</link>
+    <description>Recent content in 动态代理 on 博客喵</description>
+    <generator>Hugo -- 0.155.3</generator>
+    <language>zh-cn</language>
+    <lastBuildDate>Wed, 10 Apr 2024 00:00:00 +0000</lastBuildDate>
+    <atom:link href="http://localhost:1313/tags/%E5%8A%A8%E6%80%81%E4%BB%A3%E7%90%86/index.xml" rel="self" type="application/rss+xml" />
+    <item>
+      <title>Spring AOP 原理与动态代理实现深度解析</title>
+      <link>http://localhost:1313/posts/2024/04/spring-aop-%E5%8E%9F%E7%90%86%E4%B8%8E%E5%8A%A8%E6%80%81%E4%BB%A3%E7%90%86%E5%AE%9E%E7%8E%B0%E6%B7%B1%E5%BA%A6%E8%A7%A3%E6%9E%90/</link>
+      <pubDate>Wed, 10 Apr 2024 00:00:00 +0000</pubDate>
+      <guid>http://localhost:1313/posts/2024/04/spring-aop-%E5%8E%9F%E7%90%86%E4%B8%8E%E5%8A%A8%E6%80%81%E4%BB%A3%E7%90%86%E5%AE%9E%E7%8E%B0%E6%B7%B1%E5%BA%A6%E8%A7%A3%E6%9E%90/</guid>
+      <description>深入理解 AOP 的底层实现机制，掌握 JDK 动态代理与 CGLIB 代理的区别</description>
+    </item>
+  </channel>
+</rss>

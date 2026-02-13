@@ -1,0 +1,1113 @@
+<!DOCTYPE html>
+<html lang="en" dir="auto" data-theme="auto">
+
+<head><script src="/livereload.js?mindelay=10&amp;v=2&amp;port=1313&amp;path=livereload" data-no-instant defer></script><meta charset="utf-8">
+<meta http-equiv="X-UA-Compatible" content="IE=edge">
+<meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
+<meta name="robots" content="index, follow">
+<title>Nginx 反向代理与负载均衡实战：从入门到生产优化 | 博客喵</title>
+<meta name="keywords" content="Nginx, Linux, 最佳实践">
+<meta name="description" content="深入讲解 Nginx 反向代理和负载均衡的原理与实践，涵盖配置优化、健康检查、会话保持等生产级方案">
+<meta name="author" content="wawayu">
+<link rel="canonical" href="http://localhost:1313/posts/2025/06/nginx-%E5%8F%8D%E5%90%91%E4%BB%A3%E7%90%86%E4%B8%8E%E8%B4%9F%E8%BD%BD%E5%9D%87%E8%A1%A1%E5%AE%9E%E6%88%98%E4%BB%8E%E5%85%A5%E9%97%A8%E5%88%B0%E7%94%9F%E4%BA%A7%E4%BC%98%E5%8C%96/">
+<link crossorigin="anonymous" href="/assets/css/stylesheet.a29c24210eb31d9ce56f669c66a35c9c51b17376b7764e336a49af7dec914cf0.css" integrity="sha256-opwkIQ6zHZzlb2acZqNcnFGxc3a3dk4zakmvfeyRTPA=" rel="preload stylesheet" as="style">
+<link rel="icon" href="http://localhost:1313/favicon.ico">
+<link rel="icon" type="image/png" sizes="16x16" href="http://localhost:1313/favicon-16x16.png">
+<link rel="icon" type="image/png" sizes="32x32" href="http://localhost:1313/favicon-32x32.png">
+<link rel="apple-touch-icon" href="http://localhost:1313/apple-touch-icon.png">
+<link rel="mask-icon" href="http://localhost:1313/safari-pinned-tab.svg">
+<meta name="theme-color" content="#2e2e33">
+<meta name="msapplication-TileColor" content="#2e2e33">
+<link rel="alternate" hreflang="en" href="http://localhost:1313/posts/2025/06/nginx-%E5%8F%8D%E5%90%91%E4%BB%A3%E7%90%86%E4%B8%8E%E8%B4%9F%E8%BD%BD%E5%9D%87%E8%A1%A1%E5%AE%9E%E6%88%98%E4%BB%8E%E5%85%A5%E9%97%A8%E5%88%B0%E7%94%9F%E4%BA%A7%E4%BC%98%E5%8C%96/">
+<noscript>
+    <style>
+        #theme-toggle,
+        .top-link {
+            display: none;
+        }
+
+    </style>
+    <style>
+        @media (prefers-color-scheme: dark) {
+            :root {
+                --theme: rgb(29, 30, 32);
+                --entry: rgb(46, 46, 51);
+                --primary: rgb(218, 218, 219);
+                --secondary: rgb(155, 156, 157);
+                --tertiary: rgb(65, 66, 68);
+                --content: rgb(196, 196, 197);
+                --code-block-bg: rgb(46, 46, 51);
+                --code-bg: rgb(55, 56, 62);
+                --border: rgb(51, 51, 51);
+                color-scheme: dark;
+            }
+
+            .list {
+                background: var(--theme);
+            }
+
+            .toc {
+                background: var(--entry);
+            }
+        }
+
+        @media (prefers-color-scheme: light) {
+            .list::-webkit-scrollbar-thumb {
+                border-color: var(--code-bg);
+            }
+        }
+
+    </style>
+</noscript>
+<script>
+    if (localStorage.getItem("pref-theme") === "dark") {
+        document.querySelector("html").dataset.theme = 'dark';
+    } else if (localStorage.getItem("pref-theme") === "light") {
+       document.querySelector("html").dataset.theme = 'light';
+    } else if (window.matchMedia('(prefers-color-scheme: dark)').matches) {
+        document.querySelector("html").dataset.theme = 'dark';
+    } else {
+        document.querySelector("html").dataset.theme = 'light';
+    }
+
+</script><meta property="og:url" content="http://localhost:1313/posts/2025/06/nginx-%E5%8F%8D%E5%90%91%E4%BB%A3%E7%90%86%E4%B8%8E%E8%B4%9F%E8%BD%BD%E5%9D%87%E8%A1%A1%E5%AE%9E%E6%88%98%E4%BB%8E%E5%85%A5%E9%97%A8%E5%88%B0%E7%94%9F%E4%BA%A7%E4%BC%98%E5%8C%96/">
+  <meta property="og:site_name" content="博客喵">
+  <meta property="og:title" content="Nginx 反向代理与负载均衡实战：从入门到生产优化">
+  <meta property="og:description" content="深入讲解 Nginx 反向代理和负载均衡的原理与实践，涵盖配置优化、健康检查、会话保持等生产级方案">
+  <meta property="og:locale" content="zh-cn">
+  <meta property="og:type" content="article">
+    <meta property="article:section" content="posts">
+    <meta property="article:published_time" content="2025-06-25T00:00:00+00:00">
+    <meta property="article:modified_time" content="2025-06-25T00:00:00+00:00">
+    <meta property="article:tag" content="Nginx">
+    <meta property="article:tag" content="Linux">
+    <meta property="article:tag" content="最佳实践">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:title" content="Nginx 反向代理与负载均衡实战：从入门到生产优化">
+<meta name="twitter:description" content="深入讲解 Nginx 反向代理和负载均衡的原理与实践，涵盖配置优化、健康检查、会话保持等生产级方案">
+
+
+<script type="application/ld+json">
+{
+  "@context": "https://schema.org",
+  "@type": "BreadcrumbList",
+  "itemListElement": [
+    {
+      "@type": "ListItem",
+      "position":  1 ,
+      "name": "Posts",
+      "item": "http://localhost:1313/posts/"
+    }, 
+    {
+      "@type": "ListItem",
+      "position":  2 ,
+      "name": "Nginx 反向代理与负载均衡实战：从入门到生产优化",
+      "item": "http://localhost:1313/posts/2025/06/nginx-%E5%8F%8D%E5%90%91%E4%BB%A3%E7%90%86%E4%B8%8E%E8%B4%9F%E8%BD%BD%E5%9D%87%E8%A1%A1%E5%AE%9E%E6%88%98%E4%BB%8E%E5%85%A5%E9%97%A8%E5%88%B0%E7%94%9F%E4%BA%A7%E4%BC%98%E5%8C%96/"
+    }
+  ]
+}
+</script>
+<script type="application/ld+json">
+{
+  "@context": "https://schema.org",
+  "@type": "BlogPosting",
+  "headline": "Nginx 反向代理与负载均衡实战：从入门到生产优化",
+  "name": "Nginx 反向代理与负载均衡实战：从入门到生产优化",
+  "description": "深入讲解 Nginx 反向代理和负载均衡的原理与实践，涵盖配置优化、健康检查、会话保持等生产级方案",
+  "keywords": [
+    "Nginx", "Linux", "最佳实践"
+  ],
+  "articleBody": "Nginx 作为高性能的 Web 服务器和反向代理服务器，已经成为互联网架构中的标配组件。无论是静态资源服务、反向代理还是负载均衡，Nginx 都能提供出色的性能和稳定性。\n本文将从实际场景出发，深入讲解 Nginx 反向代理和负载均衡的配置与优化，帮助你构建高可用的服务架构。\n本文亮点 理解反向代理与正向代理的区别 掌握 Nginx 负载均衡的多种策略 学会配置健康检查与故障转移 了解会话保持的实现方案 掌握生产环境的性能调优技巧 反向代理基础 正向代理 vs 反向代理 正向代理：客户端知道目标服务器，通过代理服务器访问\n1客户端 → 代理服务器 → 目标服务器 2（客户端配置代理） 反向代理：客户端不知道真实服务器，代理服务器决定转发到哪台服务器\n1客户端 → 反向代理 → 后端服务器集群 2（服务端配置代理） 反向代理的优势 负载均衡：将请求分发到多台服务器 隐藏真实服务器：提高安全性 SSL 卸载：在代理层处理 HTTPS 缓存静态资源：减轻后端压力 统一入口：便于管理和监控 架构思考： 反向代理不仅是流量分发器，更是架构中的关键节点。通过反向代理，可以实现灰度发布、A/B 测试、流量控制等高级功能。\nNginx 反向代理配置 基础配置 1# /etc/nginx/nginx.conf 2 3user nginx; 4worker_processes auto; # 自动设置为 CPU 核心数 5error_log /var/log/nginx/error.log warn; 6pid /var/run/nginx.pid; 7 8events { 9 worker_connections 1024; # 每个 worker 进程的最大连接数 10 use epoll; # Linux 下使用 epoll 11} 12 13http { 14 include /etc/nginx/mime.types; 15 default_type application/octet-stream; 16 17 # 日志格式 18 log_format main '$remote_addr - $remote_user [$time_local] \"$request\" ' 19 '$status $body_bytes_sent \"$http_referer\" ' 20 '\"$http_user_agent\" \"$http_x_forwarded_for\" ' 21 '$request_time $upstream_response_time'; 22 23 access_log /var/log/nginx/access.log main; 24 25 sendfile on; 26 tcp_nopush on; 27 tcp_nodelay on; 28 keepalive_timeout 65; 29 types_hash_max_size 2048; 30 31 # 包含其他配置文件 32 include /etc/nginx/conf.d/*.conf; 33} 简单反向代理 1# /etc/nginx/conf.d/api.conf 2 3server { 4 listen 80; 5 server_name api.example.com; 6 7 location / { 8 # 代理到后端服务器 9 proxy_pass http://192.168.1.100:8080; 10 11 # 设置请求头 12 proxy_set_header Host $host; 13 proxy_set_header X-Real-IP $remote_addr; 14 proxy_set_header X-Forwarded-For $proxy_add_x_forwarded_for; 15 proxy_set_header X-Forwarded-Proto $scheme; 16 17 # 超时设置 18 proxy_connect_timeout 60s; 19 proxy_send_timeout 60s; 20 proxy_read_timeout 60s; 21 } 22} 路径重写 1server { 2 listen 80; 3 server_name api.example.com; 4 5 # 将 /api/v1/users 代理到 http://backend/users 6 location /api/v1/ { 7 proxy_pass http://backend/; # 注意末尾的 / 8 proxy_set_header Host $host; 9 } 10 11 # 将 /old-api 重写为 /new-api 12 location /old-api { 13 rewrite ^/old-api/(.*)$ /new-api/$1 break; 14 proxy_pass http://backend; 15 } 16} 负载均衡策略 1. 轮询（Round Robin） 默认策略，按顺序依次分配请求：\n1upstream backend { 2 server 192.168.1.101:8080; 3 server 192.168.1.102:8080; 4 server 192.168.1.103:8080; 5} 6 7server { 8 listen 80; 9 server_name api.example.com; 10 11 location / { 12 proxy_pass http://backend; 13 } 14} 2. 加权轮询（Weighted Round Robin） 根据服务器性能分配不同权重：\n1upstream backend { 2 server 192.168.1.101:8080 weight=3; # 权重 3 3 server 192.168.1.102:8080 weight=2; # 权重 2 4 server 192.168.1.103:8080 weight=1; # 权重 1 5} 权重为 3:2:1，意味着每 6 个请求中，101 服务器处理 3 个，102 处理 2 个，103 处理 1 个。\n3. IP Hash 根据客户端 IP 进行哈希，同一 IP 的请求总是分配到同一台服务器：\n1upstream backend { 2 ip_hash; 3 4 server 192.168.1.101:8080; 5 server 192.168.1.102:8080; 6 server 192.168.1.103:8080; 7} 适用场景：需要会话保持的应用（如购物车、登录状态）\n缺点：\n负载可能不均衡（IP 分布不均） 无法应对服务器故障（IP 重新哈希） 4. 最少连接（Least Connections） 将请求分配给当前连接数最少的服务器：\n1upstream backend { 2 least_conn; 3 4 server 192.168.1.101:8080; 5 server 192.168.1.102:8080; 6 server 192.168.1.103:8080; 7} 适用场景：请求处理时间差异较大的应用\n5. 一致性哈希（需要第三方模块） 1upstream backend { 2 hash $request_uri consistent; 3 4 server 192.168.1.101:8080; 5 server 192.168.1.102:8080; 6 server 192.168.1.103:8080; 7} 适用场景：缓存服务器集群\n负载均衡策略对比 策略 优点 缺点 适用场景 轮询 简单、均衡 无会话保持 无状态服务 加权轮询 考虑服务器性能 无会话保持 服务器性能不同 IP Hash 会话保持 负载可能不均 有状态服务 最少连接 动态均衡 计算开销大 长连接服务 一致性哈希 缓存命中率高 实现复杂 缓存集群 健康检查与故障转移 被动健康检查 Nginx 默认的健康检查机制，当请求失败时标记服务器为不可用：\n1upstream backend { 2 server 192.168.1.101:8080 max_fails=3 fail_timeout=30s; 3 server 192.168.1.102:8080 max_fails=3 fail_timeout=30s; 4 server 192.168.1.103:8080 max_fails=3 fail_timeout=30s; 5} 参数说明：\nmax_fails=3：连续失败 3 次后标记为不可用 fail_timeout=30s：标记为不可用后，30 秒内不再分配请求 主动健康检查（Nginx Plus 或第三方模块） 使用 nginx_upstream_check_module 模块：\n1upstream backend { 2 server 192.168.1.101:8080; 3 server 192.168.1.102:8080; 4 server 192.168.1.103:8080; 5 6 check interval=3000 rise=2 fall=3 timeout=1000 type=http; 7 check_http_send \"HEAD /health HTTP/1.0\\r\\n\\r\\n\"; 8 check_http_expect_alive http_2xx http_3xx; 9} 10 11server { 12 listen 80; 13 14 location /status { 15 check_status; 16 access_log off; 17 } 18} 参数说明：\ninterval=3000：每 3 秒检查一次 rise=2：连续成功 2 次标记为可用 fall=3：连续失败 3 次标记为不可用 timeout=1000：超时时间 1 秒 type=http：使用 HTTP 协议检查 备用服务器 1upstream backend { 2 server 192.168.1.101:8080; 3 server 192.168.1.102:8080; 4 server 192.168.1.103:8080; 5 server 192.168.1.104:8080 backup; # 备用服务器 6} 只有当所有主服务器都不可用时，才会使用备用服务器。\n故障转移配置 1location / { 2 proxy_pass http://backend; 3 proxy_next_upstream error timeout invalid_header http_500 http_502 http_503 http_504; 4 proxy_next_upstream_tries 2; # 最多尝试 2 次 5 proxy_next_upstream_timeout 10s; # 总超时时间 10 秒 6} 会话保持方案 方案一：IP Hash 1upstream backend { 2 ip_hash; 3 server 192.168.1.101:8080; 4 server 192.168.1.102:8080; 5} 优点：配置简单 缺点：负载可能不均衡\n方案二：Cookie 绑定 1upstream backend { 2 server 192.168.1.101:8080; 3 server 192.168.1.102:8080; 4 5 sticky cookie srv_id expires=1h domain=.example.com path=/; 6} Nginx 会在响应中设置一个 Cookie，后续请求根据 Cookie 路由到同一台服务器。\n方案三：Session 共享（推荐） 不依赖 Nginx，在应用层实现 Session 共享：\n使用 Redis 存储 Session：\n1@Configuration 2@EnableRedisHttpSession(maxInactiveIntervalInSeconds = 1800) 3public class SessionConfig { 4 5 @Bean 6 public LettuceConnectionFactory connectionFactory() { 7 return new LettuceConnectionFactory(); 8 } 9} 使用 JWT Token：\n1@RestController 2public class AuthController { 3 4 @PostMapping(\"/login\") 5 public Result login(@RequestBody LoginRequest request) { 6 // 验证用户名密码 7 User user = userService.authenticate(request.getUsername(), request.getPassword()); 8 9 // 生成 JWT Token 10 String token = JwtUtil.generateToken(user.getId()); 11 12 return Result.success(token); 13 } 14} 架构思考： 会话保持的最佳实践是在应用层实现无状态化。通过 Redis 共享 Session 或使用 JWT Token，可以实现真正的水平扩展，而不依赖于负载均衡器的特定功能。\nHTTPS 配置 SSL 证书配置 1server { 2 listen 443 ssl http2; 3 server_name api.example.com; 4 5 # SSL 证书 6 ssl_certificate /etc/nginx/ssl/api.example.com.crt; 7 ssl_certificate_key /etc/nginx/ssl/api.example.com.key; 8 9 # SSL 协议和加密套件 10 ssl_protocols TLSv1.2 TLSv1.3; 11 ssl_ciphers 'ECDHE-ECDSA-AES128-GCM-SHA256:ECDHE-RSA-AES128-GCM-SHA256'; 12 ssl_prefer_server_ciphers on; 13 14 # SSL 会话缓存 15 ssl_session_cache shared:SSL:10m; 16 ssl_session_timeout 10m; 17 18 # HSTS 19 add_header Strict-Transport-Security \"max-age=31536000\" always; 20 21 location / { 22 proxy_pass http://backend; 23 proxy_set_header Host $host; 24 proxy_set_header X-Real-IP $remote_addr; 25 proxy_set_header X-Forwarded-For $proxy_add_x_forwarded_for; 26 proxy_set_header X-Forwarded-Proto $scheme; 27 } 28} 29 30# HTTP 重定向到 HTTPS 31server { 32 listen 80; 33 server_name api.example.com; 34 return 301 https://$server_name$request_uri; 35} 免费 SSL 证书（Let’s Encrypt） 1# 安装 Certbot 2sudo yum install certbot python3-certbot-nginx 3 4# 获取证书 5sudo certbot --nginx -d api.example.com 6 7# 自动续期 8sudo certbot renew --dry-run 性能优化 1. 连接优化 1http { 2 # 长连接配置 3 keepalive_timeout 65; 4 keepalive_requests 100; 5 6 # 上游服务器长连接 7 upstream backend { 8 server 192.168.1.101:8080; 9 server 192.168.1.102:8080; 10 11 keepalive 32; # 保持 32 个空闲连接 12 } 13 14 server { 15 location / { 16 proxy_pass http://backend; 17 proxy_http_version 1.1; 18 proxy_set_header Connection \"\"; 19 } 20 } 21} 2. 缓存配置 1# 定义缓存路径 2proxy_cache_path /var/cache/nginx levels=1:2 keys_zone=my_cache:10m max_size=1g inactive=60m; 3 4server { 5 location / { 6 proxy_pass http://backend; 7 8 # 启用缓存 9 proxy_cache my_cache; 10 proxy_cache_valid 200 304 10m; 11 proxy_cache_valid 404 1m; 12 proxy_cache_key $scheme$proxy_host$request_uri; 13 14 # 缓存头信息 15 add_header X-Cache-Status $upstream_cache_status; 16 } 17 18 # 静态资源缓存 19 location ~* \\.(jpg|jpeg|png|gif|ico|css|js)$ { 20 proxy_pass http://backend; 21 proxy_cache my_cache; 22 proxy_cache_valid 200 30d; 23 expires 30d; 24 } 25} 3. Gzip 压缩 1http { 2 gzip on; 3 gzip_vary on; 4 gzip_proxied any; 5 gzip_comp_level 6; 6 gzip_types text/plain text/css text/xml text/javascript 7 application/json application/javascript application/xml+rss 8 application/rss+xml font/truetype font/opentype 9 application/vnd.ms-fontobject image/svg+xml; 10 gzip_disable \"msie6\"; 11} 4. 限流配置 1http { 2 # 定义限流区域 3 limit_req_zone $binary_remote_addr zone=api_limit:10m rate=10r/s; 4 limit_conn_zone $binary_remote_addr zone=conn_limit:10m; 5 6 server { 7 location /api/ { 8 # 限制请求速率：每秒 10 个请求，突发 20 个 9 limit_req zone=api_limit burst=20 nodelay; 10 11 # 限制并发连接数：每个 IP 最多 10 个连接 12 limit_conn conn_limit 10; 13 14 proxy_pass http://backend; 15 } 16 } 17} 5. Worker 进程优化 1# 自动设置 worker 进程数为 CPU 核心数 2worker_processes auto; 3 4# 绑定 worker 进程到 CPU 核心 5worker_cpu_affinity auto; 6 7# 每个 worker 进程的最大文件描述符数 8worker_rlimit_nofile 65535; 9 10events { 11 # 每个 worker 进程的最大连接数 12 worker_connections 10240; 13 14 # 使用 epoll 事件模型 15 use epoll; 16 17 # 尽可能多地接受连接 18 multi_accept on; 19} 监控与日志 访问日志分析 1# 自定义日志格式 2log_format detailed '$remote_addr - $remote_user [$time_local] ' 3 '\"$request\" $status $body_bytes_sent ' 4 '\"$http_referer\" \"$http_user_agent\" ' 5 '$request_time $upstream_response_time ' 6 '$upstream_addr $upstream_status'; 7 8access_log /var/log/nginx/access.log detailed; 使用 GoAccess 分析日志 1# 安装 GoAccess 2sudo yum install goaccess 3 4# 实时分析日志 5goaccess /var/log/nginx/access.log -o /var/www/html/report.html --log-format=COMBINED --real-time-html Nginx 状态监控 1server { 2 listen 8080; 3 server_name localhost; 4 5 location /nginx_status { 6 stub_status on; 7 access_log off; 8 allow 127.0.0.1; 9 deny all; 10 } 11} 访问 http://localhost:8080/nginx_status 查看状态：\n1Active connections: 291 2server accepts handled requests 3 16630948 16630948 31070465 4Reading: 6 Writing: 179 Waiting: 106 Prometheus 监控 使用 nginx-prometheus-exporter：\n1# 下载并运行 exporter 2docker run -p 9113:9113 nginx/nginx-prometheus-exporter:latest \\ 3 -nginx.scrape-uri=http://nginx:8080/nginx_status 生产环境最佳实践 1. 配置文件组织 1/etc/nginx/ 2├── nginx.conf # 主配置文件 3├── conf.d/ 4│ ├── api.conf # API 服务配置 5│ ├── web.conf # Web 服务配置 6│ └── admin.conf # 管理后台配置 7├── upstream/ 8│ ├── api-backend.conf # API 后端服务器列表 9│ └── web-backend.conf # Web 后端服务器列表 10└── ssl/ 11 ├── api.example.com.crt 12 └── api.example.com.key 2. 配置检查与重载 1# 检查配置文件语法 2sudo nginx -t 3 4# 重载配置（不中断服务） 5sudo nginx -s reload 6 7# 查看 Nginx 版本和编译参数 8nginx -V 3. 安全加固 1# 隐藏 Nginx 版本号 2server_tokens off; 3 4# 限制请求方法 5if ($request_method !~ ^(GET|POST|PUT|DELETE|HEAD)$) { 6 return 405; 7} 8 9# 防止点击劫持 10add_header X-Frame-Options \"SAMEORIGIN\" always; 11 12# XSS 防护 13add_header X-XSS-Protection \"1; mode=block\" always; 14 15# 内容类型嗅探防护 16add_header X-Content-Type-Options \"nosniff\" always; 17 18# CSP 策略 19add_header Content-Security-Policy \"default-src 'self'\" always; 4. 日志轮转 1# /etc/logrotate.d/nginx 2 3/var/log/nginx/*.log { 4 daily 5 missingok 6 rotate 14 7 compress 8 delaycompress 9 notifempty 10 create 0640 nginx adm 11 sharedscripts 12 postrotate 13 [ -f /var/run/nginx.pid ] \u0026\u0026 kill -USR1 `cat /var/run/nginx.pid` 14 endscript 15} 避坑提示： 生产环境中，务必做好以下几点：1) 定期备份配置文件；2) 使用版本控制管理配置；3) 配置变更前先在测试环境验证；4) 设置监控告警；5) 准备回滚方案。\n总结与思考 本文深入讲解了 Nginx 反向代理和负载均衡的配置与优化，从基础概念到生产实践：\n反向代理：理解原理，掌握基础配置和路径重写 负载均衡：掌握多种策略，根据场景选择合适方案 健康检查：实现故障检测和自动转移 会话保持：了解多种方案，推荐应用层无状态化 HTTPS 配置：SSL 证书配置和安全加固 性能优化：连接优化、缓存、压缩、限流等 监控日志：日志分析和状态监控 在实际应用中，Nginx 的作用远不止于此。通过合理配置，还可以实现：\n灰度发布：根据条件将部分流量导向新版本 A/B 测试：将不同用户导向不同版本 流量控制：限流、熔断、降级 安全防护：WAF、DDoS 防护 下次当你需要搭建高可用服务架构时，Nginx 将是你的得力助手。\n",
+  "wordCount" : "1443",
+  "inLanguage": "en",
+  "datePublished": "2025-06-25T00:00:00Z",
+  "dateModified": "2025-06-25T00:00:00Z",
+  "author":{
+    "@type": "Person",
+    "name": "wawayu"
+  },
+  "mainEntityOfPage": {
+    "@type": "WebPage",
+    "@id": "http://localhost:1313/posts/2025/06/nginx-%E5%8F%8D%E5%90%91%E4%BB%A3%E7%90%86%E4%B8%8E%E8%B4%9F%E8%BD%BD%E5%9D%87%E8%A1%A1%E5%AE%9E%E6%88%98%E4%BB%8E%E5%85%A5%E9%97%A8%E5%88%B0%E7%94%9F%E4%BA%A7%E4%BC%98%E5%8C%96/"
+  },
+  "publisher": {
+    "@type": "Organization",
+    "name": "博客喵",
+    "logo": {
+      "@type": "ImageObject",
+      "url": "http://localhost:1313/favicon.ico"
+    }
+  }
+}
+</script>
+</head>
+<body id="top">
+    <header class="header">
+    <nav class="nav">
+        <div class="logo">
+            <a href="http://localhost:1313/" accesskey="h" title="博客喵 (Alt + H)">博客喵</a>
+            <div class="logo-switches">
+                <button id="theme-toggle" accesskey="t" title="(Alt + T)" aria-label="Toggle theme">
+                    <svg id="moon" xmlns="http://www.w3.org/2000/svg" width="24" height="18" viewBox="0 0 24 24"
+                        fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"
+                        stroke-linejoin="round">
+                        <path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"></path>
+                    </svg>
+                    <svg id="sun" xmlns="http://www.w3.org/2000/svg" width="24" height="18" viewBox="0 0 24 24"
+                        fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"
+                        stroke-linejoin="round">
+                        <circle cx="12" cy="12" r="5"></circle>
+                        <line x1="12" y1="1" x2="12" y2="3"></line>
+                        <line x1="12" y1="21" x2="12" y2="23"></line>
+                        <line x1="4.22" y1="4.22" x2="5.64" y2="5.64"></line>
+                        <line x1="18.36" y1="18.36" x2="19.78" y2="19.78"></line>
+                        <line x1="1" y1="12" x2="3" y2="12"></line>
+                        <line x1="21" y1="12" x2="23" y2="12"></line>
+                        <line x1="4.22" y1="19.78" x2="5.64" y2="18.36"></line>
+                        <line x1="18.36" y1="5.64" x2="19.78" y2="4.22"></line>
+                    </svg>
+                </button>
+            </div>
+        </div>
+        <ul id="menu">
+            <li>
+                <a href="http://localhost:1313/posts/" title="📝 文章">
+                    <span>📝 文章</span>
+                </a>
+            </li>
+            <li>
+                <a href="http://localhost:1313/tags/" title="🏷️ 标签">
+                    <span>🏷️ 标签</span>
+                </a>
+            </li>
+            <li>
+                <a href="http://localhost:1313/categories/" title="📂 分类">
+                    <span>📂 分类</span>
+                </a>
+            </li>
+            <li>
+                <a href="http://localhost:1313/skills/" title="💻 技能">
+                    <span>💻 技能</span>
+                </a>
+            </li>
+            <li>
+                <a href="http://localhost:1313/about/" title="👤 关于">
+                    <span>👤 关于</span>
+                </a>
+            </li>
+            <li>
+                <a href="http://localhost:1313/search/" title="🔍 搜索 (Alt &#43; /)" accesskey=/>
+                    <span>🔍 搜索</span>
+                </a>
+            </li>
+        </ul>
+    </nav>
+</header>
+<main class="main">
+
+<article class="post-single">
+  <header class="post-header">
+    <div class="breadcrumbs"><a href="http://localhost:1313/">Home</a>&nbsp;»&nbsp;<a href="http://localhost:1313/posts/">Posts</a></div>
+    <h1 class="post-title entry-hint-parent">
+      Nginx 反向代理与负载均衡实战：从入门到生产优化
+    </h1>
+    <div class="post-description">
+      深入讲解 Nginx 反向代理和负载均衡的原理与实践，涵盖配置优化、健康检查、会话保持等生产级方案
+    </div>
+    <div class="post-meta"><span title='2025-06-25 00:00:00 +0000 UTC'>June 25, 2025</span>&nbsp;·&nbsp;<span>7 min</span>&nbsp;·&nbsp;<span>1443 words</span>&nbsp;·&nbsp;<span>wawayu</span>&nbsp;|&nbsp;<span>
+    <a href="https://github.com/wawayu-dev/wawayu-dev.github.io/tree/main/content/posts/nginx-reverse-proxy-load-balance.md" rel="noopener noreferrer edit" target="_blank">建议修改</a>
+</span>
+
+</div>
+  </header> <div class="toc">
+    <details  open>
+        <summary accesskey="c" title="(Alt + C)">
+            <span class="details">Table of Contents</span>
+        </summary>
+
+        <div class="inner"><nav id="TableOfContents">
+  <ul>
+    <li>
+      <ul>
+        <li><a href="#本文亮点">本文亮点</a></li>
+      </ul>
+    </li>
+    <li><a href="#反向代理基础">反向代理基础</a>
+      <ul>
+        <li><a href="#正向代理-vs-反向代理">正向代理 vs 反向代理</a></li>
+        <li><a href="#反向代理的优势">反向代理的优势</a></li>
+      </ul>
+    </li>
+    <li><a href="#nginx-反向代理配置">Nginx 反向代理配置</a>
+      <ul>
+        <li><a href="#基础配置">基础配置</a></li>
+        <li><a href="#简单反向代理">简单反向代理</a></li>
+        <li><a href="#路径重写">路径重写</a></li>
+      </ul>
+    </li>
+    <li><a href="#负载均衡策略">负载均衡策略</a>
+      <ul>
+        <li><a href="#1-轮询round-robin">1. 轮询（Round Robin）</a></li>
+        <li><a href="#2-加权轮询weighted-round-robin">2. 加权轮询（Weighted Round Robin）</a></li>
+        <li><a href="#3-ip-hash">3. IP Hash</a></li>
+        <li><a href="#4-最少连接least-connections">4. 最少连接（Least Connections）</a></li>
+        <li><a href="#5-一致性哈希需要第三方模块">5. 一致性哈希（需要第三方模块）</a></li>
+        <li><a href="#负载均衡策略对比">负载均衡策略对比</a></li>
+      </ul>
+    </li>
+    <li><a href="#健康检查与故障转移">健康检查与故障转移</a>
+      <ul>
+        <li><a href="#被动健康检查">被动健康检查</a></li>
+        <li><a href="#主动健康检查nginx-plus-或第三方模块">主动健康检查（Nginx Plus 或第三方模块）</a></li>
+        <li><a href="#备用服务器">备用服务器</a></li>
+        <li><a href="#故障转移配置">故障转移配置</a></li>
+      </ul>
+    </li>
+    <li><a href="#会话保持方案">会话保持方案</a>
+      <ul>
+        <li><a href="#方案一ip-hash">方案一：IP Hash</a></li>
+        <li><a href="#方案二cookie-绑定">方案二：Cookie 绑定</a></li>
+        <li><a href="#方案三session-共享推荐">方案三：Session 共享（推荐）</a></li>
+      </ul>
+    </li>
+    <li><a href="#https-配置">HTTPS 配置</a>
+      <ul>
+        <li><a href="#ssl-证书配置">SSL 证书配置</a></li>
+        <li><a href="#免费-ssl-证书lets-encrypt">免费 SSL 证书（Let&rsquo;s Encrypt）</a></li>
+      </ul>
+    </li>
+    <li><a href="#性能优化">性能优化</a>
+      <ul>
+        <li><a href="#1-连接优化">1. 连接优化</a></li>
+        <li><a href="#2-缓存配置">2. 缓存配置</a></li>
+        <li><a href="#3-gzip-压缩">3. Gzip 压缩</a></li>
+        <li><a href="#4-限流配置">4. 限流配置</a></li>
+        <li><a href="#5-worker-进程优化">5. Worker 进程优化</a></li>
+      </ul>
+    </li>
+    <li><a href="#监控与日志">监控与日志</a>
+      <ul>
+        <li><a href="#访问日志分析">访问日志分析</a></li>
+        <li><a href="#使用-goaccess-分析日志">使用 GoAccess 分析日志</a></li>
+        <li><a href="#nginx-状态监控">Nginx 状态监控</a></li>
+        <li><a href="#prometheus-监控">Prometheus 监控</a></li>
+      </ul>
+    </li>
+    <li><a href="#生产环境最佳实践">生产环境最佳实践</a>
+      <ul>
+        <li><a href="#1-配置文件组织">1. 配置文件组织</a></li>
+        <li><a href="#2-配置检查与重载">2. 配置检查与重载</a></li>
+        <li><a href="#3-安全加固">3. 安全加固</a></li>
+        <li><a href="#4-日志轮转">4. 日志轮转</a></li>
+      </ul>
+    </li>
+    <li><a href="#总结与思考">总结与思考</a></li>
+  </ul>
+</nav>
+        </div>
+    </details>
+</div>
+
+  <div class="post-content"><p>Nginx 作为高性能的 Web 服务器和反向代理服务器，已经成为互联网架构中的标配组件。无论是静态资源服务、反向代理还是负载均衡，Nginx 都能提供出色的性能和稳定性。</p>
+<p>本文将从实际场景出发，深入讲解 Nginx 反向代理和负载均衡的配置与优化，帮助你构建高可用的服务架构。</p>
+<h3 id="本文亮点">本文亮点<a hidden class="anchor" aria-hidden="true" href="#本文亮点">#</a></h3>
+<ul>
+<li><input checked="" disabled="" type="checkbox"> 理解反向代理与正向代理的区别</li>
+<li><input checked="" disabled="" type="checkbox"> 掌握 Nginx 负载均衡的多种策略</li>
+<li><input checked="" disabled="" type="checkbox"> 学会配置健康检查与故障转移</li>
+<li><input checked="" disabled="" type="checkbox"> 了解会话保持的实现方案</li>
+<li><input checked="" disabled="" type="checkbox"> 掌握生产环境的性能调优技巧</li>
+</ul>
+<hr>
+<h2 id="反向代理基础">反向代理基础<a hidden class="anchor" aria-hidden="true" href="#反向代理基础">#</a></h2>
+<h3 id="正向代理-vs-反向代理">正向代理 vs 反向代理<a hidden class="anchor" aria-hidden="true" href="#正向代理-vs-反向代理">#</a></h3>
+<p><strong>正向代理</strong>：客户端知道目标服务器，通过代理服务器访问</p>
+<div class="highlight"><pre tabindex="0" class="chroma"><code class="language-fallback" data-lang="fallback"><span class="line"><span class="ln">1</span><span class="cl">客户端 → 代理服务器 → 目标服务器
+</span></span><span class="line"><span class="ln">2</span><span class="cl">（客户端配置代理）
+</span></span></code></pre></div><p><strong>反向代理</strong>：客户端不知道真实服务器，代理服务器决定转发到哪台服务器</p>
+<div class="highlight"><pre tabindex="0" class="chroma"><code class="language-fallback" data-lang="fallback"><span class="line"><span class="ln">1</span><span class="cl">客户端 → 反向代理 → 后端服务器集群
+</span></span><span class="line"><span class="ln">2</span><span class="cl">（服务端配置代理）
+</span></span></code></pre></div><h3 id="反向代理的优势">反向代理的优势<a hidden class="anchor" aria-hidden="true" href="#反向代理的优势">#</a></h3>
+<ol>
+<li><strong>负载均衡</strong>：将请求分发到多台服务器</li>
+<li><strong>隐藏真实服务器</strong>：提高安全性</li>
+<li><strong>SSL 卸载</strong>：在代理层处理 HTTPS</li>
+<li><strong>缓存静态资源</strong>：减轻后端压力</li>
+<li><strong>统一入口</strong>：便于管理和监控</li>
+</ol>
+<blockquote>
+<p><strong>架构思考：</strong> 反向代理不仅是流量分发器，更是架构中的关键节点。通过反向代理，可以实现灰度发布、A/B 测试、流量控制等高级功能。</p>
+</blockquote>
+<hr>
+<h2 id="nginx-反向代理配置">Nginx 反向代理配置<a hidden class="anchor" aria-hidden="true" href="#nginx-反向代理配置">#</a></h2>
+<h3 id="基础配置">基础配置<a hidden class="anchor" aria-hidden="true" href="#基础配置">#</a></h3>
+<div class="highlight"><pre tabindex="0" class="chroma"><code class="language-nginx" data-lang="nginx"><span class="line"><span class="ln"> 1</span><span class="cl"><span class="c1"># /etc/nginx/nginx.conf
+</span></span></span><span class="line"><span class="ln"> 2</span><span class="cl">
+</span></span><span class="line"><span class="ln"> 3</span><span class="cl"><span class="k">user</span> <span class="s">nginx</span><span class="p">;</span>
+</span></span><span class="line"><span class="ln"> 4</span><span class="cl"><span class="k">worker_processes</span> <span class="s">auto</span><span class="p">;</span>  <span class="c1"># 自动设置为 CPU 核心数
+</span></span></span><span class="line"><span class="ln"> 5</span><span class="cl"><span class="k">error_log</span> <span class="s">/var/log/nginx/error.log</span> <span class="s">warn</span><span class="p">;</span>
+</span></span><span class="line"><span class="ln"> 6</span><span class="cl"><span class="k">pid</span> <span class="s">/var/run/nginx.pid</span><span class="p">;</span>
+</span></span><span class="line"><span class="ln"> 7</span><span class="cl">
+</span></span><span class="line"><span class="ln"> 8</span><span class="cl"><span class="k">events</span> <span class="p">{</span>
+</span></span><span class="line"><span class="ln"> 9</span><span class="cl">    <span class="kn">worker_connections</span> <span class="mi">1024</span><span class="p">;</span>  <span class="c1"># 每个 worker 进程的最大连接数
+</span></span></span><span class="line"><span class="ln">10</span><span class="cl">    <span class="kn">use</span> <span class="s">epoll</span><span class="p">;</span>  <span class="c1"># Linux 下使用 epoll
+</span></span></span><span class="line"><span class="ln">11</span><span class="cl"><span class="p">}</span>
+</span></span><span class="line"><span class="ln">12</span><span class="cl">
+</span></span><span class="line"><span class="ln">13</span><span class="cl"><span class="k">http</span> <span class="p">{</span>
+</span></span><span class="line"><span class="ln">14</span><span class="cl">    <span class="kn">include</span> <span class="s">/etc/nginx/mime.types</span><span class="p">;</span>
+</span></span><span class="line"><span class="ln">15</span><span class="cl">    <span class="kn">default_type</span> <span class="s">application/octet-stream</span><span class="p">;</span>
+</span></span><span class="line"><span class="ln">16</span><span class="cl">    
+</span></span><span class="line"><span class="ln">17</span><span class="cl">    <span class="c1"># 日志格式
+</span></span></span><span class="line"><span class="ln">18</span><span class="cl">    <span class="kn">log_format</span> <span class="s">main</span> <span class="s">&#39;</span><span class="nv">$remote_addr</span> <span class="s">-</span> <span class="nv">$remote_user</span> <span class="s">[</span><span class="nv">$time_local]</span> <span class="s">&#34;</span><span class="nv">$request&#34;</span> <span class="s">&#39;</span>
+</span></span><span class="line"><span class="ln">19</span><span class="cl">                    <span class="s">&#39;</span><span class="nv">$status</span> <span class="nv">$body_bytes_sent</span> <span class="s">&#34;</span><span class="nv">$http_referer&#34;</span> <span class="s">&#39;</span>
+</span></span><span class="line"><span class="ln">20</span><span class="cl">                    <span class="s">&#39;&#34;</span><span class="nv">$http_user_agent&#34;</span> <span class="s">&#34;</span><span class="nv">$http_x_forwarded_for&#34;</span> <span class="s">&#39;</span>
+</span></span><span class="line"><span class="ln">21</span><span class="cl">                    <span class="s">&#39;</span><span class="nv">$request_time</span> <span class="nv">$upstream_response_time&#39;</span><span class="p">;</span>
+</span></span><span class="line"><span class="ln">22</span><span class="cl">    
+</span></span><span class="line"><span class="ln">23</span><span class="cl">    <span class="kn">access_log</span> <span class="s">/var/log/nginx/access.log</span> <span class="s">main</span><span class="p">;</span>
+</span></span><span class="line"><span class="ln">24</span><span class="cl">    
+</span></span><span class="line"><span class="ln">25</span><span class="cl">    <span class="kn">sendfile</span> <span class="no">on</span><span class="p">;</span>
+</span></span><span class="line"><span class="ln">26</span><span class="cl">    <span class="kn">tcp_nopush</span> <span class="no">on</span><span class="p">;</span>
+</span></span><span class="line"><span class="ln">27</span><span class="cl">    <span class="kn">tcp_nodelay</span> <span class="no">on</span><span class="p">;</span>
+</span></span><span class="line"><span class="ln">28</span><span class="cl">    <span class="kn">keepalive_timeout</span> <span class="mi">65</span><span class="p">;</span>
+</span></span><span class="line"><span class="ln">29</span><span class="cl">    <span class="kn">types_hash_max_size</span> <span class="mi">2048</span><span class="p">;</span>
+</span></span><span class="line"><span class="ln">30</span><span class="cl">    
+</span></span><span class="line"><span class="ln">31</span><span class="cl">    <span class="c1"># 包含其他配置文件
+</span></span></span><span class="line"><span class="ln">32</span><span class="cl">    <span class="kn">include</span> <span class="s">/etc/nginx/conf.d/*.conf</span><span class="p">;</span>
+</span></span><span class="line"><span class="ln">33</span><span class="cl"><span class="p">}</span>
+</span></span></code></pre></div><h3 id="简单反向代理">简单反向代理<a hidden class="anchor" aria-hidden="true" href="#简单反向代理">#</a></h3>
+<div class="highlight"><pre tabindex="0" class="chroma"><code class="language-nginx" data-lang="nginx"><span class="line"><span class="ln"> 1</span><span class="cl"><span class="c1"># /etc/nginx/conf.d/api.conf
+</span></span></span><span class="line"><span class="ln"> 2</span><span class="cl">
+</span></span><span class="line"><span class="ln"> 3</span><span class="cl"><span class="k">server</span> <span class="p">{</span>
+</span></span><span class="line"><span class="ln"> 4</span><span class="cl">    <span class="kn">listen</span> <span class="mi">80</span><span class="p">;</span>
+</span></span><span class="line"><span class="ln"> 5</span><span class="cl">    <span class="kn">server_name</span> <span class="s">api.example.com</span><span class="p">;</span>
+</span></span><span class="line"><span class="ln"> 6</span><span class="cl">    
+</span></span><span class="line"><span class="ln"> 7</span><span class="cl">    <span class="kn">location</span> <span class="s">/</span> <span class="p">{</span>
+</span></span><span class="line"><span class="ln"> 8</span><span class="cl">        <span class="c1"># 代理到后端服务器
+</span></span></span><span class="line"><span class="ln"> 9</span><span class="cl">        <span class="kn">proxy_pass</span> <span class="s">http://192.168.1.100:8080</span><span class="p">;</span>
+</span></span><span class="line"><span class="ln">10</span><span class="cl">        
+</span></span><span class="line"><span class="ln">11</span><span class="cl">        <span class="c1"># 设置请求头
+</span></span></span><span class="line"><span class="ln">12</span><span class="cl">        <span class="kn">proxy_set_header</span> <span class="s">Host</span> <span class="nv">$host</span><span class="p">;</span>
+</span></span><span class="line"><span class="ln">13</span><span class="cl">        <span class="kn">proxy_set_header</span> <span class="s">X-Real-IP</span> <span class="nv">$remote_addr</span><span class="p">;</span>
+</span></span><span class="line"><span class="ln">14</span><span class="cl">        <span class="kn">proxy_set_header</span> <span class="s">X-Forwarded-For</span> <span class="nv">$proxy_add_x_forwarded_for</span><span class="p">;</span>
+</span></span><span class="line"><span class="ln">15</span><span class="cl">        <span class="kn">proxy_set_header</span> <span class="s">X-Forwarded-Proto</span> <span class="nv">$scheme</span><span class="p">;</span>
+</span></span><span class="line"><span class="ln">16</span><span class="cl">        
+</span></span><span class="line"><span class="ln">17</span><span class="cl">        <span class="c1"># 超时设置
+</span></span></span><span class="line"><span class="ln">18</span><span class="cl">        <span class="kn">proxy_connect_timeout</span> <span class="s">60s</span><span class="p">;</span>
+</span></span><span class="line"><span class="ln">19</span><span class="cl">        <span class="kn">proxy_send_timeout</span> <span class="s">60s</span><span class="p">;</span>
+</span></span><span class="line"><span class="ln">20</span><span class="cl">        <span class="kn">proxy_read_timeout</span> <span class="s">60s</span><span class="p">;</span>
+</span></span><span class="line"><span class="ln">21</span><span class="cl">    <span class="p">}</span>
+</span></span><span class="line"><span class="ln">22</span><span class="cl"><span class="p">}</span>
+</span></span></code></pre></div><h3 id="路径重写">路径重写<a hidden class="anchor" aria-hidden="true" href="#路径重写">#</a></h3>
+<div class="highlight"><pre tabindex="0" class="chroma"><code class="language-nginx" data-lang="nginx"><span class="line"><span class="ln"> 1</span><span class="cl"><span class="k">server</span> <span class="p">{</span>
+</span></span><span class="line"><span class="ln"> 2</span><span class="cl">    <span class="kn">listen</span> <span class="mi">80</span><span class="p">;</span>
+</span></span><span class="line"><span class="ln"> 3</span><span class="cl">    <span class="kn">server_name</span> <span class="s">api.example.com</span><span class="p">;</span>
+</span></span><span class="line"><span class="ln"> 4</span><span class="cl">    
+</span></span><span class="line"><span class="ln"> 5</span><span class="cl">    <span class="c1"># 将 /api/v1/users 代理到 http://backend/users
+</span></span></span><span class="line"><span class="ln"> 6</span><span class="cl">    <span class="kn">location</span> <span class="s">/api/v1/</span> <span class="p">{</span>
+</span></span><span class="line"><span class="ln"> 7</span><span class="cl">        <span class="kn">proxy_pass</span> <span class="s">http://backend/</span><span class="p">;</span>  <span class="c1"># 注意末尾的 /
+</span></span></span><span class="line"><span class="ln"> 8</span><span class="cl">        <span class="kn">proxy_set_header</span> <span class="s">Host</span> <span class="nv">$host</span><span class="p">;</span>
+</span></span><span class="line"><span class="ln"> 9</span><span class="cl">    <span class="p">}</span>
+</span></span><span class="line"><span class="ln">10</span><span class="cl">    
+</span></span><span class="line"><span class="ln">11</span><span class="cl">    <span class="c1"># 将 /old-api 重写为 /new-api
+</span></span></span><span class="line"><span class="ln">12</span><span class="cl">    <span class="kn">location</span> <span class="s">/old-api</span> <span class="p">{</span>
+</span></span><span class="line"><span class="ln">13</span><span class="cl">        <span class="kn">rewrite</span> <span class="s">^/old-api/(.*)</span>$ <span class="s">/new-api/</span><span class="nv">$1</span> <span class="s">break</span><span class="p">;</span>
+</span></span><span class="line"><span class="ln">14</span><span class="cl">        <span class="kn">proxy_pass</span> <span class="s">http://backend</span><span class="p">;</span>
+</span></span><span class="line"><span class="ln">15</span><span class="cl">    <span class="p">}</span>
+</span></span><span class="line"><span class="ln">16</span><span class="cl"><span class="p">}</span>
+</span></span></code></pre></div><hr>
+<h2 id="负载均衡策略">负载均衡策略<a hidden class="anchor" aria-hidden="true" href="#负载均衡策略">#</a></h2>
+<h3 id="1-轮询round-robin">1. 轮询（Round Robin）<a hidden class="anchor" aria-hidden="true" href="#1-轮询round-robin">#</a></h3>
+<p>默认策略，按顺序依次分配请求：</p>
+<div class="highlight"><pre tabindex="0" class="chroma"><code class="language-nginx" data-lang="nginx"><span class="line"><span class="ln"> 1</span><span class="cl"><span class="k">upstream</span> <span class="s">backend</span> <span class="p">{</span>
+</span></span><span class="line"><span class="ln"> 2</span><span class="cl">    <span class="kn">server</span> <span class="n">192.168.1.101</span><span class="p">:</span><span class="mi">8080</span><span class="p">;</span>
+</span></span><span class="line"><span class="ln"> 3</span><span class="cl">    <span class="kn">server</span> <span class="n">192.168.1.102</span><span class="p">:</span><span class="mi">8080</span><span class="p">;</span>
+</span></span><span class="line"><span class="ln"> 4</span><span class="cl">    <span class="kn">server</span> <span class="n">192.168.1.103</span><span class="p">:</span><span class="mi">8080</span><span class="p">;</span>
+</span></span><span class="line"><span class="ln"> 5</span><span class="cl"><span class="p">}</span>
+</span></span><span class="line"><span class="ln"> 6</span><span class="cl">
+</span></span><span class="line"><span class="ln"> 7</span><span class="cl"><span class="k">server</span> <span class="p">{</span>
+</span></span><span class="line"><span class="ln"> 8</span><span class="cl">    <span class="kn">listen</span> <span class="mi">80</span><span class="p">;</span>
+</span></span><span class="line"><span class="ln"> 9</span><span class="cl">    <span class="kn">server_name</span> <span class="s">api.example.com</span><span class="p">;</span>
+</span></span><span class="line"><span class="ln">10</span><span class="cl">    
+</span></span><span class="line"><span class="ln">11</span><span class="cl">    <span class="kn">location</span> <span class="s">/</span> <span class="p">{</span>
+</span></span><span class="line"><span class="ln">12</span><span class="cl">        <span class="kn">proxy_pass</span> <span class="s">http://backend</span><span class="p">;</span>
+</span></span><span class="line"><span class="ln">13</span><span class="cl">    <span class="p">}</span>
+</span></span><span class="line"><span class="ln">14</span><span class="cl"><span class="p">}</span>
+</span></span></code></pre></div><h3 id="2-加权轮询weighted-round-robin">2. 加权轮询（Weighted Round Robin）<a hidden class="anchor" aria-hidden="true" href="#2-加权轮询weighted-round-robin">#</a></h3>
+<p>根据服务器性能分配不同权重：</p>
+<div class="highlight"><pre tabindex="0" class="chroma"><code class="language-nginx" data-lang="nginx"><span class="line"><span class="ln">1</span><span class="cl"><span class="k">upstream</span> <span class="s">backend</span> <span class="p">{</span>
+</span></span><span class="line"><span class="ln">2</span><span class="cl">    <span class="kn">server</span> <span class="n">192.168.1.101</span><span class="p">:</span><span class="mi">8080</span> <span class="s">weight=3</span><span class="p">;</span>  <span class="c1"># 权重 3
+</span></span></span><span class="line"><span class="ln">3</span><span class="cl">    <span class="kn">server</span> <span class="n">192.168.1.102</span><span class="p">:</span><span class="mi">8080</span> <span class="s">weight=2</span><span class="p">;</span>  <span class="c1"># 权重 2
+</span></span></span><span class="line"><span class="ln">4</span><span class="cl">    <span class="kn">server</span> <span class="n">192.168.1.103</span><span class="p">:</span><span class="mi">8080</span> <span class="s">weight=1</span><span class="p">;</span>  <span class="c1"># 权重 1
+</span></span></span><span class="line"><span class="ln">5</span><span class="cl"><span class="p">}</span>
+</span></span></code></pre></div><p>权重为 3:2:1，意味着每 6 个请求中，101 服务器处理 3 个，102 处理 2 个，103 处理 1 个。</p>
+<h3 id="3-ip-hash">3. IP Hash<a hidden class="anchor" aria-hidden="true" href="#3-ip-hash">#</a></h3>
+<p>根据客户端 IP 进行哈希，同一 IP 的请求总是分配到同一台服务器：</p>
+<div class="highlight"><pre tabindex="0" class="chroma"><code class="language-nginx" data-lang="nginx"><span class="line"><span class="ln">1</span><span class="cl"><span class="k">upstream</span> <span class="s">backend</span> <span class="p">{</span>
+</span></span><span class="line"><span class="ln">2</span><span class="cl">    <span class="kn">ip_hash</span><span class="p">;</span>
+</span></span><span class="line"><span class="ln">3</span><span class="cl">    
+</span></span><span class="line"><span class="ln">4</span><span class="cl">    <span class="kn">server</span> <span class="n">192.168.1.101</span><span class="p">:</span><span class="mi">8080</span><span class="p">;</span>
+</span></span><span class="line"><span class="ln">5</span><span class="cl">    <span class="kn">server</span> <span class="n">192.168.1.102</span><span class="p">:</span><span class="mi">8080</span><span class="p">;</span>
+</span></span><span class="line"><span class="ln">6</span><span class="cl">    <span class="kn">server</span> <span class="n">192.168.1.103</span><span class="p">:</span><span class="mi">8080</span><span class="p">;</span>
+</span></span><span class="line"><span class="ln">7</span><span class="cl"><span class="p">}</span>
+</span></span></code></pre></div><p><strong>适用场景</strong>：需要会话保持的应用（如购物车、登录状态）</p>
+<p><strong>缺点</strong>：</p>
+<ul>
+<li>负载可能不均衡（IP 分布不均）</li>
+<li>无法应对服务器故障（IP 重新哈希）</li>
+</ul>
+<h3 id="4-最少连接least-connections">4. 最少连接（Least Connections）<a hidden class="anchor" aria-hidden="true" href="#4-最少连接least-connections">#</a></h3>
+<p>将请求分配给当前连接数最少的服务器：</p>
+<div class="highlight"><pre tabindex="0" class="chroma"><code class="language-nginx" data-lang="nginx"><span class="line"><span class="ln">1</span><span class="cl"><span class="k">upstream</span> <span class="s">backend</span> <span class="p">{</span>
+</span></span><span class="line"><span class="ln">2</span><span class="cl">    <span class="kn">least_conn</span><span class="p">;</span>
+</span></span><span class="line"><span class="ln">3</span><span class="cl">    
+</span></span><span class="line"><span class="ln">4</span><span class="cl">    <span class="kn">server</span> <span class="n">192.168.1.101</span><span class="p">:</span><span class="mi">8080</span><span class="p">;</span>
+</span></span><span class="line"><span class="ln">5</span><span class="cl">    <span class="kn">server</span> <span class="n">192.168.1.102</span><span class="p">:</span><span class="mi">8080</span><span class="p">;</span>
+</span></span><span class="line"><span class="ln">6</span><span class="cl">    <span class="kn">server</span> <span class="n">192.168.1.103</span><span class="p">:</span><span class="mi">8080</span><span class="p">;</span>
+</span></span><span class="line"><span class="ln">7</span><span class="cl"><span class="p">}</span>
+</span></span></code></pre></div><p><strong>适用场景</strong>：请求处理时间差异较大的应用</p>
+<h3 id="5-一致性哈希需要第三方模块">5. 一致性哈希（需要第三方模块）<a hidden class="anchor" aria-hidden="true" href="#5-一致性哈希需要第三方模块">#</a></h3>
+<div class="highlight"><pre tabindex="0" class="chroma"><code class="language-nginx" data-lang="nginx"><span class="line"><span class="ln">1</span><span class="cl"><span class="k">upstream</span> <span class="s">backend</span> <span class="p">{</span>
+</span></span><span class="line"><span class="ln">2</span><span class="cl">    <span class="kn">hash</span> <span class="nv">$request_uri</span> <span class="s">consistent</span><span class="p">;</span>
+</span></span><span class="line"><span class="ln">3</span><span class="cl">    
+</span></span><span class="line"><span class="ln">4</span><span class="cl">    <span class="kn">server</span> <span class="n">192.168.1.101</span><span class="p">:</span><span class="mi">8080</span><span class="p">;</span>
+</span></span><span class="line"><span class="ln">5</span><span class="cl">    <span class="kn">server</span> <span class="n">192.168.1.102</span><span class="p">:</span><span class="mi">8080</span><span class="p">;</span>
+</span></span><span class="line"><span class="ln">6</span><span class="cl">    <span class="kn">server</span> <span class="n">192.168.1.103</span><span class="p">:</span><span class="mi">8080</span><span class="p">;</span>
+</span></span><span class="line"><span class="ln">7</span><span class="cl"><span class="p">}</span>
+</span></span></code></pre></div><p><strong>适用场景</strong>：缓存服务器集群</p>
+<h3 id="负载均衡策略对比">负载均衡策略对比<a hidden class="anchor" aria-hidden="true" href="#负载均衡策略对比">#</a></h3>
+<table>
+  <thead>
+      <tr>
+          <th>策略</th>
+          <th>优点</th>
+          <th>缺点</th>
+          <th>适用场景</th>
+      </tr>
+  </thead>
+  <tbody>
+      <tr>
+          <td>轮询</td>
+          <td>简单、均衡</td>
+          <td>无会话保持</td>
+          <td>无状态服务</td>
+      </tr>
+      <tr>
+          <td>加权轮询</td>
+          <td>考虑服务器性能</td>
+          <td>无会话保持</td>
+          <td>服务器性能不同</td>
+      </tr>
+      <tr>
+          <td>IP Hash</td>
+          <td>会话保持</td>
+          <td>负载可能不均</td>
+          <td>有状态服务</td>
+      </tr>
+      <tr>
+          <td>最少连接</td>
+          <td>动态均衡</td>
+          <td>计算开销大</td>
+          <td>长连接服务</td>
+      </tr>
+      <tr>
+          <td>一致性哈希</td>
+          <td>缓存命中率高</td>
+          <td>实现复杂</td>
+          <td>缓存集群</td>
+      </tr>
+  </tbody>
+</table>
+<hr>
+<h2 id="健康检查与故障转移">健康检查与故障转移<a hidden class="anchor" aria-hidden="true" href="#健康检查与故障转移">#</a></h2>
+<h3 id="被动健康检查">被动健康检查<a hidden class="anchor" aria-hidden="true" href="#被动健康检查">#</a></h3>
+<p>Nginx 默认的健康检查机制，当请求失败时标记服务器为不可用：</p>
+<div class="highlight"><pre tabindex="0" class="chroma"><code class="language-nginx" data-lang="nginx"><span class="line"><span class="ln">1</span><span class="cl"><span class="k">upstream</span> <span class="s">backend</span> <span class="p">{</span>
+</span></span><span class="line"><span class="ln">2</span><span class="cl">    <span class="kn">server</span> <span class="n">192.168.1.101</span><span class="p">:</span><span class="mi">8080</span> <span class="s">max_fails=3</span> <span class="s">fail_timeout=30s</span><span class="p">;</span>
+</span></span><span class="line"><span class="ln">3</span><span class="cl">    <span class="kn">server</span> <span class="n">192.168.1.102</span><span class="p">:</span><span class="mi">8080</span> <span class="s">max_fails=3</span> <span class="s">fail_timeout=30s</span><span class="p">;</span>
+</span></span><span class="line"><span class="ln">4</span><span class="cl">    <span class="kn">server</span> <span class="n">192.168.1.103</span><span class="p">:</span><span class="mi">8080</span> <span class="s">max_fails=3</span> <span class="s">fail_timeout=30s</span><span class="p">;</span>
+</span></span><span class="line"><span class="ln">5</span><span class="cl"><span class="p">}</span>
+</span></span></code></pre></div><p>参数说明：</p>
+<ul>
+<li><code>max_fails=3</code>：连续失败 3 次后标记为不可用</li>
+<li><code>fail_timeout=30s</code>：标记为不可用后，30 秒内不再分配请求</li>
+</ul>
+<h3 id="主动健康检查nginx-plus-或第三方模块">主动健康检查（Nginx Plus 或第三方模块）<a hidden class="anchor" aria-hidden="true" href="#主动健康检查nginx-plus-或第三方模块">#</a></h3>
+<p>使用 <code>nginx_upstream_check_module</code> 模块：</p>
+<div class="highlight"><pre tabindex="0" class="chroma"><code class="language-nginx" data-lang="nginx"><span class="line"><span class="ln"> 1</span><span class="cl"><span class="k">upstream</span> <span class="s">backend</span> <span class="p">{</span>
+</span></span><span class="line"><span class="ln"> 2</span><span class="cl">    <span class="kn">server</span> <span class="n">192.168.1.101</span><span class="p">:</span><span class="mi">8080</span><span class="p">;</span>
+</span></span><span class="line"><span class="ln"> 3</span><span class="cl">    <span class="kn">server</span> <span class="n">192.168.1.102</span><span class="p">:</span><span class="mi">8080</span><span class="p">;</span>
+</span></span><span class="line"><span class="ln"> 4</span><span class="cl">    <span class="kn">server</span> <span class="n">192.168.1.103</span><span class="p">:</span><span class="mi">8080</span><span class="p">;</span>
+</span></span><span class="line"><span class="ln"> 5</span><span class="cl">    
+</span></span><span class="line"><span class="ln"> 6</span><span class="cl">    <span class="kn">check</span> <span class="s">interval=3000</span> <span class="s">rise=2</span> <span class="s">fall=3</span> <span class="s">timeout=1000</span> <span class="s">type=http</span><span class="p">;</span>
+</span></span><span class="line"><span class="ln"> 7</span><span class="cl">    <span class="kn">check_http_send</span> <span class="s">&#34;HEAD</span> <span class="s">/health</span> <span class="s">HTTP/1.0\r\n\r\n&#34;</span><span class="p">;</span>
+</span></span><span class="line"><span class="ln"> 8</span><span class="cl">    <span class="kn">check_http_expect_alive</span> <span class="s">http_2xx</span> <span class="s">http_3xx</span><span class="p">;</span>
+</span></span><span class="line"><span class="ln"> 9</span><span class="cl"><span class="p">}</span>
+</span></span><span class="line"><span class="ln">10</span><span class="cl">
+</span></span><span class="line"><span class="ln">11</span><span class="cl"><span class="k">server</span> <span class="p">{</span>
+</span></span><span class="line"><span class="ln">12</span><span class="cl">    <span class="kn">listen</span> <span class="mi">80</span><span class="p">;</span>
+</span></span><span class="line"><span class="ln">13</span><span class="cl">    
+</span></span><span class="line"><span class="ln">14</span><span class="cl">    <span class="kn">location</span> <span class="s">/status</span> <span class="p">{</span>
+</span></span><span class="line"><span class="ln">15</span><span class="cl">        <span class="kn">check_status</span><span class="p">;</span>
+</span></span><span class="line"><span class="ln">16</span><span class="cl">        <span class="kn">access_log</span> <span class="no">off</span><span class="p">;</span>
+</span></span><span class="line"><span class="ln">17</span><span class="cl">    <span class="p">}</span>
+</span></span><span class="line"><span class="ln">18</span><span class="cl"><span class="p">}</span>
+</span></span></code></pre></div><p>参数说明：</p>
+<ul>
+<li><code>interval=3000</code>：每 3 秒检查一次</li>
+<li><code>rise=2</code>：连续成功 2 次标记为可用</li>
+<li><code>fall=3</code>：连续失败 3 次标记为不可用</li>
+<li><code>timeout=1000</code>：超时时间 1 秒</li>
+<li><code>type=http</code>：使用 HTTP 协议检查</li>
+</ul>
+<h3 id="备用服务器">备用服务器<a hidden class="anchor" aria-hidden="true" href="#备用服务器">#</a></h3>
+<div class="highlight"><pre tabindex="0" class="chroma"><code class="language-nginx" data-lang="nginx"><span class="line"><span class="ln">1</span><span class="cl"><span class="k">upstream</span> <span class="s">backend</span> <span class="p">{</span>
+</span></span><span class="line"><span class="ln">2</span><span class="cl">    <span class="kn">server</span> <span class="n">192.168.1.101</span><span class="p">:</span><span class="mi">8080</span><span class="p">;</span>
+</span></span><span class="line"><span class="ln">3</span><span class="cl">    <span class="kn">server</span> <span class="n">192.168.1.102</span><span class="p">:</span><span class="mi">8080</span><span class="p">;</span>
+</span></span><span class="line"><span class="ln">4</span><span class="cl">    <span class="kn">server</span> <span class="n">192.168.1.103</span><span class="p">:</span><span class="mi">8080</span><span class="p">;</span>
+</span></span><span class="line"><span class="ln">5</span><span class="cl">    <span class="kn">server</span> <span class="n">192.168.1.104</span><span class="p">:</span><span class="mi">8080</span> <span class="s">backup</span><span class="p">;</span>  <span class="c1"># 备用服务器
+</span></span></span><span class="line"><span class="ln">6</span><span class="cl"><span class="p">}</span>
+</span></span></code></pre></div><p>只有当所有主服务器都不可用时，才会使用备用服务器。</p>
+<h3 id="故障转移配置">故障转移配置<a hidden class="anchor" aria-hidden="true" href="#故障转移配置">#</a></h3>
+<div class="highlight"><pre tabindex="0" class="chroma"><code class="language-nginx" data-lang="nginx"><span class="line"><span class="ln">1</span><span class="cl"><span class="k">location</span> <span class="s">/</span> <span class="p">{</span>
+</span></span><span class="line"><span class="ln">2</span><span class="cl">    <span class="kn">proxy_pass</span> <span class="s">http://backend</span><span class="p">;</span>
+</span></span><span class="line"><span class="ln">3</span><span class="cl">    <span class="kn">proxy_next_upstream</span> <span class="s">error</span> <span class="s">timeout</span> <span class="s">invalid_header</span> <span class="s">http_500</span> <span class="s">http_502</span> <span class="s">http_503</span> <span class="s">http_504</span><span class="p">;</span>
+</span></span><span class="line"><span class="ln">4</span><span class="cl">    <span class="kn">proxy_next_upstream_tries</span> <span class="mi">2</span><span class="p">;</span>  <span class="c1"># 最多尝试 2 次
+</span></span></span><span class="line"><span class="ln">5</span><span class="cl">    <span class="kn">proxy_next_upstream_timeout</span> <span class="s">10s</span><span class="p">;</span>  <span class="c1"># 总超时时间 10 秒
+</span></span></span><span class="line"><span class="ln">6</span><span class="cl"><span class="p">}</span>
+</span></span></code></pre></div><hr>
+<h2 id="会话保持方案">会话保持方案<a hidden class="anchor" aria-hidden="true" href="#会话保持方案">#</a></h2>
+<h3 id="方案一ip-hash">方案一：IP Hash<a hidden class="anchor" aria-hidden="true" href="#方案一ip-hash">#</a></h3>
+<div class="highlight"><pre tabindex="0" class="chroma"><code class="language-nginx" data-lang="nginx"><span class="line"><span class="ln">1</span><span class="cl"><span class="k">upstream</span> <span class="s">backend</span> <span class="p">{</span>
+</span></span><span class="line"><span class="ln">2</span><span class="cl">    <span class="kn">ip_hash</span><span class="p">;</span>
+</span></span><span class="line"><span class="ln">3</span><span class="cl">    <span class="kn">server</span> <span class="n">192.168.1.101</span><span class="p">:</span><span class="mi">8080</span><span class="p">;</span>
+</span></span><span class="line"><span class="ln">4</span><span class="cl">    <span class="kn">server</span> <span class="n">192.168.1.102</span><span class="p">:</span><span class="mi">8080</span><span class="p">;</span>
+</span></span><span class="line"><span class="ln">5</span><span class="cl"><span class="p">}</span>
+</span></span></code></pre></div><p><strong>优点</strong>：配置简单
+<strong>缺点</strong>：负载可能不均衡</p>
+<h3 id="方案二cookie-绑定">方案二：Cookie 绑定<a hidden class="anchor" aria-hidden="true" href="#方案二cookie-绑定">#</a></h3>
+<div class="highlight"><pre tabindex="0" class="chroma"><code class="language-nginx" data-lang="nginx"><span class="line"><span class="ln">1</span><span class="cl"><span class="k">upstream</span> <span class="s">backend</span> <span class="p">{</span>
+</span></span><span class="line"><span class="ln">2</span><span class="cl">    <span class="kn">server</span> <span class="n">192.168.1.101</span><span class="p">:</span><span class="mi">8080</span><span class="p">;</span>
+</span></span><span class="line"><span class="ln">3</span><span class="cl">    <span class="kn">server</span> <span class="n">192.168.1.102</span><span class="p">:</span><span class="mi">8080</span><span class="p">;</span>
+</span></span><span class="line"><span class="ln">4</span><span class="cl">    
+</span></span><span class="line"><span class="ln">5</span><span class="cl">    <span class="kn">sticky</span> <span class="s">cookie</span> <span class="s">srv_id</span> <span class="s">expires=1h</span> <span class="s">domain=.example.com</span> <span class="s">path=/</span><span class="p">;</span>
+</span></span><span class="line"><span class="ln">6</span><span class="cl"><span class="p">}</span>
+</span></span></code></pre></div><p>Nginx 会在响应中设置一个 Cookie，后续请求根据 Cookie 路由到同一台服务器。</p>
+<h3 id="方案三session-共享推荐">方案三：Session 共享（推荐）<a hidden class="anchor" aria-hidden="true" href="#方案三session-共享推荐">#</a></h3>
+<p>不依赖 Nginx，在应用层实现 Session 共享：</p>
+<p><strong>使用 Redis 存储 Session</strong>：</p>
+<div class="highlight"><pre tabindex="0" class="chroma"><code class="language-java" data-lang="java"><span class="line"><span class="ln">1</span><span class="cl"><span class="nd">@Configuration</span><span class="w">
+</span></span></span><span class="line"><span class="ln">2</span><span class="cl"><span class="nd">@EnableRedisHttpSession</span><span class="p">(</span><span class="n">maxInactiveIntervalInSeconds</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">1800</span><span class="p">)</span><span class="w">
+</span></span></span><span class="line"><span class="ln">3</span><span class="cl"><span class="kd">public</span><span class="w"> </span><span class="kd">class</span> <span class="nc">SessionConfig</span><span class="w"> </span><span class="p">{</span><span class="w">
+</span></span></span><span class="line"><span class="ln">4</span><span class="cl"><span class="w">    
+</span></span></span><span class="line"><span class="ln">5</span><span class="cl"><span class="w">    </span><span class="nd">@Bean</span><span class="w">
+</span></span></span><span class="line"><span class="ln">6</span><span class="cl"><span class="w">    </span><span class="kd">public</span><span class="w"> </span><span class="n">LettuceConnectionFactory</span><span class="w"> </span><span class="nf">connectionFactory</span><span class="p">()</span><span class="w"> </span><span class="p">{</span><span class="w">
+</span></span></span><span class="line"><span class="ln">7</span><span class="cl"><span class="w">        </span><span class="k">return</span><span class="w"> </span><span class="k">new</span><span class="w"> </span><span class="n">LettuceConnectionFactory</span><span class="p">();</span><span class="w">
+</span></span></span><span class="line"><span class="ln">8</span><span class="cl"><span class="w">    </span><span class="p">}</span><span class="w">
+</span></span></span><span class="line"><span class="ln">9</span><span class="cl"><span class="p">}</span><span class="w">
+</span></span></span></code></pre></div><p><strong>使用 JWT Token</strong>：</p>
+<div class="highlight"><pre tabindex="0" class="chroma"><code class="language-java" data-lang="java"><span class="line"><span class="ln"> 1</span><span class="cl"><span class="nd">@RestController</span><span class="w">
+</span></span></span><span class="line"><span class="ln"> 2</span><span class="cl"><span class="kd">public</span><span class="w"> </span><span class="kd">class</span> <span class="nc">AuthController</span><span class="w"> </span><span class="p">{</span><span class="w">
+</span></span></span><span class="line"><span class="ln"> 3</span><span class="cl"><span class="w">    
+</span></span></span><span class="line"><span class="ln"> 4</span><span class="cl"><span class="w">    </span><span class="nd">@PostMapping</span><span class="p">(</span><span class="s">&#34;/login&#34;</span><span class="p">)</span><span class="w">
+</span></span></span><span class="line"><span class="ln"> 5</span><span class="cl"><span class="w">    </span><span class="kd">public</span><span class="w"> </span><span class="n">Result</span><span class="w"> </span><span class="nf">login</span><span class="p">(</span><span class="nd">@RequestBody</span><span class="w"> </span><span class="n">LoginRequest</span><span class="w"> </span><span class="n">request</span><span class="p">)</span><span class="w"> </span><span class="p">{</span><span class="w">
+</span></span></span><span class="line"><span class="ln"> 6</span><span class="cl"><span class="w">        </span><span class="c1">// 验证用户名密码</span><span class="w">
+</span></span></span><span class="line"><span class="ln"> 7</span><span class="cl"><span class="w">        </span><span class="n">User</span><span class="w"> </span><span class="n">user</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">userService</span><span class="p">.</span><span class="na">authenticate</span><span class="p">(</span><span class="n">request</span><span class="p">.</span><span class="na">getUsername</span><span class="p">(),</span><span class="w"> </span><span class="n">request</span><span class="p">.</span><span class="na">getPassword</span><span class="p">());</span><span class="w">
+</span></span></span><span class="line"><span class="ln"> 8</span><span class="cl"><span class="w">        
+</span></span></span><span class="line"><span class="ln"> 9</span><span class="cl"><span class="w">        </span><span class="c1">// 生成 JWT Token</span><span class="w">
+</span></span></span><span class="line"><span class="ln">10</span><span class="cl"><span class="w">        </span><span class="n">String</span><span class="w"> </span><span class="n">token</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">JwtUtil</span><span class="p">.</span><span class="na">generateToken</span><span class="p">(</span><span class="n">user</span><span class="p">.</span><span class="na">getId</span><span class="p">());</span><span class="w">
+</span></span></span><span class="line"><span class="ln">11</span><span class="cl"><span class="w">        
+</span></span></span><span class="line"><span class="ln">12</span><span class="cl"><span class="w">        </span><span class="k">return</span><span class="w"> </span><span class="n">Result</span><span class="p">.</span><span class="na">success</span><span class="p">(</span><span class="n">token</span><span class="p">);</span><span class="w">
+</span></span></span><span class="line"><span class="ln">13</span><span class="cl"><span class="w">    </span><span class="p">}</span><span class="w">
+</span></span></span><span class="line"><span class="ln">14</span><span class="cl"><span class="p">}</span><span class="w">
+</span></span></span></code></pre></div><blockquote>
+<p><strong>架构思考：</strong> 会话保持的最佳实践是在应用层实现无状态化。通过 Redis 共享 Session 或使用 JWT Token，可以实现真正的水平扩展，而不依赖于负载均衡器的特定功能。</p>
+</blockquote>
+<hr>
+<h2 id="https-配置">HTTPS 配置<a hidden class="anchor" aria-hidden="true" href="#https-配置">#</a></h2>
+<h3 id="ssl-证书配置">SSL 证书配置<a hidden class="anchor" aria-hidden="true" href="#ssl-证书配置">#</a></h3>
+<div class="highlight"><pre tabindex="0" class="chroma"><code class="language-nginx" data-lang="nginx"><span class="line"><span class="ln"> 1</span><span class="cl"><span class="k">server</span> <span class="p">{</span>
+</span></span><span class="line"><span class="ln"> 2</span><span class="cl">    <span class="kn">listen</span> <span class="mi">443</span> <span class="s">ssl</span> <span class="s">http2</span><span class="p">;</span>
+</span></span><span class="line"><span class="ln"> 3</span><span class="cl">    <span class="kn">server_name</span> <span class="s">api.example.com</span><span class="p">;</span>
+</span></span><span class="line"><span class="ln"> 4</span><span class="cl">    
+</span></span><span class="line"><span class="ln"> 5</span><span class="cl">    <span class="c1"># SSL 证书
+</span></span></span><span class="line"><span class="ln"> 6</span><span class="cl">    <span class="kn">ssl_certificate</span> <span class="s">/etc/nginx/ssl/api.example.com.crt</span><span class="p">;</span>
+</span></span><span class="line"><span class="ln"> 7</span><span class="cl">    <span class="kn">ssl_certificate_key</span> <span class="s">/etc/nginx/ssl/api.example.com.key</span><span class="p">;</span>
+</span></span><span class="line"><span class="ln"> 8</span><span class="cl">    
+</span></span><span class="line"><span class="ln"> 9</span><span class="cl">    <span class="c1"># SSL 协议和加密套件
+</span></span></span><span class="line"><span class="ln">10</span><span class="cl">    <span class="kn">ssl_protocols</span> <span class="s">TLSv1.2</span> <span class="s">TLSv1.3</span><span class="p">;</span>
+</span></span><span class="line"><span class="ln">11</span><span class="cl">    <span class="kn">ssl_ciphers</span> <span class="s">&#39;ECDHE-ECDSA-AES128-GCM-SHA256:ECDHE-RSA-AES128-GCM-SHA256&#39;</span><span class="p">;</span>
+</span></span><span class="line"><span class="ln">12</span><span class="cl">    <span class="kn">ssl_prefer_server_ciphers</span> <span class="no">on</span><span class="p">;</span>
+</span></span><span class="line"><span class="ln">13</span><span class="cl">    
+</span></span><span class="line"><span class="ln">14</span><span class="cl">    <span class="c1"># SSL 会话缓存
+</span></span></span><span class="line"><span class="ln">15</span><span class="cl">    <span class="kn">ssl_session_cache</span> <span class="s">shared:SSL:10m</span><span class="p">;</span>
+</span></span><span class="line"><span class="ln">16</span><span class="cl">    <span class="kn">ssl_session_timeout</span> <span class="mi">10m</span><span class="p">;</span>
+</span></span><span class="line"><span class="ln">17</span><span class="cl">    
+</span></span><span class="line"><span class="ln">18</span><span class="cl">    <span class="c1"># HSTS
+</span></span></span><span class="line"><span class="ln">19</span><span class="cl">    <span class="kn">add_header</span> <span class="s">Strict-Transport-Security</span> <span class="s">&#34;max-age=31536000&#34;</span> <span class="s">always</span><span class="p">;</span>
+</span></span><span class="line"><span class="ln">20</span><span class="cl">    
+</span></span><span class="line"><span class="ln">21</span><span class="cl">    <span class="kn">location</span> <span class="s">/</span> <span class="p">{</span>
+</span></span><span class="line"><span class="ln">22</span><span class="cl">        <span class="kn">proxy_pass</span> <span class="s">http://backend</span><span class="p">;</span>
+</span></span><span class="line"><span class="ln">23</span><span class="cl">        <span class="kn">proxy_set_header</span> <span class="s">Host</span> <span class="nv">$host</span><span class="p">;</span>
+</span></span><span class="line"><span class="ln">24</span><span class="cl">        <span class="kn">proxy_set_header</span> <span class="s">X-Real-IP</span> <span class="nv">$remote_addr</span><span class="p">;</span>
+</span></span><span class="line"><span class="ln">25</span><span class="cl">        <span class="kn">proxy_set_header</span> <span class="s">X-Forwarded-For</span> <span class="nv">$proxy_add_x_forwarded_for</span><span class="p">;</span>
+</span></span><span class="line"><span class="ln">26</span><span class="cl">        <span class="kn">proxy_set_header</span> <span class="s">X-Forwarded-Proto</span> <span class="nv">$scheme</span><span class="p">;</span>
+</span></span><span class="line"><span class="ln">27</span><span class="cl">    <span class="p">}</span>
+</span></span><span class="line"><span class="ln">28</span><span class="cl"><span class="p">}</span>
+</span></span><span class="line"><span class="ln">29</span><span class="cl">
+</span></span><span class="line"><span class="ln">30</span><span class="cl"><span class="c1"># HTTP 重定向到 HTTPS
+</span></span></span><span class="line"><span class="ln">31</span><span class="cl"><span class="k">server</span> <span class="p">{</span>
+</span></span><span class="line"><span class="ln">32</span><span class="cl">    <span class="kn">listen</span> <span class="mi">80</span><span class="p">;</span>
+</span></span><span class="line"><span class="ln">33</span><span class="cl">    <span class="kn">server_name</span> <span class="s">api.example.com</span><span class="p">;</span>
+</span></span><span class="line"><span class="ln">34</span><span class="cl">    <span class="kn">return</span> <span class="mi">301</span> <span class="s">https://</span><span class="nv">$server_name$request_uri</span><span class="p">;</span>
+</span></span><span class="line"><span class="ln">35</span><span class="cl"><span class="p">}</span>
+</span></span></code></pre></div><h3 id="免费-ssl-证书lets-encrypt">免费 SSL 证书（Let&rsquo;s Encrypt）<a hidden class="anchor" aria-hidden="true" href="#免费-ssl-证书lets-encrypt">#</a></h3>
+<div class="highlight"><pre tabindex="0" class="chroma"><code class="language-bash" data-lang="bash"><span class="line"><span class="ln">1</span><span class="cl"><span class="c1"># 安装 Certbot</span>
+</span></span><span class="line"><span class="ln">2</span><span class="cl">sudo yum install certbot python3-certbot-nginx
+</span></span><span class="line"><span class="ln">3</span><span class="cl">
+</span></span><span class="line"><span class="ln">4</span><span class="cl"><span class="c1"># 获取证书</span>
+</span></span><span class="line"><span class="ln">5</span><span class="cl">sudo certbot --nginx -d api.example.com
+</span></span><span class="line"><span class="ln">6</span><span class="cl">
+</span></span><span class="line"><span class="ln">7</span><span class="cl"><span class="c1"># 自动续期</span>
+</span></span><span class="line"><span class="ln">8</span><span class="cl">sudo certbot renew --dry-run
+</span></span></code></pre></div><hr>
+<h2 id="性能优化">性能优化<a hidden class="anchor" aria-hidden="true" href="#性能优化">#</a></h2>
+<h3 id="1-连接优化">1. 连接优化<a hidden class="anchor" aria-hidden="true" href="#1-连接优化">#</a></h3>
+<div class="highlight"><pre tabindex="0" class="chroma"><code class="language-nginx" data-lang="nginx"><span class="line"><span class="ln"> 1</span><span class="cl"><span class="k">http</span> <span class="p">{</span>
+</span></span><span class="line"><span class="ln"> 2</span><span class="cl">    <span class="c1"># 长连接配置
+</span></span></span><span class="line"><span class="ln"> 3</span><span class="cl">    <span class="kn">keepalive_timeout</span> <span class="mi">65</span><span class="p">;</span>
+</span></span><span class="line"><span class="ln"> 4</span><span class="cl">    <span class="kn">keepalive_requests</span> <span class="mi">100</span><span class="p">;</span>
+</span></span><span class="line"><span class="ln"> 5</span><span class="cl">    
+</span></span><span class="line"><span class="ln"> 6</span><span class="cl">    <span class="c1"># 上游服务器长连接
+</span></span></span><span class="line"><span class="ln"> 7</span><span class="cl">    <span class="kn">upstream</span> <span class="s">backend</span> <span class="p">{</span>
+</span></span><span class="line"><span class="ln"> 8</span><span class="cl">        <span class="kn">server</span> <span class="n">192.168.1.101</span><span class="p">:</span><span class="mi">8080</span><span class="p">;</span>
+</span></span><span class="line"><span class="ln"> 9</span><span class="cl">        <span class="kn">server</span> <span class="n">192.168.1.102</span><span class="p">:</span><span class="mi">8080</span><span class="p">;</span>
+</span></span><span class="line"><span class="ln">10</span><span class="cl">        
+</span></span><span class="line"><span class="ln">11</span><span class="cl">        <span class="kn">keepalive</span> <span class="mi">32</span><span class="p">;</span>  <span class="c1"># 保持 32 个空闲连接
+</span></span></span><span class="line"><span class="ln">12</span><span class="cl">    <span class="p">}</span>
+</span></span><span class="line"><span class="ln">13</span><span class="cl">    
+</span></span><span class="line"><span class="ln">14</span><span class="cl">    <span class="kn">server</span> <span class="p">{</span>
+</span></span><span class="line"><span class="ln">15</span><span class="cl">        <span class="kn">location</span> <span class="s">/</span> <span class="p">{</span>
+</span></span><span class="line"><span class="ln">16</span><span class="cl">            <span class="kn">proxy_pass</span> <span class="s">http://backend</span><span class="p">;</span>
+</span></span><span class="line"><span class="ln">17</span><span class="cl">            <span class="kn">proxy_http_version</span> <span class="mi">1</span><span class="s">.1</span><span class="p">;</span>
+</span></span><span class="line"><span class="ln">18</span><span class="cl">            <span class="kn">proxy_set_header</span> <span class="s">Connection</span> <span class="s">&#34;&#34;</span><span class="p">;</span>
+</span></span><span class="line"><span class="ln">19</span><span class="cl">        <span class="p">}</span>
+</span></span><span class="line"><span class="ln">20</span><span class="cl">    <span class="p">}</span>
+</span></span><span class="line"><span class="ln">21</span><span class="cl"><span class="p">}</span>
+</span></span></code></pre></div><h3 id="2-缓存配置">2. 缓存配置<a hidden class="anchor" aria-hidden="true" href="#2-缓存配置">#</a></h3>
+<div class="highlight"><pre tabindex="0" class="chroma"><code class="language-nginx" data-lang="nginx"><span class="line"><span class="ln"> 1</span><span class="cl"><span class="c1"># 定义缓存路径
+</span></span></span><span class="line"><span class="ln"> 2</span><span class="cl"><span class="k">proxy_cache_path</span> <span class="s">/var/cache/nginx</span> <span class="s">levels=1:2</span> <span class="s">keys_zone=my_cache:10m</span> <span class="s">max_size=1g</span> <span class="s">inactive=60m</span><span class="p">;</span>
+</span></span><span class="line"><span class="ln"> 3</span><span class="cl">
+</span></span><span class="line"><span class="ln"> 4</span><span class="cl"><span class="k">server</span> <span class="p">{</span>
+</span></span><span class="line"><span class="ln"> 5</span><span class="cl">    <span class="kn">location</span> <span class="s">/</span> <span class="p">{</span>
+</span></span><span class="line"><span class="ln"> 6</span><span class="cl">        <span class="kn">proxy_pass</span> <span class="s">http://backend</span><span class="p">;</span>
+</span></span><span class="line"><span class="ln"> 7</span><span class="cl">        
+</span></span><span class="line"><span class="ln"> 8</span><span class="cl">        <span class="c1"># 启用缓存
+</span></span></span><span class="line"><span class="ln"> 9</span><span class="cl">        <span class="kn">proxy_cache</span> <span class="s">my_cache</span><span class="p">;</span>
+</span></span><span class="line"><span class="ln">10</span><span class="cl">        <span class="kn">proxy_cache_valid</span> <span class="mi">200</span> <span class="mi">304</span> <span class="mi">10m</span><span class="p">;</span>
+</span></span><span class="line"><span class="ln">11</span><span class="cl">        <span class="kn">proxy_cache_valid</span> <span class="mi">404</span> <span class="mi">1m</span><span class="p">;</span>
+</span></span><span class="line"><span class="ln">12</span><span class="cl">        <span class="kn">proxy_cache_key</span> <span class="nv">$scheme$proxy_host$request_uri</span><span class="p">;</span>
+</span></span><span class="line"><span class="ln">13</span><span class="cl">        
+</span></span><span class="line"><span class="ln">14</span><span class="cl">        <span class="c1"># 缓存头信息
+</span></span></span><span class="line"><span class="ln">15</span><span class="cl">        <span class="kn">add_header</span> <span class="s">X-Cache-Status</span> <span class="nv">$upstream_cache_status</span><span class="p">;</span>
+</span></span><span class="line"><span class="ln">16</span><span class="cl">    <span class="p">}</span>
+</span></span><span class="line"><span class="ln">17</span><span class="cl">    
+</span></span><span class="line"><span class="ln">18</span><span class="cl">    <span class="c1"># 静态资源缓存
+</span></span></span><span class="line"><span class="ln">19</span><span class="cl">    <span class="kn">location</span> <span class="p">~</span><span class="sr">*</span> <span class="s">\.(jpg|jpeg|png|gif|ico|css|js)</span>$ <span class="p">{</span>
+</span></span><span class="line"><span class="ln">20</span><span class="cl">        <span class="kn">proxy_pass</span> <span class="s">http://backend</span><span class="p">;</span>
+</span></span><span class="line"><span class="ln">21</span><span class="cl">        <span class="kn">proxy_cache</span> <span class="s">my_cache</span><span class="p">;</span>
+</span></span><span class="line"><span class="ln">22</span><span class="cl">        <span class="kn">proxy_cache_valid</span> <span class="mi">200</span> <span class="s">30d</span><span class="p">;</span>
+</span></span><span class="line"><span class="ln">23</span><span class="cl">        <span class="kn">expires</span> <span class="s">30d</span><span class="p">;</span>
+</span></span><span class="line"><span class="ln">24</span><span class="cl">    <span class="p">}</span>
+</span></span><span class="line"><span class="ln">25</span><span class="cl"><span class="p">}</span>
+</span></span></code></pre></div><h3 id="3-gzip-压缩">3. Gzip 压缩<a hidden class="anchor" aria-hidden="true" href="#3-gzip-压缩">#</a></h3>
+<div class="highlight"><pre tabindex="0" class="chroma"><code class="language-nginx" data-lang="nginx"><span class="line"><span class="ln"> 1</span><span class="cl"><span class="k">http</span> <span class="p">{</span>
+</span></span><span class="line"><span class="ln"> 2</span><span class="cl">    <span class="kn">gzip</span> <span class="no">on</span><span class="p">;</span>
+</span></span><span class="line"><span class="ln"> 3</span><span class="cl">    <span class="kn">gzip_vary</span> <span class="no">on</span><span class="p">;</span>
+</span></span><span class="line"><span class="ln"> 4</span><span class="cl">    <span class="kn">gzip_proxied</span> <span class="s">any</span><span class="p">;</span>
+</span></span><span class="line"><span class="ln"> 5</span><span class="cl">    <span class="kn">gzip_comp_level</span> <span class="mi">6</span><span class="p">;</span>
+</span></span><span class="line"><span class="ln"> 6</span><span class="cl">    <span class="kn">gzip_types</span> <span class="s">text/plain</span> <span class="s">text/css</span> <span class="s">text/xml</span> <span class="s">text/javascript</span> 
+</span></span><span class="line"><span class="ln"> 7</span><span class="cl">               <span class="s">application/json</span> <span class="s">application/javascript</span> <span class="s">application/xml+rss</span> 
+</span></span><span class="line"><span class="ln"> 8</span><span class="cl">               <span class="s">application/rss+xml</span> <span class="s">font/truetype</span> <span class="s">font/opentype</span> 
+</span></span><span class="line"><span class="ln"> 9</span><span class="cl">               <span class="s">application/vnd.ms-fontobject</span> <span class="s">image/svg+xml</span><span class="p">;</span>
+</span></span><span class="line"><span class="ln">10</span><span class="cl">    <span class="kn">gzip_disable</span> <span class="s">&#34;msie6&#34;</span><span class="p">;</span>
+</span></span><span class="line"><span class="ln">11</span><span class="cl"><span class="p">}</span>
+</span></span></code></pre></div><h3 id="4-限流配置">4. 限流配置<a hidden class="anchor" aria-hidden="true" href="#4-限流配置">#</a></h3>
+<div class="highlight"><pre tabindex="0" class="chroma"><code class="language-nginx" data-lang="nginx"><span class="line"><span class="ln"> 1</span><span class="cl"><span class="k">http</span> <span class="p">{</span>
+</span></span><span class="line"><span class="ln"> 2</span><span class="cl">    <span class="c1"># 定义限流区域
+</span></span></span><span class="line"><span class="ln"> 3</span><span class="cl">    <span class="kn">limit_req_zone</span> <span class="nv">$binary_remote_addr</span> <span class="s">zone=api_limit:10m</span> <span class="s">rate=10r/s</span><span class="p">;</span>
+</span></span><span class="line"><span class="ln"> 4</span><span class="cl">    <span class="kn">limit_conn_zone</span> <span class="nv">$binary_remote_addr</span> <span class="s">zone=conn_limit:10m</span><span class="p">;</span>
+</span></span><span class="line"><span class="ln"> 5</span><span class="cl">    
+</span></span><span class="line"><span class="ln"> 6</span><span class="cl">    <span class="kn">server</span> <span class="p">{</span>
+</span></span><span class="line"><span class="ln"> 7</span><span class="cl">        <span class="kn">location</span> <span class="s">/api/</span> <span class="p">{</span>
+</span></span><span class="line"><span class="ln"> 8</span><span class="cl">            <span class="c1"># 限制请求速率：每秒 10 个请求，突发 20 个
+</span></span></span><span class="line"><span class="ln"> 9</span><span class="cl">            <span class="kn">limit_req</span> <span class="s">zone=api_limit</span> <span class="s">burst=20</span> <span class="s">nodelay</span><span class="p">;</span>
+</span></span><span class="line"><span class="ln">10</span><span class="cl">            
+</span></span><span class="line"><span class="ln">11</span><span class="cl">            <span class="c1"># 限制并发连接数：每个 IP 最多 10 个连接
+</span></span></span><span class="line"><span class="ln">12</span><span class="cl">            <span class="kn">limit_conn</span> <span class="s">conn_limit</span> <span class="mi">10</span><span class="p">;</span>
+</span></span><span class="line"><span class="ln">13</span><span class="cl">            
+</span></span><span class="line"><span class="ln">14</span><span class="cl">            <span class="kn">proxy_pass</span> <span class="s">http://backend</span><span class="p">;</span>
+</span></span><span class="line"><span class="ln">15</span><span class="cl">        <span class="p">}</span>
+</span></span><span class="line"><span class="ln">16</span><span class="cl">    <span class="p">}</span>
+</span></span><span class="line"><span class="ln">17</span><span class="cl"><span class="p">}</span>
+</span></span></code></pre></div><h3 id="5-worker-进程优化">5. Worker 进程优化<a hidden class="anchor" aria-hidden="true" href="#5-worker-进程优化">#</a></h3>
+<div class="highlight"><pre tabindex="0" class="chroma"><code class="language-nginx" data-lang="nginx"><span class="line"><span class="ln"> 1</span><span class="cl"><span class="c1"># 自动设置 worker 进程数为 CPU 核心数
+</span></span></span><span class="line"><span class="ln"> 2</span><span class="cl"><span class="k">worker_processes</span> <span class="s">auto</span><span class="p">;</span>
+</span></span><span class="line"><span class="ln"> 3</span><span class="cl">
+</span></span><span class="line"><span class="ln"> 4</span><span class="cl"><span class="c1"># 绑定 worker 进程到 CPU 核心
+</span></span></span><span class="line"><span class="ln"> 5</span><span class="cl"><span class="k">worker_cpu_affinity</span> <span class="s">auto</span><span class="p">;</span>
+</span></span><span class="line"><span class="ln"> 6</span><span class="cl">
+</span></span><span class="line"><span class="ln"> 7</span><span class="cl"><span class="c1"># 每个 worker 进程的最大文件描述符数
+</span></span></span><span class="line"><span class="ln"> 8</span><span class="cl"><span class="k">worker_rlimit_nofile</span> <span class="mi">65535</span><span class="p">;</span>
+</span></span><span class="line"><span class="ln"> 9</span><span class="cl">
+</span></span><span class="line"><span class="ln">10</span><span class="cl"><span class="k">events</span> <span class="p">{</span>
+</span></span><span class="line"><span class="ln">11</span><span class="cl">    <span class="c1"># 每个 worker 进程的最大连接数
+</span></span></span><span class="line"><span class="ln">12</span><span class="cl">    <span class="kn">worker_connections</span> <span class="mi">10240</span><span class="p">;</span>
+</span></span><span class="line"><span class="ln">13</span><span class="cl">    
+</span></span><span class="line"><span class="ln">14</span><span class="cl">    <span class="c1"># 使用 epoll 事件模型
+</span></span></span><span class="line"><span class="ln">15</span><span class="cl">    <span class="kn">use</span> <span class="s">epoll</span><span class="p">;</span>
+</span></span><span class="line"><span class="ln">16</span><span class="cl">    
+</span></span><span class="line"><span class="ln">17</span><span class="cl">    <span class="c1"># 尽可能多地接受连接
+</span></span></span><span class="line"><span class="ln">18</span><span class="cl">    <span class="kn">multi_accept</span> <span class="no">on</span><span class="p">;</span>
+</span></span><span class="line"><span class="ln">19</span><span class="cl"><span class="p">}</span>
+</span></span></code></pre></div><hr>
+<h2 id="监控与日志">监控与日志<a hidden class="anchor" aria-hidden="true" href="#监控与日志">#</a></h2>
+<h3 id="访问日志分析">访问日志分析<a hidden class="anchor" aria-hidden="true" href="#访问日志分析">#</a></h3>
+<div class="highlight"><pre tabindex="0" class="chroma"><code class="language-nginx" data-lang="nginx"><span class="line"><span class="ln">1</span><span class="cl"><span class="c1"># 自定义日志格式
+</span></span></span><span class="line"><span class="ln">2</span><span class="cl"><span class="k">log_format</span> <span class="s">detailed</span> <span class="s">&#39;</span><span class="nv">$remote_addr</span> <span class="s">-</span> <span class="nv">$remote_user</span> <span class="s">[</span><span class="nv">$time_local]</span> <span class="s">&#39;</span>
+</span></span><span class="line"><span class="ln">3</span><span class="cl">                    <span class="s">&#39;&#34;</span><span class="nv">$request&#34;</span> <span class="nv">$status</span> <span class="nv">$body_bytes_sent</span> <span class="s">&#39;</span>
+</span></span><span class="line"><span class="ln">4</span><span class="cl">                    <span class="s">&#39;&#34;</span><span class="nv">$http_referer&#34;</span> <span class="s">&#34;</span><span class="nv">$http_user_agent&#34;</span> <span class="s">&#39;</span>
+</span></span><span class="line"><span class="ln">5</span><span class="cl">                    <span class="s">&#39;</span><span class="nv">$request_time</span> <span class="nv">$upstream_response_time</span> <span class="s">&#39;</span>
+</span></span><span class="line"><span class="ln">6</span><span class="cl">                    <span class="s">&#39;</span><span class="nv">$upstream_addr</span> <span class="nv">$upstream_status&#39;</span><span class="p">;</span>
+</span></span><span class="line"><span class="ln">7</span><span class="cl">
+</span></span><span class="line"><span class="ln">8</span><span class="cl"><span class="k">access_log</span> <span class="s">/var/log/nginx/access.log</span> <span class="s">detailed</span><span class="p">;</span>
+</span></span></code></pre></div><h3 id="使用-goaccess-分析日志">使用 GoAccess 分析日志<a hidden class="anchor" aria-hidden="true" href="#使用-goaccess-分析日志">#</a></h3>
+<div class="highlight"><pre tabindex="0" class="chroma"><code class="language-bash" data-lang="bash"><span class="line"><span class="ln">1</span><span class="cl"><span class="c1"># 安装 GoAccess</span>
+</span></span><span class="line"><span class="ln">2</span><span class="cl">sudo yum install goaccess
+</span></span><span class="line"><span class="ln">3</span><span class="cl">
+</span></span><span class="line"><span class="ln">4</span><span class="cl"><span class="c1"># 实时分析日志</span>
+</span></span><span class="line"><span class="ln">5</span><span class="cl">goaccess /var/log/nginx/access.log -o /var/www/html/report.html --log-format<span class="o">=</span>COMBINED --real-time-html
+</span></span></code></pre></div><h3 id="nginx-状态监控">Nginx 状态监控<a hidden class="anchor" aria-hidden="true" href="#nginx-状态监控">#</a></h3>
+<div class="highlight"><pre tabindex="0" class="chroma"><code class="language-nginx" data-lang="nginx"><span class="line"><span class="ln"> 1</span><span class="cl"><span class="k">server</span> <span class="p">{</span>
+</span></span><span class="line"><span class="ln"> 2</span><span class="cl">    <span class="kn">listen</span> <span class="mi">8080</span><span class="p">;</span>
+</span></span><span class="line"><span class="ln"> 3</span><span class="cl">    <span class="kn">server_name</span> <span class="s">localhost</span><span class="p">;</span>
+</span></span><span class="line"><span class="ln"> 4</span><span class="cl">    
+</span></span><span class="line"><span class="ln"> 5</span><span class="cl">    <span class="kn">location</span> <span class="s">/nginx_status</span> <span class="p">{</span>
+</span></span><span class="line"><span class="ln"> 6</span><span class="cl">        <span class="kn">stub_status</span> <span class="no">on</span><span class="p">;</span>
+</span></span><span class="line"><span class="ln"> 7</span><span class="cl">        <span class="kn">access_log</span> <span class="no">off</span><span class="p">;</span>
+</span></span><span class="line"><span class="ln"> 8</span><span class="cl">        <span class="kn">allow</span> <span class="n">127.0.0.1</span><span class="p">;</span>
+</span></span><span class="line"><span class="ln"> 9</span><span class="cl">        <span class="kn">deny</span> <span class="s">all</span><span class="p">;</span>
+</span></span><span class="line"><span class="ln">10</span><span class="cl">    <span class="p">}</span>
+</span></span><span class="line"><span class="ln">11</span><span class="cl"><span class="p">}</span>
+</span></span></code></pre></div><p>访问 <code>http://localhost:8080/nginx_status</code> 查看状态：</p>
+<div class="highlight"><pre tabindex="0" class="chroma"><code class="language-fallback" data-lang="fallback"><span class="line"><span class="ln">1</span><span class="cl">Active connections: 291
+</span></span><span class="line"><span class="ln">2</span><span class="cl">server accepts handled requests
+</span></span><span class="line"><span class="ln">3</span><span class="cl"> 16630948 16630948 31070465
+</span></span><span class="line"><span class="ln">4</span><span class="cl">Reading: 6 Writing: 179 Waiting: 106
+</span></span></code></pre></div><h3 id="prometheus-监控">Prometheus 监控<a hidden class="anchor" aria-hidden="true" href="#prometheus-监控">#</a></h3>
+<p>使用 <code>nginx-prometheus-exporter</code>：</p>
+<div class="highlight"><pre tabindex="0" class="chroma"><code class="language-bash" data-lang="bash"><span class="line"><span class="ln">1</span><span class="cl"><span class="c1"># 下载并运行 exporter</span>
+</span></span><span class="line"><span class="ln">2</span><span class="cl">docker run -p 9113:9113 nginx/nginx-prometheus-exporter:latest <span class="se">\
+</span></span></span><span class="line"><span class="ln">3</span><span class="cl">  -nginx.scrape-uri<span class="o">=</span>http://nginx:8080/nginx_status
+</span></span></code></pre></div><hr>
+<h2 id="生产环境最佳实践">生产环境最佳实践<a hidden class="anchor" aria-hidden="true" href="#生产环境最佳实践">#</a></h2>
+<h3 id="1-配置文件组织">1. 配置文件组织<a hidden class="anchor" aria-hidden="true" href="#1-配置文件组织">#</a></h3>
+<div class="highlight"><pre tabindex="0" class="chroma"><code class="language-fallback" data-lang="fallback"><span class="line"><span class="ln"> 1</span><span class="cl">/etc/nginx/
+</span></span><span class="line"><span class="ln"> 2</span><span class="cl">├── nginx.conf              # 主配置文件
+</span></span><span class="line"><span class="ln"> 3</span><span class="cl">├── conf.d/
+</span></span><span class="line"><span class="ln"> 4</span><span class="cl">│   ├── api.conf           # API 服务配置
+</span></span><span class="line"><span class="ln"> 5</span><span class="cl">│   ├── web.conf           # Web 服务配置
+</span></span><span class="line"><span class="ln"> 6</span><span class="cl">│   └── admin.conf         # 管理后台配置
+</span></span><span class="line"><span class="ln"> 7</span><span class="cl">├── upstream/
+</span></span><span class="line"><span class="ln"> 8</span><span class="cl">│   ├── api-backend.conf   # API 后端服务器列表
+</span></span><span class="line"><span class="ln"> 9</span><span class="cl">│   └── web-backend.conf   # Web 后端服务器列表
+</span></span><span class="line"><span class="ln">10</span><span class="cl">└── ssl/
+</span></span><span class="line"><span class="ln">11</span><span class="cl">    ├── api.example.com.crt
+</span></span><span class="line"><span class="ln">12</span><span class="cl">    └── api.example.com.key
+</span></span></code></pre></div><h3 id="2-配置检查与重载">2. 配置检查与重载<a hidden class="anchor" aria-hidden="true" href="#2-配置检查与重载">#</a></h3>
+<div class="highlight"><pre tabindex="0" class="chroma"><code class="language-bash" data-lang="bash"><span class="line"><span class="ln">1</span><span class="cl"><span class="c1"># 检查配置文件语法</span>
+</span></span><span class="line"><span class="ln">2</span><span class="cl">sudo nginx -t
+</span></span><span class="line"><span class="ln">3</span><span class="cl">
+</span></span><span class="line"><span class="ln">4</span><span class="cl"><span class="c1"># 重载配置（不中断服务）</span>
+</span></span><span class="line"><span class="ln">5</span><span class="cl">sudo nginx -s reload
+</span></span><span class="line"><span class="ln">6</span><span class="cl">
+</span></span><span class="line"><span class="ln">7</span><span class="cl"><span class="c1"># 查看 Nginx 版本和编译参数</span>
+</span></span><span class="line"><span class="ln">8</span><span class="cl">nginx -V
+</span></span></code></pre></div><h3 id="3-安全加固">3. 安全加固<a hidden class="anchor" aria-hidden="true" href="#3-安全加固">#</a></h3>
+<div class="highlight"><pre tabindex="0" class="chroma"><code class="language-nginx" data-lang="nginx"><span class="line"><span class="ln"> 1</span><span class="cl"><span class="c1"># 隐藏 Nginx 版本号
+</span></span></span><span class="line"><span class="ln"> 2</span><span class="cl"><span class="k">server_tokens</span> <span class="no">off</span><span class="p">;</span>
+</span></span><span class="line"><span class="ln"> 3</span><span class="cl">
+</span></span><span class="line"><span class="ln"> 4</span><span class="cl"><span class="c1"># 限制请求方法
+</span></span></span><span class="line"><span class="ln"> 5</span><span class="cl"><span class="k">if</span> <span class="s">(</span><span class="nv">$request_method</span> <span class="s">!~</span> <span class="s">^(GET|POST|PUT|DELETE|HEAD)</span>$<span class="s">)</span> <span class="p">{</span>
+</span></span><span class="line"><span class="ln"> 6</span><span class="cl">    <span class="kn">return</span> <span class="mi">405</span><span class="p">;</span>
+</span></span><span class="line"><span class="ln"> 7</span><span class="cl"><span class="p">}</span>
+</span></span><span class="line"><span class="ln"> 8</span><span class="cl">
+</span></span><span class="line"><span class="ln"> 9</span><span class="cl"><span class="c1"># 防止点击劫持
+</span></span></span><span class="line"><span class="ln">10</span><span class="cl"><span class="k">add_header</span> <span class="s">X-Frame-Options</span> <span class="s">&#34;SAMEORIGIN&#34;</span> <span class="s">always</span><span class="p">;</span>
+</span></span><span class="line"><span class="ln">11</span><span class="cl">
+</span></span><span class="line"><span class="ln">12</span><span class="cl"><span class="c1"># XSS 防护
+</span></span></span><span class="line"><span class="ln">13</span><span class="cl"><span class="k">add_header</span> <span class="s">X-XSS-Protection</span> <span class="s">&#34;1</span><span class="p">;</span> <span class="k">mode=block&#34;</span> <span class="s">always</span><span class="p">;</span>
+</span></span><span class="line"><span class="ln">14</span><span class="cl">
+</span></span><span class="line"><span class="ln">15</span><span class="cl"><span class="c1"># 内容类型嗅探防护
+</span></span></span><span class="line"><span class="ln">16</span><span class="cl"><span class="k">add_header</span> <span class="s">X-Content-Type-Options</span> <span class="s">&#34;nosniff&#34;</span> <span class="s">always</span><span class="p">;</span>
+</span></span><span class="line"><span class="ln">17</span><span class="cl">
+</span></span><span class="line"><span class="ln">18</span><span class="cl"><span class="c1"># CSP 策略
+</span></span></span><span class="line"><span class="ln">19</span><span class="cl"><span class="k">add_header</span> <span class="s">Content-Security-Policy</span> <span class="s">&#34;default-src</span> <span class="s">&#39;self&#39;&#34;</span> <span class="s">always</span><span class="p">;</span>
+</span></span></code></pre></div><h3 id="4-日志轮转">4. 日志轮转<a hidden class="anchor" aria-hidden="true" href="#4-日志轮转">#</a></h3>
+<div class="highlight"><pre tabindex="0" class="chroma"><code class="language-bash" data-lang="bash"><span class="line"><span class="ln"> 1</span><span class="cl"><span class="c1"># /etc/logrotate.d/nginx</span>
+</span></span><span class="line"><span class="ln"> 2</span><span class="cl">
+</span></span><span class="line"><span class="ln"> 3</span><span class="cl">/var/log/nginx/*.log <span class="o">{</span>
+</span></span><span class="line"><span class="ln"> 4</span><span class="cl">    daily
+</span></span><span class="line"><span class="ln"> 5</span><span class="cl">    missingok
+</span></span><span class="line"><span class="ln"> 6</span><span class="cl">    rotate <span class="m">14</span>
+</span></span><span class="line"><span class="ln"> 7</span><span class="cl">    compress
+</span></span><span class="line"><span class="ln"> 8</span><span class="cl">    delaycompress
+</span></span><span class="line"><span class="ln"> 9</span><span class="cl">    notifempty
+</span></span><span class="line"><span class="ln">10</span><span class="cl">    create <span class="m">0640</span> nginx adm
+</span></span><span class="line"><span class="ln">11</span><span class="cl">    sharedscripts
+</span></span><span class="line"><span class="ln">12</span><span class="cl">    postrotate
+</span></span><span class="line"><span class="ln">13</span><span class="cl">        <span class="o">[</span> -f /var/run/nginx.pid <span class="o">]</span> <span class="o">&amp;&amp;</span> <span class="nb">kill</span> -USR1 <span class="sb">`</span>cat /var/run/nginx.pid<span class="sb">`</span>
+</span></span><span class="line"><span class="ln">14</span><span class="cl">    endscript
+</span></span><span class="line"><span class="ln">15</span><span class="cl"><span class="o">}</span>
+</span></span></code></pre></div><blockquote>
+<p><strong>避坑提示：</strong> 生产环境中，务必做好以下几点：1) 定期备份配置文件；2) 使用版本控制管理配置；3) 配置变更前先在测试环境验证；4) 设置监控告警；5) 准备回滚方案。</p>
+</blockquote>
+<hr>
+<h2 id="总结与思考">总结与思考<a hidden class="anchor" aria-hidden="true" href="#总结与思考">#</a></h2>
+<p>本文深入讲解了 Nginx 反向代理和负载均衡的配置与优化，从基础概念到生产实践：</p>
+<ul>
+<li><strong>反向代理</strong>：理解原理，掌握基础配置和路径重写</li>
+<li><strong>负载均衡</strong>：掌握多种策略，根据场景选择合适方案</li>
+<li><strong>健康检查</strong>：实现故障检测和自动转移</li>
+<li><strong>会话保持</strong>：了解多种方案，推荐应用层无状态化</li>
+<li><strong>HTTPS 配置</strong>：SSL 证书配置和安全加固</li>
+<li><strong>性能优化</strong>：连接优化、缓存、压缩、限流等</li>
+<li><strong>监控日志</strong>：日志分析和状态监控</li>
+</ul>
+<p>在实际应用中，Nginx 的作用远不止于此。通过合理配置，还可以实现：</p>
+<ul>
+<li><strong>灰度发布</strong>：根据条件将部分流量导向新版本</li>
+<li><strong>A/B 测试</strong>：将不同用户导向不同版本</li>
+<li><strong>流量控制</strong>：限流、熔断、降级</li>
+<li><strong>安全防护</strong>：WAF、DDoS 防护</li>
+</ul>
+<p>下次当你需要搭建高可用服务架构时，Nginx 将是你的得力助手。</p>
+
+
+  </div>
+
+  <footer class="post-footer">
+    <ul class="post-tags">
+      <li><a href="http://localhost:1313/tags/nginx/">Nginx</a></li>
+      <li><a href="http://localhost:1313/tags/linux/">Linux</a></li>
+      <li><a href="http://localhost:1313/tags/%E6%9C%80%E4%BD%B3%E5%AE%9E%E8%B7%B5/">最佳实践</a></li>
+    </ul>
+<nav class="paginav">
+  <a class="prev" href="http://localhost:1313/posts/2025/07/git-%E5%B7%A5%E4%BD%9C%E6%B5%81%E4%BB%8E%E5%88%86%E6%94%AF%E7%AE%A1%E7%90%86%E5%88%B0%E4%BB%A3%E7%A0%81%E5%AE%A1%E6%9F%A5%E7%9A%84%E6%9C%80%E4%BD%B3%E5%AE%9E%E8%B7%B5/">
+    <span class="title">« Prev</span>
+    <br>
+    <span>Git 工作流：从分支管理到代码审查的最佳实践</span>
+  </a>
+  <a class="next" href="http://localhost:1313/posts/2025/05/easyexcel-%E7%99%BE%E4%B8%87%E7%BA%A7%E6%95%B0%E6%8D%AE%E5%AF%BC%E5%87%BA%E7%9A%84%E5%86%85%E5%AD%98%E4%BC%98%E5%8C%96%E5%AE%9E%E6%88%98/">
+    <span class="title">Next »</span>
+    <br>
+    <span>EasyExcel 百万级数据导出的内存优化实战</span>
+  </a>
+</nav>
+
+
+<ul class="share-buttons">
+    <li>
+        <a target="_blank" rel="noopener noreferrer" aria-label="share Nginx 反向代理与负载均衡实战：从入门到生产优化 on x"
+            href="https://x.com/intent/tweet/?text=Nginx%20%e5%8f%8d%e5%90%91%e4%bb%a3%e7%90%86%e4%b8%8e%e8%b4%9f%e8%bd%bd%e5%9d%87%e8%a1%a1%e5%ae%9e%e6%88%98%ef%bc%9a%e4%bb%8e%e5%85%a5%e9%97%a8%e5%88%b0%e7%94%9f%e4%ba%a7%e4%bc%98%e5%8c%96&amp;url=http%3a%2f%2flocalhost%3a1313%2fposts%2f2025%2f06%2fnginx-%25E5%258F%258D%25E5%2590%2591%25E4%25BB%25A3%25E7%2590%2586%25E4%25B8%258E%25E8%25B4%259F%25E8%25BD%25BD%25E5%259D%2587%25E8%25A1%25A1%25E5%25AE%259E%25E6%2588%2598%25E4%25BB%258E%25E5%2585%25A5%25E9%2597%25A8%25E5%2588%25B0%25E7%2594%259F%25E4%25BA%25A7%25E4%25BC%2598%25E5%258C%2596%2f&amp;hashtags=Nginx%2cLinux%2c%e6%9c%80%e4%bd%b3%e5%ae%9e%e8%b7%b5">
+            <svg version="1.1" viewBox="0 0 512 512" xml:space="preserve" height="30px" width="30px" fill="currentColor">
+                <path
+                    d="M512 62.554 L 512 449.446 C 512 483.97 483.97 512 449.446 512 L 62.554 512 C 28.03 512 0 483.97 0 449.446 L 0 62.554 C 0 28.03 28.029 0 62.554 0 L 449.446 0 C 483.971 0 512 28.03 512 62.554 Z M 269.951 190.75 L 182.567 75.216 L 56 75.216 L 207.216 272.95 L 63.9 436.783 L 125.266 436.783 L 235.9 310.383 L 332.567 436.783 L 456 436.783 L 298.367 228.367 L 432.367 75.216 L 371.033 75.216 Z M 127.633 110 L 164.101 110 L 383.481 400.065 L 349.5 400.065 Z" />
+            </svg>
+        </a>
+    </li>
+    <li>
+        <a target="_blank" rel="noopener noreferrer" aria-label="share Nginx 反向代理与负载均衡实战：从入门到生产优化 on linkedin"
+            href="https://www.linkedin.com/shareArticle?mini=true&amp;url=http%3a%2f%2flocalhost%3a1313%2fposts%2f2025%2f06%2fnginx-%25E5%258F%258D%25E5%2590%2591%25E4%25BB%25A3%25E7%2590%2586%25E4%25B8%258E%25E8%25B4%259F%25E8%25BD%25BD%25E5%259D%2587%25E8%25A1%25A1%25E5%25AE%259E%25E6%2588%2598%25E4%25BB%258E%25E5%2585%25A5%25E9%2597%25A8%25E5%2588%25B0%25E7%2594%259F%25E4%25BA%25A7%25E4%25BC%2598%25E5%258C%2596%2f&amp;title=Nginx%20%e5%8f%8d%e5%90%91%e4%bb%a3%e7%90%86%e4%b8%8e%e8%b4%9f%e8%bd%bd%e5%9d%87%e8%a1%a1%e5%ae%9e%e6%88%98%ef%bc%9a%e4%bb%8e%e5%85%a5%e9%97%a8%e5%88%b0%e7%94%9f%e4%ba%a7%e4%bc%98%e5%8c%96&amp;summary=Nginx%20%e5%8f%8d%e5%90%91%e4%bb%a3%e7%90%86%e4%b8%8e%e8%b4%9f%e8%bd%bd%e5%9d%87%e8%a1%a1%e5%ae%9e%e6%88%98%ef%bc%9a%e4%bb%8e%e5%85%a5%e9%97%a8%e5%88%b0%e7%94%9f%e4%ba%a7%e4%bc%98%e5%8c%96&amp;source=http%3a%2f%2flocalhost%3a1313%2fposts%2f2025%2f06%2fnginx-%25E5%258F%258D%25E5%2590%2591%25E4%25BB%25A3%25E7%2590%2586%25E4%25B8%258E%25E8%25B4%259F%25E8%25BD%25BD%25E5%259D%2587%25E8%25A1%25A1%25E5%25AE%259E%25E6%2588%2598%25E4%25BB%258E%25E5%2585%25A5%25E9%2597%25A8%25E5%2588%25B0%25E7%2594%259F%25E4%25BA%25A7%25E4%25BC%2598%25E5%258C%2596%2f">
+            <svg version="1.1" viewBox="0 0 512 512" xml:space="preserve" height="30px" width="30px" fill="currentColor">
+                <path
+                    d="M449.446,0c34.525,0 62.554,28.03 62.554,62.554l0,386.892c0,34.524 -28.03,62.554 -62.554,62.554l-386.892,0c-34.524,0 -62.554,-28.03 -62.554,-62.554l0,-386.892c0,-34.524 28.029,-62.554 62.554,-62.554l386.892,0Zm-288.985,423.278l0,-225.717l-75.04,0l0,225.717l75.04,0Zm270.539,0l0,-129.439c0,-69.333 -37.018,-101.586 -86.381,-101.586c-39.804,0 -57.634,21.891 -67.617,37.266l0,-31.958l-75.021,0c0.995,21.181 0,225.717 0,225.717l75.02,0l0,-126.056c0,-6.748 0.486,-13.492 2.474,-18.315c5.414,-13.475 17.767,-27.434 38.494,-27.434c27.135,0 38.007,20.707 38.007,51.037l0,120.768l75.024,0Zm-307.552,-334.556c-25.674,0 -42.448,16.879 -42.448,39.002c0,21.658 16.264,39.002 41.455,39.002l0.484,0c26.165,0 42.452,-17.344 42.452,-39.002c-0.485,-22.092 -16.241,-38.954 -41.943,-39.002Z" />
+            </svg>
+        </a>
+    </li>
+    <li>
+        <a target="_blank" rel="noopener noreferrer" aria-label="share Nginx 反向代理与负载均衡实战：从入门到生产优化 on reddit"
+            href="https://reddit.com/submit?url=http%3a%2f%2flocalhost%3a1313%2fposts%2f2025%2f06%2fnginx-%25E5%258F%258D%25E5%2590%2591%25E4%25BB%25A3%25E7%2590%2586%25E4%25B8%258E%25E8%25B4%259F%25E8%25BD%25BD%25E5%259D%2587%25E8%25A1%25A1%25E5%25AE%259E%25E6%2588%2598%25E4%25BB%258E%25E5%2585%25A5%25E9%2597%25A8%25E5%2588%25B0%25E7%2594%259F%25E4%25BA%25A7%25E4%25BC%2598%25E5%258C%2596%2f&title=Nginx%20%e5%8f%8d%e5%90%91%e4%bb%a3%e7%90%86%e4%b8%8e%e8%b4%9f%e8%bd%bd%e5%9d%87%e8%a1%a1%e5%ae%9e%e6%88%98%ef%bc%9a%e4%bb%8e%e5%85%a5%e9%97%a8%e5%88%b0%e7%94%9f%e4%ba%a7%e4%bc%98%e5%8c%96">
+            <svg version="1.1" viewBox="0 0 512 512" xml:space="preserve" height="30px" width="30px" fill="currentColor">
+                <path
+                    d="M449.446,0c34.525,0 62.554,28.03 62.554,62.554l0,386.892c0,34.524 -28.03,62.554 -62.554,62.554l-386.892,0c-34.524,0 -62.554,-28.03 -62.554,-62.554l0,-386.892c0,-34.524 28.029,-62.554 62.554,-62.554l386.892,0Zm-3.446,265.638c0,-22.964 -18.616,-41.58 -41.58,-41.58c-11.211,0 -21.361,4.457 -28.841,11.666c-28.424,-20.508 -67.586,-33.757 -111.204,-35.278l18.941,-89.121l61.884,13.157c0.756,15.734 13.642,28.29 29.56,28.29c16.407,0 29.706,-13.299 29.706,-29.701c0,-16.403 -13.299,-29.702 -29.706,-29.702c-11.666,0 -21.657,6.792 -26.515,16.578l-69.105,-14.69c-1.922,-0.418 -3.939,-0.042 -5.585,1.036c-1.658,1.073 -2.811,2.761 -3.224,4.686l-21.152,99.438c-44.258,1.228 -84.046,14.494 -112.837,35.232c-7.468,-7.164 -17.589,-11.591 -28.757,-11.591c-22.965,0 -41.585,18.616 -41.585,41.58c0,16.896 10.095,31.41 24.568,37.918c-0.639,4.135 -0.99,8.328 -0.99,12.576c0,63.977 74.469,115.836 166.33,115.836c91.861,0 166.334,-51.859 166.334,-115.836c0,-4.218 -0.347,-8.387 -0.977,-12.493c14.564,-6.47 24.735,-21.034 24.735,-38.001Zm-119.474,108.193c-20.27,20.241 -59.115,21.816 -70.534,21.816c-11.428,0 -50.277,-1.575 -70.522,-21.82c-3.007,-3.008 -3.007,-7.882 0,-10.889c3.003,-2.999 7.882,-3.003 10.885,0c12.777,12.781 40.11,17.317 59.637,17.317c19.522,0 46.86,-4.536 59.657,-17.321c3.016,-2.999 7.886,-2.995 10.885,0.008c3.008,3.011 3.003,7.882 -0.008,10.889Zm-5.23,-48.781c-16.373,0 -29.701,-13.324 -29.701,-29.698c0,-16.381 13.328,-29.714 29.701,-29.714c16.378,0 29.706,13.333 29.706,29.714c0,16.374 -13.328,29.698 -29.706,29.698Zm-160.386,-29.702c0,-16.381 13.328,-29.71 29.714,-29.71c16.369,0 29.689,13.329 29.689,29.71c0,16.373 -13.32,29.693 -29.689,29.693c-16.386,0 -29.714,-13.32 -29.714,-29.693Z" />
+            </svg>
+        </a>
+    </li>
+    <li>
+        <a target="_blank" rel="noopener noreferrer" aria-label="share Nginx 反向代理与负载均衡实战：从入门到生产优化 on facebook"
+            href="https://facebook.com/sharer/sharer.php?u=http%3a%2f%2flocalhost%3a1313%2fposts%2f2025%2f06%2fnginx-%25E5%258F%258D%25E5%2590%2591%25E4%25BB%25A3%25E7%2590%2586%25E4%25B8%258E%25E8%25B4%259F%25E8%25BD%25BD%25E5%259D%2587%25E8%25A1%25A1%25E5%25AE%259E%25E6%2588%2598%25E4%25BB%258E%25E5%2585%25A5%25E9%2597%25A8%25E5%2588%25B0%25E7%2594%259F%25E4%25BA%25A7%25E4%25BC%2598%25E5%258C%2596%2f">
+            <svg version="1.1" viewBox="0 0 512 512" xml:space="preserve" height="30px" width="30px" fill="currentColor">
+                <path
+                    d="M449.446,0c34.525,0 62.554,28.03 62.554,62.554l0,386.892c0,34.524 -28.03,62.554 -62.554,62.554l-106.468,0l0,-192.915l66.6,0l12.672,-82.621l-79.272,0l0,-53.617c0,-22.603 11.073,-44.636 46.58,-44.636l36.042,0l0,-70.34c0,0 -32.71,-5.582 -63.982,-5.582c-65.288,0 -107.96,39.569 -107.96,111.204l0,62.971l-72.573,0l0,82.621l72.573,0l0,192.915l-191.104,0c-34.524,0 -62.554,-28.03 -62.554,-62.554l0,-386.892c0,-34.524 28.029,-62.554 62.554,-62.554l386.892,0Z" />
+            </svg>
+        </a>
+    </li>
+    <li>
+        <a target="_blank" rel="noopener noreferrer" aria-label="share Nginx 反向代理与负载均衡实战：从入门到生产优化 on whatsapp"
+            href="https://api.whatsapp.com/send?text=Nginx%20%e5%8f%8d%e5%90%91%e4%bb%a3%e7%90%86%e4%b8%8e%e8%b4%9f%e8%bd%bd%e5%9d%87%e8%a1%a1%e5%ae%9e%e6%88%98%ef%bc%9a%e4%bb%8e%e5%85%a5%e9%97%a8%e5%88%b0%e7%94%9f%e4%ba%a7%e4%bc%98%e5%8c%96%20-%20http%3a%2f%2flocalhost%3a1313%2fposts%2f2025%2f06%2fnginx-%25E5%258F%258D%25E5%2590%2591%25E4%25BB%25A3%25E7%2590%2586%25E4%25B8%258E%25E8%25B4%259F%25E8%25BD%25BD%25E5%259D%2587%25E8%25A1%25A1%25E5%25AE%259E%25E6%2588%2598%25E4%25BB%258E%25E5%2585%25A5%25E9%2597%25A8%25E5%2588%25B0%25E7%2594%259F%25E4%25BA%25A7%25E4%25BC%2598%25E5%258C%2596%2f">
+            <svg version="1.1" viewBox="0 0 512 512" xml:space="preserve" height="30px" width="30px" fill="currentColor">
+                <path
+                    d="M449.446,0c34.525,0 62.554,28.03 62.554,62.554l0,386.892c0,34.524 -28.03,62.554 -62.554,62.554l-386.892,0c-34.524,0 -62.554,-28.03 -62.554,-62.554l0,-386.892c0,-34.524 28.029,-62.554 62.554,-62.554l386.892,0Zm-58.673,127.703c-33.842,-33.881 -78.847,-52.548 -126.798,-52.568c-98.799,0 -179.21,80.405 -179.249,179.234c-0.013,31.593 8.241,62.428 23.927,89.612l-25.429,92.884l95.021,-24.925c26.181,14.28 55.659,21.807 85.658,21.816l0.074,0c98.789,0 179.206,-80.413 179.247,-179.243c0.018,-47.895 -18.61,-92.93 -52.451,-126.81Zm-126.797,275.782l-0.06,0c-26.734,-0.01 -52.954,-7.193 -75.828,-20.767l-5.441,-3.229l-56.386,14.792l15.05,-54.977l-3.542,-5.637c-14.913,-23.72 -22.791,-51.136 -22.779,-79.287c0.033,-82.142 66.867,-148.971 149.046,-148.971c39.793,0.014 77.199,15.531 105.329,43.692c28.128,28.16 43.609,65.592 43.594,105.4c-0.034,82.149 -66.866,148.983 -148.983,148.984Zm81.721,-111.581c-4.479,-2.242 -26.499,-13.075 -30.604,-14.571c-4.105,-1.495 -7.091,-2.241 -10.077,2.241c-2.986,4.483 -11.569,14.572 -14.182,17.562c-2.612,2.988 -5.225,3.364 -9.703,1.12c-4.479,-2.241 -18.91,-6.97 -36.017,-22.23c-13.314,-11.876 -22.304,-26.542 -24.916,-31.026c-2.612,-4.484 -0.279,-6.908 1.963,-9.14c2.016,-2.007 4.48,-5.232 6.719,-7.847c2.24,-2.615 2.986,-4.484 4.479,-7.472c1.493,-2.99 0.747,-5.604 -0.374,-7.846c-1.119,-2.241 -10.077,-24.288 -13.809,-33.256c-3.635,-8.733 -7.327,-7.55 -10.077,-7.688c-2.609,-0.13 -5.598,-0.158 -8.583,-0.158c-2.986,0 -7.839,1.121 -11.944,5.604c-4.105,4.484 -15.675,15.32 -15.675,37.364c0,22.046 16.048,43.342 18.287,46.332c2.24,2.99 31.582,48.227 76.511,67.627c10.685,4.615 19.028,7.371 25.533,9.434c10.728,3.41 20.492,2.929 28.209,1.775c8.605,-1.285 26.499,-10.833 30.231,-21.295c3.732,-10.464 3.732,-19.431 2.612,-21.298c-1.119,-1.869 -4.105,-2.99 -8.583,-5.232Z" />
+            </svg>
+        </a>
+    </li>
+    <li>
+        <a target="_blank" rel="noopener noreferrer" aria-label="share Nginx 反向代理与负载均衡实战：从入门到生产优化 on telegram"
+            href="https://telegram.me/share/url?text=Nginx%20%e5%8f%8d%e5%90%91%e4%bb%a3%e7%90%86%e4%b8%8e%e8%b4%9f%e8%bd%bd%e5%9d%87%e8%a1%a1%e5%ae%9e%e6%88%98%ef%bc%9a%e4%bb%8e%e5%85%a5%e9%97%a8%e5%88%b0%e7%94%9f%e4%ba%a7%e4%bc%98%e5%8c%96&amp;url=http%3a%2f%2flocalhost%3a1313%2fposts%2f2025%2f06%2fnginx-%25E5%258F%258D%25E5%2590%2591%25E4%25BB%25A3%25E7%2590%2586%25E4%25B8%258E%25E8%25B4%259F%25E8%25BD%25BD%25E5%259D%2587%25E8%25A1%25A1%25E5%25AE%259E%25E6%2588%2598%25E4%25BB%258E%25E5%2585%25A5%25E9%2597%25A8%25E5%2588%25B0%25E7%2594%259F%25E4%25BA%25A7%25E4%25BC%2598%25E5%258C%2596%2f">
+            <svg version="1.1" xml:space="preserve" viewBox="2 2 28 28" height="30px" width="30px" fill="currentColor">
+                <path
+                    d="M26.49,29.86H5.5a3.37,3.37,0,0,1-2.47-1,3.35,3.35,0,0,1-1-2.47V5.48A3.36,3.36,0,0,1,3,3,3.37,3.37,0,0,1,5.5,2h21A3.38,3.38,0,0,1,29,3a3.36,3.36,0,0,1,1,2.46V26.37a3.35,3.35,0,0,1-1,2.47A3.38,3.38,0,0,1,26.49,29.86Zm-5.38-6.71a.79.79,0,0,0,.85-.66L24.73,9.24a.55.55,0,0,0-.18-.46.62.62,0,0,0-.41-.17q-.08,0-16.53,6.11a.59.59,0,0,0-.41.59.57.57,0,0,0,.43.52l4,1.24,1.61,4.83a.62.62,0,0,0,.63.43.56.56,0,0,0,.4-.17L16.54,20l4.09,3A.9.9,0,0,0,21.11,23.15ZM13.8,20.71l-1.21-4q8.72-5.55,8.78-5.55c.15,0,.23,0,.23.16a.18.18,0,0,1,0,.06s-2.51,2.3-7.52,6.8Z" />
+            </svg>
+        </a>
+    </li>
+    <li>
+        <a target="_blank" rel="noopener noreferrer" aria-label="share Nginx 反向代理与负载均衡实战：从入门到生产优化 on ycombinator"
+            href="https://news.ycombinator.com/submitlink?t=Nginx%20%e5%8f%8d%e5%90%91%e4%bb%a3%e7%90%86%e4%b8%8e%e8%b4%9f%e8%bd%bd%e5%9d%87%e8%a1%a1%e5%ae%9e%e6%88%98%ef%bc%9a%e4%bb%8e%e5%85%a5%e9%97%a8%e5%88%b0%e7%94%9f%e4%ba%a7%e4%bc%98%e5%8c%96&u=http%3a%2f%2flocalhost%3a1313%2fposts%2f2025%2f06%2fnginx-%25E5%258F%258D%25E5%2590%2591%25E4%25BB%25A3%25E7%2590%2586%25E4%25B8%258E%25E8%25B4%259F%25E8%25BD%25BD%25E5%259D%2587%25E8%25A1%25A1%25E5%25AE%259E%25E6%2588%2598%25E4%25BB%258E%25E5%2585%25A5%25E9%2597%25A8%25E5%2588%25B0%25E7%2594%259F%25E4%25BA%25A7%25E4%25BC%2598%25E5%258C%2596%2f">
+            <svg version="1.1" xml:space="preserve" width="30px" height="30px" viewBox="0 0 512 512" fill="currentColor"
+                xmlns:inkscape="http://www.inkscape.org/namespaces/inkscape">
+                <path
+                    d="M449.446 0C483.971 0 512 28.03 512 62.554L512 449.446C512 483.97 483.97 512 449.446 512L62.554 512C28.03 512 0 483.97 0 449.446L0 62.554C0 28.03 28.029 0 62.554 0L449.446 0ZM183.8767 87.9921H121.8427L230.6673 292.4508V424.0079H281.3328V292.4508L390.1575 87.9921H328.1233L256 238.2489z" />
+            </svg>
+        </a>
+    </li>
+</ul>
+
+  </footer>
+</article>
+    </main>
+    
+<footer class="footer">
+        <span>&copy; 2026 <a href="http://localhost:1313/">博客喵</a></span> · 
+
+    <span>
+        Powered by
+        <a href="https://gohugo.io/" rel="noopener noreferrer" target="_blank">Hugo</a> &
+        <a href="https://github.com/adityatelange/hugo-PaperMod/" rel="noopener" target="_blank">PaperMod</a>
+    </span>
+</footer>
+<a href="#top" aria-label="go to top" title="Go to Top (Alt + G)" class="top-link" id="top-link" accesskey="g">
+    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 12 6" fill="currentColor">
+        <path d="M12 6H0l6-6z" />
+    </svg>
+</a>
+
+<script>
+    let menu = document.getElementById('menu');
+    if (menu) {
+        
+        const scrollPosition = localStorage.getItem("menu-scroll-position");
+        if (scrollPosition) {
+            menu.scrollLeft = parseInt(scrollPosition, 10);
+        }
+        
+        menu.onscroll = function () {
+            localStorage.setItem("menu-scroll-position", menu.scrollLeft);
+        }
+    }
+
+    document.querySelectorAll('a[href^="#"]').forEach(anchor => {
+        anchor.addEventListener("click", function (e) {
+            e.preventDefault();
+            var id = this.getAttribute("href").substr(1);
+            if (!window.matchMedia('(prefers-reduced-motion: reduce)').matches) {
+                document.querySelector(`[id='${decodeURIComponent(id)}']`).scrollIntoView({
+                    behavior: "smooth"
+                });
+            } else {
+                document.querySelector(`[id='${decodeURIComponent(id)}']`).scrollIntoView();
+            }
+            if (id === "top") {
+                history.replaceState(null, null, " ");
+            } else {
+                history.pushState(null, null, `#${id}`);
+            }
+        });
+    });
+
+</script>
+<script>
+    var mybutton = document.getElementById("top-link");
+    window.onscroll = function () {
+        if (document.body.scrollTop > 800 || document.documentElement.scrollTop > 800) {
+            mybutton.style.visibility = "visible";
+            mybutton.style.opacity = "1";
+        } else {
+            mybutton.style.visibility = "hidden";
+            mybutton.style.opacity = "0";
+        }
+    };
+
+</script>
+<script>
+    document.getElementById("theme-toggle").addEventListener("click", () => {
+        const html = document.querySelector("html");
+        if (html.dataset.theme === "dark") {
+            html.dataset.theme = 'light';
+            localStorage.setItem("pref-theme", 'light');
+        } else {
+            html.dataset.theme = 'dark';
+            localStorage.setItem("pref-theme", 'dark');
+        }
+    })
+
+</script>
+<script>
+    document.querySelectorAll('pre > code').forEach((codeblock) => {
+        const container = codeblock.parentNode.parentNode;
+
+        const copybutton = document.createElement('button');
+        copybutton.classList.add('copy-code');
+        copybutton.innerHTML = 'copy';
+
+        function copyingDone() {
+            copybutton.innerHTML = 'copied!';
+            setTimeout(() => {
+                copybutton.innerHTML = 'copy';
+            }, 2000);
+        }
+
+        copybutton.addEventListener('click', (cb) => {
+            if ('clipboard' in navigator) {
+                navigator.clipboard.writeText(codeblock.textContent);
+                copyingDone();
+                return;
+            }
+
+            const range = document.createRange();
+            range.selectNodeContents(codeblock);
+            const selection = window.getSelection();
+            selection.removeAllRanges();
+            selection.addRange(range);
+            try {
+                document.execCommand('copy');
+                copyingDone();
+            } catch (e) { };
+            selection.removeRange(range);
+        });
+
+        if (container.classList.contains("highlight")) {
+            container.appendChild(copybutton);
+        } else if (container.parentNode.firstChild == container) {
+            
+        } else if (codeblock.parentNode.parentNode.parentNode.parentNode.parentNode.nodeName == "TABLE") {
+            
+            codeblock.parentNode.parentNode.parentNode.parentNode.parentNode.appendChild(copybutton);
+        } else {
+            
+            codeblock.parentNode.appendChild(copybutton);
+        }
+    });
+</script>
+</body>
+
+</html>

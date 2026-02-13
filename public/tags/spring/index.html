@@ -1,0 +1,313 @@
+<!DOCTYPE html>
+<html lang="en" dir="auto" data-theme="auto">
+
+<head><script src="/livereload.js?mindelay=10&amp;v=2&amp;port=1313&amp;path=livereload" data-no-instant defer></script><meta charset="utf-8">
+<meta http-equiv="X-UA-Compatible" content="IE=edge">
+<meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
+<meta name="robots" content="index, follow">
+<title>Spring | 博客喵</title>
+<meta name="keywords" content="">
+<meta name="description" content="记录技术成长，分享开发经验，专注 Java 后端与分布式系统">
+<meta name="author" content="wawayu">
+<link rel="canonical" href="http://localhost:1313/tags/spring/">
+<link crossorigin="anonymous" href="/assets/css/stylesheet.a29c24210eb31d9ce56f669c66a35c9c51b17376b7764e336a49af7dec914cf0.css" integrity="sha256-opwkIQ6zHZzlb2acZqNcnFGxc3a3dk4zakmvfeyRTPA=" rel="preload stylesheet" as="style">
+<link rel="icon" href="http://localhost:1313/favicon.ico">
+<link rel="icon" type="image/png" sizes="16x16" href="http://localhost:1313/favicon-16x16.png">
+<link rel="icon" type="image/png" sizes="32x32" href="http://localhost:1313/favicon-32x32.png">
+<link rel="apple-touch-icon" href="http://localhost:1313/apple-touch-icon.png">
+<link rel="mask-icon" href="http://localhost:1313/safari-pinned-tab.svg">
+<meta name="theme-color" content="#2e2e33">
+<meta name="msapplication-TileColor" content="#2e2e33">
+<link rel="alternate" type="application/rss+xml" href="http://localhost:1313/tags/spring/index.xml" title="rss">
+<link rel="alternate" hreflang="en" href="http://localhost:1313/tags/spring/">
+<noscript>
+    <style>
+        #theme-toggle,
+        .top-link {
+            display: none;
+        }
+
+    </style>
+    <style>
+        @media (prefers-color-scheme: dark) {
+            :root {
+                --theme: rgb(29, 30, 32);
+                --entry: rgb(46, 46, 51);
+                --primary: rgb(218, 218, 219);
+                --secondary: rgb(155, 156, 157);
+                --tertiary: rgb(65, 66, 68);
+                --content: rgb(196, 196, 197);
+                --code-block-bg: rgb(46, 46, 51);
+                --code-bg: rgb(55, 56, 62);
+                --border: rgb(51, 51, 51);
+                color-scheme: dark;
+            }
+
+            .list {
+                background: var(--theme);
+            }
+
+            .toc {
+                background: var(--entry);
+            }
+        }
+
+        @media (prefers-color-scheme: light) {
+            .list::-webkit-scrollbar-thumb {
+                border-color: var(--code-bg);
+            }
+        }
+
+    </style>
+</noscript>
+<script>
+    if (localStorage.getItem("pref-theme") === "dark") {
+        document.querySelector("html").dataset.theme = 'dark';
+    } else if (localStorage.getItem("pref-theme") === "light") {
+       document.querySelector("html").dataset.theme = 'light';
+    } else if (window.matchMedia('(prefers-color-scheme: dark)').matches) {
+        document.querySelector("html").dataset.theme = 'dark';
+    } else {
+        document.querySelector("html").dataset.theme = 'light';
+    }
+
+</script><meta property="og:url" content="http://localhost:1313/tags/spring/">
+  <meta property="og:site_name" content="博客喵">
+  <meta property="og:title" content="Spring">
+  <meta property="og:description" content="记录技术成长，分享开发经验，专注 Java 后端与分布式系统">
+  <meta property="og:locale" content="zh-cn">
+  <meta property="og:type" content="website">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:title" content="Spring">
+<meta name="twitter:description" content="记录技术成长，分享开发经验，专注 Java 后端与分布式系统">
+
+</head>
+<body class="list" id="top">
+    <header class="header">
+    <nav class="nav">
+        <div class="logo">
+            <a href="http://localhost:1313/" accesskey="h" title="博客喵 (Alt + H)">博客喵</a>
+            <div class="logo-switches">
+                <button id="theme-toggle" accesskey="t" title="(Alt + T)" aria-label="Toggle theme">
+                    <svg id="moon" xmlns="http://www.w3.org/2000/svg" width="24" height="18" viewBox="0 0 24 24"
+                        fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"
+                        stroke-linejoin="round">
+                        <path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"></path>
+                    </svg>
+                    <svg id="sun" xmlns="http://www.w3.org/2000/svg" width="24" height="18" viewBox="0 0 24 24"
+                        fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"
+                        stroke-linejoin="round">
+                        <circle cx="12" cy="12" r="5"></circle>
+                        <line x1="12" y1="1" x2="12" y2="3"></line>
+                        <line x1="12" y1="21" x2="12" y2="23"></line>
+                        <line x1="4.22" y1="4.22" x2="5.64" y2="5.64"></line>
+                        <line x1="18.36" y1="18.36" x2="19.78" y2="19.78"></line>
+                        <line x1="1" y1="12" x2="3" y2="12"></line>
+                        <line x1="21" y1="12" x2="23" y2="12"></line>
+                        <line x1="4.22" y1="19.78" x2="5.64" y2="18.36"></line>
+                        <line x1="18.36" y1="5.64" x2="19.78" y2="4.22"></line>
+                    </svg>
+                </button>
+            </div>
+        </div>
+        <ul id="menu">
+            <li>
+                <a href="http://localhost:1313/posts/" title="📝 文章">
+                    <span>📝 文章</span>
+                </a>
+            </li>
+            <li>
+                <a href="http://localhost:1313/tags/" title="🏷️ 标签">
+                    <span>🏷️ 标签</span>
+                </a>
+            </li>
+            <li>
+                <a href="http://localhost:1313/categories/" title="📂 分类">
+                    <span>📂 分类</span>
+                </a>
+            </li>
+            <li>
+                <a href="http://localhost:1313/skills/" title="💻 技能">
+                    <span>💻 技能</span>
+                </a>
+            </li>
+            <li>
+                <a href="http://localhost:1313/about/" title="👤 关于">
+                    <span>👤 关于</span>
+                </a>
+            </li>
+            <li>
+                <a href="http://localhost:1313/search/" title="🔍 搜索 (Alt &#43; /)" accesskey=/>
+                    <span>🔍 搜索</span>
+                </a>
+            </li>
+        </ul>
+    </nav>
+</header>
+<main class="main"> 
+<header class="page-header"><div class="breadcrumbs"><a href="http://localhost:1313/">Home</a>&nbsp;»&nbsp;<a href="http://localhost:1313/tags/">Tags</a></div>
+  <h1>
+    Spring
+    <a href="/tags/spring/index.xml" title="RSS" aria-label="RSS">
+      <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"
+        stroke-linecap="round" stroke-linejoin="round" height="23">
+        <path d="M4 11a9 9 0 0 1 9 9" />
+        <path d="M4 4a16 16 0 0 1 16 16" />
+        <circle cx="5" cy="19" r="1" />
+      </svg>
+    </a>
+  </h1>
+</header>
+
+<article class="post-entry tag-entry"> 
+  <header class="entry-header">
+    <h2 class="entry-hint-parent">Spring Boot Starter 自定义开发：从原理到实战
+    </h2>
+  </header>
+  <div class="entry-content">
+    <p>Spring Boot 的核心魅力在于&#34;约定优于配置&#34;，而 Starter 机制是实现这一理念的关键。本文通过实战案例，讲解如何开发一个生产级的自定义 Starter。
+本文亮点 理解 Spring Boot 自动装配的底层原理 掌握 BeanPostProcessor 的使用场景 学会设计零侵入式的基础组件 了解 Starter 的最佳实践与规范 为什么需要自定义 Starter？ 场景： 公司有多个 Spring Boot 项目，都需要集成线程池监控功能。
+传统做法： 每个项目都复制一遍配置代码。
+问题：
+代码重复，维护成本高 配置不统一，容易出错 升级困难，需要修改所有项目 Starter 的优势：
+一次开发，多处复用 零侵入，引入依赖即可使用 统一管理，升级方便 案例：开发线程池监控 Starter 功能需求：
+自动扫描项目中的 ThreadPoolExecutor 定时上报线程池指标（活跃线程数、队列长度、拒绝次数） 提供管理后台查看和调整线程池参数 第一步：创建 Starter 项目 项目结构
+1threadpool-spring-boot-starter 2├── src/main/java 3│ └── com/example/threadpool 4│ ├── autoconfigure 5│ │ ├── ThreadPoolAutoConfiguration.java 6│ │ └── ThreadPoolProperties.java 7│ ├── core 8│ │ ├── ThreadPoolMonitor.java 9│ │ └── ThreadPoolRegistry.java 10│ └── processor 11│ └── ThreadPoolBeanPostProcessor.java 12├── src/main/resources 13│ └── META-INF 14│ └── spring.factories 15└── pom.xml pom.xml
+...</p>
+  </div>
+  <footer class="entry-footer"><span title='2024-08-05 00:00:00 +0000 UTC'>August 5, 2024</span>&nbsp;·&nbsp;<span>4 min</span>&nbsp;·&nbsp;<span>845 words</span>&nbsp;·&nbsp;<span>wawayu</span></footer>
+  <a class="entry-link" aria-label="post link to Spring Boot Starter 自定义开发：从原理到实战" href="http://localhost:1313/posts/2024/08/spring-boot-starter-%E8%87%AA%E5%AE%9A%E4%B9%89%E5%BC%80%E5%8F%91%E4%BB%8E%E5%8E%9F%E7%90%86%E5%88%B0%E5%AE%9E%E6%88%98/"></a>
+</article>
+
+<article class="post-entry tag-entry"> 
+  <header class="entry-header">
+    <h2 class="entry-hint-parent">Spring Bean 生命周期完全解析
+    </h2>
+  </header>
+  <div class="entry-content">
+    <p>理解 Spring Bean 的生命周期，是掌握 Spring 框架的关键。本文从源码层面剖析 Bean 的创建过程，帮助你深入理解 Spring 的核心机制。
+本文亮点 掌握 Bean 生命周期的完整流程 理解 BeanPostProcessor 的执行时机 学会解决循环依赖问题 了解 InitializingBean vs @PostConstruct 的区别 Bean 生命周期概览 1实例化 → 属性填充 → 初始化前 → 初始化 → 初始化后 → 使用 → 销毁 详细流程：
+实例化（Instantiation）：通过反射创建 Bean 实例 属性填充（Populate）：注入依赖的 Bean Aware 接口回调：BeanNameAware、BeanFactoryAware 等 BeanPostProcessor.postProcessBeforeInitialization InitializingBean.afterPropertiesSet 自定义 init-method BeanPostProcessor.postProcessAfterInitialization Bean 可以使用 DisposableBean.destroy 自定义 destroy-method 实例化：反射创建对象 1protected Object doCreateBean(String beanName, RootBeanDefinition mbd, Object[] args) { 2 // 1. 实例化 Bean 3 BeanWrapper instanceWrapper = createBeanInstance(beanName, mbd, args); 4 Object bean = instanceWrapper.getWrappedInstance(); 5 6 // 2. 属性填充 7 populateBean(beanName, mbd, instanceWrapper); 8 9 // 3. 初始化 10 Object exposedObject = initializeBean(beanName, bean, mbd); 11 12 return exposedObject; 13} 属性填充：依赖注入 1protected void populateBean(String beanName, RootBeanDefinition mbd, BeanWrapper bw) { 2 // 获取属性值 3 PropertyValues pvs = mbd.getPropertyValues(); 4 5 // 自动装配（byName、byType） 6 if (mbd.getResolvedAutowireMode() == AUTOWIRE_BY_NAME) { 7 autowireByName(beanName, mbd, bw, newPvs); 8 } 9 if (mbd.getResolvedAutowireMode() == AUTOWIRE_BY_TYPE) { 10 autowireByType(beanName, mbd, bw, newPvs); 11 } 12 13 // 应用属性值 14 applyPropertyValues(beanName, mbd, bw, pvs); 15} 初始化：回调与自定义逻辑 1protected Object initializeBean(String beanName, Object bean, RootBeanDefinition mbd) { 2 // 1. Aware 接口回调 3 invokeAwareMethods(beanName, bean); 4 5 // 2. BeanPostProcessor 前置处理 6 Object wrappedBean = applyBeanPostProcessorsBeforeInitialization(bean, beanName); 7 8 // 3. 初始化方法 9 invokeInitMethods(beanName, wrappedBean, mbd); 10 11 // 4. BeanPostProcessor 后置处理 12 wrappedBean = applyBeanPostProcessorsAfterInitialization(wrappedBean, beanName); 13 14 return wrappedBean; 15} BeanPostProcessor：扩展点 1public interface BeanPostProcessor { 2 3 // 初始化前回调 4 default Object postProcessBeforeInitialization(Object bean, String beanName) { 5 return bean; 6 } 7 8 // 初始化后回调 9 default Object postProcessAfterInitialization(Object bean, String beanName) { 10 return bean; 11 } 12} 应用场景：
+...</p>
+  </div>
+  <footer class="entry-footer"><span title='2024-06-20 00:00:00 +0000 UTC'>June 20, 2024</span>&nbsp;·&nbsp;<span>3 min</span>&nbsp;·&nbsp;<span>433 words</span>&nbsp;·&nbsp;<span>wawayu</span></footer>
+  <a class="entry-link" aria-label="post link to Spring Bean 生命周期完全解析" href="http://localhost:1313/posts/2024/06/spring-bean-%E7%94%9F%E5%91%BD%E5%91%A8%E6%9C%9F%E5%AE%8C%E5%85%A8%E8%A7%A3%E6%9E%90/"></a>
+</article>
+
+<article class="post-entry tag-entry"> 
+  <header class="entry-header">
+    <h2 class="entry-hint-parent">Spring 事务传播机制与失效场景完全解析
+    </h2>
+  </header>
+  <div class="entry-content">
+    <p>Spring 事务管理是后端开发的基础技能，但很多人只会在方法上加 @Transactional，却不知道事务传播机制和失效场景。本文系统讲解 Spring 事务的核心原理。
+本文亮点 理解 7 种事务传播行为的区别与适用场景 掌握事务失效的 5 种常见场景 学会编程式事务的使用方法 了解分布式事务的解决方案 事务的 ACID 特性 Atomicity（原子性）：事务中的操作要么全部成功，要么全部失败 Consistency（一致性）：事务执行前后，数据保持一致状态 Isolation（隔离性）：并发事务之间互不干扰 Durability（持久性）：事务提交后，数据永久保存 7 种事务传播行为 REQUIRED（默认）
+如果当前存在事务，加入该事务；如果不存在，创建新事务。
+1@Transactional(propagation = Propagation.REQUIRED) 2public void methodA() { 3 // 操作 1 4 methodB(); // 加入 methodA 的事务 5} 6 7@Transactional(propagation = Propagation.REQUIRED) 8public void methodB() { 9 // 操作 2 10} 如果 methodB 抛出异常，methodA 和 methodB 的操作都会回滚。
+...</p>
+  </div>
+  <footer class="entry-footer"><span title='2024-05-15 00:00:00 +0000 UTC'>May 15, 2024</span>&nbsp;·&nbsp;<span>3 min</span>&nbsp;·&nbsp;<span>491 words</span>&nbsp;·&nbsp;<span>wawayu</span></footer>
+  <a class="entry-link" aria-label="post link to Spring 事务传播机制与失效场景完全解析" href="http://localhost:1313/posts/2024/05/spring-%E4%BA%8B%E5%8A%A1%E4%BC%A0%E6%92%AD%E6%9C%BA%E5%88%B6%E4%B8%8E%E5%A4%B1%E6%95%88%E5%9C%BA%E6%99%AF%E5%AE%8C%E5%85%A8%E8%A7%A3%E6%9E%90/"></a>
+</article>
+
+<article class="post-entry tag-entry"> 
+  <header class="entry-header">
+    <h2 class="entry-hint-parent">Spring AOP 原理与动态代理实现深度解析
+    </h2>
+  </header>
+  <div class="entry-content">
+    <p>AOP（面向切面编程）是 Spring 框架的核心特性之一。通过 AOP，我们可以将横切关注点（如日志、事务、权限）从业务逻辑中分离出来。但 AOP 是如何实现的？本文深入剖析 Spring AOP 的底层机制。
+本文亮点 理解 AOP 的核心概念：切面、切点、通知、连接点 掌握 JDK 动态代理与 CGLIB 代理的实现原理 学会 ProxyFactory 的创建流程 了解切面执行顺序与责任链模式 AOP 核心概念 切面（Aspect）
+横切关注点的模块化，比如日志切面、事务切面。
+1@Aspect 2@Component 3public class LogAspect { 4 5 @Before(&#34;execution(* com.example.service.*.*(..))&#34;) 6 public void logBefore(JoinPoint joinPoint) { 7 log.info(&#34;方法执行前: {}&#34;, joinPoint.getSignature().getName()); 8 } 9} 切点（Pointcut）
+定义在哪些连接点上应用通知，通过表达式匹配。
+1@Pointcut(&#34;execution(* com.example.service.*.*(..))&#34;) 2public void serviceLayer() {} 通知（Advice）
+在切点上执行的动作，分为五种类型：
+@Before：前置通知 @After：后置通知 @AfterReturning：返回通知 @AfterThrowing：异常通知 @Around：环绕通知 连接点（JoinPoint）
+程序执行的某个点，比如方法调用、异常抛出。
+JDK 动态代理 vs CGLIB 代理 Spring AOP 使用两种代理方式：
+...</p>
+  </div>
+  <footer class="entry-footer"><span title='2024-04-10 00:00:00 +0000 UTC'>April 10, 2024</span>&nbsp;·&nbsp;<span>3 min</span>&nbsp;·&nbsp;<span>514 words</span>&nbsp;·&nbsp;<span>wawayu</span></footer>
+  <a class="entry-link" aria-label="post link to Spring AOP 原理与动态代理实现深度解析" href="http://localhost:1313/posts/2024/04/spring-aop-%E5%8E%9F%E7%90%86%E4%B8%8E%E5%8A%A8%E6%80%81%E4%BB%A3%E7%90%86%E5%AE%9E%E7%8E%B0%E6%B7%B1%E5%BA%A6%E8%A7%A3%E6%9E%90/"></a>
+</article>
+    </main>
+    
+<footer class="footer">
+        <span>&copy; 2026 <a href="http://localhost:1313/">博客喵</a></span> · 
+
+    <span>
+        Powered by
+        <a href="https://gohugo.io/" rel="noopener noreferrer" target="_blank">Hugo</a> &
+        <a href="https://github.com/adityatelange/hugo-PaperMod/" rel="noopener" target="_blank">PaperMod</a>
+    </span>
+</footer>
+<a href="#top" aria-label="go to top" title="Go to Top (Alt + G)" class="top-link" id="top-link" accesskey="g">
+    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 12 6" fill="currentColor">
+        <path d="M12 6H0l6-6z" />
+    </svg>
+</a>
+
+<script>
+    let menu = document.getElementById('menu');
+    if (menu) {
+        
+        const scrollPosition = localStorage.getItem("menu-scroll-position");
+        if (scrollPosition) {
+            menu.scrollLeft = parseInt(scrollPosition, 10);
+        }
+        
+        menu.onscroll = function () {
+            localStorage.setItem("menu-scroll-position", menu.scrollLeft);
+        }
+    }
+
+    document.querySelectorAll('a[href^="#"]').forEach(anchor => {
+        anchor.addEventListener("click", function (e) {
+            e.preventDefault();
+            var id = this.getAttribute("href").substr(1);
+            if (!window.matchMedia('(prefers-reduced-motion: reduce)').matches) {
+                document.querySelector(`[id='${decodeURIComponent(id)}']`).scrollIntoView({
+                    behavior: "smooth"
+                });
+            } else {
+                document.querySelector(`[id='${decodeURIComponent(id)}']`).scrollIntoView();
+            }
+            if (id === "top") {
+                history.replaceState(null, null, " ");
+            } else {
+                history.pushState(null, null, `#${id}`);
+            }
+        });
+    });
+
+</script>
+<script>
+    var mybutton = document.getElementById("top-link");
+    window.onscroll = function () {
+        if (document.body.scrollTop > 800 || document.documentElement.scrollTop > 800) {
+            mybutton.style.visibility = "visible";
+            mybutton.style.opacity = "1";
+        } else {
+            mybutton.style.visibility = "hidden";
+            mybutton.style.opacity = "0";
+        }
+    };
+
+</script>
+<script>
+    document.getElementById("theme-toggle").addEventListener("click", () => {
+        const html = document.querySelector("html");
+        if (html.dataset.theme === "dark") {
+            html.dataset.theme = 'light';
+            localStorage.setItem("pref-theme", 'light');
+        } else {
+            html.dataset.theme = 'dark';
+            localStorage.setItem("pref-theme", 'dark');
+        }
+    })
+
+</script>
+</body>
+
+</html>

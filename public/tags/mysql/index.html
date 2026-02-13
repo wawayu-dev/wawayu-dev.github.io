@@ -1,0 +1,329 @@
+<!DOCTYPE html>
+<html lang="en" dir="auto" data-theme="auto">
+
+<head><script src="/livereload.js?mindelay=10&amp;v=2&amp;port=1313&amp;path=livereload" data-no-instant defer></script><meta charset="utf-8">
+<meta http-equiv="X-UA-Compatible" content="IE=edge">
+<meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
+<meta name="robots" content="index, follow">
+<title>MySQL | 博客喵</title>
+<meta name="keywords" content="">
+<meta name="description" content="记录技术成长，分享开发经验，专注 Java 后端与分布式系统">
+<meta name="author" content="wawayu">
+<link rel="canonical" href="http://localhost:1313/tags/mysql/">
+<link crossorigin="anonymous" href="/assets/css/stylesheet.a29c24210eb31d9ce56f669c66a35c9c51b17376b7764e336a49af7dec914cf0.css" integrity="sha256-opwkIQ6zHZzlb2acZqNcnFGxc3a3dk4zakmvfeyRTPA=" rel="preload stylesheet" as="style">
+<link rel="icon" href="http://localhost:1313/favicon.ico">
+<link rel="icon" type="image/png" sizes="16x16" href="http://localhost:1313/favicon-16x16.png">
+<link rel="icon" type="image/png" sizes="32x32" href="http://localhost:1313/favicon-32x32.png">
+<link rel="apple-touch-icon" href="http://localhost:1313/apple-touch-icon.png">
+<link rel="mask-icon" href="http://localhost:1313/safari-pinned-tab.svg">
+<meta name="theme-color" content="#2e2e33">
+<meta name="msapplication-TileColor" content="#2e2e33">
+<link rel="alternate" type="application/rss+xml" href="http://localhost:1313/tags/mysql/index.xml" title="rss">
+<link rel="alternate" hreflang="en" href="http://localhost:1313/tags/mysql/">
+<noscript>
+    <style>
+        #theme-toggle,
+        .top-link {
+            display: none;
+        }
+
+    </style>
+    <style>
+        @media (prefers-color-scheme: dark) {
+            :root {
+                --theme: rgb(29, 30, 32);
+                --entry: rgb(46, 46, 51);
+                --primary: rgb(218, 218, 219);
+                --secondary: rgb(155, 156, 157);
+                --tertiary: rgb(65, 66, 68);
+                --content: rgb(196, 196, 197);
+                --code-block-bg: rgb(46, 46, 51);
+                --code-bg: rgb(55, 56, 62);
+                --border: rgb(51, 51, 51);
+                color-scheme: dark;
+            }
+
+            .list {
+                background: var(--theme);
+            }
+
+            .toc {
+                background: var(--entry);
+            }
+        }
+
+        @media (prefers-color-scheme: light) {
+            .list::-webkit-scrollbar-thumb {
+                border-color: var(--code-bg);
+            }
+        }
+
+    </style>
+</noscript>
+<script>
+    if (localStorage.getItem("pref-theme") === "dark") {
+        document.querySelector("html").dataset.theme = 'dark';
+    } else if (localStorage.getItem("pref-theme") === "light") {
+       document.querySelector("html").dataset.theme = 'light';
+    } else if (window.matchMedia('(prefers-color-scheme: dark)').matches) {
+        document.querySelector("html").dataset.theme = 'dark';
+    } else {
+        document.querySelector("html").dataset.theme = 'light';
+    }
+
+</script><meta property="og:url" content="http://localhost:1313/tags/mysql/">
+  <meta property="og:site_name" content="博客喵">
+  <meta property="og:title" content="MySQL">
+  <meta property="og:description" content="记录技术成长，分享开发经验，专注 Java 后端与分布式系统">
+  <meta property="og:locale" content="zh-cn">
+  <meta property="og:type" content="website">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:title" content="MySQL">
+<meta name="twitter:description" content="记录技术成长，分享开发经验，专注 Java 后端与分布式系统">
+
+</head>
+<body class="list" id="top">
+    <header class="header">
+    <nav class="nav">
+        <div class="logo">
+            <a href="http://localhost:1313/" accesskey="h" title="博客喵 (Alt + H)">博客喵</a>
+            <div class="logo-switches">
+                <button id="theme-toggle" accesskey="t" title="(Alt + T)" aria-label="Toggle theme">
+                    <svg id="moon" xmlns="http://www.w3.org/2000/svg" width="24" height="18" viewBox="0 0 24 24"
+                        fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"
+                        stroke-linejoin="round">
+                        <path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"></path>
+                    </svg>
+                    <svg id="sun" xmlns="http://www.w3.org/2000/svg" width="24" height="18" viewBox="0 0 24 24"
+                        fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"
+                        stroke-linejoin="round">
+                        <circle cx="12" cy="12" r="5"></circle>
+                        <line x1="12" y1="1" x2="12" y2="3"></line>
+                        <line x1="12" y1="21" x2="12" y2="23"></line>
+                        <line x1="4.22" y1="4.22" x2="5.64" y2="5.64"></line>
+                        <line x1="18.36" y1="18.36" x2="19.78" y2="19.78"></line>
+                        <line x1="1" y1="12" x2="3" y2="12"></line>
+                        <line x1="21" y1="12" x2="23" y2="12"></line>
+                        <line x1="4.22" y1="19.78" x2="5.64" y2="18.36"></line>
+                        <line x1="18.36" y1="5.64" x2="19.78" y2="4.22"></line>
+                    </svg>
+                </button>
+            </div>
+        </div>
+        <ul id="menu">
+            <li>
+                <a href="http://localhost:1313/posts/" title="📝 文章">
+                    <span>📝 文章</span>
+                </a>
+            </li>
+            <li>
+                <a href="http://localhost:1313/tags/" title="🏷️ 标签">
+                    <span>🏷️ 标签</span>
+                </a>
+            </li>
+            <li>
+                <a href="http://localhost:1313/categories/" title="📂 分类">
+                    <span>📂 分类</span>
+                </a>
+            </li>
+            <li>
+                <a href="http://localhost:1313/skills/" title="💻 技能">
+                    <span>💻 技能</span>
+                </a>
+            </li>
+            <li>
+                <a href="http://localhost:1313/about/" title="👤 关于">
+                    <span>👤 关于</span>
+                </a>
+            </li>
+            <li>
+                <a href="http://localhost:1313/search/" title="🔍 搜索 (Alt &#43; /)" accesskey=/>
+                    <span>🔍 搜索</span>
+                </a>
+            </li>
+        </ul>
+    </nav>
+</header>
+<main class="main"> 
+<header class="page-header"><div class="breadcrumbs"><a href="http://localhost:1313/">Home</a>&nbsp;»&nbsp;<a href="http://localhost:1313/tags/">Tags</a></div>
+  <h1>
+    MySQL
+    <a href="/tags/mysql/index.xml" title="RSS" aria-label="RSS">
+      <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"
+        stroke-linecap="round" stroke-linejoin="round" height="23">
+        <path d="M4 11a9 9 0 0 1 9 9" />
+        <path d="M4 4a16 16 0 0 1 16 16" />
+        <circle cx="5" cy="19" r="1" />
+      </svg>
+    </a>
+  </h1>
+</header>
+
+<article class="post-entry tag-entry"> 
+  <header class="entry-header">
+    <h2 class="entry-hint-parent">ShardingSphere 分库分表的生产实战
+    </h2>
+  </header>
+  <div class="entry-content">
+    <p>当单表数据量达到千万级别时，查询性能会急剧下降。分库分表是解决大数据量问题的有效方案。本文将深入讲解如何使用 ShardingSphere 实现分库分表，并分享生产环境的实战经验。
+本文亮点 理解分库分表的核心概念和应用场景 掌握 ShardingSphere 的配置和使用方法 学会选择合适的分片策略 了解分库分表的最佳实践和常见问题 为什么需要分库分表？ 场景：订单表数据爆炸
+电商系统的订单表，每天新增10万条数据，一年就是3600万条。随着数据量增长：
+查询变慢：单表查询从毫秒级变成秒级 索引失效：B&#43;树层级增加，索引效率下降 锁竞争：大表的锁粒度大，并发性能差 备份困难：单表备份时间过长 传统优化方案的局限
+1-- 优化索引 2CREATE INDEX idx_user_id_create_time ON orders(user_id, create_time); 3 4-- 分区表 5ALTER TABLE orders PARTITION BY RANGE (YEAR(create_time)) ( 6 PARTITION p2023 VALUES LESS THAN (2024), 7 PARTITION p2024 VALUES LESS THAN (2025) 8); 这些方案只能缓解问题，无法根本解决。当数据量达到亿级时，分库分表是必然选择。
+分库分表核心概念 垂直拆分 vs 水平拆分 垂直拆分：按业务模块拆分
+1原始数据库 2├── 用户表 3├── 订单表 4├── 商品表 5└── 支付表 6 7拆分后 8├── 用户库 9│ └── 用户表 10├── 订单库 11│ └── 订单表 12├── 商品库 13│ └── 商品表 14└── 支付库 15 └── 支付表 水平拆分：按数据行拆分
+...</p>
+  </div>
+  <footer class="entry-footer"><span title='2025-02-15 00:00:00 +0000 UTC'>February 15, 2025</span>&nbsp;·&nbsp;<span>6 min</span>&nbsp;·&nbsp;<span>1274 words</span>&nbsp;·&nbsp;<span>wawayu</span></footer>
+  <a class="entry-link" aria-label="post link to ShardingSphere 分库分表的生产实战" href="http://localhost:1313/posts/2025/02/shardingsphere-%E5%88%86%E5%BA%93%E5%88%86%E8%A1%A8%E7%9A%84%E7%94%9F%E4%BA%A7%E5%AE%9E%E6%88%98/"></a>
+</article>
+
+<article class="post-entry tag-entry"> 
+  <header class="entry-header">
+    <h2 class="entry-hint-parent">MySQL 慢查询优化实战案例
+    </h2>
+  </header>
+  <div class="entry-content">
+    <p>一条慢查询可能拖垮整个系统。本文通过真实的生产案例，讲解如何定位和优化慢查询，让你掌握 SQL 性能调优的完整方法论。
+本文亮点 掌握慢查询日志的分析方法 学会使用 Explain 定位性能瓶颈 了解常见的 SQL 优化技巧 理解数据库层面的性能优化 案例背景 某电商系统的订单列表查询接口响应时间达到 5 秒，用户体验极差。
+原始 SQL
+1SELECT o.*, u.username, u.phone 2FROM `order` o 3LEFT JOIN user u ON o.user_id = u.id 4WHERE o.status IN (1, 2, 3) 5 AND o.create_time &gt;= &#39;2024-01-01&#39; 6 AND u.city = &#39;Beijing&#39; 7ORDER BY o.create_time DESC 8LIMIT 20; 数据量：
+order 表：100 万条 user 表：50 万条 第一步：开启慢查询日志 配置 MySQL
+1[mysqld] 2slow_query_log = 1 3slow_query_log_file = /var/log/mysql/slow.log 4long_query_time = 1 5log_queries_not_using_indexes = 1 分析慢查询日志
+...</p>
+  </div>
+  <footer class="entry-footer"><span title='2024-12-10 00:00:00 +0000 UTC'>December 10, 2024</span>&nbsp;·&nbsp;<span>4 min</span>&nbsp;·&nbsp;<span>761 words</span>&nbsp;·&nbsp;<span>wawayu</span></footer>
+  <a class="entry-link" aria-label="post link to MySQL 慢查询优化实战案例" href="http://localhost:1313/posts/2024/12/mysql-%E6%85%A2%E6%9F%A5%E8%AF%A2%E4%BC%98%E5%8C%96%E5%AE%9E%E6%88%98%E6%A1%88%E4%BE%8B/"></a>
+</article>
+
+<article class="post-entry tag-entry"> 
+  <header class="entry-header">
+    <h2 class="entry-hint-parent">MySQL 事务隔离级别与 MVCC 机制深度解析
+    </h2>
+  </header>
+  <div class="entry-content">
+    <p>在高并发场景下，多个事务同时访问数据库，如何保证数据的一致性？MySQL 通过事务隔离级别和 MVCC 机制解决了这个问题。本文深入剖析 MySQL 的并发控制原理。
+本文亮点 理解四种事务隔离级别的区别与适用场景 掌握 MVCC 的 ReadView 机制 学会解决幻读问题的方法 了解锁机制与 MVCC 的配合 事务的并发问题 脏读（Dirty Read）
+事务 A 读取了事务 B 未提交的数据，事务 B 回滚后，事务 A 读到的数据是无效的。
+1时间线： 2T1: 事务 A 开始 3T2: 事务 B 开始，将 balance 从 100 改为 200 4T3: 事务 A 读取 balance = 200（脏读） 5T4: 事务 B 回滚，balance 恢复为 100 6T5: 事务 A 提交 不可重复读（Non-Repeatable Read）
+事务 A 两次读取同一数据，结果不一致（因为事务 B 修改并提交了数据）。
+...</p>
+  </div>
+  <footer class="entry-footer"><span title='2024-11-28 00:00:00 +0000 UTC'>November 28, 2024</span>&nbsp;·&nbsp;<span>6 min</span>&nbsp;·&nbsp;<span>1093 words</span>&nbsp;·&nbsp;<span>wawayu</span></footer>
+  <a class="entry-link" aria-label="post link to MySQL 事务隔离级别与 MVCC 机制深度解析" href="http://localhost:1313/posts/2024/11/mysql-%E4%BA%8B%E5%8A%A1%E9%9A%94%E7%A6%BB%E7%BA%A7%E5%88%AB%E4%B8%8E-mvcc-%E6%9C%BA%E5%88%B6%E6%B7%B1%E5%BA%A6%E8%A7%A3%E6%9E%90/"></a>
+</article>
+
+<article class="post-entry tag-entry"> 
+  <header class="entry-header">
+    <h2 class="entry-hint-parent">MySQL 索引优化：从 Explain 到执行计划
+    </h2>
+  </header>
+  <div class="entry-content">
+    <p>SQL 性能优化是后端开发的必备技能。一条慢查询可能拖垮整个系统，而合理的索引设计能让查询速度提升百倍。本文系统讲解 MySQL 索引优化的方法论。
+本文亮点 理解 B&#43; 树索引的底层原理 掌握 Explain 执行计划的分析方法 学会联合索引的最左前缀匹配规则 了解覆盖索引与索引下推优化 B&#43; 树索引原理 为什么选择 B&#43; 树？
+常见的数据结构对比：
+数据结构 查询时间复杂度 问题 数组 O(n) 查询慢 二叉搜索树 O(log n) 可能退化为链表 平衡二叉树 O(log n) 树高太高，IO 次数多 B 树 O(log n) 非叶子节点存储数据，浪费空间 B&#43; 树 O(log n) 叶子节点存储数据，非叶子节点只存索引 B&#43; 树的特点
+所有数据存储在叶子节点 叶子节点通过指针连接，支持范围查询 非叶子节点只存储索引，可以存储更多的键值 树的高度低，IO 次数少 InnoDB 的聚簇索引
+InnoDB 的主键索引是聚簇索引，叶子节点存储完整的行数据。
+1主键索引（聚簇索引） 2 10 3 / \ 4 5 15 5 / \ / \ 6 1 7 12 18 7 | | | | 8 [完整行数据] 二级索引（非主键索引）的叶子节点存储主键值，需要回表查询。
+...</p>
+  </div>
+  <footer class="entry-footer"><span title='2024-11-15 00:00:00 +0000 UTC'>November 15, 2024</span>&nbsp;·&nbsp;<span>5 min</span>&nbsp;·&nbsp;<span>1007 words</span>&nbsp;·&nbsp;<span>wawayu</span></footer>
+  <a class="entry-link" aria-label="post link to MySQL 索引优化：从 Explain 到执行计划" href="http://localhost:1313/posts/2024/11/mysql-%E7%B4%A2%E5%BC%95%E4%BC%98%E5%8C%96%E4%BB%8E-explain-%E5%88%B0%E6%89%A7%E8%A1%8C%E8%AE%A1%E5%88%92/"></a>
+</article>
+
+<article class="post-entry tag-entry"> 
+  <header class="entry-header">
+    <h2 class="entry-hint-parent">Spring 事务传播机制与失效场景完全解析
+    </h2>
+  </header>
+  <div class="entry-content">
+    <p>Spring 事务管理是后端开发的基础技能，但很多人只会在方法上加 @Transactional，却不知道事务传播机制和失效场景。本文系统讲解 Spring 事务的核心原理。
+本文亮点 理解 7 种事务传播行为的区别与适用场景 掌握事务失效的 5 种常见场景 学会编程式事务的使用方法 了解分布式事务的解决方案 事务的 ACID 特性 Atomicity（原子性）：事务中的操作要么全部成功，要么全部失败 Consistency（一致性）：事务执行前后，数据保持一致状态 Isolation（隔离性）：并发事务之间互不干扰 Durability（持久性）：事务提交后，数据永久保存 7 种事务传播行为 REQUIRED（默认）
+如果当前存在事务，加入该事务；如果不存在，创建新事务。
+1@Transactional(propagation = Propagation.REQUIRED) 2public void methodA() { 3 // 操作 1 4 methodB(); // 加入 methodA 的事务 5} 6 7@Transactional(propagation = Propagation.REQUIRED) 8public void methodB() { 9 // 操作 2 10} 如果 methodB 抛出异常，methodA 和 methodB 的操作都会回滚。
+...</p>
+  </div>
+  <footer class="entry-footer"><span title='2024-05-15 00:00:00 +0000 UTC'>May 15, 2024</span>&nbsp;·&nbsp;<span>3 min</span>&nbsp;·&nbsp;<span>491 words</span>&nbsp;·&nbsp;<span>wawayu</span></footer>
+  <a class="entry-link" aria-label="post link to Spring 事务传播机制与失效场景完全解析" href="http://localhost:1313/posts/2024/05/spring-%E4%BA%8B%E5%8A%A1%E4%BC%A0%E6%92%AD%E6%9C%BA%E5%88%B6%E4%B8%8E%E5%A4%B1%E6%95%88%E5%9C%BA%E6%99%AF%E5%AE%8C%E5%85%A8%E8%A7%A3%E6%9E%90/"></a>
+</article>
+    </main>
+    
+<footer class="footer">
+        <span>&copy; 2026 <a href="http://localhost:1313/">博客喵</a></span> · 
+
+    <span>
+        Powered by
+        <a href="https://gohugo.io/" rel="noopener noreferrer" target="_blank">Hugo</a> &
+        <a href="https://github.com/adityatelange/hugo-PaperMod/" rel="noopener" target="_blank">PaperMod</a>
+    </span>
+</footer>
+<a href="#top" aria-label="go to top" title="Go to Top (Alt + G)" class="top-link" id="top-link" accesskey="g">
+    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 12 6" fill="currentColor">
+        <path d="M12 6H0l6-6z" />
+    </svg>
+</a>
+
+<script>
+    let menu = document.getElementById('menu');
+    if (menu) {
+        
+        const scrollPosition = localStorage.getItem("menu-scroll-position");
+        if (scrollPosition) {
+            menu.scrollLeft = parseInt(scrollPosition, 10);
+        }
+        
+        menu.onscroll = function () {
+            localStorage.setItem("menu-scroll-position", menu.scrollLeft);
+        }
+    }
+
+    document.querySelectorAll('a[href^="#"]').forEach(anchor => {
+        anchor.addEventListener("click", function (e) {
+            e.preventDefault();
+            var id = this.getAttribute("href").substr(1);
+            if (!window.matchMedia('(prefers-reduced-motion: reduce)').matches) {
+                document.querySelector(`[id='${decodeURIComponent(id)}']`).scrollIntoView({
+                    behavior: "smooth"
+                });
+            } else {
+                document.querySelector(`[id='${decodeURIComponent(id)}']`).scrollIntoView();
+            }
+            if (id === "top") {
+                history.replaceState(null, null, " ");
+            } else {
+                history.pushState(null, null, `#${id}`);
+            }
+        });
+    });
+
+</script>
+<script>
+    var mybutton = document.getElementById("top-link");
+    window.onscroll = function () {
+        if (document.body.scrollTop > 800 || document.documentElement.scrollTop > 800) {
+            mybutton.style.visibility = "visible";
+            mybutton.style.opacity = "1";
+        } else {
+            mybutton.style.visibility = "hidden";
+            mybutton.style.opacity = "0";
+        }
+    };
+
+</script>
+<script>
+    document.getElementById("theme-toggle").addEventListener("click", () => {
+        const html = document.querySelector("html");
+        if (html.dataset.theme === "dark") {
+            html.dataset.theme = 'light';
+            localStorage.setItem("pref-theme", 'light');
+        } else {
+            html.dataset.theme = 'dark';
+            localStorage.setItem("pref-theme", 'dark');
+        }
+    })
+
+</script>
+</body>
+
+</html>
